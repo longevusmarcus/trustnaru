@@ -1,4 +1,4 @@
-import { Search, Sparkles, Target, TrendingUp, Heart } from "lucide-react";
+import { Search, Sparkles, Target, TrendingUp, Heart, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
@@ -16,6 +16,33 @@ const categories = [
   "Health & Energy",
   "Learning",
   "Purpose",
+];
+
+const futureLibrary = [
+  {
+    name: "Creative Strategist",
+    description: "Leading wellness ventures in major European cities",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop",
+    traits: "Creative • Strategic • Wellness-focused"
+  },
+  {
+    name: "Tech Entrepreneur",
+    description: "Building AI-powered platforms that scale globally",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop",
+    traits: "Innovative • Technical • Visionary"
+  },
+  {
+    name: "Design Director",
+    description: "Leading creative teams at top design studios",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop",
+    traits: "Creative • Leadership • Design"
+  },
+  {
+    name: "Wellness Coach",
+    description: "Helping professionals find balance and purpose",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop",
+    traits: "Empathetic • Holistic • Inspiring"
+  }
 ];
 
 export const SearchPage = () => {
@@ -45,6 +72,38 @@ export const SearchPage = () => {
                   <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${exercise.color} flex items-center justify-center`}>
                     <exercise.icon className="h-6 w-6 text-white" />
                   </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Future Self Library */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Future Self Library</p>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {futureLibrary.map((future) => (
+              <Card 
+                key={future.name}
+                className="overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+              >
+                <div className="relative h-48">
+                  <img 
+                    src={future.image} 
+                    alt={future.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                    <h4 className="font-semibold text-sm mb-1">{future.name}</h4>
+                    <p className="text-xs opacity-90 line-clamp-2">{future.description}</p>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <p className="text-xs text-muted-foreground">{future.traits}</p>
                 </div>
               </Card>
             ))}

@@ -1,4 +1,4 @@
-import { Home, Search, Plus, List, BarChart3 } from "lucide-react";
+import { Home, Search, Plus, Eye, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BottomNavProps {
@@ -40,10 +40,10 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onNavigate("timeline")}
-          className={active === "timeline" ? "text-foreground" : "text-muted-foreground"}
+          onClick={() => onNavigate("future")}
+          className={active === "future" ? "text-foreground" : "text-muted-foreground"}
         >
-          <List className="h-5 w-5" />
+          <Eye className="h-5 w-5" />
         </Button>
         
         <Button
