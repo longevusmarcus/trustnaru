@@ -5,6 +5,7 @@ import { HomePage } from "@/components/HomePage";
 import { SearchPage } from "@/components/SearchPage";
 import { TimelinePage } from "@/components/TimelinePage";
 import { FutureYouPage } from "@/components/FutureYouPage";
+import { ActionPage } from "@/components/ActionPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 
@@ -20,7 +21,7 @@ const Index = () => {
       case "home": return "today";
       case "search": return "explore";
       case "future": return "your futures";
-      case "stats": return "progress";
+      case "action": return "action";
       default: return "path genius";
     }
   };
@@ -72,14 +73,7 @@ const Index = () => {
         {currentPage === "home" && <HomePage />}
         {currentPage === "search" && <SearchPage />}
         {currentPage === "future" && <FutureYouPage />}
-        {currentPage === "stats" && (
-          <div className="px-4 pb-24 pt-4">
-            <div className="max-w-md mx-auto">
-              <h2 className="text-2xl font-bold mb-4">Progress</h2>
-              <p className="text-muted-foreground">Your journey statistics coming soon...</p>
-            </div>
-          </div>
-        )}
+        {currentPage === "action" && <ActionPage />}
       </main>
 
       <BottomNav active={currentPage} onNavigate={handleNavigation} />
