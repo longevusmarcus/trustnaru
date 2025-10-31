@@ -1,6 +1,8 @@
-import { Search, Sparkles, Target, TrendingUp, Heart, Users } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Search, Sparkles, Target, TrendingUp, Heart, Users, CheckCircle, X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const exercises = [
   { name: "Vision", icon: Sparkles, color: "from-violet-500 to-purple-600" },
@@ -16,6 +18,68 @@ const categories = [
   "Health & Energy",
   "Learning",
   "Purpose",
+];
+
+const pathsLibrary = [
+  {
+    id: "path-1",
+    name: "The Mindful Leader",
+    description: "Balance ambition with inner peace",
+    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=200&fit=crop",
+    tags: ["Leadership", "Wellness"]
+  },
+  {
+    id: "path-2",
+    name: "The Digital Nomad",
+    description: "Work from anywhere, live everywhere",
+    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&h=200&fit=crop",
+    tags: ["Freedom", "Tech"]
+  },
+  {
+    id: "path-3",
+    name: "The Creative Visionary",
+    description: "Turn ideas into reality",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
+    tags: ["Creativity", "Innovation"]
+  },
+  {
+    id: "path-4",
+    name: "The Tech Entrepreneur",
+    description: "Build products that scale",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=200&fit=crop",
+    tags: ["Startup", "Innovation"]
+  }
+];
+
+const profilesLibrary = [
+  {
+    id: "profile-1",
+    name: "Sarah Chen",
+    description: "VP Product at Tech Unicorn",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=200&fit=crop",
+    tags: ["Product", "Leadership"]
+  },
+  {
+    id: "profile-2",
+    name: "Marcus Rodriguez",
+    description: "Founder & CEO of Design Studio",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=200&fit=crop",
+    tags: ["Design", "Entrepreneurship"]
+  },
+  {
+    id: "profile-3",
+    name: "Elena Popov",
+    description: "AI Research Lead at OpenAI",
+    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=200&fit=crop",
+    tags: ["AI", "Research"]
+  },
+  {
+    id: "profile-4",
+    name: "James Park",
+    description: "Creative Director at Nike",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=200&fit=crop",
+    tags: ["Creative", "Brand"]
+  }
 ];
 
 const futureLibrary = [
@@ -46,6 +110,18 @@ const futureLibrary = [
 ];
 
 export const SearchPage = () => {
+  const [approvedPaths, setApprovedPaths] = useState<string[]>([]);
+  const [rejectedPaths, setRejectedPaths] = useState<string[]>([]);
+
+  const handleApprove = (id: string) => {
+    setApprovedPaths([...approvedPaths, id]);
+    setRejectedPaths(rejectedPaths.filter(rid => rid !== id));
+  };
+
+  const handleReject = (id: string) => {
+    setRejectedPaths([...rejectedPaths, id]);
+    setApprovedPaths(approvedPaths.filter(aid => aid !== id));
+  };
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
@@ -78,33 +154,97 @@ export const SearchPage = () => {
           </div>
         </div>
 
-        {/* Future Self Library */}
+        {/* Future Self Library - Paths */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Future Self Library</p>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Paths</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {futureLibrary.map((future) => (
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            {pathsLibrary.map((item) => (
               <Card 
-                key={future.name}
-                className="overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+                key={item.id}
+                className="overflow-hidden flex-shrink-0 w-48"
               >
-                <div className="relative h-48">
+                <div className="relative h-32">
                   <img 
-                    src={future.image} 
-                    alt={future.name}
-                    className="w-full h-full object-cover"
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-full h-full object-cover opacity-80"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                    <h4 className="font-semibold text-sm mb-1">{future.name}</h4>
-                    <p className="text-xs opacity-90 line-clamp-2">{future.description}</p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+                <CardContent className="p-3 space-y-2">
+                  <div>
+                    <h4 className="text-sm font-medium">{item.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={approvedPaths.includes(item.id) ? "default" : "outline"}
+                      size="sm"
+                      className="flex-1 h-7 px-2"
+                      onClick={() => handleApprove(item.id)}
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant={rejectedPaths.includes(item.id) ? "destructive" : "outline"}
+                      size="sm"
+                      className="flex-1 h-7 px-2"
+                      onClick={() => handleReject(item.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Future Self Library - Profiles */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Profiles to Clone</p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            {profilesLibrary.map((item) => (
+              <Card 
+                key={item.id}
+                className="overflow-hidden flex-shrink-0 w-48"
+              >
+                <div className="relative h-32">
+                  <img 
+                    src={item.image} 
+                    alt={item.name}
+                    className="w-full h-full object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
-                <div className="p-3">
-                  <p className="text-xs text-muted-foreground">{future.traits}</p>
-                </div>
+                <CardContent className="p-3 space-y-2">
+                  <div>
+                    <h4 className="text-sm font-medium">{item.name}</h4>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={approvedPaths.includes(item.id) ? "default" : "outline"}
+                      size="sm"
+                      className="flex-1 h-7 px-2"
+                      onClick={() => handleApprove(item.id)}
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant={rejectedPaths.includes(item.id) ? "destructive" : "outline"}
+                      size="sm"
+                      className="flex-1 h-7 px-2"
+                      onClick={() => handleReject(item.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>
