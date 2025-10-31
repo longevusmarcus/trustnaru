@@ -1,11 +1,10 @@
-import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Sparkles, CheckCircle2 } from "lucide-react";
+import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const FutureYouPage = () => {
-  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const navigate = useNavigate();
   
   const futureCards = [
     {
@@ -128,51 +127,15 @@ export const FutureYouPage = () => {
 
                 <div className="space-y-2 pt-2">
                   <div className="flex gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="flex-1" size="sm" onClick={() => setSelectedCard(index)}>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          View Path
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>{card.title} Journey</DialogTitle>
-                        </DialogHeader>
-                        
-                        <div className="space-y-4 pt-4">
-                          <div className="grid grid-cols-3 gap-2">
-                            {card.pathImages.map((img, imgIndex) => (
-                              <div key={imgIndex} className="aspect-square rounded-lg overflow-hidden">
-                                <img src={img} alt={`Path ${imgIndex + 1}`} className="w-full h-full object-cover" />
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="space-y-3">
-                            <h3 className="font-semibold text-sm">Your Roadmap</h3>
-                            {card.roadmap.map((step, stepIndex) => (
-                              <div key={stepIndex} className="flex items-start gap-3 p-3 bg-card-dark rounded-lg">
-                                <CheckCircle2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium">{step.step}</p>
-                                  <p className="text-xs text-muted-foreground">{step.duration}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="space-y-2">
-                            <h3 className="font-semibold text-sm">Your Affirmations</h3>
-                            {card.affirmations.map((affirmation, affIndex) => (
-                              <div key={affIndex} className="p-3 bg-gradient-to-r from-card-dark to-muted rounded-lg">
-                                <p className="text-sm italic">{affirmation}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1" 
+                      size="sm"
+                      onClick={() => navigate(`/path/${index}`, { state: { card } })}
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      View Path
+                    </Button>
                     
                     <Button variant="outline" className="flex-1" size="sm">
                       <Share2 className="h-4 w-4 mr-2" />
