@@ -1,6 +1,5 @@
 import { ChevronRight, Calendar, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { VoiceBubble } from "@/components/VoiceBubble";
 import { useToast } from "@/components/ui/use-toast";
 
 const formatDate = () => {
@@ -17,11 +16,6 @@ const formatDate = () => {
 export const HomePage = () => {
   const { greeting, date } = formatDate();
   const { toast } = useToast();
-
-  const handleVoiceTranscription = (text: string) => {
-    console.log('Transcription:', text);
-    // You can add logic here to process the transcription
-  };
 
   return (
     <div className="px-4 pb-24 pt-4">
@@ -109,9 +103,6 @@ export const HomePage = () => {
           </Card>
         </div>
       </div>
-      
-      {/* Voice Bubble */}
-      <VoiceBubble onTranscription={handleVoiceTranscription} />
     </div>
   );
 };
