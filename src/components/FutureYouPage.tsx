@@ -1,4 +1,4 @@
-import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Sparkles } from "lucide-react";
+import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -91,61 +91,53 @@ export const FutureYouPage = () => {
 
         <div className="space-y-4">
           {futureCards.map((card, index) => (
-            <Card key={index} className="overflow-hidden">
-              <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
+            <Card key={index} className="overflow-hidden border-border/50">
+              <div className="relative h-48 bg-muted/20">
                 <img 
                   src={card.image} 
                   alt={card.title}
-                  className="w-full h-full object-cover opacity-80"
+                  className="w-full h-full object-cover opacity-20 grayscale"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 text-white">
-                  <h3 className="text-xl font-bold mb-2">{card.title}</h3>
+                <div className="absolute inset-0 flex items-end p-6">
+                  <h3 className="text-xl font-semibold">{card.title}</h3>
                 </div>
               </div>
               
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
                   <span>{card.location}</span>
                 </div>
                 
-                <div className="flex items-center gap-2 text-sm">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Briefcase className="h-4 w-4" />
                   <span>{card.role}</span>
                 </div>
                 
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
                   <span>{card.schedule}</span>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
                   <span>{card.income}</span>
                 </div>
 
-                <div className="space-y-2 pt-2">
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="flex-1" 
-                      size="sm"
-                      onClick={() => navigate(`/path/${index}`, { state: { card } })}
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      View Path
-                    </Button>
-                    
-                    <Button variant="outline" className="flex-1" size="sm">
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share
-                    </Button>
-                  </div>
+                <div className="space-y-2 pt-4 border-t border-border/50">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    size="sm"
+                    onClick={() => navigate(`/path/${index}`, { state: { card } })}
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    View Path
+                  </Button>
                   
-                  <Button variant="default" className="w-full" size="sm">
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Activate This Path
+                  <Button variant="ghost" className="w-full justify-start" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
                   </Button>
                 </div>
               </CardContent>

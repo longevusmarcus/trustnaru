@@ -1,14 +1,14 @@
-import { Search, Sparkles, Target, TrendingUp, Heart, Users, CheckCircle, X } from "lucide-react";
+import { Search, Compass, Target, TrendingUp, Lightbulb, CheckCircle, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const exercises = [
-  { name: "Vision", icon: Sparkles, color: "from-violet-500 to-purple-600" },
-  { name: "Goals", icon: Target, color: "from-blue-500 to-cyan-600" },
-  { name: "Growth", icon: TrendingUp, color: "from-emerald-500 to-teal-600" },
-  { name: "Values", icon: Heart, color: "from-rose-500 to-pink-600" },
+  { name: "Vision", icon: Compass },
+  { name: "Goals", icon: Target },
+  { name: "Growth", icon: TrendingUp },
+  { name: "Values", icon: Lightbulb },
 ];
 
 const categories = [
@@ -182,12 +182,12 @@ export const SearchPage = () => {
             {exercises.map((exercise) => (
               <Card 
                 key={exercise.name}
-                className="bg-card-dark text-card-dark-foreground p-6 cursor-pointer hover:scale-105 transition-transform"
+                className="border-border/50 p-6 cursor-pointer hover:border-foreground/20 transition-colors"
               >
                 <div className="flex flex-col items-start justify-between h-32">
-                  <h3 className="text-lg font-semibold">{exercise.name}</h3>
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${exercise.color} flex items-center justify-center`}>
-                    <exercise.icon className="h-6 w-6 text-white" />
+                  <h3 className="text-lg font-medium">{exercise.name}</h3>
+                  <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center">
+                    <exercise.icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               </Card>
@@ -204,18 +204,17 @@ export const SearchPage = () => {
             {pathsLibrary.map((item) => (
               <Card 
                 key={item.id}
-                className="overflow-hidden flex-shrink-0 w-64"
+                className="overflow-hidden flex-shrink-0 w-64 border-border/50"
               >
                 <div 
-                  className="relative h-32 cursor-pointer"
+                  className="relative h-32 cursor-pointer bg-muted/20"
                   onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
                 >
                   <img 
                     src={item.image} 
                     alt={item.name}
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover opacity-20 grayscale"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <CardContent className="p-3 space-y-2">
                   <div 
@@ -291,18 +290,17 @@ export const SearchPage = () => {
             {profilesLibrary.map((item) => (
               <Card 
                 key={item.id}
-                className="overflow-hidden flex-shrink-0 w-64"
+                className="overflow-hidden flex-shrink-0 w-64 border-border/50"
               >
                 <div 
-                  className="relative h-32 cursor-pointer"
+                  className="relative h-32 cursor-pointer bg-muted/20"
                   onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
                 >
                   <img 
                     src={item.image} 
                     alt={item.name}
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover opacity-20 grayscale"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <CardContent className="p-3 space-y-2">
                   <div 
