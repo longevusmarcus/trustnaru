@@ -1,0 +1,215 @@
+import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+
+interface VoiceBubbleProps {
+  onTranscription?: (text: string) => void;
+}
+
+export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && isRecording) {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, [isRecording]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+        } 
+      });
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+      
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await processAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      toast({
+        title: "Recording started",
+        description: "Speak now...",
+      });
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      toast({
+        title: "Error",
+        description: "Could not access microphone",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const processAudio = async (audioBlob: Blob) => {
+    setIsProcessing(true);
+    
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      
+      reader.onloadend = async () => {
+        const base64Audio = reader.result?.toString().split(',')[1];
+        
+        if (!base64Audio) {
+          throw new Error('Failed to convert audio to base64');
+        }
+
+        console.log('Sending audio to transcription...');
+        
+        const { data, error } = await supabase.functions.invoke('transcribe-voice', {
+          body: { audio: base64Audio }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        const transcription = data?.text || '';
+        
+        if (transcription) {
+          toast({
+            title: "Transcription complete",
+            description: transcription,
+          });
+          onTranscription?.(transcription);
+        } else {
+          toast({
+            title: "No speech detected",
+            description: "Please try speaking again",
+            variant: "destructive",
+          });
+        }
+        
+        setIsProcessing(false);
+      };
+      
+      reader.onerror = () => {
+        throw new Error('Failed to read audio file');
+      };
+      
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      toast({
+        title: "Error",
+        description: "Failed to transcribe audio",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
+    }
+  };
+
+  const handleClick = () => {
+    if (isRecording) {
+      stopRecording();
+    } else if (!isProcessing) {
+      startRecording();
+    }
+  };
+
+  return (
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+      <button
+        onClick={handleClick}
+        disabled={isProcessing}
+        className="relative group"
+        aria-label={isRecording ? "Stop recording" : "Start recording"}
+      >
+        {/* Outer glow rings */}
+        <div className={`absolute inset-0 rounded-full ${
+          isRecording 
+            ? 'animate-ping bg-primary/30' 
+            : 'bg-primary/10 group-hover:bg-primary/20'
+        } transition-all duration-300`} style={{ 
+          transform: 'scale(1.5)',
+          animation: isRecording ? 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+        }} />
+        
+        {/* Middle pulse ring */}
+        {isRecording && (
+          <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" style={{ 
+            transform: 'scale(1.3)',
+            animation: 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          }} />
+        )}
+        
+        {/* Main bubble */}
+        <div className={`
+          relative w-20 h-20 rounded-full 
+          bg-gradient-to-br from-primary via-primary/90 to-primary/80
+          flex items-center justify-center
+          transition-all duration-300
+          shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]
+          ${isRecording ? 'scale-110 shadow-[0_0_60px_rgba(var(--primary-rgb),0.6)]' : 'group-hover:scale-105'}
+          ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}>
+          {/* Inner glow */}
+          <div className={`
+            absolute inset-2 rounded-full 
+            bg-gradient-to-br from-white/20 to-transparent
+            ${isRecording ? 'animate-pulse' : ''}
+          `} />
+          
+          {/* Center dot indicator */}
+          <div className={`
+            w-3 h-3 rounded-full 
+            ${isRecording ? 'bg-white animate-pulse' : 'bg-white/80'}
+            ${isProcessing ? 'animate-spin' : ''}
+            transition-all duration-300
+          `} />
+          
+          {/* Recording indicator text */}
+          {isRecording && (
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              <span className="text-xs font-medium text-primary animate-pulse">
+                Recording...
+              </span>
+            </div>
+          )}
+          
+          {/* Processing indicator text */}
+          {isProcessing && (
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              <span className="text-xs font-medium text-muted-foreground">
+                Processing...
+              </span>
+            </div>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+};
