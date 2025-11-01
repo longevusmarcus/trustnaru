@@ -25,19 +25,20 @@ export default function PathDetail() {
 
       <div className="px-4 pb-8">
         {/* Hero Image */}
-        <div className="relative h-64 -mx-4 mb-6 bg-muted/20">
+        <div className="relative h-64 -mx-4 mb-6">
           <img 
             src={card.image} 
             alt={card.title}
-            className="w-full h-full object-cover opacity-20 grayscale"
+            className="w-full h-full object-cover"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
 
         {/* Path Images */}
         <div className="grid grid-cols-3 gap-2 mb-8">
           {card.pathImages.map((img: string, imgIndex: number) => (
-            <div key={imgIndex} className="aspect-square rounded-lg overflow-hidden bg-muted/20">
-              <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover opacity-20 grayscale" />
+            <div key={imgIndex} className="aspect-square rounded-lg overflow-hidden">
+              <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
             </div>
           ))}
         </div>

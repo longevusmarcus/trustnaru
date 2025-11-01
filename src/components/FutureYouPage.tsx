@@ -92,14 +92,15 @@ export const FutureYouPage = () => {
         <div className="space-y-4">
           {futureCards.map((card, index) => (
             <Card key={index} className="overflow-hidden border-border/50">
-              <div className="relative h-48 bg-muted/20">
+              <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
                 <img 
                   src={card.image} 
                   alt={card.title}
-                  className="w-full h-full object-cover opacity-20 grayscale"
+                  className="w-full h-full object-cover opacity-80"
                 />
-                <div className="absolute inset-0 flex items-end p-6">
-                  <h3 className="text-xl font-semibold">{card.title}</h3>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <h3 className="text-xl font-bold mb-2">{card.title}</h3>
                 </div>
               </div>
               

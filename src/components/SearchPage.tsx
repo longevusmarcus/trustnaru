@@ -207,14 +207,15 @@ export const SearchPage = () => {
                 className="overflow-hidden flex-shrink-0 w-64 border-border/50"
               >
                 <div 
-                  className="relative h-32 cursor-pointer bg-muted/20"
+                  className="relative h-32 cursor-pointer"
                   onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
                 >
                   <img 
                     src={item.image} 
                     alt={item.name}
-                    className="w-full h-full object-cover opacity-20 grayscale"
+                    className="w-full h-full object-cover opacity-80"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <CardContent className="p-3 space-y-2">
                   <div 
@@ -293,14 +294,15 @@ export const SearchPage = () => {
                 className="overflow-hidden flex-shrink-0 w-64 border-border/50"
               >
                 <div 
-                  className="relative h-32 cursor-pointer bg-muted/20"
+                  className="relative h-32 cursor-pointer"
                   onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
                 >
                   <img 
                     src={item.image} 
                     alt={item.name}
-                    className="w-full h-full object-cover opacity-20 grayscale"
+                    className="w-full h-full object-cover opacity-80"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
                 <CardContent className="p-3 space-y-2">
                   <div 
