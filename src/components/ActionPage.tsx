@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Trophy, Flame } from "lucide-react";
+import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,21 +26,21 @@ export const ActionPage = () => {
         <div className="grid grid-cols-3 gap-3">
           <Card className="bg-card-dark text-card-dark-foreground">
             <CardContent className="p-4 text-center">
-              <Flame className="h-6 w-6 mx-auto mb-2 text-orange-500" />
+              <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">{currentStreak}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
             </CardContent>
           </Card>
           <Card className="bg-card-dark text-card-dark-foreground">
             <CardContent className="p-4 text-center">
-              <Trophy className="h-6 w-6 mx-auto mb-2 text-yellow-500" />
+              <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">{totalPoints}</div>
               <div className="text-xs text-muted-foreground">Points</div>
             </CardContent>
           </Card>
           <Card className="bg-card-dark text-card-dark-foreground">
             <CardContent className="p-4 text-center">
-              <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
+              <Circle className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">3/5</div>
               <div className="text-xs text-muted-foreground">Goals</div>
             </CardContent>
