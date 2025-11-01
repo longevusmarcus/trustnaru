@@ -24,21 +24,21 @@ export const ActionPage = () => {
       <div className="max-w-md mx-auto space-y-6">
         {/* Gamification Stats */}
         <div className="grid grid-cols-3 gap-3">
-          <Card className="bg-card-dark text-card-dark-foreground">
+          <Card>
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">{currentStreak}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
             </CardContent>
           </Card>
-          <Card className="bg-card-dark text-card-dark-foreground">
+          <Card>
             <CardContent className="p-4 text-center">
               <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">{totalPoints}</div>
               <div className="text-xs text-muted-foreground">Points</div>
             </CardContent>
           </Card>
-          <Card className="bg-card-dark text-card-dark-foreground">
+          <Card>
             <CardContent className="p-4 text-center">
               <Circle className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
               <div className="text-2xl font-bold">3/5</div>
