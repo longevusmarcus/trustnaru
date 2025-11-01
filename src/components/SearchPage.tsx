@@ -1,24 +1,8 @@
-import { Search, Compass, Target, TrendingUp, Lightbulb, CheckCircle, X } from "lucide-react";
+import { Search, CheckCircle, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-
-const exercises = [
-  { name: "Vision", icon: Compass },
-  { name: "Goals", icon: Target },
-  { name: "Growth", icon: TrendingUp },
-  { name: "Values", icon: Lightbulb },
-];
-
-const categories = [
-  "Career Path",
-  "Personal Growth", 
-  "Relationships",
-  "Health & Energy",
-  "Learning",
-  "Purpose",
-];
 
 const pathsLibrary = [
   {
@@ -170,29 +154,9 @@ export const SearchPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search exercises and pathways..."
+            placeholder="Search library..."
             className="pl-10 bg-card"
           />
-        </div>
-
-        {/* Exercises */}
-        <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Pathways</p>
-          <div className="grid grid-cols-2 gap-3">
-            {exercises.map((exercise) => (
-              <Card 
-                key={exercise.name}
-                className="border-border/50 p-6 cursor-pointer hover:border-foreground/20 transition-colors"
-              >
-                <div className="flex flex-col items-start justify-between h-32">
-                  <h3 className="text-lg font-medium">{exercise.name}</h3>
-                  <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center">
-                    <exercise.icon className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
         </div>
 
         {/* Future Self Library - Paths */}
@@ -365,21 +329,6 @@ export const SearchPage = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* How can Path Genius help */}
-        <div>
-          <h3 className="text-base font-semibold mb-3">How can Path Genius help you?</h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className="px-4 py-2 text-sm bg-card border border-border rounded-full hover:bg-secondary transition-colors"
-              >
-                {category}
-              </button>
             ))}
           </div>
         </div>
