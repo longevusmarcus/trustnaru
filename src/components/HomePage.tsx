@@ -1,4 +1,4 @@
-import { ChevronRight, Calendar, Compass, Target, TrendingUp, Lightbulb } from "lucide-react";
+import { ChevronRight, Calendar, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const formatDate = () => {
@@ -11,21 +11,6 @@ const formatDate = () => {
   };
 };
 
-const exercises = [
-  { name: "Vision", icon: Compass },
-  { name: "Goals", icon: Target },
-  { name: "Growth", icon: TrendingUp },
-  { name: "Values", icon: Lightbulb },
-];
-
-const categories = [
-  "Career Path",
-  "Personal Growth", 
-  "Relationships",
-  "Health & Energy",
-  "Learning",
-  "Purpose",
-];
 
 export const HomePage = () => {
   const { greeting, date } = formatDate();
@@ -82,39 +67,27 @@ export const HomePage = () => {
           </Card>
         </div>
 
-        {/* Pathways */}
+        {/* Daily Mission */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Pathways</p>
-          <div className="grid grid-cols-2 gap-3">
-            {exercises.map((exercise) => (
-              <Card 
-                key={exercise.name}
-                className="border-border/50 p-6 cursor-pointer hover:border-foreground/20 transition-colors"
-              >
-                <div className="flex flex-col items-start justify-between h-32">
-                  <h3 className="text-lg font-medium">{exercise.name}</h3>
-                  <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center">
-                    <exercise.icon className="h-5 w-5 text-muted-foreground" />
-                  </div>
+          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Daily Mission</p>
+          <Card className="p-6 border-primary/20 bg-gradient-to-br from-background to-primary/5">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 space-y-2">
+                <h3 className="text-lg font-semibold">Define Your Core Values</h3>
+                <p className="text-sm text-muted-foreground">
+                  Take 10 minutes to reflect on what truly matters to you
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
+                  <span>10 min</span>
+                  <span>•</span>
+                  <span>Reflection</span>
                 </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* How can Path Genius help */}
-        <div>
-          <h3 className="text-base font-semibold mb-3">How can Path Genius help you?</h3>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className="px-4 py-2 text-sm bg-card border border-border rounded-full hover:bg-secondary transition-colors"
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+              </div>
+            </div>
+          </Card>
         </div>
 
         {/* Evening Section */}
