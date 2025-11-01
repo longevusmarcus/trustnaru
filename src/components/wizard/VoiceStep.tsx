@@ -1,6 +1,7 @@
-import { Mic, Circle } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { VoiceBubble } from "@/components/VoiceBubble";
 
 interface VoiceStepProps {
   onNext: () => void;
@@ -8,8 +9,14 @@ interface VoiceStepProps {
 }
 
 export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
+  const [transcription, setTranscription] = useState<string>("");
+
+  const handleTranscription = (text: string) => {
+    setTranscription(text);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative pb-32">
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Share Your Energy</h2>
         <p className="text-muted-foreground">
@@ -17,22 +24,22 @@ export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
         </p>
       </div>
 
-      <Card className="p-12 flex flex-col items-center space-y-6">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-foreground/10 to-foreground/5 flex items-center justify-center">
-          <Mic className="h-16 w-16 text-foreground/60" />
-        </div>
-
+      <Card className="p-12 flex flex-col items-center space-y-6 min-h-[300px]">
         <div className="text-center space-y-2">
-          <p className="font-medium">Tap to record</p>
+          <p className="font-medium">Tap the bubble below to record</p>
           <p className="text-sm text-muted-foreground">
             Speak naturally about what excites and energizes you
           </p>
         </div>
 
-        <Button size="lg" className="rounded-full w-20 h-20">
-          <Circle className="h-8 w-8" />
-        </Button>
+        {transcription && (
+          <div className="mt-4 p-4 bg-muted rounded-lg max-w-md">
+            <p className="text-sm">{transcription}</p>
+          </div>
+        )}
       </Card>
+
+      <VoiceBubble onTranscription={handleTranscription} />
 
       <Card className="p-4 bg-muted/50 border-0">
         <div className="text-sm space-y-1">
