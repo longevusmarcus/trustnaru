@@ -13,7 +13,7 @@ export const ProfilePage = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
   const [userStats, setUserStats] = useState<any>(null);
-  const [currentPath, setCurrentPath] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);
   const [joinDate, setJoinDate] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
@@ -30,16 +30,23 @@ export const ProfilePage = () => {
         const date = new Date(user.created_at);
         setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
-        // Load user profile for display name
+        // Load user profile for display name, CV, and voice
         const { data: profile } = await supabase
           .from('user_profiles')
-          .select('display_name')
+          .select('display_name, cv_url, voice_transcription')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (profile?.display_name) {
-          setDisplayName(profile.display_name);
-          setEditName(profile.display_name);
+        if (profile) {
+          setUserProfile(profile);
+          if (profile.display_name) {
+            setDisplayName(profile.display_name);
+            setEditName(profile.display_name);
+          } else {
+            const defaultName = user.email?.split('@')[0] || 'User';
+            setDisplayName(defaultName);
+            setEditName(defaultName);
+          }
         } else {
           const defaultName = user.email?.split('@')[0] || 'User';
           setDisplayName(defaultName);
@@ -55,19 +62,6 @@ export const ProfilePage = () => {
 
         if (stats) {
           setUserStats(stats);
-        }
-
-        // Load current path (most recent)
-        const { data: path } = await supabase
-          .from('career_paths')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (path) {
-          setCurrentPath(path);
         }
 
         // Load earned badges
@@ -205,21 +199,43 @@ export const ProfilePage = () => {
           </CardContent>
         </Card>
 
-        {/* Current Path */}
-        {currentPath && (
+        {/* CV Summary */}
+        {userProfile?.cv_url && (
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Current Path</h3>
-                <Badge variant="secondary">{currentPath.difficulty_level || 'Beginner'}</Badge>
-              </div>
-              <h4 className="text-lg font-semibold mb-2">{currentPath.title}</h4>
-              <p className="text-sm text-muted-foreground mb-3">{currentPath.description}</p>
-              {currentPath.journey_duration && (
-                <div className="text-xs text-muted-foreground">
-                  Duration: {currentPath.journey_duration}
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
+                Professional Background
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-foreground/60" />
+                  <span>CV uploaded and analyzed</span>
                 </div>
-              )}
+                <p className="text-muted-foreground text-xs pl-3.5">
+                  Your professional experience and skills have been captured
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Voice Summary */}
+        {userProfile?.voice_transcription && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
+                Your Energy & Passions
+              </h3>
+              <div className="space-y-3">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  "{userProfile.voice_transcription.substring(0, 200)}{userProfile.voice_transcription.length > 200 ? '...' : ''}"
+                </p>
+                {userProfile.voice_transcription.length > 200 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-muted-foreground">
+                    Read full transcription
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
