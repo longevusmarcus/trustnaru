@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      career_paths: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string
+          difficulty_level: string | null
+          id: string
+          image_url: string | null
+          impact_areas: string[] | null
+          journey_duration: string | null
+          key_skills: string[] | null
+          lifestyle_benefits: string[] | null
+          salary_range: string | null
+          target_companies: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description: string
+          difficulty_level?: string | null
+          id?: string
+          image_url?: string | null
+          impact_areas?: string[] | null
+          journey_duration?: string | null
+          key_skills?: string[] | null
+          lifestyle_benefits?: string[] | null
+          salary_range?: string | null
+          target_companies?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string
+          difficulty_level?: string | null
+          id?: string
+          image_url?: string | null
+          impact_areas?: string[] | null
+          journey_duration?: string | null
+          key_skills?: string[] | null
+          lifestyle_benefits?: string[] | null
+          salary_range?: string | null
+          target_companies?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_reference: boolean | null
+          photo_url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_reference?: boolean | null
+          photo_url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_reference?: boolean | null
+          photo_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          created_at: string
+          cv_url: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          voice_transcription: string | null
+          wizard_data: Json | null
+        }
+        Insert: {
+          created_at?: string
+          cv_url?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          voice_transcription?: string | null
+          wizard_data?: Json | null
+        }
+        Update: {
+          created_at?: string
+          cv_url?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          voice_transcription?: string | null
+          wizard_data?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
