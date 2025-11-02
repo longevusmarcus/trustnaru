@@ -219,12 +219,32 @@ export const ProfilePage = () => {
           </Card>
         )}
 
+        {/* Energy Summary */}
+        {userProfile?.voice_transcription && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
+                Energy & Passions
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-foreground">
+                  <div className="w-1.5 h-1.5 rounded-full bg-foreground/60" />
+                  <span>Voice transcript uploaded and analyzed</span>
+                </div>
+                <p className="text-muted-foreground text-xs pl-3.5">
+                  Your motivations and interests have been understood
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Voice Summary */}
         {userProfile?.voice_transcription && (
           <Card>
             <CardContent className="p-6">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
-                Your Energy & Passions
+                Voice Transcription
               </h3>
               <div className="space-y-3">
                 <p className="text-sm leading-relaxed text-muted-foreground">
