@@ -14,12 +14,14 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
 
   const getHeaderTitle = () => {
+    if (showTimeline) return "timeline";
     switch (currentPage) {
       case "home": return "today";
-      case "mentors": return "mentors";
+      case "search": return "explore";
       case "future": return "your futures";
       case "action": return "action";
       default: return "path genius";
@@ -31,6 +33,7 @@ const Index = () => {
       setShowWizard(true);
     } else {
       setCurrentPage(page);
+      setShowTimeline(false);
     }
   };
 
@@ -53,14 +56,26 @@ const Index = () => {
     );
   }
 
+  if (showTimeline) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(false)} />
+        <main className="pb-safe">
+          <TimelinePage />
+        </main>
+        <BottomNav active={currentPage} onNavigate={handleNavigation} />
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <div className="min-h-screen bg-background">
-        <Header title={getHeaderTitle()} />
+        <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(true)} />
         
         <main className="pb-safe">
           {currentPage === "home" && <HomePage />}
-          {currentPage === "mentors" && <SearchPage />}
+          {currentPage === "search" && <SearchPage />}
           {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
           {currentPage === "action" && <ActionPage />}
         </main>
