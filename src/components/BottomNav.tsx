@@ -1,4 +1,4 @@
-import { Home, Users, Plus, Eye, Target } from "lucide-react";
+import { Home, Search, Plus, Eye, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BottomNavProps {
@@ -9,7 +9,7 @@ interface BottomNavProps {
 export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pb-safe">
-      <div className="max-w-md mx-auto flex items-center justify-around h-16 px-2">
+      <div className="max-w-md mx-auto flex items-center justify-around h-16 px-4">
         <Button
           variant="ghost"
           size="icon"
@@ -22,10 +22,10 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onNavigate("mentors")}
-          className={active === "mentors" ? "text-foreground" : "text-muted-foreground"}
+          onClick={() => onNavigate("search")}
+          className={active === "search" ? "text-foreground" : "text-muted-foreground"}
         >
-          <Users className="h-5 w-5" />
+          <Search className="h-5 w-5" />
         </Button>
         
         <Button

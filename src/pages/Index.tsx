@@ -6,7 +6,6 @@ import { SearchPage } from "@/components/SearchPage";
 import { TimelinePage } from "@/components/TimelinePage";
 import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
-import { ProfilePage } from "@/components/ProfilePage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -15,15 +14,16 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
 
   const getHeaderTitle = () => {
+    if (showTimeline) return "timeline";
     switch (currentPage) {
       case "home": return "today";
-      case "mentors": return "mentors";
+      case "search": return "explore";
       case "future": return "your futures";
       case "action": return "action";
-      case "profile": return "profile";
       default: return "path genius";
     }
   };
@@ -33,6 +33,7 @@ const Index = () => {
       setShowWizard(true);
     } else {
       setCurrentPage(page);
+      setShowTimeline(false);
     }
   };
 
@@ -55,17 +56,28 @@ const Index = () => {
     );
   }
 
+  if (showTimeline) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(false)} />
+        <main className="pb-safe">
+          <TimelinePage />
+        </main>
+        <BottomNav active={currentPage} onNavigate={handleNavigation} />
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <div className="min-h-screen bg-background">
-        <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
+        <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(true)} />
         
         <main className="pb-safe">
           {currentPage === "home" && <HomePage />}
-          {currentPage === "mentors" && <SearchPage />}
+          {currentPage === "search" && <SearchPage />}
           {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
           {currentPage === "action" && <ActionPage />}
-          {currentPage === "profile" && <ProfilePage />}
         </main>
 
         <BottomNav active={currentPage} onNavigate={handleNavigation} />

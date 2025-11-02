@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
   const [paths, setPaths] = useState<any[]>(careerPaths);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     if (careerPaths.length > 0) {
@@ -56,8 +56,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     }
   };
 
-  // Removed auto-generate to prevent infinite loops
-  // Users can manually trigger image generation if needed
+  useEffect(() => {
+    // Auto-generate images for paths that don't have them
+    paths.forEach(path => {
+      if (!path.all_images || path.all_images.length === 0) {
+        generateImages(path.id);
+      }
+    });
+  }, [paths]);
 
   const futureCards = paths.length > 0 ? paths.map(path => ({
     id: path.id,
