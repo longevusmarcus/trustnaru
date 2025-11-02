@@ -60,16 +60,22 @@ serve(async (req) => {
           }
           const cvBase64 = btoa(binary);
           
-          const analysisPrompt = `Analyze this CV/resume document and extract key information.
+          const analysisPrompt = `Deeply analyze this CV/resume and extract detailed career information.
 
-Provide a structured analysis in JSON format:
+Provide comprehensive analysis in JSON format:
 {
-  "current_role": "their current or most recent role",
+  "current_role": "exact job title from CV",
+  "years_experience": "total years in workforce",
   "experience_level": "entry|mid|senior|executive",
-  "core_skills": ["skill1", "skill2", "skill3"],
-  "industries": ["industry1", "industry2"],
-  "strengths": ["strength1", "strength2"],
-  "potential_directions": ["direction1", "direction2", "direction3"]
+  "career_progression": ["role1 (years)", "role2 (years)", "role3 (years)"],
+  "industries_worked": ["specific industry 1", "specific industry 2"],
+  "core_skills": ["proven skill 1", "proven skill 2", "proven skill 3"],
+  "technical_skills": ["technical skill 1", "technical skill 2"],
+  "soft_skills": ["soft skill 1", "soft skill 2"],
+  "achievements": ["achievement 1", "achievement 2"],
+  "education": "highest degree and field",
+  "strengths": ["demonstrated strength 1", "demonstrated strength 2"],
+  "work_style": "description of how they work based on experience"
 }`;
 
           const analysisResponse = await fetch(
@@ -99,13 +105,19 @@ Provide a structured analysis in JSON format:
             const analysisText = analysisData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
             const analysis = JSON.parse(analysisText);
             cvAnalysis = `
-CV Analysis:
+DETAILED CV ANALYSIS:
 - Current Role: ${analysis.current_role}
+- Total Experience: ${analysis.years_experience}
 - Experience Level: ${analysis.experience_level}
-- Core Skills: ${analysis.core_skills?.join(', ')}
-- Industries: ${analysis.industries?.join(', ')}
-- Key Strengths: ${analysis.strengths?.join(', ')}
-- Potential Directions: ${analysis.potential_directions?.join(', ')}`;
+- Career Progression: ${analysis.career_progression?.join(' → ')}
+- Industries Worked: ${analysis.industries_worked?.join(', ')}
+- Core Skills (Proven): ${analysis.core_skills?.join(', ')}
+- Technical Skills: ${analysis.technical_skills?.join(', ')}
+- Soft Skills: ${analysis.soft_skills?.join(', ')}
+- Key Achievements: ${analysis.achievements?.join('; ')}
+- Education: ${analysis.education}
+- Strengths: ${analysis.strengths?.join(', ')}
+- Work Style: ${analysis.work_style}`;
             console.log('CV analysis complete');
           } else {
             const errorText = await analysisResponse.text();
@@ -154,8 +166,8 @@ Voice Interests Analysis:
       }
     }
 
-    // Step 3: Construct enhanced prompt for hybrid career paths
-    const prompt = `You are an expert career strategist specializing in PRACTICAL career fusion. Generate 7 career paths that intelligently blend CV skills with voice energy/interests.
+    // Step 3: Construct deeply personalized prompt using real experience + passions
+    const prompt = `You are an expert career strategist. Create 7 DEEPLY PERSONALIZED career paths by analyzing their ACTUAL experience and REAL passions.
 
 ${cvAnalysis}
 
@@ -163,38 +175,51 @@ ${voiceInterests}
 
 Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-STRATEGY - Balance practicality with passion:
-1. ROOT IN REALITY: Start with their actual CV skills as the foundation
-   - If CV shows sales → roles must involve sales/business development
-   - If CV shows project management → roles involve coordination/leadership
-   - If CV shows communication → roles leverage presentation/writing
-   
-2. INFUSE PASSION: Weave voice interests/energy into the role context
-   - Tea passion → work IN tea industry or tea-adjacent (hospitality, wellness, import/export)
-   - Loves organizing events → event-driven roles or community building
-   - Energized by people → client-facing, collaborative, or coaching roles
-   
-3. CAREER MIX (7 paths):
-   - 3 PRACTICAL-FORWARD: Traditional role + passion twist (80% CV skills, 20% passion)
-     Ex: "Sales Manager at Premium Tea Importers" or "Event Sales Director for Wellness Brands"
-   - 2 BALANCED FUSION: Equal blend (50% CV skills, 50% passion)
-     Ex: "Tea Experience Designer & Retail Consultant" or "Corporate Wellness Program Lead"
-   - 2 PASSION-FORWARD: Entrepreneurial/bold but skill-grounded (70% passion, 30% CV skills)
-     Ex: "Tea Ceremony Facilitator & Mindfulness Coach" or "Tea Tourism Curator"
+CRITICAL PERSONALIZATION RULES:
 
-4. TITLES must be SPECIFIC and REAL:
-   - ✅ "Partnership Manager at Organic Tea Brands"
-   - ✅ "Sales Trainer for Hospitality & Wellness Sector"  
-   - ✅ "Tea Sommelier & Customer Experience Director"
-   - ❌ Avoid vague titles like "Wellness Advocate" or "Passion Entrepreneur"
+1. START WITH THEIR REAL EXPERIENCE:
+   - Use their ACTUAL roles, years of experience, and career progression
+   - Reference their SPECIFIC industries they've worked in
+   - Build on their PROVEN skills (not generic ones)
+   - Consider their seniority level and achievements
+   - Example: If they have 5 years in sales at tech companies → don't suggest entry-level roles
+   - Example: If they've progressed from coordinator → manager → senior manager → suggest director-level paths
 
-5. DESCRIPTIONS explain the FUSION:
-   - Start with CV skill: "Leveraging your [X years] in [CV role]..."
-   - Connect to passion: "...you'd work in [passion context] where [specific value]"
-   - Make it tangible: "Daily work includes [realistic tasks]"
+2. LAYER THEIR AUTHENTIC PASSIONS:
+   - Use EXACT interests/energizers from voice transcription
+   - If they mention "tea" → incorporate tea industry, tea culture, tea brands
+   - If they say "organizing events" → event management, experiential, hospitality
+   - If they're energized by "people" → coaching, training, community building
+   - Match their energy level to role type (high energy → dynamic roles, calm energy → strategic roles)
+
+3. CREATE LOGICAL CAREER BRIDGES:
+   - Each path must be a REALISTIC next step from their current position
+   - Respect their years of experience (don't go backwards)
+   - Use their industry knowledge as an advantage
+   - Example: "3 years marketing at fintech" + "loves tea" → "Marketing Director at Premium Tea E-commerce Brand"
+   - Example: "8 years operations management" + "passionate about wellness" → "Head of Operations at Wellness Retreat Chain"
+
+4. CAREER PATH MIX (7 total):
+   - 3 EXPERIENCE-FORWARD: Natural progression in their field + passion context (80% experience, 20% passion)
+     Ex: If Senior Sales Manager → "VP of Sales at Organic Tea Import Company"
+   - 2 BALANCED FUSION: Equal weight to experience and passion (50/50)
+     Ex: If Event Coordinator + loves tea → "Tea Experience Designer & Corporate Event Lead"
+   - 2 PASSION-FORWARD: Entrepreneurial pivot using their skills (30% experience, 70% passion)
+     Ex: If Marketing Manager + tea enthusiast → "Tea Brand Founder & Digital Marketing Consultant"
+
+5. MAKE IT HYPER-SPECIFIC:
+   - Use their exact experience level in titles
+   - Reference their actual skills in descriptions
+   - Cite their industry experience
+   - Example: "With your 6 years leading sales teams in SaaS and your passion for mindfulness, you'd excel as a Sales Director at wellness tech startups like Calm, Headspace, or meditation app companies."
+
+6. DESCRIPTION STRUCTURE (each path):
+   - Sentence 1: "Building on your [X years] as [actual role] in [actual industry]..."
+   - Sentence 2: "This role channels your passion for [exact interest from voice] into [specific context]..."
+   - Sentence 3: "Day-to-day involves [realistic tasks using their proven skills + passion elements]."
 
 Generate 7 career paths (JSON):
-{"archetypes": [{"title": "Specific Role Title at [Context]", "description": "2-3 sentences: (1) How CV skills apply (2) How passion connects (3) What daily work looks like", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "$XX,XXX-$XX,XXX", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["cv_skill_1", "cv_skill_2", "passion_skill", "skill_to_develop"], "target_companies": ["real_company_1", "real_company_2", "real_company_3"], "category": "practical-fusion|balanced-fusion|passion-forward|corporate|entrepreneurial", "difficulty_level": "beginner|intermediate|advanced"}]}`;
+{"archetypes": [{"title": "Specific Role at Experience-Appropriate Level", "description": "3 sentences following structure above, deeply personalized to their experience and passions", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic based on their experience level", "lifestyle_benefits": ["benefit tied to passion", "benefit from role level", "specific perk"], "impact_areas": ["impact related to industry", "impact related to passion"], "key_skills": ["proven_skill_from_cv", "proven_skill_from_cv", "passion_skill", "growth_skill"], "target_companies": ["real_company_1", "real_company_2", "real_company_3"], "category": "experience-forward|balanced-fusion|passion-forward|corporate|entrepreneurial", "difficulty_level": "appropriate to their experience level"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
