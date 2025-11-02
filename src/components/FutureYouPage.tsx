@@ -13,15 +13,16 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [paths, setPaths] = useState<any[]>(careerPaths);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   
   useEffect(() => {
     if (careerPaths.length > 0) {
       setPaths(careerPaths);
       setHasLoaded(true);
-    } else if (!hasLoaded) {
+    } else if (!hasLoaded && user) {
       loadCareerPaths();
     }
-  }, [careerPaths, user]);
+  }, [careerPaths, user, hasLoaded]);
 
   const loadCareerPaths = async () => {
     if (!user) {
@@ -84,6 +85,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   };
   
   const generateImages = async (pathId: string) => {
+    if (generatingImages.has(pathId)) return;
+    
+    setGeneratingImages(prev => new Set(prev).add(pathId));
+    
     try {
       const { error } = await supabase.functions.invoke('generate-path-images', {
         body: { pathId }
@@ -95,17 +100,25 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       await loadCareerPaths();
     } catch (error) {
       console.error('Error generating images:', error);
+    } finally {
+      setGeneratingImages(prev => {
+        const next = new Set(prev);
+        next.delete(pathId);
+        return next;
+      });
     }
   };
 
   useEffect(() => {
-    // Auto-generate images for paths that don't have them
+    // Auto-generate images for paths that don't have them (only once per path)
+    if (paths.length === 0) return;
+    
     paths.forEach(path => {
-      if (!path.all_images || path.all_images.length === 0) {
+      if ((!path.all_images || path.all_images.length === 0) && !generatingImages.has(path.id)) {
         generateImages(path.id);
       }
     });
-  }, [paths]);
+  }, [paths.map(p => p.id).join(',')]); // Only re-run if path IDs change
 
   const futureCards = paths.length > 0 ? paths.map(path => ({
     id: path.id,

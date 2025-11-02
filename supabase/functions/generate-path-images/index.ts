@@ -8,9 +8,23 @@ const corsHeaders = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function generateWithLovableAI(prompt: string, refImageUrl: string, maxRetries = 2): Promise<Uint8Array> {
-  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-  if (!LOVABLE_API_KEY) throw new Error('Missing LOVABLE_API_KEY secret');
+async function urlToBase64(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const buffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
+async function generateWithGemini(prompt: string, refImageUrl: string, maxRetries = 2): Promise<Uint8Array> {
+  const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+  if (!GEMINI_API_KEY) throw new Error('Missing GEMINI_API_KEY secret');
 
   const fullPrompt = `${prompt}\n\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.`;
 
@@ -18,60 +32,48 @@ async function generateWithLovableAI(prompt: string, refImageUrl: string, maxRet
     try {
       console.log(`Attempt ${attempt + 1}/${maxRetries + 1} to generate image`);
       
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image-preview",
-          messages: [
-            {
-              role: "user",
-              content: [
+      // Convert reference image to base64
+      const refImageBase64 = await urlToBase64(refImageUrl);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: fullPrompt },
                 {
-                  type: "text",
-                  text: fullPrompt
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: refImageUrl
+                  inline_data: {
+                    mime_type: 'image/jpeg',
+                    data: refImageBase64
                   }
                 }
               ]
+            }],
+            generationConfig: {
+              response_modalities: ["image"]
             }
-          ],
-          modalities: ["image", "text"]
-        })
-      });
+          })
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`API error ${response.status}:`, errorText);
-        throw new Error(`API error ${response.status}: ${errorText}`);
+        console.error(`Gemini API error ${response.status}:`, errorText);
+        throw new Error(`Gemini API error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data?.data;
 
-      if (!imageUrl) {
-        console.error('No image in response:', JSON.stringify(data));
-        throw new Error('No image returned in API response');
+      if (!imageData) {
+        console.error('No image in Gemini response:', JSON.stringify(data));
+        throw new Error('No image returned by Gemini');
       }
 
-      // Extract base64 data from data URL
-      if (!imageUrl.startsWith('data:image/')) {
-        throw new Error('Invalid image URL format');
-      }
-
-      const base64Data = imageUrl.split(',')[1];
-      if (!base64Data) {
-        throw new Error('Failed to extract base64 data from image URL');
-      }
-
-      return Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+      return Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
     } catch (error) {
       console.error(`Attempt ${attempt + 1} failed:`, error);
       
@@ -212,7 +214,7 @@ serve(async (req) => {
       console.log(`Generating image ${i + 1}/4...`);
       
       try {
-        const imageBytes = await generateWithLovableAI(prompt, refImageUrl);
+        const imageBytes = await generateWithGemini(prompt, refImageUrl);
         
         // Upload to storage bucket
         const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;

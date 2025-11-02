@@ -183,13 +183,16 @@ CRITICAL PERSONALIZATION RULES:
    - Build on their PROVEN skills (not generic ones)
    - Consider their seniority level and achievements
 
-2. EXTRACT AND USE PASSIONS FROM VOICE:
-   - Listen carefully to what energizes them in the voice transcription
-   - If they mention "tea" → tea sommelier, tea brand founder, tea travel guide, tea café owner
-   - If they say "travel" → travel designer, destination consultant, travel content creator
-   - If "wellness" → wellness coach, retreat coordinator, mindfulness trainer
-   - If "food" → culinary consultant, food blogger, restaurant concept designer
-   - Be VERY SPECIFIC to their exact interests mentioned
+2. EXTRACT AND USE PASSIONS FROM VOICE - THIS IS CRITICAL:
+   - Listen carefully to EVERY specific interest in the voice transcription
+   - If they mention "tea" → tea sommelier, tea brand founder, tea travel guide, tea café owner, tea educator
+   - If they say "travel" → travel designer, destination consultant, travel content creator, travel photographer
+   - If "wellness" → wellness coach, retreat coordinator, mindfulness trainer, wellness consultant
+   - If "food" → culinary consultant, food blogger, restaurant concept designer, food critic
+   - If "art" → art curator, gallery owner, art consultant, creative director
+   - If "music" → music producer, concert organizer, music therapist, audio brand strategist
+   - Use their EXACT words and create careers directly connected to those passions
+   - The passion-driven paths (6-7) MUST center entirely on these specific interests
 
 3. MANDATORY PATH DISTRIBUTION (7 total paths):
    
