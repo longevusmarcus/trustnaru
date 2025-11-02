@@ -119,16 +119,14 @@ export const InsightsPage = () => {
                   </div>
 
                   <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 transition-colors duration-300">
-                      <svg 
-                        className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors duration-300" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+                    <svg 
+                      className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors duration-300" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
               </Card>
