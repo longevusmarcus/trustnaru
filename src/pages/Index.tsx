@@ -8,7 +8,6 @@ import { ActionPage } from "@/components/ActionPage";
 import { ProfilePage } from "@/components/ProfilePage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
-import { AuthProvider } from "@/components/AuthProvider";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
@@ -55,21 +54,19 @@ const Index = () => {
   }
 
   return (
-    <AuthProvider>
-      <div className="min-h-screen bg-background">
-        <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
-        
-        <main className="pb-safe">
-          {currentPage === "home" && <HomePage />}
-          {currentPage === "mentors" && <SearchPage />}
-          {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
-          {currentPage === "action" && <ActionPage />}
-          {currentPage === "profile" && <ProfilePage />}
-        </main>
+    <div className="min-h-screen bg-background">
+      <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
+      
+      <main className="pb-safe">
+        {currentPage === "home" && <HomePage />}
+        {currentPage === "mentors" && <SearchPage />}
+        {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
+        {currentPage === "action" && <ActionPage />}
+        {currentPage === "profile" && <ProfilePage />}
+      </main>
 
-        <BottomNav active={currentPage} onNavigate={handleNavigation} />
-      </div>
-    </AuthProvider>
+      <BottomNav active={currentPage} onNavigate={handleNavigation} />
+    </div>
   );
 };
 
