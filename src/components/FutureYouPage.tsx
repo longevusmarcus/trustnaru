@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [paths, setPaths] = useState<any[]>(careerPaths);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -19,26 +21,25 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     } else if (!hasLoaded) {
       loadCareerPaths();
     }
-  }, [careerPaths]);
+  }, [careerPaths, user]);
 
   const loadCareerPaths = async () => {
+    if (!user) {
+      setPaths([]);
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase
+        .from('career_paths')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (user) {
-        const { data, error } = await supabase
-          .from('career_paths')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          setPaths(data);
-          setHasLoaded(true);
-        }
-      } else {
-        setPaths([]);
+      if (!error && data) {
+        setPaths(data);
+        setHasLoaded(true);
       }
     } catch (error) {
       console.error('Error loading career paths:', error);
@@ -48,10 +49,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   };
 
   const handleGenerateNewVersions = async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
 
       // Get user profile data
       const { data: profile } = await supabase

@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -46,6 +47,7 @@ const dailyMissions = [
 
 export const HomePage = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [userStats, setUserStats] = useState<any>(null);
   const [streaks, setStreaks] = useState<Date[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
@@ -53,7 +55,6 @@ export const HomePage = () => {
 
   useEffect(() => {
     const fetchGamificationData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const weekStart = weekDates[0].toISOString().split('T')[0];
@@ -102,7 +103,7 @@ export const HomePage = () => {
     };
 
     fetchGamificationData();
-  }, []);
+  }, [user]);
 
   return (
     <div className="px-4 pb-24 pt-4">

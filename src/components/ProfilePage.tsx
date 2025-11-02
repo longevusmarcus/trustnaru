@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
 
 export const ProfilePage = () => {
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);
@@ -22,8 +23,6 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
 
       if (user) {
         const date = new Date(user.created_at);
@@ -75,7 +74,7 @@ export const ProfilePage = () => {
     };
 
     loadProfile();
-  }, []);
+  }, [user]);
 
   const handleSaveName = async () => {
     if (!user || !editName.trim()) return;

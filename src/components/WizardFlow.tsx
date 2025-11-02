@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WizardFlowProps {
   onComplete: (careerPaths: any[]) => void;
@@ -15,6 +16,8 @@ interface WizardFlowProps {
 }
 
 export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [cvUrl, setCvUrl] = useState<string | undefined>();
   const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
@@ -24,12 +27,10 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
     photos: false,
     voice: false
   });
-  const { toast } = useToast();
 
   // Check for existing data on mount
   useEffect(() => {
     const checkExistingData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // Check for CV
@@ -56,7 +57,7 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
     };
 
     checkExistingData();
-  }, []);
+  }, [user]);
 
   const handleComplete = async () => {
     setStep(4);
