@@ -6,6 +6,7 @@ import { SearchPage } from "@/components/SearchPage";
 import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
 import { ProfilePage } from "@/components/ProfilePage";
+import { InsightsPage } from "@/components/InsightsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 
@@ -19,6 +20,7 @@ const Index = () => {
     switch (currentPage) {
       case "home": return "today";
       case "mentors": return "mentors";
+      case "insights": return "insights";
       case "future": return "your futures";
       case "action": return "action";
       case "profile": return "profile";
@@ -60,6 +62,7 @@ const Index = () => {
       <main className="pb-safe">
         {currentPage === "home" && <HomePage />}
         {currentPage === "mentors" && <SearchPage />}
+        {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "action" && <ActionPage />}
         {currentPage === "profile" && <ProfilePage />}
