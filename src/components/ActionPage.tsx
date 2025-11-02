@@ -118,25 +118,6 @@ export const ActionPage = () => {
           </Card>
         </div>
 
-        {/* AI Chat Assistant */}
-        <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-5 w-5 text-primary mt-1" />
-              <div className="flex-1">
-                <h4 className="font-medium mb-1">AI Coach</h4>
-                <p className="text-sm text-muted-foreground mb-3">
-                  "You're 65% through your milestone! Focus on user testing this week."
-                </p>
-                <Button size="sm" className="w-full">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Chat with AI Coach
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Quick Tools */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Tools</h3>
