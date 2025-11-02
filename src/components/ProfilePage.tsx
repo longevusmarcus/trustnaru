@@ -45,11 +45,12 @@ export const ProfilePage = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      toast({ title: "Signed out", description: "You have been successfully signed out" });
+      await supabase.auth.signOut();
+      // State will be updated by onAuthStateChange listener in AuthProvider
+      toast({ title: "Signed out successfully" });
     } catch (error: any) {
-      console.warn('Supabase signOut failed, applying local fallback:', error);
+      console.error('Sign out error:', error);
+      // Force local clear and reload
       try {
         const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
         if (projectRef) {
@@ -59,8 +60,7 @@ export const ProfilePage = () => {
           if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k);
         });
       } catch {}
-      toast({ title: "Signed out locally", description: "Network issue detected. Reloading..." });
-      setTimeout(() => window.location.reload(), 300);
+      window.location.reload();
     }
   };
 
