@@ -56,15 +56,32 @@ export const HomePage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch user stats
-      const { data: stats } = await supabase
-        .from('user_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const weekStart = weekDates[0].toISOString().split('T')[0];
+      const weekEnd = weekDates[6].toISOString().split('T')[0];
 
-      if (!stats) {
-        // Create initial stats if not exists
+      // Fetch all data in parallel
+      const [statsResult, streakResult, badgesResult] = await Promise.all([
+        supabase
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('daily_streaks')
+          .select('streak_date')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+          .gte('streak_date', weekStart)
+          .lte('streak_date', weekEnd),
+        supabase
+          .from('user_badges')
+          .select('*, badges (name, icon, description)')
+          .eq('user_id', user.id)
+          .order('earned_at', { ascending: false })
+          .limit(3)
+      ]);
+
+      if (!statsResult.data) {
         await supabase.from('user_stats').insert({
           user_id: user.id,
           current_streak: 0,
@@ -72,38 +89,15 @@ export const HomePage = () => {
           total_points: 0
         });
       } else {
-        setUserStats(stats);
+        setUserStats(statsResult.data);
       }
 
-      // Fetch streaks for this week
-      const weekStart = weekDates[0].toISOString().split('T')[0];
-      const weekEnd = weekDates[6].toISOString().split('T')[0];
-      
-      const { data: streakData } = await supabase
-        .from('daily_streaks')
-        .select('streak_date')
-        .eq('user_id', user.id)
-        .eq('completed', true)
-        .gte('streak_date', weekStart)
-        .lte('streak_date', weekEnd);
-
-      if (streakData) {
-        setStreaks(streakData.map(s => new Date(s.streak_date)));
+      if (streakResult.data) {
+        setStreaks(streakResult.data.map(s => new Date(s.streak_date)));
       }
 
-      // Fetch earned badges
-      const { data: badges } = await supabase
-        .from('user_badges')
-        .select(`
-          *,
-          badges (name, icon, description)
-        `)
-        .eq('user_id', user.id)
-        .order('earned_at', { ascending: false })
-        .limit(3);
-
-      if (badges) {
-        setEarnedBadges(badges);
+      if (badgesResult.data) {
+        setEarnedBadges(badgesResult.data);
       }
     };
 

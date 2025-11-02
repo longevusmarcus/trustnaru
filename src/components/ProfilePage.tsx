@@ -26,22 +26,33 @@ export const ProfilePage = () => {
       setUser(user);
 
       if (user) {
-        // Format join date
         const date = new Date(user.created_at);
         setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
-        // Load user profile for display name, CV, and voice
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('display_name, cv_url, voice_transcription')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Load all data in parallel
+        const [profileResult, statsResult, badgesResult] = await Promise.all([
+          supabase
+            .from('user_profiles')
+            .select('display_name, cv_url, voice_transcription')
+            .eq('user_id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('user_stats')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle(),
+          supabase
+            .from('user_badges')
+            .select('*, badges (name, icon, description)')
+            .eq('user_id', user.id)
+            .order('earned_at', { ascending: false })
+        ]);
 
-        if (profile) {
-          setUserProfile(profile);
-          if (profile.display_name) {
-            setDisplayName(profile.display_name);
-            setEditName(profile.display_name);
+        if (profileResult.data) {
+          setUserProfile(profileResult.data);
+          if (profileResult.data.display_name) {
+            setDisplayName(profileResult.data.display_name);
+            setEditName(profileResult.data.display_name);
           } else {
             const defaultName = user.email?.split('@')[0] || 'User';
             setDisplayName(defaultName);
@@ -53,29 +64,12 @@ export const ProfilePage = () => {
           setEditName(defaultName);
         }
 
-        // Load user stats
-        const { data: stats } = await supabase
-          .from('user_stats')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (stats) {
-          setUserStats(stats);
+        if (statsResult.data) {
+          setUserStats(statsResult.data);
         }
 
-        // Load earned badges
-        const { data: earnedBadges } = await supabase
-          .from('user_badges')
-          .select(`
-            *,
-            badges (name, icon, description)
-          `)
-          .eq('user_id', user.id)
-          .order('earned_at', { ascending: false });
-
-        if (earnedBadges) {
-          setBadges(earnedBadges);
+        if (badgesResult.data) {
+          setBadges(badgesResult.data);
         }
       }
     };

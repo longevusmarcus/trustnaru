@@ -38,7 +38,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           setHasLoaded(true);
         }
       } else {
-        // Not logged in: show defaults (no DB fetch) and stop loading
         setPaths([]);
       }
     } catch (error) {
