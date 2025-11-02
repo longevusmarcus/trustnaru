@@ -172,57 +172,40 @@ serve(async (req) => {
     const refB64 = await urlToBase64(signedUrlData.signedUrl);
     const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-    // Generate 3 scene variations
+    // Generate 1 professional scene image (reduced from 3 to avoid CPU timeout)
     const scenePrompts = constructScenePrompts(careerPath);
-    console.log('Generating 3 scene variations for:', careerPath.title);
+    const mainPrompt = scenePrompts[0]; // Use first prompt (professional scene)
+    console.log('Generating career image for:', careerPath.title);
 
-    const imageUrls: string[] = [];
+    const imageBytes = await generateWithGemini(mainPrompt, refB64, refMime);
     
-    for (let i = 0; i < scenePrompts.length; i++) {
-      console.log(`Generating image ${i + 1}/3...`);
-      await sleep(1500); // Rate limiting
-      
-      try {
-        const imageBytes = await generateWithGemini(scenePrompts[i], refB64, refMime);
-        
-        // Upload to storage bucket
-        const fileName = `${user.id}/${pathId}-${i}-${Date.now()}.png`;
-        const { data: uploadData, error: uploadError } = await supabaseClient
-          .storage
-          .from('career-images')
-          .upload(fileName, imageBytes, {
-            contentType: 'image/png',
-            cacheControl: '3600',
-            upsert: false
-          });
+    // Upload to storage bucket
+    const fileName = `${user.id}/${pathId}-${Date.now()}.png`;
+    const { data: uploadData, error: uploadError } = await supabaseClient
+      .storage
+      .from('career-images')
+      .upload(fileName, imageBytes, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: false
+      });
 
-        if (uploadError) {
-          console.error(`Failed to upload image ${i + 1}:`, uploadError);
-          continue;
-        }
-
-        // Get public URL
-        const { data: { publicUrl } } = supabaseClient
-          .storage
-          .from('career-images')
-          .getPublicUrl(fileName);
-        
-        imageUrls.push(publicUrl);
-        console.log(`Successfully generated and uploaded image ${i + 1}`);
-      } catch (imageError) {
-        console.error(`Failed to generate image ${i + 1}:`, imageError);
-        // Continue with other images even if one fails
-      }
+    if (uploadError) {
+      throw new Error(`Failed to upload image: ${uploadError.message}`);
     }
 
-    if (imageUrls.length === 0) {
-      throw new Error('Failed to generate any images');
-    }
+    // Get public URL
+    const { data: { publicUrl } } = supabaseClient
+      .storage
+      .from('career-images')
+      .getPublicUrl(fileName);
+    
+    console.log('Successfully generated and uploaded career image');
 
-    // Store URLs instead of base64
+    // Store URL in database
     const imageData = {
-      image_url: imageUrls[0],
-      all_images: imageUrls
+      image_url: publicUrl,
+      all_images: [publicUrl]
     };
 
     const { error: updateError } = await supabaseClient
@@ -231,16 +214,16 @@ serve(async (req) => {
       .eq('id', pathId);
 
     if (updateError) {
-      console.error('Error updating career path with images:', updateError);
+      console.error('Error updating career path with image:', updateError);
       throw updateError;
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        imageUrl: imageUrls[0],
-        allImages: imageUrls,
-        message: `Generated ${imageUrls.length} scene variations`
+        imageUrl: publicUrl,
+        allImages: [publicUrl],
+        message: 'Career image generated successfully'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
