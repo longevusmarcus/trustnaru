@@ -66,14 +66,22 @@ async function generateWithGemini(prompt: string, refImageUrl: string, maxRetrie
       }
 
       const data = await response.json();
-      const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data?.data;
+
+      // Extract image data from any part using either inlineData or inline_data
+      const parts = data?.candidates?.[0]?.content?.parts ?? [];
+      const imgPart = parts.find((p: any) => p?.inlineData?.data || p?.inline_data?.data);
+      const imageData: string | undefined = imgPart?.inlineData?.data ?? imgPart?.inline_data?.data;
 
       if (!imageData) {
-        console.error('No image in Gemini response:', JSON.stringify(data));
+        const summary = {
+          candidateCount: data?.candidates?.length ?? 0,
+          partKeys: Array.isArray(parts) ? parts.map((p: any) => Object.keys(p)) : [],
+        };
+        console.error('No image in Gemini response (summary):', summary);
         throw new Error('No image returned by Gemini');
       }
 
-      return Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
+      return Uint8Array.from(atob(imageData), (c) => c.charCodeAt(0));
     } catch (error) {
       console.error(`Attempt ${attempt + 1} failed:`, error);
       
