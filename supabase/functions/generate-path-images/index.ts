@@ -72,11 +72,15 @@ const constructScenePrompts = (careerPath: any): string[] => {
   const keySkills = Array.isArray(careerPath.key_skills) && careerPath.key_skills.length
     ? careerPath.key_skills.join(', ')
     : 'their expertise';
+  const targetCompanies = Array.isArray(careerPath.target_companies) && careerPath.target_companies.length
+    ? careerPath.target_companies[0]
+    : 'a leading company';
 
   return [
-    `Professional Scene — Show this person working as a ${roleTitle}, actively demonstrating ${keySkills}. 50mm f/1.8, soft natural light, editorial style, modern professional environment.`,
-    `Leadership Moment — Show this person presenting or collaborating as a ${roleTitle}, medium shot, shallow depth of field, professional lighting, confident and engaged.`,
-    `Success Lifestyle — Show this person enjoying ${lifestyle}, golden hour wide shot, aspirational but authentic, embodying the rewards of being a ${roleTitle}.`
+    `Hero Professional Portrait — Show this person as a ${roleTitle}, confident headshot to mid-torso, 85mm f/1.4, soft directional lighting, professional yet approachable, modern workspace background slightly blurred, editorial quality.`,
+    `At Work Scene — Show this person actively working as a ${roleTitle}, demonstrating ${keySkills}, 50mm f/1.8, natural office lighting, dynamic composition, authentic work environment.`,
+    `Leadership & Collaboration — Show this person in a meeting or presentation as a ${roleTitle}, medium shot, confident body language, professional lighting, modern office setting.`,
+    `Lifestyle Aspiration — Show this person enjoying ${lifestyle}, golden hour lighting, wide environmental shot, aspirational lifestyle that comes with being a ${roleTitle}, relaxed and fulfilled.`
   ];
 }
 
@@ -172,40 +176,58 @@ serve(async (req) => {
     const refB64 = await urlToBase64(signedUrlData.signedUrl);
     const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-    // Generate 1 professional scene image (reduced from 3 to avoid CPU timeout)
+    // Generate 4 images per career path
     const scenePrompts = constructScenePrompts(careerPath);
-    const mainPrompt = scenePrompts[0]; // Use first prompt (professional scene)
-    console.log('Generating career image for:', careerPath.title);
+    console.log('Generating 4 career images for:', careerPath.title);
 
-    const imageBytes = await generateWithGemini(mainPrompt, refB64, refMime);
-    
-    // Upload to storage bucket
-    const fileName = `${user.id}/${pathId}-${Date.now()}.png`;
-    const { data: uploadData, error: uploadError } = await supabaseClient
-      .storage
-      .from('career-images')
-      .upload(fileName, imageBytes, {
-        contentType: 'image/png',
-        cacheControl: '3600',
-        upsert: false
-      });
+    const allImageUrls: string[] = [];
 
-    if (uploadError) {
-      throw new Error(`Failed to upload image: ${uploadError.message}`);
+    // Generate all 4 images
+    for (let i = 0; i < scenePrompts.length; i++) {
+      const prompt = scenePrompts[i];
+      console.log(`Generating image ${i + 1}/4...`);
+      
+      const imageBytes = await generateWithGemini(prompt, refB64, refMime);
+      
+      // Upload to storage bucket
+      const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
+      const { data: uploadData, error: uploadError } = await supabaseClient
+        .storage
+        .from('career-images')
+        .upload(fileName, imageBytes, {
+          contentType: 'image/png',
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error(`Failed to upload image ${i + 1}:`, uploadError.message);
+        continue; // Continue with other images even if one fails
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabaseClient
+        .storage
+        .from('career-images')
+        .getPublicUrl(fileName);
+      
+      allImageUrls.push(publicUrl);
+      console.log(`Successfully generated image ${i + 1}/4`);
+      
+      // Small delay between generations to avoid rate limits
+      if (i < scenePrompts.length - 1) {
+        await sleep(1000);
+      }
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabaseClient
-      .storage
-      .from('career-images')
-      .getPublicUrl(fileName);
-    
-    console.log('Successfully generated and uploaded career image');
+    if (allImageUrls.length === 0) {
+      throw new Error('Failed to generate any images');
+    }
 
-    // Store URL in database
+    // Store URLs in database - first image as main, all in array
     const imageData = {
-      image_url: publicUrl,
-      all_images: [publicUrl]
+      image_url: allImageUrls[0],
+      all_images: allImageUrls
     };
 
     const { error: updateError } = await supabaseClient
@@ -214,16 +236,16 @@ serve(async (req) => {
       .eq('id', pathId);
 
     if (updateError) {
-      console.error('Error updating career path with image:', updateError);
+      console.error('Error updating career path with images:', updateError);
       throw updateError;
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        imageUrl: publicUrl,
-        allImages: [publicUrl],
-        message: 'Career image generated successfully'
+        imageUrl: allImageUrls[0],
+        allImages: allImageUrls,
+        message: `Successfully generated ${allImageUrls.length} career images`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

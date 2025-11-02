@@ -182,44 +182,48 @@ CRITICAL PERSONALIZATION RULES:
    - Reference their SPECIFIC industries they've worked in
    - Build on their PROVEN skills (not generic ones)
    - Consider their seniority level and achievements
-   - Example: If they have 5 years in sales at tech companies → don't suggest entry-level roles
-   - Example: If they've progressed from coordinator → manager → senior manager → suggest director-level paths
 
-2. LAYER THEIR AUTHENTIC PASSIONS:
-   - Use EXACT interests/energizers from voice transcription
-   - If they mention "tea" → incorporate tea industry, tea culture, tea brands
-   - If they say "organizing events" → event management, experiential, hospitality
-   - If they're energized by "people" → coaching, training, community building
-   - Match their energy level to role type (high energy → dynamic roles, calm energy → strategic roles)
+2. EXTRACT AND USE PASSIONS FROM VOICE:
+   - Listen carefully to what energizes them in the voice transcription
+   - If they mention "tea" → tea sommelier, tea brand founder, tea travel guide, tea café owner
+   - If they say "travel" → travel designer, destination consultant, travel content creator
+   - If "wellness" → wellness coach, retreat coordinator, mindfulness trainer
+   - If "food" → culinary consultant, food blogger, restaurant concept designer
+   - Be VERY SPECIFIC to their exact interests mentioned
 
-3. CREATE LOGICAL CAREER BRIDGES:
-   - Each path must be a REALISTIC next step from their current position
-   - Respect their years of experience (don't go backwards)
-   - Use their industry knowledge as an advantage
-   - Example: "3 years marketing at fintech" + "loves tea" → "Marketing Director at Premium Tea E-commerce Brand"
-   - Example: "8 years operations management" + "passionate about wellness" → "Head of Operations at Wellness Retreat Chain"
+3. MANDATORY PATH DISTRIBUTION (7 total paths):
+   
+   PATH 1-2: NATURAL CAREER PROGRESSION (2 paths)
+   - Direct next steps in their current field/industry
+   - Use their proven track record and experience level
+   - Example: Senior Manager → Director → VP path
+   - Focus: 90% experience, 10% passion context
+   
+   PATH 3-5: CAREER CHANGE WITH SKILLS TRANSFER (3 paths)
+   - New industries but leveraging their existing skills
+   - Realistic pivots based on transferable expertise
+   - Example: Marketing Manager in tech → Marketing Director in another industry
+   - Focus: 60% experience, 40% new direction
+   
+   PATH 6-7: PASSION-DRIVEN CAREERS (2 paths)
+   - HEAVILY based on their voice transcription interests
+   - Use exact passions mentioned (tea, travel, wellness, etc.)
+   - Can be entrepreneurial or employee roles
+   - Example: If loves tea → "Tea Sommelier & Brand Ambassador" or "Founder of Premium Tea Subscription Box"
+   - Focus: 70% passion, 30% skills application
 
-4. CAREER PATH MIX (7 total):
-   - 3 EXPERIENCE-FORWARD: Natural progression in their field + passion context (80% experience, 20% passion)
-     Ex: If Senior Sales Manager → "VP of Sales at Organic Tea Import Company"
-   - 2 BALANCED FUSION: Equal weight to experience and passion (50/50)
-     Ex: If Event Coordinator + loves tea → "Tea Experience Designer & Corporate Event Lead"
-   - 2 PASSION-FORWARD: Entrepreneurial pivot using their skills (30% experience, 70% passion)
-     Ex: If Marketing Manager + tea enthusiast → "Tea Brand Founder & Digital Marketing Consultant"
-
-5. MAKE IT HYPER-SPECIFIC:
-   - Use their exact experience level in titles
-   - Reference their actual skills in descriptions
-   - Cite their industry experience
-   - Example: "With your 6 years leading sales teams in SaaS and your passion for mindfulness, you'd excel as a Sales Director at wellness tech startups like Calm, Headspace, or meditation app companies."
-
-6. DESCRIPTION STRUCTURE (each path):
+4. DESCRIPTION STRUCTURE (each path):
    - Sentence 1: "Building on your [X years] as [actual role] in [actual industry]..."
    - Sentence 2: "This role channels your passion for [exact interest from voice] into [specific context]..."
    - Sentence 3: "Day-to-day involves [realistic tasks using their proven skills + passion elements]."
 
-Generate 7 career paths (JSON):
-{"archetypes": [{"title": "Specific Role at Experience-Appropriate Level", "description": "3 sentences following structure above, deeply personalized to their experience and passions", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic based on their experience level", "lifestyle_benefits": ["benefit tied to passion", "benefit from role level", "specific perk"], "impact_areas": ["impact related to industry", "impact related to passion"], "key_skills": ["proven_skill_from_cv", "proven_skill_from_cv", "passion_skill", "growth_skill"], "target_companies": ["real_company_1", "real_company_2", "real_company_3"], "category": "experience-forward|balanced-fusion|passion-forward|corporate|entrepreneurial", "difficulty_level": "appropriate to their experience level"}]}`;
+5. MAKE IT HYPER-SPECIFIC:
+   - For passion paths: Use EXACT words from their voice (if they say "tea ceremony" → include tea ceremony)
+   - Reference actual companies/industries that match their interests
+   - Use their experience level in titles appropriately
+
+Generate 7 career paths in this exact order (2 progression + 3 career change + 2 passion):
+{"archetypes": [{"title": "Specific Role Title", "description": "3 sentences following structure", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"], "impact_areas": ["impact 1", "impact 2"], "key_skills": ["skill 1", "skill 2", "skill 3", "skill 4"], "target_companies": ["company 1", "company 2", "company 3"], "category": "natural-progression|career-change|passion-driven", "difficulty_level": "entry|mid|senior|executive"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
