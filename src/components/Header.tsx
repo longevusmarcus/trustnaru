@@ -1,4 +1,4 @@
-import { User, Bell, Users } from "lucide-react";
+import { User, Bell, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
@@ -16,7 +16,7 @@ export const Header = ({ title, onNavigate }: HeaderProps) => {
             <Bell className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => onNavigate("mentors")}>
-            <Users className="h-4 w-4" />
+            <Star className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => onNavigate("profile")}>
             <User className="h-4 w-4" />
