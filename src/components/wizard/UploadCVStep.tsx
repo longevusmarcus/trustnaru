@@ -1,7 +1,7 @@
 import { Upload, FileText, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,7 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -111,9 +112,10 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
           }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          onClick={() => document.getElementById('cv-upload')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}
+          onClick={() => inputRef.current?.click()}
         >
           <input
+            ref={inputRef}
             type="file"
             accept=".pdf,.doc,.docx"
             onChange={handleFileUpload}
@@ -147,7 +149,10 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
               </div>
               {!uploadedFile && (
                 <Button variant="outline" size="sm" type="button" disabled={uploading}
-                  onClick={() => document.getElementById('cv-upload')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    inputRef.current?.click();
+                  }}
                 >
                   {uploading ? 'Uploading...' : 'Choose File'}
                 </Button>
