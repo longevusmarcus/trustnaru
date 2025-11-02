@@ -196,7 +196,7 @@ export const HomePage = () => {
 
         {/* Daily Missions */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Today's Missions</p>
+          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Dashboard</p>
           <div className="space-y-3">
             {dailyMissions.map((mission, index) => {
               const Icon = mission.icon;
