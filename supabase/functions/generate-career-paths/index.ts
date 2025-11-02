@@ -101,25 +101,17 @@ ${cvAnalysis}
 Voice Energy/Motivation:
 ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-Additional Context:
-${wizardData.givesEnergy ? `- What gives them energy: ${wizardData.givesEnergy}` : ''}
-${wizardData.passions ? `- Passions outside work: ${wizardData.passions}` : ''}
-${wizardData.achievements ? `- What they want to be known for: ${wizardData.achievements}` : ''}
-${wizardData.visionBoard?.length > 0 ? `- Vision board selections: ${wizardData.visionBoard.join(', ')}` : ''}
-${wizardData.lifestyle?.length > 0 ? `- Lifestyle preferences: ${wizardData.lifestyle.join(', ')}` : ''}
-${wizardData.trends?.length > 0 ? `- Industry interests: ${wizardData.trends.join(', ')}` : ''}
-${wizardData.timeframe ? `- Timeframe: ${wizardData.timeframe}` : ''}
-
 CRITICAL REQUIREMENTS:
-1. Each path must be a NATURAL EVOLUTION of their existing skills and experience
+1. Each path must be a NATURAL EVOLUTION of their existing skills and experience from the CV
 2. Build on their current strengths and interests - don't suggest random careers
-3. Consider their voice transcription energy and motivations
-4. Align with their lifestyle preferences and what they want to be known for
-5. Paths should vary in: risk level, time investment, industry, and growth trajectory
-6. Make titles specific (e.g., "Senior Product Manager in HealthTech" not just "Product Manager")
+3. Use their voice transcription to understand what truly energizes them
+4. Paths should be REALISTIC and ACHIEVABLE given their background
+5. Vary paths by: risk level, time investment, industry direction, and work style
+6. Make titles SPECIFIC (e.g., "Senior Product Manager in HealthTech" not just "Product Manager")
+7. In descriptions, EXPLICITLY reference how this builds on their CV background and aligns with their energy
 
 Generate exactly 7 distinct career paths. Response format (JSON): 
-{"archetypes": [{"title": "Specific Role Title", "description": "Brief compelling description explaining WHY this is a natural fit based on their background", "journey_duration": "1-3 years" or "3-5 years", "salary_range": "Realistic range in USD", "lifestyle_benefits": ["benefit1", "benefit2"], "impact_areas": ["impact1", "impact2"], "key_skills": ["skill1", "skill2", "skill3"], "target_companies": ["company1", "company2"], "category": "tech|product|sales|marketing|healthcare|finance|creative|business", "difficulty_level": "beginner|intermediate|advanced"}]}`;
+{"archetypes": [{"title": "Specific Role Title", "description": "2-3 sentence description explaining WHY this is a natural fit based on their CV background and what energizes them", "journey_duration": "1-3 years" or "3-5 years" or "5-7 years", "salary_range": "Realistic range based on experience level", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["existing_skill1", "skill_to_develop1", "skill_to_develop2"], "target_companies": ["company1", "company2", "company3"], "category": "tech|product|sales|marketing|healthcare|finance|creative|business|education|consulting", "difficulty_level": "beginner|intermediate|advanced"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,

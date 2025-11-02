@@ -1,12 +1,47 @@
+import { useEffect, useState } from "react";
 import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
+  const [paths, setPaths] = useState<any[]>(careerPaths);
+  const [loading, setLoading] = useState(false);
   
-  const futureCards = careerPaths.length > 0 ? careerPaths.map(path => ({
+  useEffect(() => {
+    if (careerPaths.length > 0) {
+      setPaths(careerPaths);
+    } else {
+      loadCareerPaths();
+    }
+  }, [careerPaths]);
+
+  const loadCareerPaths = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('career_paths')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setPaths(data);
+      }
+    } catch (error) {
+      console.error('Error loading career paths:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const futureCards = paths.length > 0 ? paths.map(path => ({
     title: path.title,
     location: "Remote / Hybrid",
     role: path.description,
@@ -90,6 +125,31 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       ]
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="px-4 pb-24 pt-4">
+        <div className="max-w-md mx-auto space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold">Your Future Selves</h1>
+            <p className="text-muted-foreground">Loading your personalized career paths...</p>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <Skeleton className="h-64 w-full" />
+                <CardContent className="p-6 space-y-4">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 pb-24 pt-4">
