@@ -1,6 +1,23 @@
 import { Circle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const ProcessingStep = () => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds(s => s + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatTime = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+  };
+
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-8">
       <div className="relative">
@@ -16,6 +33,9 @@ export const ProcessingStep = () => {
         <p className="text-muted-foreground text-lg">
           Mapping your energy, skills, and future possibilities…
         </p>
+        <div className="pt-2 text-xs text-muted-foreground/60 font-mono tracking-wider">
+          {formatTime(seconds)}
+        </div>
       </div>
 
       <div className="space-y-2 text-sm text-muted-foreground text-center">
