@@ -3,44 +3,70 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import compassIcon from "@/assets/insights-compass.png";
-import analyticsIcon from "@/assets/insights-analytics.png";
-import tipsIcon from "@/assets/insights-tips.png";
-import chatIcon from "@/assets/insights-chat.png";
 
 interface InsightFeature {
   id: string;
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   action: string;
 }
 
+const CompassIcon = () => (
+  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <circle cx="12" cy="12" r="10"/>
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+  </svg>
+);
+
+const AnalyticsIcon = () => (
+  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </svg>
+);
+
+const TipsIcon = () => (
+  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M9 18h6"/>
+    <path d="M10 22h4"/>
+    <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+  </svg>
+);
+
+const ChatIcon = () => (
+  <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    <circle cx="9" cy="10" r="0.5" fill="currentColor"/>
+    <circle cx="12" cy="10" r="0.5" fill="currentColor"/>
+    <circle cx="15" cy="10" r="0.5" fill="currentColor"/>
+  </svg>
+);
+
 const features: InsightFeature[] = [
   {
     id: "guidance",
-    icon: compassIcon,
+    icon: <CompassIcon />,
     title: "Daily Guidance",
     description: "AI-powered insights based on your recent progress",
     action: "Get Guidance"
   },
   {
     id: "analytics",
-    icon: analyticsIcon,
+    icon: <AnalyticsIcon />,
     title: "Career Analytics",
     description: "Track your progress and growth patterns",
     action: "View Analytics"
   },
   {
     id: "tips",
-    icon: tipsIcon,
+    icon: <TipsIcon />,
     title: "Smart Tips",
     description: "Personalized advice for your journey",
     action: "Get Tips"
   },
   {
     id: "chat",
-    icon: chatIcon,
+    icon: <ChatIcon />,
     title: "AI Chat",
     description: "Get instant answers about your paths",
     action: "Start Chat"
@@ -103,12 +129,10 @@ export const InsightsPage = () => {
                 onClick={() => handleFeatureClick(feature)}
               >
                 <div className="p-6 flex items-center gap-5">
-                  <div className="relative flex-shrink-0">
-                    <img 
-                      src={feature.icon} 
-                      alt={feature.title} 
-                      className="h-10 w-10 object-contain opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
-                    />
+                  <div className="relative flex-shrink-0 text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                    <div className="group-hover:scale-110 transition-transform duration-300">
+                      {feature.icon}
+                    </div>
                   </div>
                   
                   <div className="flex-1 min-w-0">
