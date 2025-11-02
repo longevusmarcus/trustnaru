@@ -1,10 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, LogOut, Settings, Trophy, Target, Flame, Star, Calendar } from "lucide-react";
+import { LogOut, Settings, Trophy, Target, Flame, Pencil, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const ProfilePage = () => {
   const { toast } = useToast();
@@ -13,6 +16,9 @@ export const ProfilePage = () => {
   const [currentPath, setCurrentPath] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);
   const [joinDate, setJoinDate] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>("");
+  const [editName, setEditName] = useState<string>("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -24,12 +30,28 @@ export const ProfilePage = () => {
         const date = new Date(user.created_at);
         setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
+        // Load user profile for display name
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('display_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (profile?.display_name) {
+          setDisplayName(profile.display_name);
+          setEditName(profile.display_name);
+        } else {
+          const defaultName = user.email?.split('@')[0] || 'User';
+          setDisplayName(defaultName);
+          setEditName(defaultName);
+        }
+
         // Load user stats
         const { data: stats } = await supabase
           .from('user_stats')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (stats) {
           setUserStats(stats);
@@ -42,7 +64,7 @@ export const ProfilePage = () => {
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (path) {
           setCurrentPath(path);
@@ -67,6 +89,34 @@ export const ProfilePage = () => {
     loadProfile();
   }, []);
 
+  const handleSaveName = async () => {
+    if (!user || !editName.trim()) return;
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .upsert({ 
+        user_id: user.id, 
+        display_name: editName.trim() 
+      }, {
+        onConflict: 'user_id'
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Could not update name",
+        variant: "destructive"
+      });
+    } else {
+      setDisplayName(editName.trim());
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Name updated"
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -87,43 +137,73 @@ export const ProfilePage = () => {
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="text-center">
-          <div className="relative inline-block mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto">
-              <Camera className="h-10 w-10 text-muted-foreground" />
-            </div>
+        <div className="text-center space-y-3">
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-2xl font-semibold">{displayName}</h2>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Name</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Display Name</Label>
+                    <Input
+                      id="name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveName}>
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-          <h2 className="text-2xl font-bold mb-1">{user?.email?.split('@')[0] || 'User'}</h2>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-3 w-3" />
+            <Calendar className="h-3.5 w-3.5" />
             <span>Started {joinDate}</span>
           </div>
         </div>
 
-        {/* Gamification Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Flame className="h-5 w-5 text-orange-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.current_streak || 0}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Star className="h-5 w-5 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.total_points || 0}</div>
-              <div className="text-xs text-muted-foreground">Points</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Target className="h-5 w-5 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.missions_completed || 0}</div>
-              <div className="text-xs text-muted-foreground">Missions</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Progress Stats */}
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Flame className="h-4 w-4 text-foreground/60" />
+                <span className="text-sm">Day Streak</span>
+              </div>
+              <span className="font-semibold">{userStats?.current_streak || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="h-4 w-4 text-foreground/60" />
+                <span className="text-sm">Missions Completed</span>
+              </div>
+              <span className="font-semibold">{userStats?.missions_completed || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-4 w-4 text-foreground/60" />
+                <span className="text-sm">Badges Earned</span>
+              </div>
+              <span className="font-semibold">{badges.length}</span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Current Path */}
         {currentPath && (
@@ -133,7 +213,7 @@ export const ProfilePage = () => {
                 <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Current Path</h3>
                 <Badge variant="secondary">{currentPath.difficulty_level || 'Beginner'}</Badge>
               </div>
-              <h4 className="text-lg font-bold mb-2">{currentPath.title}</h4>
+              <h4 className="text-lg font-semibold mb-2">{currentPath.title}</h4>
               <p className="text-sm text-muted-foreground mb-3">{currentPath.description}</p>
               {currentPath.journey_duration && (
                 <div className="text-xs text-muted-foreground">
@@ -144,48 +224,32 @@ export const ProfilePage = () => {
           </Card>
         )}
 
-        {/* Achievements & Badges */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-              Achievements
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div>
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">
+              Badges
             </h3>
-            <Trophy className="h-4 w-4 text-yellow-500" />
-          </div>
-          
-          {badges.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               {badges.map((badge: any, index: number) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-3xl mb-2">{badge.badges.icon}</div>
-                    <p className="text-xs font-medium mb-1">{badge.badges.name}</p>
-                    <p className="text-xs text-muted-foreground">{badge.badges.description}</p>
-                  </CardContent>
-                </Card>
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <div className="text-2xl">{badge.badges.icon}</div>
+                  <p className="text-xs text-center text-muted-foreground">{badge.badges.name}</p>
+                </div>
               ))}
             </div>
-          ) : (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Trophy className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  Complete missions to earn your first badge!
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Account Actions */}
-        <div className="space-y-3">
-          <Button variant="outline" className="w-full justify-start" size="lg">
+        <div className="space-y-2 pt-4">
+          <Button variant="ghost" className="w-full justify-start" size="lg">
             <Settings className="h-4 w-4 mr-3" />
             Account Settings
           </Button>
           <Button 
-            variant="outline" 
-            className="w-full justify-start text-destructive hover:text-destructive" 
+            variant="ghost" 
+            className="w-full justify-start text-muted-foreground hover:text-destructive" 
             size="lg"
             onClick={handleSignOut}
           >
