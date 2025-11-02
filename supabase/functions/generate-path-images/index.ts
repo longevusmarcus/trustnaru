@@ -8,60 +8,85 @@ const corsHeaders = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function urlToBase64(url: string): Promise<string> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch reference image: ${res.status}`);
-  const buf = new Uint8Array(await res.arrayBuffer());
-  let binary = '';
-  for (let i = 0; i < buf.length; i++) {
-    binary += String.fromCharCode(buf[i]);
-  }
-  return btoa(binary);
-}
+async function generateWithLovableAI(prompt: string, refImageUrl: string, maxRetries = 2): Promise<Uint8Array> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  if (!LOVABLE_API_KEY) throw new Error('Missing LOVABLE_API_KEY secret');
 
-async function generateWithGemini(prompt: string, refB64: string, mime = 'image/jpeg'): Promise<Uint8Array> {
-  const GEMINI_KEY = Deno.env.get('GEMINI_API_KEY');
-  if (!GEMINI_KEY) throw new Error('Missing GEMINI_API_KEY secret');
+  const fullPrompt = `${prompt}\n\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.`;
 
-  const MODEL = 'gemini-2.5-flash-image-preview';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'x-goog-api-key': GEMINI_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            { text: `${prompt}\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.` },
-            { inline_data: { mime_type: mime, data: refB64 } },
-          ],
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempt ${attempt + 1}/${maxRetries + 1} to generate image`);
+      
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
         },
-      ],
-    }),
-  });
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image-preview",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: fullPrompt
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: refImageUrl
+                  }
+                }
+              ]
+            }
+          ],
+          modalities: ["image", "text"]
+        })
+      });
 
-  if (!resp.ok) {
-    const t = await resp.text();
-    throw new Error(`Gemini error ${resp.status}: ${t}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API error ${response.status}:`, errorText);
+        throw new Error(`API error ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+      if (!imageUrl) {
+        console.error('No image in response:', JSON.stringify(data));
+        throw new Error('No image returned in API response');
+      }
+
+      // Extract base64 data from data URL
+      if (!imageUrl.startsWith('data:image/')) {
+        throw new Error('Invalid image URL format');
+      }
+
+      const base64Data = imageUrl.split(',')[1];
+      if (!base64Data) {
+        throw new Error('Failed to extract base64 data from image URL');
+      }
+
+      return Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const waitTime = Math.pow(2, attempt) * 1000;
+      console.log(`Waiting ${waitTime}ms before retry...`);
+      await sleep(waitTime);
+    }
   }
 
-  const json = await resp.json();
-  const parts = json?.candidates?.[0]?.content?.parts || [];
-
-  for (const p of parts) {
-    if (p?.inlineData?.data) {
-      return Uint8Array.from(atob(p.inlineData.data), c => c.charCodeAt(0));
-    }
-    if (p?.inline_data?.data) {
-      return Uint8Array.from(atob(p.inline_data.data), c => c.charCodeAt(0));
-    }
-  }
-
-  throw new Error('No image returned by Gemini');
+  throw new Error('Failed to generate image after all retries');
 }
 
 const constructScenePrompts = (careerPath: any): string[] => {
@@ -172,9 +197,8 @@ serve(async (req) => {
       throw new Error('Failed to access reference photo');
     }
 
-    // Convert signed URL to base64 for Gemini
-    const refB64 = await urlToBase64(signedUrlData.signedUrl);
-    const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+    // Use signed URL directly for the AI API
+    const refImageUrl = signedUrlData.signedUrl;
 
     // Generate 4 images per career path
     const scenePrompts = constructScenePrompts(careerPath);
@@ -187,36 +211,41 @@ serve(async (req) => {
       const prompt = scenePrompts[i];
       console.log(`Generating image ${i + 1}/4...`);
       
-      const imageBytes = await generateWithGemini(prompt, refB64, refMime);
-      
-      // Upload to storage bucket
-      const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
-      const { data: uploadData, error: uploadError } = await supabaseClient
-        .storage
-        .from('career-images')
-        .upload(fileName, imageBytes, {
-          contentType: 'image/png',
-          cacheControl: '3600',
-          upsert: false
-        });
+      try {
+        const imageBytes = await generateWithLovableAI(prompt, refImageUrl);
+        
+        // Upload to storage bucket
+        const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from('career-images')
+          .upload(fileName, imageBytes, {
+            contentType: 'image/png',
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (uploadError) {
-        console.error(`Failed to upload image ${i + 1}:`, uploadError.message);
-        continue; // Continue with other images even if one fails
+        if (uploadError) {
+          console.error(`Failed to upload image ${i + 1}:`, uploadError.message);
+          continue; // Continue with other images even if one fails
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabaseClient
+          .storage
+          .from('career-images')
+          .getPublicUrl(fileName);
+        
+        allImageUrls.push(publicUrl);
+        console.log(`Successfully generated image ${i + 1}/4`);
+      } catch (imageError) {
+        console.error(`Failed to generate image ${i + 1}/4:`, imageError);
+        // Continue with other images even if one fails
       }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabaseClient
-        .storage
-        .from('career-images')
-        .getPublicUrl(fileName);
-      
-      allImageUrls.push(publicUrl);
-      console.log(`Successfully generated image ${i + 1}/4`);
       
       // Small delay between generations to avoid rate limits
       if (i < scenePrompts.length - 1) {
-        await sleep(1000);
+        await sleep(1500);
       }
     }
 
