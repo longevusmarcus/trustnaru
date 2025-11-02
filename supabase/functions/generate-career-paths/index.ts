@@ -29,12 +29,79 @@ serve(async (req) => {
 
     const { wizardData, cvUrl, voiceTranscription } = await req.json();
 
-    // Construct prompt for AI
-    const prompt = `You are a career path generator. Based on the following information about the user, generate exactly 7 distinct, personalized career paths.
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY not configured');
+    }
 
-User Information:
-${cvUrl ? '- CV/Resume has been provided (analyze experience level from context)' : '- No CV provided'}
-${voiceTranscription ? `- Voice message: "${voiceTranscription}"` : ''}
+    // Step 1: Analyze CV if provided
+    let cvAnalysis = '';
+    if (cvUrl) {
+      console.log('Analyzing CV with Gemini...');
+      const { data: signedCvUrl, error: cvSignError } = await supabaseClient
+        .storage
+        .from('cvs')
+        .createSignedUrl(cvUrl, 3600);
+
+      if (!cvSignError && signedCvUrl) {
+        try {
+          const cvResponse = await fetch(signedCvUrl.signedUrl);
+          const cvText = await cvResponse.text();
+          
+          const analysisPrompt = `Analyze this CV/resume and extract key information:
+${cvText}
+
+Provide a structured analysis in JSON format:
+{
+  "current_role": "their current or most recent role",
+  "experience_level": "entry|mid|senior|executive",
+  "core_skills": ["skill1", "skill2", "skill3"],
+  "industries": ["industry1", "industry2"],
+  "strengths": ["strength1", "strength2"],
+  "potential_directions": ["direction1", "direction2", "direction3"]
+}`;
+
+          const analysisResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: analysisPrompt }] }],
+                generationConfig: { response_mime_type: "application/json" }
+              }),
+            }
+          );
+
+          if (analysisResponse.ok) {
+            const analysisData = await analysisResponse.json();
+            const analysisText = analysisData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+            const analysis = JSON.parse(analysisText);
+            cvAnalysis = `
+CV Analysis:
+- Current Role: ${analysis.current_role}
+- Experience Level: ${analysis.experience_level}
+- Core Skills: ${analysis.core_skills?.join(', ')}
+- Industries: ${analysis.industries?.join(', ')}
+- Key Strengths: ${analysis.strengths?.join(', ')}
+- Potential Directions: ${analysis.potential_directions?.join(', ')}`;
+            console.log('CV analysis complete');
+          }
+        } catch (e) {
+          console.error('CV analysis error:', e);
+        }
+      }
+    }
+
+    // Step 2: Construct enhanced prompt for career paths
+    const prompt = `You are a career path strategist. Generate exactly 7 personalized career paths that represent NATURAL EVOLUTIONS of this person's existing skills and interests.
+
+${cvAnalysis}
+
+Voice Energy/Motivation:
+${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
+
+Additional Context:
 ${wizardData.givesEnergy ? `- What gives them energy: ${wizardData.givesEnergy}` : ''}
 ${wizardData.passions ? `- Passions outside work: ${wizardData.passions}` : ''}
 ${wizardData.achievements ? `- What they want to be known for: ${wizardData.achievements}` : ''}
@@ -43,20 +110,16 @@ ${wizardData.lifestyle?.length > 0 ? `- Lifestyle preferences: ${wizardData.life
 ${wizardData.trends?.length > 0 ? `- Industry interests: ${wizardData.trends.join(', ')}` : ''}
 ${wizardData.timeframe ? `- Timeframe: ${wizardData.timeframe}` : ''}
 
-Create 7 paths that are:
-1. Highly specific and personalized
-2. Realistic given their experience level
-3. Aligned with their energy, passions, and lifestyle goals
-4. Incorporate the industry trends they're interested in
-5. Diverse in direction and opportunity
+CRITICAL REQUIREMENTS:
+1. Each path must be a NATURAL EVOLUTION of their existing skills and experience
+2. Build on their current strengths and interests - don't suggest random careers
+3. Consider their voice transcription energy and motivations
+4. Align with their lifestyle preferences and what they want to be known for
+5. Paths should vary in: risk level, time investment, industry, and growth trajectory
+6. Make titles specific (e.g., "Senior Product Manager in HealthTech" not just "Product Manager")
 
-Generate exactly 7 distinct career archetypes. Response format (JSON): 
-{"archetypes": [{"title": "Specific Role Title", "description": "Brief compelling description", "journey_duration": "1-3 years" or "3-5 years", "salary_range": "Realistic range in USD", "lifestyle_benefits": ["benefit1", "benefit2"], "impact_areas": ["impact1", "impact2"], "key_skills": ["skill1", "skill2", "skill3"], "target_companies": ["company1", "company2"], "category": "tech|product|sales|marketing|healthcare|finance|creative|business", "difficulty_level": "beginner|intermediate|advanced"}]}`;
-
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
-    }
+Generate exactly 7 distinct career paths. Response format (JSON): 
+{"archetypes": [{"title": "Specific Role Title", "description": "Brief compelling description explaining WHY this is a natural fit based on their background", "journey_duration": "1-3 years" or "3-5 years", "salary_range": "Realistic range in USD", "lifestyle_benefits": ["benefit1", "benefit2"], "impact_areas": ["impact1", "impact2"], "key_skills": ["skill1", "skill2", "skill3"], "target_companies": ["company1", "company2"], "category": "tech|product|sales|marketing|healthcare|finance|creative|business", "difficulty_level": "beginner|intermediate|advanced"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,

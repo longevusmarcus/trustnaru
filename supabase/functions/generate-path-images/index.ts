@@ -36,7 +36,7 @@ async function generateWithGemini(prompt: string, refB64: string, mime = 'image/
       contents: [
         {
           parts: [
-            { text: `${prompt}\nUse the provided image as the subject. Preserve the same identity strictly. Make it photorealistic and professional.` },
+            { text: `${prompt}\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.` },
             { inline_data: { mime_type: mime, data: refB64 } },
           ],
         },
@@ -64,6 +64,22 @@ async function generateWithGemini(prompt: string, refB64: string, mime = 'image/
   }
 
   throw new Error('No image returned by Gemini');
+}
+
+const constructScenePrompts = (careerPath: any): string[] => {
+  const roleTitle = careerPath.title || 'Professional';
+  const lifestyle = Array.isArray(careerPath.lifestyle_benefits) && careerPath.lifestyle_benefits.length
+    ? careerPath.lifestyle_benefits.join(', ')
+    : 'professional fulfillment';
+  const keySkills = Array.isArray(careerPath.key_skills) && careerPath.key_skills.length
+    ? careerPath.key_skills.join(', ')
+    : 'their expertise';
+
+  return [
+    `Professional Scene — Show this person working as a ${roleTitle}, actively demonstrating ${keySkills}. 50mm f/1.8, soft natural light, editorial style, modern professional environment.`,
+    `Leadership Moment — Show this person presenting or collaborating as a ${roleTitle}, medium shot, shallow depth of field, professional lighting, confident and engaged.`,
+    `Success Lifestyle — Show this person enjoying ${lifestyle}, golden hour wide shot, aspirational but authentic, embodying the rewards of being a ${roleTitle}.`
+  ];
 }
 
 serve(async (req) => {
@@ -128,32 +144,53 @@ serve(async (req) => {
     const refB64 = await urlToBase64(signedUrlData.signedUrl);
     const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-    // Generate image prompt
-    const roleTitle = careerPath.title;
-    const lifestyle = careerPath.lifestyle_benefits?.join(', ') || 'professional fulfillment';
-    const keySkills = careerPath.key_skills?.join(', ') || 'their expertise';
+    // Generate 3 scene variations
+    const scenePrompts = constructScenePrompts(careerPath);
+    console.log('Generating 3 scene variations for:', careerPath.title);
 
-    const imagePrompt = `Generate a ultra-photorealistic professional scene showing this person as a ${roleTitle}, demonstrating ${keySkills}. The scene should convey ${lifestyle}. Professional lighting, editorial style, 50mm f/1.8, soft natural light. The person should look confident and successful in this role.`;
+    const generatedImages: string[] = [];
+    
+    for (let i = 0; i < scenePrompts.length; i++) {
+      console.log(`Generating image ${i + 1}/3...`);
+      await sleep(1500); // Rate limiting
+      
+      try {
+        const dataUrl = await generateWithGemini(scenePrompts[i], refB64, refMime);
+        generatedImages.push(dataUrl);
+        console.log(`Successfully generated image ${i + 1}`);
+      } catch (imageError) {
+        console.error(`Failed to generate image ${i + 1}:`, imageError);
+        // Continue with other images even if one fails
+      }
+    }
 
-    console.log('Generating image with prompt:', imagePrompt);
+    if (generatedImages.length === 0) {
+      throw new Error('Failed to generate any images');
+    }
 
-    await sleep(1500); // Rate limiting
+    // Store the first image as the main image, and all images in an array
+    const imageData = {
+      image_url: generatedImages[0],
+      all_images: generatedImages // Store all 3 variations
+    };
 
-    const dataUrl = await generateWithGemini(imagePrompt, refB64, refMime);
-
-    // Update career path with image
     const { error: updateError } = await supabaseClient
       .from('career_paths')
-      .update({ image_url: dataUrl })
+      .update(imageData)
       .eq('id', pathId);
 
     if (updateError) {
-      console.error('Error updating career path with image:', updateError);
+      console.error('Error updating career path with images:', updateError);
       throw updateError;
     }
 
     return new Response(
-      JSON.stringify({ success: true, imageUrl: dataUrl }),
+      JSON.stringify({ 
+        success: true, 
+        imageUrl: generatedImages[0],
+        allImages: generatedImages,
+        message: `Generated ${generatedImages.length} scene variations`
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
