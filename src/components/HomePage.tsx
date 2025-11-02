@@ -1,4 +1,4 @@
-import { ChevronRight, Calendar, Sparkles } from "lucide-react";
+import { ChevronRight, Calendar, Target, BookOpen, Compass } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -7,14 +7,37 @@ const formatDate = () => {
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const now = new Date();
   return {
-    greeting: now.getHours() < 12 ? 'good morning.' : now.getHours() < 18 ? 'good afternoon.' : 'good evening.',
     date: `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`
   };
 };
 
+const dailyMissions = [
+  {
+    icon: Target,
+    title: "Define Your Core Values",
+    description: "Reflect on what truly matters to you",
+    duration: "10 min",
+    type: "Reflection"
+  },
+  {
+    icon: BookOpen,
+    title: "Document Your Progress",
+    description: "Record one achievement from today",
+    duration: "5 min",
+    type: "Journaling"
+  },
+  {
+    icon: Compass,
+    title: "Visualize Your Path",
+    description: "Spend time imagining your ideal future",
+    duration: "15 min",
+    type: "Meditation"
+  }
+];
+
 
 export const HomePage = () => {
-  const { greeting, date } = formatDate();
+  const { date } = formatDate();
   const { toast } = useToast();
 
   return (
@@ -22,7 +45,7 @@ export const HomePage = () => {
       <div className="max-w-md mx-auto space-y-6">
         {/* Greeting */}
         <div>
-          <h2 className="text-3xl font-bold mb-1">{greeting}</h2>
+          <h2 className="text-3xl font-bold mb-1">Hey, Izzy</h2>
           <p className="text-muted-foreground">{date}</p>
         </div>
 
@@ -69,27 +92,34 @@ export const HomePage = () => {
           </Card>
         </div>
 
-        {/* Daily Mission */}
+        {/* Daily Missions */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Daily Mission</p>
-          <Card className="p-6 border-primary/20 bg-gradient-to-br from-background to-primary/5">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 space-y-2">
-                <h3 className="text-lg font-semibold">Define Your Core Values</h3>
-                <p className="text-sm text-muted-foreground">
-                  Take 10 minutes to reflect on what truly matters to you
-                </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                  <span>10 min</span>
-                  <span>•</span>
-                  <span>Reflection</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Today's Missions</p>
+          <div className="space-y-3">
+            {dailyMissions.map((mission, index) => {
+              const Icon = mission.icon;
+              return (
+                <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
+                      <Icon className="h-5 w-5 text-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm mb-1">{mission.title}</h3>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {mission.description}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{mission.duration}</span>
+                        <span>•</span>
+                        <span>{mission.type}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
         {/* Featured */}
