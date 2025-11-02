@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import { AuthStatusBanner } from "@/components/AuthStatusBanner";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -21,6 +22,8 @@ type AuthFormData = z.infer<typeof authSchema>;
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -51,9 +54,7 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const onSubmit = async (data: AuthFormData) => {
-    setIsLoading(true);
-
+  const attemptAuth = async (data: AuthFormData, attempt = 0): Promise<void> => {
     try {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
@@ -64,8 +65,26 @@ const Auth = () => {
           },
         });
 
-        if (error) throw error;
+        if (error) {
+          // Check for 503 backend errors
+          if (error.message.includes('503') || error.message.includes('upstream')) {
+            setIsOffline(true);
+            setRetryCount(attempt + 1);
+            
+            // Exponential backoff: 2s, 4s, 8s, 16s, max 16s
+            const delay = Math.min(2000 * Math.pow(2, attempt), 16000);
+            
+            if (attempt < 5) {
+              setTimeout(() => {
+                attemptAuth(data, attempt + 1);
+              }, delay);
+              return;
+            }
+          }
+          throw error;
+        }
 
+        setIsOffline(false);
         toast({
           title: "Account created successfully!",
           description: "You can now sign in with your credentials.",
@@ -78,19 +97,44 @@ const Auth = () => {
           password: data.password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Check for 503 backend errors
+          if (error.message.includes('503') || error.message.includes('upstream')) {
+            setIsOffline(true);
+            setRetryCount(attempt + 1);
+            
+            const delay = Math.min(2000 * Math.pow(2, attempt), 16000);
+            
+            if (attempt < 5) {
+              setTimeout(() => {
+                attemptAuth(data, attempt + 1);
+              }, delay);
+              return;
+            }
+          }
+          throw error;
+        }
 
+        setIsOffline(false);
         toast({
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
       }
     } catch (error: any) {
+      setIsOffline(false);
       toast({
         title: isSignUp ? "Sign up failed" : "Sign in failed",
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+    }
+  };
+
+  const onSubmit = async (data: AuthFormData) => {
+    setIsLoading(true);
+    try {
+      await attemptAuth(data);
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +144,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <AuthStatusBanner isOffline={isOffline} />
           <CardTitle className="text-2xl">
             {isSignUp ? "Create an account" : "Welcome back"}
           </CardTitle>

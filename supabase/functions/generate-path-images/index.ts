@@ -19,7 +19,7 @@ async function urlToBase64(url: string): Promise<string> {
   return btoa(binary);
 }
 
-async function generateWithGemini(prompt: string, refB64: string, mime = 'image/jpeg'): Promise<string> {
+async function generateWithGemini(prompt: string, refB64: string, mime = 'image/jpeg'): Promise<Uint8Array> {
   const GEMINI_KEY = Deno.env.get('GEMINI_API_KEY');
   if (!GEMINI_KEY) throw new Error('Missing GEMINI_API_KEY secret');
 
@@ -54,12 +54,10 @@ async function generateWithGemini(prompt: string, refB64: string, mime = 'image/
 
   for (const p of parts) {
     if (p?.inlineData?.data) {
-      const mt = p.inlineData.mimeType || 'image/png';
-      return `data:${mt};base64,${p.inlineData.data}`;
+      return Uint8Array.from(atob(p.inlineData.data), c => c.charCodeAt(0));
     }
     if (p?.inline_data?.data) {
-      const mt = p.inline_data.mime_type || 'image/png';
-      return `data:${mt};base64,${p.inline_data.data}`;
+      return Uint8Array.from(atob(p.inline_data.data), c => c.charCodeAt(0));
     }
   }
 
@@ -178,30 +176,53 @@ serve(async (req) => {
     const scenePrompts = constructScenePrompts(careerPath);
     console.log('Generating 3 scene variations for:', careerPath.title);
 
-    const generatedImages: string[] = [];
+    const imageUrls: string[] = [];
     
     for (let i = 0; i < scenePrompts.length; i++) {
       console.log(`Generating image ${i + 1}/3...`);
       await sleep(1500); // Rate limiting
       
       try {
-        const dataUrl = await generateWithGemini(scenePrompts[i], refB64, refMime);
-        generatedImages.push(dataUrl);
-        console.log(`Successfully generated image ${i + 1}`);
+        const imageBytes = await generateWithGemini(scenePrompts[i], refB64, refMime);
+        
+        // Upload to storage bucket
+        const fileName = `${user.id}/${pathId}-${i}-${Date.now()}.png`;
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from('career-images')
+          .upload(fileName, imageBytes, {
+            contentType: 'image/png',
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error(`Failed to upload image ${i + 1}:`, uploadError);
+          continue;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabaseClient
+          .storage
+          .from('career-images')
+          .getPublicUrl(fileName);
+        
+        imageUrls.push(publicUrl);
+        console.log(`Successfully generated and uploaded image ${i + 1}`);
       } catch (imageError) {
         console.error(`Failed to generate image ${i + 1}:`, imageError);
         // Continue with other images even if one fails
       }
     }
 
-    if (generatedImages.length === 0) {
+    if (imageUrls.length === 0) {
       throw new Error('Failed to generate any images');
     }
 
-    // Store the first image as the main image, and all images in an array
+    // Store URLs instead of base64
     const imageData = {
-      image_url: generatedImages[0],
-      all_images: generatedImages // Store all 3 variations
+      image_url: imageUrls[0],
+      all_images: imageUrls
     };
 
     const { error: updateError } = await supabaseClient
@@ -217,9 +238,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        imageUrl: generatedImages[0],
-        allImages: generatedImages,
-        message: `Generated ${generatedImages.length} scene variations`
+        imageUrl: imageUrls[0],
+        allImages: imageUrls,
+        message: `Generated ${imageUrls.length} scene variations`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
