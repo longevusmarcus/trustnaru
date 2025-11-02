@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     
     try {
       if (isSignUp) {
@@ -61,7 +63,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         toast({ title: "Signed in successfully!" });
       }
     } catch (error: any) {
-      toast({ title: "Authentication failed", description: error.message, variant: "destructive" });
+      console.error('Auth error:', error);
+      toast({ 
+        title: "Authentication failed", 
+        description: error.message || "Network error. Please check your connection.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -92,8 +101,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <Button type="submit" className="w-full">
-                {isSignUp ? "Sign Up" : "Sign In"}
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting ? "Please wait..." : (isSignUp ? "Sign Up" : "Sign In")}
               </Button>
               <Button
                 type="button"
