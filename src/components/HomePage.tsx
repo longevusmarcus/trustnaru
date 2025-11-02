@@ -235,17 +235,6 @@ export const HomePage = () => {
             <div className="text-xs text-muted-foreground">30 min • Beginner friendly</div>
           </Card>
         </div>
-
-        {/* Evening Section */}
-        <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Evening</p>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Reflect on your day</h3>
-            <p className="text-sm text-muted-foreground">
-              Take a moment to review your progress and set intentions for tomorrow
-            </p>
-          </Card>
-        </div>
       </div>
     </div>
   );
