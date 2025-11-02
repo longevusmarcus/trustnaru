@@ -1,13 +1,14 @@
-import { Sparkles } from "lucide-react";
+import { Circle } from "lucide-react";
 
 export const ProcessingStep = () => {
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-8">
       <div className="relative">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-foreground/20 to-foreground/10 animate-pulse flex items-center justify-center">
-          <Sparkles className="h-12 w-12 text-foreground/60 animate-spin" style={{ animationDuration: '3s' }} />
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 via-primary/30 to-primary/10 flex items-center justify-center animate-pulse backdrop-blur-sm border border-primary/20">
+          <Circle className="h-16 w-16 text-primary/70 fill-primary/5" strokeWidth={1} />
         </div>
-        <div className="absolute inset-0 rounded-full border-4 border-foreground/10 animate-ping" style={{ animationDuration: '2s' }} />
+        <div className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: '2s' }} />
+        <div className="absolute inset-0 rounded-full border border-primary/20 animate-pulse" style={{ animationDuration: '3s' }} />
       </div>
 
       <div className="text-center space-y-3 max-w-md">

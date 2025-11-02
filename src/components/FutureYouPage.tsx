@@ -10,11 +10,13 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const navigate = useNavigate();
   const [paths, setPaths] = useState<any[]>(careerPaths);
   const [loading, setLoading] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   
   useEffect(() => {
     if (careerPaths.length > 0) {
       setPaths(careerPaths);
-    } else {
+      setHasLoaded(true);
+    } else if (!hasLoaded) {
       loadCareerPaths();
     }
   }, [careerPaths]);
@@ -33,6 +35,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
         if (!error && data) {
           setPaths(data);
+          setHasLoaded(true);
         }
       } else {
         // Not logged in: show defaults (no DB fetch) and stop loading
@@ -40,6 +43,41 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       }
     } catch (error) {
       console.error('Error loading career paths:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateNewVersions = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user profile data
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) return;
+
+      // Call generate-career-paths function
+      const { data: newPaths, error } = await supabase.functions.invoke('generate-career-paths', {
+        body: {
+          wizardData: profile.wizard_data,
+          cvUrl: profile.cv_url,
+          voiceTranscription: profile.voice_transcription
+        }
+      });
+
+      if (error) throw error;
+
+      // Reload paths to include new ones
+      await loadCareerPaths();
+    } catch (error) {
+      console.error('Error generating new versions:', error);
     } finally {
       setLoading(false);
     }
@@ -263,8 +301,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           ))}
         </div>
 
-        <Button variant="outline" className="w-full" size="lg">
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          size="lg"
+          onClick={handleGenerateNewVersions}
+          disabled={loading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
           Generate New Versions
         </Button>
       </div>
