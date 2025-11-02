@@ -18,21 +18,36 @@ export const ProfilePage = () => {
 
   const loadUserData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Error getting user:', userError);
+        setLoading(false);
+        return;
+      }
+
       setUser(user);
 
       if (user) {
         // Load career paths count
-        const { count: pathsCount } = await supabase
+        const { count: pathsCount, error: pathsError } = await supabase
           .from('career_paths')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
 
+        if (pathsError) {
+          console.error('Error loading paths count:', pathsError);
+        }
+
         // Load photos count
-        const { count: photosCount } = await supabase
+        const { count: photosCount, error: photosError } = await supabase
           .from('user_photos')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id);
+
+        if (photosError) {
+          console.error('Error loading photos count:', photosError);
+        }
 
         setStats({
           paths: pathsCount || 0,
