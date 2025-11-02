@@ -134,10 +134,10 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
                   <Upload className="h-8 w-8 text-muted-foreground" />
                 )}
               </div>
-              <div className="text-center">
+              <div className="text-center px-4">
                 {uploadedFile ? (
                   <>
-                    <p className="font-medium text-primary">✓ {uploadedFile}</p>
+                    <p className="font-medium text-primary break-all">✓ {uploadedFile}</p>
                     <p className="text-sm text-muted-foreground">Click to change</p>
                   </>
                 ) : (
