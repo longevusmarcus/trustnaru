@@ -154,102 +154,15 @@ export const SearchPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search library..."
+            placeholder="Search mentors..."
             className="pl-10 bg-card"
           />
         </div>
 
-        {/* Future Self Library - Paths */}
+        {/* Mentor Profiles Database */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Paths</p>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {pathsLibrary.map((item) => (
-              <Card 
-                key={item.id}
-                className="overflow-hidden flex-shrink-0 w-64 border-border/50"
-              >
-                <div 
-                  className="relative h-32 cursor-pointer"
-                  onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
-                >
-                  <img 
-                    src={item.image} 
-                    alt={item.name}
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
-                <CardContent className="p-3 space-y-2">
-                  <div 
-                    className="cursor-pointer"
-                    onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
-                  >
-                    <h4 className="text-sm font-medium">{item.name}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
-                  </div>
-                  
-                  {expandedCard === item.id && (
-                    <div className="space-y-2 pt-2 border-t border-border">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Salary</p>
-                        <p className="text-xs font-medium">{item.salary}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Routine</p>
-                        <p className="text-xs">{item.routine}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Lifestyle</p>
-                        <p className="text-xs">{item.lifestyle}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Key Tasks</p>
-                        <ul className="text-xs space-y-1">
-                          {item.tasks.map((task, idx) => (
-                            <li key={idx} className="flex items-start gap-1">
-                              <span className="text-muted-foreground">•</span>
-                              <span>{task}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Impact</p>
-                        <p className="text-xs italic">{item.impact}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant={approvedPaths.includes(item.id) ? "default" : "outline"}
-                      size="sm"
-                      className="flex-1 h-7 px-2"
-                      onClick={() => handleApprove(item.id)}
-                    >
-                      <CheckCircle className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={rejectedPaths.includes(item.id) ? "destructive" : "outline"}
-                      size="sm"
-                      className="flex-1 h-7 px-2"
-                      onClick={() => handleReject(item.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Future Self Library - Profiles */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Profiles to Clone</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mentors</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             {profilesLibrary.map((item) => (
@@ -331,18 +244,6 @@ export const SearchPage = () => {
               </Card>
             ))}
           </div>
-        </div>
-
-        {/* Featured */}
-        <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured</p>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Design Your Future</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              A guided pathway to visualize and plan your ideal future self
-            </p>
-            <div className="text-xs text-muted-foreground">30 min • Beginner friendly</div>
-          </Card>
         </div>
       </div>
     </div>
