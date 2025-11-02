@@ -4,87 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Session, User } from "@supabase/supabase-js";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    // THEN check for existing session
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Auth init failed:', err);
-        setSession(null);
-        setUser(null);
-        setLoading(false);
-      });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-
-    const timeout = <T,>(p: Promise<T>, ms = 10000) =>
-      new Promise<T>((resolve, reject) => {
-        const id = window.setTimeout(() => reject(new Error('Network timeout. Please try again.')), ms);
-        p.then((v) => { clearTimeout(id); resolve(v); })
-         .catch((err) => { clearTimeout(id); reject(err); });
-      });
     
     try {
-      if (!navigator.onLine) {
-        throw new Error('You appear to be offline. Please check your connection.');
-      }
       if (isSignUp) {
-        const { error } = await timeout(
-          supabase.auth.signUp({ 
-            email, 
-            password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/`
-            }
-          })
-        );
+        const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        toast({ title: "Success! You can now sign in." });
-        setIsSignUp(false);
-        setPassword("");
+        toast({ title: "Check your email to confirm your account" });
       } else {
-        const { error } = await timeout(
-          supabase.auth.signInWithPassword({ email, password })
-        );
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: "Signed in successfully!" });
       }
     } catch (error: any) {
-      console.error('Auth error:', error);
-      toast({ 
-        title: "Authentication failed", 
-        description: error.message || "Network error. Please check your connection.", 
-        variant: "destructive" 
-      });
-    } finally {
-      setSubmitting(false);
+      toast({ title: "Authentication failed", description: error.message, variant: "destructive" });
     }
   };
 
@@ -115,8 +70,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <Button type="submit" className="w-full" disabled={submitting}>
-                {submitting ? "Please wait..." : (isSignUp ? "Sign Up" : "Sign In")}
+              <Button type="submit" className="w-full">
+                {isSignUp ? "Sign Up" : "Sign In"}
               </Button>
               <Button
                 type="button"

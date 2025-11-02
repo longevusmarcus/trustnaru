@@ -1,4 +1,4 @@
-import { Home, Users, Plus, Eye, Target } from "lucide-react";
+import { Home, Search, Plus, Eye, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BottomNavProps {
@@ -22,10 +22,10 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onNavigate("mentors")}
-          className={active === "mentors" ? "text-foreground" : "text-muted-foreground"}
+          onClick={() => onNavigate("search")}
+          className={active === "search" ? "text-foreground" : "text-muted-foreground"}
         >
-          <Users className="h-5 w-5" />
+          <Search className="h-5 w-5" />
         </Button>
         
         <Button
