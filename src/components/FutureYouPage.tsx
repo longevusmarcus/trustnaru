@@ -23,16 +23,20 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
 
-      const { data, error } = await supabase
-        .from('career_paths')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      if (user) {
+        const { data, error } = await supabase
+          .from('career_paths')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        setPaths(data);
+        if (!error && data) {
+          setPaths(data);
+        }
+      } else {
+        // Not logged in: show defaults (no DB fetch) and stop loading
+        setPaths([]);
       }
     } catch (error) {
       console.error('Error loading career paths:', error);
