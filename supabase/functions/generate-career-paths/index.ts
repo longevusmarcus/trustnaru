@@ -93,25 +93,79 @@ CV Analysis:
       }
     }
 
-    // Step 2: Construct enhanced prompt for career paths
-    const prompt = `You are a career path strategist. Generate exactly 7 personalized career paths that represent NATURAL EVOLUTIONS of this person's existing skills and interests.
+    // Step 2: Extract key interests and passions from voice
+    let voiceInterests = '';
+    if (voiceTranscription) {
+      const interestsPrompt = `Extract the key interests, passions, and what energizes this person from their voice transcription:
+"${voiceTranscription}"
+
+Return JSON format: {"interests": ["interest1", "interest2"], "values": ["value1", "value2"], "energizers": ["energizer1", "energizer2"]}`;
+
+      try {
+        const interestsResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: interestsPrompt }] }],
+              generationConfig: { response_mime_type: "application/json" }
+            }),
+          }
+        );
+
+        if (interestsResponse.ok) {
+          const interestsData = await interestsResponse.json();
+          const interestsText = interestsData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const interests = JSON.parse(interestsText);
+          voiceInterests = `
+Voice Interests Analysis:
+- Interests: ${interests.interests?.join(', ')}
+- Values: ${interests.values?.join(', ')}
+- What Energizes Them: ${interests.energizers?.join(', ')}`;
+          console.log('Voice interests extracted');
+        }
+      } catch (e) {
+        console.error('Voice interests extraction error:', e);
+      }
+    }
+
+    // Step 3: Construct enhanced prompt for hybrid career paths
+    const prompt = `You are an expert career fusion strategist. Create exactly 7 UNIQUE and PERSONALIZED career paths by BLENDING professional skills from their CV with their personal interests and passions.
 
 ${cvAnalysis}
 
-Voice Energy/Motivation:
+${voiceInterests}
+
+Voice Transcription (full context):
 ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-CRITICAL REQUIREMENTS:
-1. Each path must be a NATURAL EVOLUTION of their existing skills and experience from the CV
-2. Build on their current strengths and interests - don't suggest random careers
-3. Use their voice transcription to understand what truly energizes them
-4. Paths should be REALISTIC and ACHIEVABLE given their background
-5. Vary paths by: risk level, time investment, industry direction, and work style
-6. Make titles SPECIFIC (e.g., "Senior Product Manager in HealthTech" not just "Product Manager")
-7. In descriptions, EXPLICITLY reference how this builds on their CV background and aligns with their energy
+CRITICAL FUSION STRATEGY:
+1. BLEND professional skills with personal passions to create HYBRID roles
+   Example: Sales skills + Tea passion = "Tea Sommelier & Corporate Wellness Consultant"
+   Example: Communication skills + Mindfulness = "Mindfulness Retreat Director & Corporate Training Lead"
+   Example: Tech skills + Travel = "Digital Nomad Tech Consultant"
+   
+2. Each path should COMBINE at least 2 elements:
+   - Professional expertise from CV
+   - Personal interest or passion from voice
+   
+3. Make titles CREATIVE but PRACTICAL:
+   - "Wellness-Focused Sales Director for Conscious Brands"
+   - "Tea Travel Guide & Cultural Experience Designer"
+   - "Mindful Leadership Coach for Tech Companies"
+   - "Sustainable Business Consultant in Tea Industry"
+   
+4. Variety in paths:
+   - 2-3 corporate-hybrid roles (traditional job with passion twist)
+   - 2-3 entrepreneurial paths (building something around their passion)
+   - 1-2 completely reimagined careers (bold but grounded in their skills)
+   
+5. In descriptions, EXPLAIN THE FUSION:
+   "This role leverages your [CV skill] expertise while allowing you to pursue your passion for [interest]. You'd be working with [specific context] where both skills create unique value."
 
-Generate exactly 7 distinct career paths. Response format (JSON): 
-{"archetypes": [{"title": "Specific Role Title", "description": "2-3 sentence description explaining WHY this is a natural fit based on their CV background and what energizes them", "journey_duration": "1-3 years" or "3-5 years" or "5-7 years", "salary_range": "Realistic range based on experience level", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["existing_skill1", "skill_to_develop1", "skill_to_develop2"], "target_companies": ["company1", "company2", "company3"], "category": "tech|product|sales|marketing|healthcare|finance|creative|business|education|consulting", "difficulty_level": "beginner|intermediate|advanced"}]}`;
+Generate exactly 7 distinct FUSION career paths. Response format (JSON): 
+{"archetypes": [{"title": "Creative Fusion Title", "description": "2-3 sentences explaining HOW this fuses their professional skills with personal passions, WHY this is uniquely suited to them, and what their day-to-day would look like", "journey_duration": "1-3 years" or "3-5 years" or "5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["existing_skill_from_cv", "passion_skill_1", "skill_to_develop"], "target_companies": ["company1", "company2", "company3"], "category": "fusion|hybrid|entrepreneurial|corporate-reimagined|passion-career", "difficulty_level": "beginner|intermediate|advanced"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,

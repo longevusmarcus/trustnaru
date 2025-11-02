@@ -41,14 +41,42 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     }
   };
   
+  const generateImages = async (pathId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('generate-path-images', {
+        body: { pathId }
+      });
+      
+      if (error) throw error;
+      
+      // Reload paths to get updated images
+      await loadCareerPaths();
+    } catch (error) {
+      console.error('Error generating images:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Auto-generate images for paths that don't have them
+    paths.forEach(path => {
+      if (!path.all_images || path.all_images.length === 0) {
+        generateImages(path.id);
+      }
+    });
+  }, [paths]);
+
   const futureCards = paths.length > 0 ? paths.map(path => ({
+    id: path.id,
     title: path.title,
     location: "Remote / Hybrid",
     role: path.description,
     schedule: path.journey_duration,
     income: path.salary_range,
     image: path.image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
-    pathImages: [],
+    pathImages: path.all_images || [],
+    category: path.category,
+    keySkills: path.key_skills || [],
+    lifestyleBenefits: path.lifestyle_benefits || [],
     roadmap: [],
     affirmations: []
   })) : [
@@ -175,14 +203,23 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
               </div>
               
               <CardContent className="p-6 space-y-4">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{card.location}</span>
-                </div>
+                {/* Show 3 generated images if available */}
+                {card.pathImages && card.pathImages.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {card.pathImages.slice(0, 3).map((imgUrl: string, idx: number) => (
+                      <div key={idx} className="aspect-square rounded-lg overflow-hidden border border-border/50">
+                        <img 
+                          src={imgUrl} 
+                          alt={`${card.title} scene ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Briefcase className="h-4 w-4" />
-                  <span>{card.role}</span>
+                <div className="text-sm text-muted-foreground">
+                  <p className="line-clamp-3">{card.role}</p>
                 </div>
                 
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -194,6 +231,12 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                   <DollarSign className="h-4 w-4" />
                   <span>{card.income}</span>
                 </div>
+                
+                {card.category && (
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    {card.category}
+                  </div>
+                )}
 
                 <div className="space-y-2 pt-4 border-t border-border/50">
                   <Button 
