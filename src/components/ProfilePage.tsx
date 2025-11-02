@@ -15,25 +15,28 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
-      if (user) {
-        // Load user stats
-        const { count: pathsCount } = await supabase
-          .from('career_paths')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+        if (user) {
+          const { count: pathsCount } = await supabase
+            .from('career_paths')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
 
-        const { count: photosCount } = await supabase
-          .from('user_photos')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+          const { count: photosCount } = await supabase
+            .from('user_photos')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id);
 
-        setStats({
-          pathsGenerated: pathsCount || 0,
-          photosUploaded: photosCount || 0
-        });
+          setStats({
+            pathsGenerated: pathsCount || 0,
+            photosUploaded: photosCount || 0
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
       }
     };
 
@@ -41,18 +44,23 @@ export const ProfilePage = () => {
   }, []);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out"
-      });
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast({ title: "Signed out", description: "You have been successfully signed out" });
+    } catch (error: any) {
+      console.warn('Supabase signOut failed, applying local fallback:', error);
+      try {
+        const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined;
+        if (projectRef) {
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
+        }
+        Object.keys(localStorage).forEach((k) => {
+          if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k);
+        });
+      } catch {}
+      toast({ title: "Signed out locally", description: "Network issue detected. Reloading..." });
+      setTimeout(() => window.location.reload(), 300);
     }
   };
 
@@ -72,8 +80,8 @@ export const ProfilePage = () => {
               <Camera className="h-4 w-4" />
             </Button>
           </div>
-          <h2 className="text-2xl font-bold mb-1">{user?.email?.split('@')[0] || 'User'}</h2>
-          <p className="text-sm text-muted-foreground">{user?.email}</p>
+          <h2 className="text-2xl font-bold mb-1">{user?.email?.split('@')[0] || 'Guest'}</h2>
+          <p className="text-sm text-muted-foreground">{user?.email || 'Not signed in'}</p>
         </div>
 
         {/* Stats */}
