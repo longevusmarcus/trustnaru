@@ -175,6 +175,13 @@ ${voiceInterests}
 
 Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
+⚠️ CRITICAL: SCAN THE VOICE TRANSCRIPTION FOR SPECIFIC INTERESTS ⚠️
+Before generating ANY career paths, you MUST:
+1. Read the voice transcription word-by-word
+2. Identify EVERY specific noun or activity mentioned (tea, yoga, cooking, travel, art, music, gaming, etc.)
+3. For EACH specific interest found, create AT LEAST ONE specialized career path around it
+4. These are NOT optional - if they mention "tea", you MUST include tea-related careers
+
 CRITICAL PERSONALIZATION RULES:
 
 1. START WITH THEIR REAL EXPERIENCE:
@@ -183,16 +190,25 @@ CRITICAL PERSONALIZATION RULES:
    - Build on their PROVEN skills (not generic ones)
    - Consider their seniority level and achievements
 
-2. EXTRACT AND USE PASSIONS FROM VOICE - THIS IS CRITICAL:
-   - Listen carefully to EVERY specific interest in the voice transcription
-   - If they mention "tea" → tea sommelier, tea brand founder, tea travel guide, tea café owner, tea educator
-   - If they say "travel" → travel designer, destination consultant, travel content creator, travel photographer
-   - If "wellness" → wellness coach, retreat coordinator, mindfulness trainer, wellness consultant
-   - If "food" → culinary consultant, food blogger, restaurant concept designer, food critic
-   - If "art" → art curator, gallery owner, art consultant, creative director
-   - If "music" → music producer, concert organizer, music therapist, audio brand strategist
-   - Use their EXACT words and create careers directly connected to those passions
-   - The passion-driven paths (6-7) MUST center entirely on these specific interests
+2. MANDATORY: EXTRACT SPECIFIC INTERESTS FROM VOICE:
+   
+   STEP 1: Scan voice transcription for these types of specific interests:
+   - Foods/Beverages: tea, coffee, wine, chocolate, baking, cooking
+   - Activities: yoga, running, hiking, gaming, photography, painting
+   - Topics: sustainability, wellness, technology, education, music, fashion
+   - Places: travel, nature, cities, beaches, mountains
+   
+   STEP 2: For EACH specific interest found, create specialized careers:
+   - "tea" → Tea Sommelier, Tea Brand Founder, Tea Travel Guide, Tea Café Owner, Tea Educator, Tea Import Specialist
+   - "yoga" → Yoga Studio Owner, Yoga Retreat Designer, Corporate Wellness Coach, Yoga Therapy Specialist
+   - "travel" → Travel Curator, Destination Consultant, Travel Content Creator, Luxury Travel Advisor
+   - "cooking" → Personal Chef, Recipe Developer, Food Tourism Guide, Culinary Brand Consultant
+   - "wine" → Wine Sommelier, Wine Tour Operator, Wine Education Director, Wine Brand Ambassador
+   - "gaming" → Game Designer, Esports Coach, Gaming Content Creator, Game Studio Producer
+   - "photography" → Commercial Photographer, Photo Tour Leader, Photography Educator, Photo Brand Consultant
+   - "wellness" → Wellness Coach, Retreat Coordinator, Corporate Wellness Director, Wellness Product Developer
+   
+   STEP 3: These specialized careers are MANDATORY - not optional suggestions
 
 3. MANDATORY PATH DISTRIBUTION (7 total paths):
    
@@ -202,17 +218,18 @@ CRITICAL PERSONALIZATION RULES:
    - Example: Senior Manager → Director → VP path
    - Focus: 90% experience, 10% passion context
    
-   PATH 3-5: CAREER CHANGE WITH SKILLS TRANSFER (3 paths)
+   PATH 3-4: CAREER CHANGE WITH SKILLS TRANSFER (2 paths)
    - New industries but leveraging their existing skills
    - Realistic pivots based on transferable expertise
    - Example: Marketing Manager in tech → Marketing Director in another industry
    - Focus: 60% experience, 40% new direction
    
-   PATH 6-7: PASSION-DRIVEN CAREERS (2 paths)
-   - HEAVILY based on their voice transcription interests
-   - Use exact passions mentioned (tea, travel, wellness, etc.)
-   - Can be entrepreneurial or employee roles
-   - Example: If loves tea → "Tea Sommelier & Brand Ambassador" or "Founder of Premium Tea Subscription Box"
+   PATH 5-7: PASSION-DRIVEN CAREERS (3 paths) ⚠️ MOST IMPORTANT ⚠️
+   - These MUST be based on specific interests mentioned in voice
+   - Use the EXACT words from their transcription
+   - Create niche, specialized careers around those interests
+   - Can combine their experience with passion (e.g., "Marketing expertise + tea passion = Tea Brand Marketing Director")
+   - Example: Loves tea → "Premium Tea Sommelier", "Tea Travel Guide", "Founder of Artisan Tea Company"
    - Focus: 70% passion, 30% skills application
 
 4. DESCRIPTION STRUCTURE (each path):
@@ -222,10 +239,11 @@ CRITICAL PERSONALIZATION RULES:
 
 5. MAKE IT HYPER-SPECIFIC:
    - For passion paths: Use EXACT words from their voice (if they say "tea ceremony" → include tea ceremony)
-   - Reference actual companies/industries that match their interests
+   - Reference actual companies/industries that match their interests (e.g., tea companies: Teavana, Harney & Sons, Art of Tea)
    - Use their experience level in titles appropriately
+   - Make sure the careers are REAL and VIABLE in the market
 
-Generate 7 career paths in this exact order (2 progression + 3 career change + 2 passion):
+Generate 7 career paths in this exact order (2 progression + 2 career change + 3 passion):
 {"archetypes": [{"title": "Specific Role Title", "description": "3 sentences following structure", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"], "impact_areas": ["impact 1", "impact 2"], "key_skills": ["skill 1", "skill 2", "skill 3", "skill 4"], "target_companies": ["company 1", "company 2", "company 3"], "category": "natural-progression|career-change|passion-driven", "difficulty_level": "entry|mid|senior|executive"}]}`;
 
     const response = await fetch(
