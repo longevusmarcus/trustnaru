@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       career_paths: {
         Row: {
+          all_images: string[] | null
           category: string | null
           created_at: string
           description: string
@@ -33,6 +34,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          all_images?: string[] | null
           category?: string | null
           created_at?: string
           description: string
@@ -50,6 +52,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          all_images?: string[] | null
           category?: string | null
           created_at?: string
           description?: string
