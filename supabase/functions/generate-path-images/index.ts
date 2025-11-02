@@ -19,51 +19,50 @@ async function urlToBase64(url: string): Promise<string> {
   return btoa(binary);
 }
 
-async function generateWithGemini(prompt: string, refB64: string, mime = 'image/jpeg'): Promise<string> {
-  const GEMINI_KEY = Deno.env.get('GEMINI_API_KEY');
-  if (!GEMINI_KEY) throw new Error('Missing GEMINI_API_KEY');
+async function generateWithLovableAI(prompt: string, refDataUrl: string): Promise<string> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  if (!LOVABLE_API_KEY) throw new Error('Missing LOVABLE_API_KEY');
 
-  const MODEL = 'gemini-2.5-flash-image-preview';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-
-  const resp = await fetch(url, {
+  const resp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'x-goog-api-key': GEMINI_KEY,
+      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      contents: [
+      model: 'google/gemini-2.5-flash-image',
+      messages: [
         {
-          parts: [
-            { text: `${prompt}\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.` },
-            { inline_data: { mime_type: mime, data: refB64 } },
-          ],
-        },
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `${prompt}\n\nUse the provided image as the subject. Preserve the same identity strictly (same face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture). No identity changes. No face swaps. Make it ultra-photorealistic and professional.`
+            },
+            {
+              type: 'image_url',
+              image_url: { url: refDataUrl }
+            }
+          ]
+        }
       ],
+      modalities: ['image', 'text']
     }),
   });
 
   if (!resp.ok) {
     const t = await resp.text();
-    throw new Error(`Gemini error ${resp.status}: ${t}`);
+    throw new Error(`Lovable AI error ${resp.status}: ${t}`);
   }
 
   const json = await resp.json();
-  const parts = json?.candidates?.[0]?.content?.parts || [];
-
-  for (const p of parts) {
-    if (p?.inlineData?.data) {
-      const mt = p.inlineData.mimeType || 'image/png';
-      return `data:${mt};base64,${p.inlineData.data}`;
-    }
-    if (p?.inline_data?.data) {
-      const mt = p.inline_data.mime_type || 'image/png';
-      return `data:${mt};base64,${p.inline_data.data}`;
-    }
+  const imageUrl = json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  
+  if (!imageUrl) {
+    throw new Error('No image returned by Lovable AI');
   }
 
-  throw new Error('No image returned by Gemini');
+  return imageUrl;
 }
 
 const constructScenePrompts = (careerPath: any): string[] => {
@@ -170,8 +169,10 @@ serve(async (req) => {
       throw new Error('Failed to access reference photo');
     }
 
+    // Convert signed URL to data URL for Lovable AI
     const refB64 = await urlToBase64(signedUrlData.signedUrl);
     const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const refDataUrl = `data:${refMime};base64,${refB64}`;
 
     // Generate 3 scene variations
     const scenePrompts = constructScenePrompts(careerPath);
@@ -181,10 +182,10 @@ serve(async (req) => {
     
     for (let i = 0; i < scenePrompts.length; i++) {
       console.log(`Generating image ${i + 1}/3...`);
-      await sleep(1500); // Rate limiting
+      await sleep(2000); // Rate limiting between requests
       
       try {
-        const dataUrl = await generateWithGemini(scenePrompts[i], refB64, refMime);
+        const dataUrl = await generateWithLovableAI(scenePrompts[i], refDataUrl);
         generatedImages.push(dataUrl);
         console.log(`Successfully generated image ${i + 1}`);
       } catch (imageError) {
