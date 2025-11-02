@@ -102,11 +102,12 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
 
       <div className="space-y-4">
         <Card 
-          className={`p-8 border-2 border-dashed transition-colors ${
+          className={`p-8 border-2 border-dashed transition-colors cursor-pointer ${
             uploadedFile ? 'border-primary bg-primary/5' : 'border-border hover:border-foreground/20'
           }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
+          onClick={() => document.getElementById('cv-upload')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}
         >
           <input
             type="file"

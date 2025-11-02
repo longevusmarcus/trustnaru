@@ -23,7 +23,7 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
     if (photos.length + files.length > 10) {
       toast({
         title: "Too many photos",
-        description: "You can upload up to 10 photos",
+        description: "Please upload exactly 10 photos",
         variant: "destructive"
       });
       return;
@@ -35,7 +35,7 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const uploadedUrls: string[] = [];
+      const previewUrls: string[] = [];
 
       for (const file of files) {
         // Validate file type
@@ -67,28 +67,26 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('user-photos')
-          .getPublicUrl(fileName);
-
-        // Save to database
+        // Save storage path in DB (safer than public URL)
         const { error: dbError } = await supabase
           .from('user_photos')
           .insert({
             user_id: user.id,
-            photo_url: publicUrl,
+            photo_url: fileName,
             is_reference: true
           });
 
         if (dbError) throw dbError;
 
-        uploadedUrls.push(publicUrl);
+        // Local preview ensures user can see the photo even if bucket is private
+        const preview = URL.createObjectURL(file);
+        previewUrls.push(preview);
       }
 
-      setPhotos([...photos, ...uploadedUrls]);
+      setPhotos([...photos, ...previewUrls]);
       toast({
         title: "Photos uploaded",
-        description: `${uploadedUrls.length} photo(s) uploaded successfully`
+        description: `${previewUrls.length} photo(s) uploaded successfully`
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -111,7 +109,7 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Show Your Best Self</h2>
         <p className="text-muted-foreground">
-          Upload up to 10 photos - we'll use these to generate your personalized career images
+          Upload exactly 10 photos — we'll use these to generate your personalized career images
         </p>
       </div>
 
@@ -161,8 +159,8 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button onClick={onNext} disabled={photos.length === 0 || uploading} className="flex-1">
-          {uploading ? 'Uploading...' : 'Continue'}
+        <Button onClick={onNext} disabled={photos.length !== 10 || uploading} className="flex-1">
+          {uploading ? 'Uploading...' : photos.length !== 10 ? `Add ${10 - photos.length} more` : 'Continue'}
         </Button>
       </div>
     </div>
