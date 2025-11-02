@@ -85,107 +85,108 @@ export const ProfilePage = () => {
 
   return (
     <div className="px-4 pb-24 pt-4">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-md mx-auto space-y-8">
         {/* Profile Header */}
-        <div className="text-center">
-          <div className="relative inline-block mb-4">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mx-auto">
-              <Camera className="h-10 w-10 text-muted-foreground" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold mb-1">{user?.email?.split('@')[0] || 'User'}</h2>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-3 w-3" />
-            <span>Started {joinDate}</span>
+        <div>
+          <h2 className="text-3xl font-bold mb-2">{user?.email?.split('@')[0] || 'User'}</h2>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Calendar className="h-4 w-4" />
+            <span className="text-sm">Started {joinDate}</span>
           </div>
         </div>
 
-        {/* Gamification Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Flame className="h-5 w-5 text-orange-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.current_streak || 0}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Star className="h-5 w-5 text-yellow-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.total_points || 0}</div>
-              <div className="text-xs text-muted-foreground">Points</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Target className="h-5 w-5 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-bold mb-1">{userStats?.missions_completed || 0}</div>
-              <div className="text-xs text-muted-foreground">Missions</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Current Path */}
-        {currentPath && (
-          <Card>
+        {/* Journey Path */}
+        {currentPath ? (
+          <Card className="border-none shadow-sm">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Current Path</h3>
-                <Badge variant="secondary">{currentPath.difficulty_level || 'Beginner'}</Badge>
-              </div>
-              <h4 className="text-lg font-bold mb-2">{currentPath.title}</h4>
-              <p className="text-sm text-muted-foreground mb-3">{currentPath.description}</p>
-              {currentPath.journey_duration && (
-                <div className="text-xs text-muted-foreground">
-                  Duration: {currentPath.journey_duration}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                  <Target className="h-6 w-6 text-foreground" />
                 </div>
-              )}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Following Path</p>
+                  <h3 className="font-semibold">{currentPath.title}</h3>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">{currentPath.description}</p>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                {currentPath.journey_duration && (
+                  <span>{currentPath.journey_duration}</span>
+                )}
+                {currentPath.difficulty_level && (
+                  <>
+                    <span>•</span>
+                    <span>{currentPath.difficulty_level}</span>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-6 text-center">
+              <Target className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">
+                Start your journey by creating your first path
+              </p>
             </CardContent>
           </Card>
         )}
 
-        {/* Achievements & Badges */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-              Achievements
-            </h3>
-            <Trophy className="h-4 w-4 text-yellow-500" />
-          </div>
-          
-          {badges.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
-              {badges.map((badge: any, index: number) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 text-center">
-                    <div className="text-3xl mb-2">{badge.badges.icon}</div>
-                    <p className="text-xs font-medium mb-1">{badge.badges.name}</p>
-                    <p className="text-xs text-muted-foreground">{badge.badges.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+        {/* Progress Stats */}
+        <div className="space-y-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Progress</p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between py-3 border-b border-border/50">
+              <div className="flex items-center gap-3">
+                <Flame className="h-5 w-5 text-foreground/60" />
+                <span className="text-sm">Current Streak</span>
+              </div>
+              <span className="font-semibold">{userStats?.current_streak || 0} days</span>
             </div>
-          ) : (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Trophy className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  Complete missions to earn your first badge!
-                </p>
-              </CardContent>
-            </Card>
-          )}
+            <div className="flex items-center justify-between py-3 border-b border-border/50">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-5 w-5 text-foreground/60" />
+                <span className="text-sm">Missions Completed</span>
+              </div>
+              <span className="font-semibold">{userStats?.missions_completed || 0}</span>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-foreground/60" />
+                <span className="text-sm">Badges Earned</span>
+              </div>
+              <span className="font-semibold">{badges.length}</span>
+            </div>
+          </div>
         </div>
 
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div className="space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Achievements</p>
+            <div className="grid grid-cols-4 gap-3">
+              {badges.map((badge: any, index: number) => (
+                <div key={index} className="text-center">
+                  <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-2 text-2xl">
+                    {badge.badges.icon}
+                  </div>
+                  <p className="text-xs font-medium line-clamp-1">{badge.badges.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Account Actions */}
-        <div className="space-y-3">
-          <Button variant="outline" className="w-full justify-start" size="lg">
+        <div className="space-y-2 pt-4 border-t border-border/50">
+          <Button variant="ghost" className="w-full justify-start" size="lg">
             <Settings className="h-4 w-4 mr-3" />
             Account Settings
           </Button>
           <Button 
-            variant="outline" 
-            className="w-full justify-start text-destructive hover:text-destructive" 
+            variant="ghost" 
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" 
             size="lg"
             onClick={handleSignOut}
           >
