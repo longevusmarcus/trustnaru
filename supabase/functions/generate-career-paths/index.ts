@@ -45,11 +45,13 @@ serve(async (req) => {
 
       if (!cvSignError && signedCvUrl) {
         try {
+          // Fetch CV file as blob
           const cvResponse = await fetch(signedCvUrl.signedUrl);
-          const cvText = await cvResponse.text();
+          const cvBlob = await cvResponse.blob();
+          const cvBuffer = await cvBlob.arrayBuffer();
+          const cvBase64 = btoa(String.fromCharCode(...new Uint8Array(cvBuffer)));
           
-          const analysisPrompt = `Analyze this CV/resume and extract key information:
-${cvText}
+          const analysisPrompt = `Analyze this CV/resume document and extract key information.
 
 Provide a structured analysis in JSON format:
 {
@@ -67,7 +69,17 @@ Provide a structured analysis in JSON format:
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                contents: [{ parts: [{ text: analysisPrompt }] }],
+                contents: [{
+                  parts: [
+                    { text: analysisPrompt },
+                    {
+                      inline_data: {
+                        mime_type: 'application/pdf',
+                        data: cvBase64
+                      }
+                    }
+                  ]
+                }],
                 generationConfig: { response_mime_type: "application/json" }
               }),
             }
@@ -86,6 +98,9 @@ CV Analysis:
 - Key Strengths: ${analysis.strengths?.join(', ')}
 - Potential Directions: ${analysis.potential_directions?.join(', ')}`;
             console.log('CV analysis complete');
+          } else {
+            const errorText = await analysisResponse.text();
+            console.error('CV analysis API error:', errorText);
           }
         } catch (e) {
           console.error('CV analysis error:', e);
