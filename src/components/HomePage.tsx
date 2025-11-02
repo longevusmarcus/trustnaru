@@ -1,14 +1,22 @@
-import { ChevronRight, Calendar, Target, BookOpen, Compass } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
-const formatDate = () => {
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const now = new Date();
-  return {
-    date: `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`
-  };
+const getWeekDates = () => {
+  const today = new Date();
+  const currentDay = today.getDay();
+  const diff = currentDay === 0 ? -6 : 1 - currentDay; // Adjust so Monday is first
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diff);
+  
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    return date;
+  });
 };
 
 const dailyMissions = [
@@ -37,35 +45,129 @@ const dailyMissions = [
 
 
 export const HomePage = () => {
-  const { date } = formatDate();
   const { toast } = useToast();
+  const [userStats, setUserStats] = useState<any>(null);
+  const [streaks, setStreaks] = useState<Date[]>([]);
+  const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
+  const weekDates = getWeekDates();
+
+  useEffect(() => {
+    const fetchGamificationData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch user stats
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!stats) {
+        // Create initial stats if not exists
+        await supabase.from('user_stats').insert({
+          user_id: user.id,
+          current_streak: 0,
+          longest_streak: 0,
+          total_points: 0
+        });
+      } else {
+        setUserStats(stats);
+      }
+
+      // Fetch streaks for this week
+      const weekStart = weekDates[0].toISOString().split('T')[0];
+      const weekEnd = weekDates[6].toISOString().split('T')[0];
+      
+      const { data: streakData } = await supabase
+        .from('daily_streaks')
+        .select('streak_date')
+        .eq('user_id', user.id)
+        .eq('completed', true)
+        .gte('streak_date', weekStart)
+        .lte('streak_date', weekEnd);
+
+      if (streakData) {
+        setStreaks(streakData.map(s => new Date(s.streak_date)));
+      }
+
+      // Fetch earned badges
+      const { data: badges } = await supabase
+        .from('user_badges')
+        .select(`
+          *,
+          badges (name, icon, description)
+        `)
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false })
+        .limit(3);
+
+      if (badges) {
+        setEarnedBadges(badges);
+      }
+    };
+
+    fetchGamificationData();
+  }, []);
 
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
         {/* Greeting */}
-        <div>
-          <h2 className="text-3xl font-bold mb-1">Hey, Izzy</h2>
-          <p className="text-muted-foreground">{date}</p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold">Hey, Izzy</h2>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/5">
+              <Flame className="h-4 w-4 text-orange-500" />
+              <span className="font-semibold text-sm">{userStats?.current_streak || 0}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Week Calendar */}
+        {/* Streak Calendar */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-muted-foreground">THIS WEEK</span>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">DAILY STREAKS</span>
+            <Flame className="h-4 w-4 text-orange-500" />
           </div>
           <div className="grid grid-cols-7 gap-2">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-              <div key={day} className="text-center">
-                <div className="text-xs text-muted-foreground mb-1">{day}</div>
-                <div className={`text-sm font-medium rounded-lg py-2 ${i === 2 ? 'bg-primary text-primary-foreground' : ''}`}>
-                  {8 + i}
+            {weekDates.map((date, i) => {
+              const isToday = date.toDateString() === new Date().toDateString();
+              const hasStreak = streaks.some(s => s.toDateString() === date.toDateString());
+              const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+              
+              return (
+                <div key={i} className="text-center">
+                  <div className="text-xs text-muted-foreground mb-1">{dayNames[date.getDay()]}</div>
+                  <div className={`text-sm font-medium rounded-lg py-2 transition-colors ${
+                    hasStreak 
+                      ? 'bg-primary text-primary-foreground' 
+                      : isToday 
+                      ? 'border-2 border-primary' 
+                      : 'bg-muted/30'
+                  }`}>
+                    {date.getDate()}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
+
+        {/* Badges Section */}
+        {earnedBadges.length > 0 && (
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Recent Badges</p>
+            <div className="grid grid-cols-3 gap-3">
+              {earnedBadges.map((badge: any, index: number) => (
+                <Card key={index} className="p-3 text-center">
+                  <div className="text-2xl mb-1">{badge.badges.icon}</div>
+                  <p className="text-xs font-medium">{badge.badges.name}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Main Future Self Card */}
         <div>
