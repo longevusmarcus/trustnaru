@@ -1,7 +1,7 @@
-import { Compass, Heart } from "lucide-react";
+import { Compass, TrendingUp, Target, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const InsightsPage = () => {
   const { toast } = useToast();
@@ -16,11 +16,6 @@ export const InsightsPage = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-serif italic">Insights</h1>
-          <p className="text-muted-foreground">Your intuition patterns over time</p>
-        </div>
-
         <Card className="p-6 space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
@@ -41,14 +36,37 @@ export const InsightsPage = () => {
           </Button>
         </Card>
 
-        <Card className="p-6 flex flex-col items-center justify-center space-y-4 min-h-[200px]">
-          <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-            <Heart className="h-8 w-8 text-foreground" />
-          </div>
-          <p className="text-center text-muted-foreground">
-            Start checking in to build your trust score
-          </p>
-        </Card>
+        <div className="grid gap-4">
+          <Card className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="h-6 w-6 text-foreground" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Career Analytics</h3>
+              <p className="text-sm text-muted-foreground">Track your progress and growth</p>
+            </div>
+          </Card>
+
+          <Card className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <Target className="h-6 w-6 text-foreground" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Smart Tips</h3>
+              <p className="text-sm text-muted-foreground">Personalized advice for your journey</p>
+            </div>
+          </Card>
+
+          <Card className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <Sparkles className="h-6 w-6 text-foreground" />
+            </div>
+            <div>
+              <h3 className="font-semibold">AI Chat</h3>
+              <p className="text-sm text-muted-foreground">Get instant answers about your paths</p>
+            </div>
+          </Card>
+        </div>
 
         <div className="pt-4">
           <h2 className="text-2xl font-semibold mb-4">This Week</h2>
