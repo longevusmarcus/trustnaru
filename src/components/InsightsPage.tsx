@@ -71,17 +71,6 @@ export const InsightsPage = () => {
         >
           <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary/5 to-primary/10">
             <div className="p-8 space-y-6">
-              <div className="flex items-center justify-center">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                  <img 
-                    src={compassIcon} 
-                    alt="Compass" 
-                    className="relative h-20 w-20 object-contain opacity-80"
-                  />
-                </div>
-              </div>
-              
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-semibold">Daily Guidance</h2>
                 <p className="text-sm text-muted-foreground">
@@ -115,13 +104,11 @@ export const InsightsPage = () => {
               >
                 <div className="p-6 flex items-center gap-5">
                   <div className="relative flex-shrink-0">
-                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 transition-colors duration-300">
-                      <img 
-                        src={feature.icon} 
-                        alt={feature.title} 
-                        className="h-7 w-7 object-contain opacity-70 group-hover:opacity-90 transition-opacity duration-300"
-                      />
-                    </div>
+                    <img 
+                      src={feature.icon} 
+                      alt={feature.title} 
+                      className="h-10 w-10 object-contain opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                    />
                   </div>
                   
                   <div className="flex-1 min-w-0">
