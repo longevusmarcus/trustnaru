@@ -6,9 +6,10 @@ import { VoiceBubble } from "@/components/VoiceBubble";
 interface VoiceStepProps {
   onNext: (transcription: string) => void;
   onBack: () => void;
+  hasExistingVoice?: boolean;
 }
 
-export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
+export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) => {
   const [transcription, setTranscription] = useState<string>("");
 
   const handleTranscription = (text: string) => {
@@ -20,7 +21,9 @@ export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Share Your Energy</h2>
         <p className="text-muted-foreground">
-          Record 15-30 seconds about what gives you energy lately
+          {hasExistingVoice 
+            ? 'Update your energy recording or continue with the existing one'
+            : 'Record 15-30 seconds about what gives you energy lately'}
         </p>
       </div>
 
@@ -56,8 +59,12 @@ export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button onClick={() => onNext(transcription)} className="flex-1" disabled={!transcription}>
-          Continue
+        <Button 
+          onClick={() => onNext(transcription)} 
+          className="flex-1" 
+          disabled={!transcription && !hasExistingVoice}
+        >
+          {transcription ? 'Continue' : hasExistingVoice ? 'Use existing voice' : 'Continue'}
         </Button>
       </div>
     </div>

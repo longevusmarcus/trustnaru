@@ -276,36 +276,36 @@ Generate 7 career paths (JSON):
       careerPaths.push(savedPath);
     }
 
-    // Save wizard data to user profile
-    const { data: existingProfile } = await supabaseClient
-      .from('user_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+      // Save wizard data to user profile
+      const { data: existingProfile } = await supabaseClient
+        .from('user_profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-    if (existingProfile) {
-      const { error: updateError } = await supabaseClient
-        .from('user_profiles')
-        .update({
-          cv_url: cvUrl,
-          voice_transcription: voiceTranscription,
-          wizard_data: wizardData,
-        })
-        .eq('user_id', user.id);
-      
-      if (updateError) console.error('Error updating user profile:', updateError);
-    } else {
-      const { error: insertError } = await supabaseClient
-        .from('user_profiles')
-        .insert({
-          user_id: user.id,
-          cv_url: cvUrl,
-          voice_transcription: voiceTranscription,
-          wizard_data: wizardData,
-        });
-      
-      if (insertError) console.error('Error creating user profile:', insertError);
-    }
+      const profileData = {
+        cv_url: cvUrl,
+        voice_transcription: voiceTranscription,
+        wizard_data: wizardData,
+      };
+
+      if (existingProfile) {
+        const { error: updateError } = await supabaseClient
+          .from('user_profiles')
+          .update(profileData)
+          .eq('user_id', user.id);
+        
+        if (updateError) console.error('Error updating user profile:', updateError);
+      } else {
+        const { error: insertError } = await supabaseClient
+          .from('user_profiles')
+          .insert({
+            user_id: user.id,
+            ...profileData
+          });
+        
+        if (insertError) console.error('Error creating user profile:', insertError);
+      }
 
     return new Response(
       JSON.stringify({ success: true, careerPaths }),

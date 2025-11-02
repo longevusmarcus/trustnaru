@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UploadCVStep } from "./wizard/UploadCVStep";
 import { PhotosStep } from "./wizard/PhotosStep";
 import { VoiceStep } from "./wizard/VoiceStep";
@@ -19,7 +19,44 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   const [cvUrl, setCvUrl] = useState<string | undefined>();
   const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
   const [generatedPaths, setGeneratedPaths] = useState<any[]>([]);
+  const [hasExistingData, setHasExistingData] = useState<{cv: boolean, photos: boolean, voice: boolean}>({
+    cv: false,
+    photos: false,
+    voice: false
+  });
   const { toast } = useToast();
+
+  // Check for existing data on mount
+  useEffect(() => {
+    const checkExistingData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Check for CV
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('cv_url, voice_transcription')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Check for photos
+      const { data: photos } = await supabase
+        .from('user_photos')
+        .select('id')
+        .eq('user_id', user.id);
+
+      setHasExistingData({
+        cv: !!profile?.cv_url,
+        photos: (photos?.length || 0) >= 10,
+        voice: !!profile?.voice_transcription
+      });
+
+      if (profile?.cv_url) setCvUrl(profile.cv_url);
+      if (profile?.voice_transcription) setVoiceTranscription(profile.voice_transcription);
+    };
+
+    checkExistingData();
+  }, []);
 
   const handleComplete = async () => {
     setStep(4);
@@ -97,16 +134,18 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
         {step === 1 && (
           <UploadCVStep 
             onNext={(url) => {
-              setCvUrl(url);
+              if (url) setCvUrl(url);
               setStep(2);
             }} 
             onSkip={() => setStep(2)}
+            hasExistingCV={hasExistingData.cv}
           />
         )}
         {step === 2 && (
           <PhotosStep 
             onNext={() => setStep(3)} 
             onBack={() => setStep(1)}
+            hasExistingPhotos={hasExistingData.photos}
           />
         )}
         {step === 3 && (
@@ -116,6 +155,7 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
               handleComplete();
             }} 
             onBack={() => setStep(2)}
+            hasExistingVoice={hasExistingData.voice}
           />
         )}
         {step === 4 && <ProcessingStep />}

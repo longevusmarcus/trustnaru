@@ -8,9 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 interface PhotosStepProps {
   onNext: () => void;
   onBack: () => void;
+  hasExistingPhotos?: boolean;
 }
 
-export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
+export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProps) => {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -109,7 +110,9 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Show Your Best Self</h2>
         <p className="text-muted-foreground">
-          Upload exactly 10 photos — we'll use these to generate your personalized career images
+          {hasExistingPhotos 
+            ? 'Update your photos or continue with existing ones' 
+            : 'Upload exactly 10 photos — we\'ll use these to generate your personalized career images'}
         </p>
       </div>
 
@@ -159,8 +162,8 @@ export const PhotosStep = ({ onNext, onBack }: PhotosStepProps) => {
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button onClick={onNext} disabled={photos.length !== 10 || uploading} className="flex-1">
-          {uploading ? 'Uploading...' : photos.length !== 10 ? `Add ${10 - photos.length} more` : 'Continue'}
+        <Button onClick={onNext} disabled={(photos.length !== 10 && !hasExistingPhotos) || uploading} className="flex-1">
+          {uploading ? 'Uploading...' : photos.length !== 10 ? (hasExistingPhotos ? 'Use existing photos' : `Add ${10 - photos.length} more`) : 'Continue'}
         </Button>
       </div>
     </div>

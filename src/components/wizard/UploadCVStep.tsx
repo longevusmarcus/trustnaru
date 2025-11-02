@@ -8,9 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 interface UploadCVStepProps {
   onNext: (cvUrl?: string) => void;
   onSkip: () => void;
+  hasExistingCV?: boolean;
 }
 
-export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
+export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Share Your Experience</h2>
         <p className="text-muted-foreground">
-          Upload your CV to help us create personalized paths
+          {hasExistingCV ? 'Update your CV or continue with the existing one' : 'Upload your CV to help us create personalized paths'}
         </p>
       </div>
 
@@ -195,10 +196,10 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
 
       <div className="flex gap-3 pt-4">
         <Button variant="ghost" onClick={onSkip} className="flex-1">
-          Skip for now
+          {hasExistingCV ? 'Use existing CV' : 'Skip for now'}
         </Button>
-        <Button onClick={() => onNext(cvUrl || undefined)} className="flex-1" disabled={!cvUrl || uploading}>
-          {cvUrl ? 'Continue' : 'Upload CV to continue'}
+        <Button onClick={() => onNext(cvUrl || undefined)} className="flex-1" disabled={(!cvUrl && !hasExistingCV) || uploading}>
+          {cvUrl ? 'Continue' : hasExistingCV ? 'Continue' : 'Upload CV to continue'}
         </Button>
       </div>
     </div>
