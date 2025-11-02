@@ -122,22 +122,51 @@ serve(async (req) => {
       .select('*')
       .eq('user_id', user.id)
       .eq('is_reference', true)
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (!userPhotos || userPhotos.length === 0) {
       throw new Error('No reference photo found');
     }
 
-    const photoPath = userPhotos[0].photo_url;
+    const photoPath = userPhotos[0].photo_url as string;
+
+    // Normalize path: ensure it's relative to the bucket and has no leading slash
+    let objectPath = photoPath.startsWith('user-photos/')
+      ? photoPath.substring('user-photos/'.length)
+      : photoPath;
+    objectPath = objectPath.replace(/^\/+/, '');
+    console.log('Attempting to sign reference photo at path:', objectPath);
     
     // Create a signed URL that's accessible by the edge function
-    const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+    let signedUrlData: { signedUrl: string } | null = null;
+    let signedUrlError: any = null;
+
+    const attempt1 = await supabaseClient
       .storage
       .from('user-photos')
-      .createSignedUrl(photoPath, 3600); // 1 hour expiry
+      .createSignedUrl(objectPath, 3600); // 1 hour expiry
 
-    if (signedUrlError || !signedUrlData) {
-      console.error('Error creating signed URL:', signedUrlError);
+    if (attempt1?.data) {
+      signedUrlData = attempt1.data;
+    } else {
+      signedUrlError = attempt1?.error;
+      console.error('Signed URL attempt 1 failed:', signedUrlError);
+      // Fallback: sometimes paths are saved with a leading slash
+      const attempt2 = await supabaseClient
+        .storage
+        .from('user-photos')
+        .createSignedUrl(`/${objectPath}`.replace(/\/\//g, '/'), 3600);
+      if (attempt2?.data) {
+        signedUrlData = attempt2.data;
+        signedUrlError = null;
+      } else {
+        signedUrlError = attempt2?.error;
+        console.error('Signed URL attempt 2 failed:', signedUrlError);
+      }
+    }
+
+    if (!signedUrlData) {
       throw new Error('Failed to access reference photo');
     }
 
