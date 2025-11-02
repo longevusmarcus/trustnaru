@@ -69,12 +69,16 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('cvs')
-        .getPublicUrl(fileName);
-
+      // Store storage path (private bucket)
       setUploadedFile(file.name);
-      setCvUrl(publicUrl);
+      setCvUrl(fileName);
+
+      // Save to user profile immediately
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .upsert({ user_id: user.id, cv_url: fileName }, { onConflict: 'user_id' });
+      if (profileError) throw profileError;
+
       toast({
         title: "CV uploaded successfully",
         description: "Your CV has been uploaded and will be analyzed"
@@ -142,7 +146,9 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
                 )}
               </div>
               {!uploadedFile && (
-                <Button variant="outline" size="sm" type="button" disabled={uploading}>
+                <Button variant="outline" size="sm" type="button" disabled={uploading}
+                  onClick={() => document.getElementById('cv-upload')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))}
+                >
                   {uploading ? 'Uploading...' : 'Choose File'}
                 </Button>
               )}
@@ -155,8 +161,8 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
         <Button variant="ghost" onClick={onSkip} className="flex-1">
           Skip for now
         </Button>
-        <Button onClick={() => onNext(cvUrl || undefined)} className="flex-1">
-          Continue
+        <Button onClick={() => onNext(cvUrl || undefined)} className="flex-1" disabled={!cvUrl || uploading}>
+          {cvUrl ? 'Continue' : 'Upload CV to continue'}
         </Button>
       </div>
     </div>
