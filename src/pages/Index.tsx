@@ -8,6 +8,7 @@ import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
@@ -68,18 +69,20 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(true)} />
-      
-      <main className="pb-safe">
-        {currentPage === "home" && <HomePage />}
-        {currentPage === "search" && <SearchPage />}
-        {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
-        {currentPage === "action" && <ActionPage />}
-      </main>
+    <AuthProvider>
+      <div className="min-h-screen bg-background">
+        <Header title={getHeaderTitle()} onTimelineClick={() => setShowTimeline(true)} />
+        
+        <main className="pb-safe">
+          {currentPage === "home" && <HomePage />}
+          {currentPage === "search" && <SearchPage />}
+          {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
+          {currentPage === "action" && <ActionPage />}
+        </main>
 
-      <BottomNav active={currentPage} onNavigate={handleNavigation} />
-    </div>
+        <BottomNav active={currentPage} onNavigate={handleNavigation} />
+      </div>
+    </AuthProvider>
   );
 };
 

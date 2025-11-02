@@ -19,7 +19,20 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    await uploadFile(file);
+  };
 
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) await uploadFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const uploadFile = async (file: File) => {
     // Validate file type
     const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!validTypes.includes(file.type)) {
@@ -50,7 +63,7 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('cvs')
         .upload(fileName, file);
 
@@ -70,7 +83,7 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload your CV. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to upload your CV",
         variant: "destructive"
       });
     } finally {
@@ -88,9 +101,13 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       </div>
 
       <div className="space-y-4">
-        <Card className={`p-8 border-2 border-dashed transition-colors ${
-          uploadedFile ? 'border-primary bg-primary/5' : 'border-border hover:border-foreground/20 cursor-pointer'
-        }`}>
+        <Card 
+          className={`p-8 border-2 border-dashed transition-colors ${
+            uploadedFile ? 'border-primary bg-primary/5' : 'border-border hover:border-foreground/20'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
           <input
             type="file"
             accept=".pdf,.doc,.docx"
