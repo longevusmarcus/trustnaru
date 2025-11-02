@@ -4,57 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-const pathsLibrary = [
-  {
-    id: "path-1",
-    name: "The Mindful Leader",
-    description: "Balance ambition with inner peace",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=200&fit=crop",
-    tags: ["Leadership", "Wellness"],
-    salary: "$120K - $180K/year",
-    routine: "Morning meditation, deep work blocks, evening walks",
-    lifestyle: "Hybrid work, 4-day week, focus on wellbeing",
-    tasks: ["Team strategy", "Mindful meetings", "Coaching sessions"],
-    impact: "Build teams that thrive emotionally and professionally"
-  },
-  {
-    id: "path-2",
-    name: "The Digital Nomad",
-    description: "Work from anywhere, live everywhere",
-    image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&h=200&fit=crop",
-    tags: ["Freedom", "Tech"],
-    salary: "$80K - $150K/year",
-    routine: "Flexible hours, coworking spaces, weekly travel",
-    lifestyle: "Remote-first, slow travel, digital minimalism",
-    tasks: ["Client projects", "Content creation", "Network building"],
-    impact: "Prove location independence creates better work-life harmony"
-  },
-  {
-    id: "path-3",
-    name: "The Creative Visionary",
-    description: "Turn ideas into reality",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop",
-    tags: ["Creativity", "Innovation"],
-    salary: "$100K - $160K/year",
-    routine: "Creative mornings, collaborative afternoons, inspiration time",
-    lifestyle: "Studio culture, art scenes, continuous learning",
-    tasks: ["Concept development", "Team direction", "Client pitches"],
-    impact: "Create work that makes people feel something meaningful"
-  },
-  {
-    id: "path-4",
-    name: "The Tech Entrepreneur",
-    description: "Build products that scale",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=300&h=200&fit=crop",
-    tags: ["Startup", "Innovation"],
-    salary: "$150K+ equity",
-    routine: "Product sprints, investor meetings, team building",
-    lifestyle: "High intensity, high reward, mission-driven",
-    tasks: ["Product roadmap", "Fundraising", "Scaling team"],
-    impact: "Build solutions that improve millions of lives"
-  }
-];
-
 const profilesLibrary = [
   {
     id: "profile-1",
@@ -106,33 +55,6 @@ const profilesLibrary = [
   }
 ];
 
-const futureLibrary = [
-  {
-    name: "Creative Strategist",
-    description: "Leading wellness ventures in major European cities",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop",
-    traits: "Creative • Strategic • Wellness-focused"
-  },
-  {
-    name: "Tech Entrepreneur",
-    description: "Building AI-powered platforms that scale globally",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop",
-    traits: "Innovative • Technical • Visionary"
-  },
-  {
-    name: "Design Director",
-    description: "Leading creative teams at top design studios",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop",
-    traits: "Creative • Leadership • Design"
-  },
-  {
-    name: "Wellness Coach",
-    description: "Helping professionals find balance and purpose",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop",
-    traits: "Empathetic • Holistic • Inspiring"
-  }
-];
-
 export const SearchPage = () => {
   const [approvedPaths, setApprovedPaths] = useState<string[]>([]);
   const [rejectedPaths, setRejectedPaths] = useState<string[]>([]);
@@ -159,97 +81,10 @@ export const SearchPage = () => {
           />
         </div>
 
-        {/* Future Self Library - Paths */}
+        {/* Mentor Profiles */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Paths</p>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {pathsLibrary.map((item) => (
-              <Card 
-                key={item.id}
-                className="overflow-hidden flex-shrink-0 w-64 border-border/50"
-              >
-                <div 
-                  className="relative h-32 cursor-pointer"
-                  onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
-                >
-                  <img 
-                    src={item.image} 
-                    alt={item.name}
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
-                <CardContent className="p-3 space-y-2">
-                  <div 
-                    className="cursor-pointer"
-                    onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
-                  >
-                    <h4 className="text-sm font-medium">{item.name}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
-                  </div>
-                  
-                  {expandedCard === item.id && (
-                    <div className="space-y-2 pt-2 border-t border-border">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Salary</p>
-                        <p className="text-xs font-medium">{item.salary}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Routine</p>
-                        <p className="text-xs">{item.routine}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Lifestyle</p>
-                        <p className="text-xs">{item.lifestyle}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Key Tasks</p>
-                        <ul className="text-xs space-y-1">
-                          {item.tasks.map((task, idx) => (
-                            <li key={idx} className="flex items-start gap-1">
-                              <span className="text-muted-foreground">•</span>
-                              <span>{task}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Impact</p>
-                        <p className="text-xs italic">{item.impact}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant={approvedPaths.includes(item.id) ? "default" : "outline"}
-                      size="sm"
-                      className="flex-1 h-7 px-2"
-                      onClick={() => handleApprove(item.id)}
-                    >
-                      <CheckCircle className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant={rejectedPaths.includes(item.id) ? "destructive" : "outline"}
-                      size="sm"
-                      className="flex-1 h-7 px-2"
-                      onClick={() => handleReject(item.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Future Self Library - Profiles */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Profiles to Clone</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mentor Profiles</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             {profilesLibrary.map((item) => (
@@ -331,18 +166,6 @@ export const SearchPage = () => {
               </Card>
             ))}
           </div>
-        </div>
-
-        {/* Featured */}
-        <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured</p>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Design Your Future</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              A guided pathway to visualize and plan your ideal future self
-            </p>
-            <div className="text-xs text-muted-foreground">30 min • Beginner friendly</div>
-          </Card>
         </div>
       </div>
     </div>
