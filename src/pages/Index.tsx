@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { HomePage } from "@/components/HomePage";
@@ -15,6 +15,11 @@ const Index = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const getHeaderTitle = () => {
     switch (currentPage) {
