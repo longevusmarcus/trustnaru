@@ -23,7 +23,7 @@ const Index = () => {
 
   const getHeaderTitle = () => {
     switch (currentPage) {
-      case "home": return "today";
+      case "home": return "dashboard";
       case "mentors": return "mentors";
       case "insights": return "insights";
       case "future": return "your futures";
