@@ -112,9 +112,21 @@ serve(async (req) => {
       throw new Error('No reference photo found');
     }
 
-    const bestPhotoUrl = userPhotos[0].photo_url;
-    const refB64 = await urlToBase64(bestPhotoUrl);
-    const refMime = bestPhotoUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const photoPath = userPhotos[0].photo_url;
+    
+    // Create a signed URL that's accessible by the edge function
+    const { data: signedUrlData, error: signedUrlError } = await supabaseClient
+      .storage
+      .from('user-photos')
+      .createSignedUrl(photoPath, 3600); // 1 hour expiry
+
+    if (signedUrlError || !signedUrlData) {
+      console.error('Error creating signed URL:', signedUrlError);
+      throw new Error('Failed to access reference photo');
+    }
+
+    const refB64 = await urlToBase64(signedUrlData.signedUrl);
+    const refMime = photoPath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
     // Generate image prompt
     const roleTitle = careerPath.title;

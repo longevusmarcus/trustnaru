@@ -114,17 +114,34 @@ Generate exactly 7 distinct career archetypes. Response format (JSON):
     }
 
     // Save wizard data to user profile
-    const { error: profileError } = await supabaseClient
+    const { data: existingProfile } = await supabaseClient
       .from('user_profiles')
-      .upsert({
-        user_id: user.id,
-        cv_url: cvUrl,
-        voice_transcription: voiceTranscription,
-        wizard_data: wizardData,
-      });
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-    if (profileError) {
-      console.error('Error saving user profile:', profileError);
+    if (existingProfile) {
+      const { error: updateError } = await supabaseClient
+        .from('user_profiles')
+        .update({
+          cv_url: cvUrl,
+          voice_transcription: voiceTranscription,
+          wizard_data: wizardData,
+        })
+        .eq('user_id', user.id);
+      
+      if (updateError) console.error('Error updating user profile:', updateError);
+    } else {
+      const { error: insertError } = await supabaseClient
+        .from('user_profiles')
+        .insert({
+          user_id: user.id,
+          cv_url: cvUrl,
+          voice_transcription: voiceTranscription,
+          wizard_data: wizardData,
+        });
+      
+      if (insertError) console.error('Error creating user profile:', insertError);
     }
 
     return new Response(
