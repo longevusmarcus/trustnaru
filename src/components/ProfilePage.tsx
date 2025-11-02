@@ -41,11 +41,19 @@ export const ProfilePage = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out"
-    });
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out"
+      });
+    }
   };
 
   return (
