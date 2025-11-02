@@ -58,17 +58,36 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
     setUploading(true);
 
     try {
+      console.log('Starting CV upload...', { fileName: file.name, fileSize: file.size });
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('cvs')
-        .upload(fileName, file);
+      console.log('Uploading to storage...', fileName);
 
-      if (uploadError) throw uploadError;
+      // Add timeout to upload
+      const uploadPromise = supabase.storage
+        .from('cvs')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout - please try again')), 30000)
+      );
+
+      const { error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful, updating profile...');
 
       // Store storage path (private bucket)
       setUploadedFile(file.name);
@@ -78,7 +97,13 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({ user_id: user.id, cv_url: fileName }, { onConflict: 'user_id' });
-      if (profileError) throw profileError;
+      
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
+
+      console.log('Profile updated successfully');
 
       toast({
         title: "CV uploaded successfully",
@@ -86,13 +111,19 @@ export const UploadCVStep = ({ onNext, onSkip }: UploadCVStepProps) => {
       });
     } catch (error) {
       console.error('Upload error:', error);
+      
+      // Reset state on error
+      setUploadedFile(null);
+      setCvUrl(null);
+      
       toast({
         title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to upload your CV",
+        description: error instanceof Error ? error.message : "Failed to upload your CV. Please try again.",
         variant: "destructive"
       });
     } finally {
       setUploading(false);
+      console.log('Upload process complete');
     }
   };
 
