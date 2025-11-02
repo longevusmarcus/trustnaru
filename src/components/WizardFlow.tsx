@@ -5,20 +5,70 @@ import { VoiceStep } from "./wizard/VoiceStep";
 import { ProcessingStep } from "./wizard/ProcessingStep";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface WizardFlowProps {
-  onComplete: () => void;
+  onComplete: (careerPaths: any[]) => void;
   onClose: () => void;
 }
 
 export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   const [step, setStep] = useState(1);
+  const [cvUrl, setCvUrl] = useState<string | undefined>();
+  const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
+  const [generatedPaths, setGeneratedPaths] = useState<any[]>([]);
+  const { toast } = useToast();
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setStep(4);
-    setTimeout(() => {
-      onComplete();
-    }, 4000);
+    
+    try {
+      // Generate career paths
+      const { data, error } = await supabase.functions.invoke('generate-career-paths', {
+        body: {
+          wizardData: {},
+          cvUrl,
+          voiceTranscription
+        }
+      });
+
+      if (error) throw error;
+
+      const paths = data.careerPaths || [];
+      setGeneratedPaths(paths);
+
+      // Generate images for each path in parallel
+      const imagePromises = paths.map((path: any) =>
+        supabase.functions.invoke('generate-path-images', {
+          body: { pathId: path.id }
+        }).catch(err => {
+          console.error(`Failed to generate image for path ${path.id}:`, err);
+          return null;
+        })
+      );
+
+      await Promise.allSettled(imagePromises);
+
+      // Fetch updated paths with images
+      const { data: updatedPaths } = await supabase
+        .from('career_paths')
+        .select('*')
+        .in('id', paths.map((p: any) => p.id));
+
+      setTimeout(() => {
+        onComplete(updatedPaths || paths);
+      }, 2000);
+    } catch (error) {
+      console.error('Error generating paths:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate career paths. Please try again.",
+        variant: "destructive"
+      });
+      setStep(3); // Go back to voice step
+    }
   };
 
   return (
@@ -46,7 +96,10 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
       <div className="max-w-md mx-auto px-4 py-8">
         {step === 1 && (
           <UploadCVStep 
-            onNext={() => setStep(2)} 
+            onNext={(url) => {
+              setCvUrl(url);
+              setStep(2);
+            }} 
             onSkip={() => setStep(2)}
           />
         )}
@@ -58,7 +111,10 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
         )}
         {step === 3 && (
           <VoiceStep 
-            onNext={handleComplete} 
+            onNext={(transcription) => {
+              setVoiceTranscription(transcription);
+              handleComplete();
+            }} 
             onBack={() => setStep(2)}
           />
         )}

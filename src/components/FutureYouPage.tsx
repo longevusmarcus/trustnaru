@@ -3,10 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 
-export const FutureYouPage = () => {
+export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
   
-  const futureCards = [
+  const futureCards = careerPaths.length > 0 ? careerPaths.map(path => ({
+    title: path.title,
+    location: "Remote / Hybrid",
+    role: path.description,
+    schedule: path.journey_duration,
+    income: path.salary_range,
+    image: path.image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
+    pathImages: [],
+    roadmap: [],
+    affirmations: []
+  })) : [
     {
       title: "Creative Strategist",
       location: "Milan & Lisbon",

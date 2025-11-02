@@ -2,3 +2,9 @@ project_id = "vpugfhmddyttrokzbsqr"
 
 [functions.transcribe-voice]
 verify_jwt = false
+
+[functions.generate-career-paths]
+verify_jwt = true
+
+[functions.generate-path-images]
+verify_jwt = true

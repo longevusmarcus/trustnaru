@@ -14,6 +14,7 @@ const Index = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
+  const [careerPaths, setCareerPaths] = useState<any[]>([]);
 
   const getHeaderTitle = () => {
     if (showTimeline) return "timeline";
@@ -35,8 +36,9 @@ const Index = () => {
     }
   };
 
-  const handleWizardComplete = () => {
+  const handleWizardComplete = (paths: any[]) => {
     setShowWizard(false);
+    setCareerPaths(paths);
     setCurrentPage("future");
   };
 
@@ -72,7 +74,7 @@ const Index = () => {
       <main className="pb-safe">
         {currentPage === "home" && <HomePage />}
         {currentPage === "search" && <SearchPage />}
-        {currentPage === "future" && <FutureYouPage />}
+        {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "action" && <ActionPage />}
       </main>
 

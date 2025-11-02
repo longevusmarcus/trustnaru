@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { VoiceBubble } from "@/components/VoiceBubble";
 
 interface VoiceStepProps {
-  onNext: () => void;
+  onNext: (transcription: string) => void;
   onBack: () => void;
 }
 
@@ -56,7 +56,7 @@ export const VoiceStep = ({ onNext, onBack }: VoiceStepProps) => {
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button onClick={onNext} className="flex-1">
+        <Button onClick={() => onNext(transcription)} className="flex-1" disabled={!transcription}>
           Continue
         </Button>
       </div>
