@@ -43,22 +43,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
+    const timeout = <T,>(p: Promise<T>, ms = 10000) =>
+      new Promise<T>((resolve, reject) => {
+        const id = window.setTimeout(() => reject(new Error('Network timeout. Please try again.')), ms);
+        p.then((v) => { clearTimeout(id); resolve(v); })
+         .catch((err) => { clearTimeout(id); reject(err); });
+      });
     
     try {
+      if (!navigator.onLine) {
+        throw new Error('You appear to be offline. Please check your connection.');
+      }
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`
-          }
-        });
+        const { error } = await timeout(
+          supabase.auth.signUp({ 
+            email, 
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`
+            }
+          })
+        );
         if (error) throw error;
         toast({ title: "Success! You can now sign in." });
         setIsSignUp(false);
         setPassword("");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await timeout(
+          supabase.auth.signInWithPassword({ email, password })
+        );
         if (error) throw error;
         toast({ title: "Signed in successfully!" });
       }
