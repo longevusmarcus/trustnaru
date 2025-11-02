@@ -58,7 +58,7 @@ const Index = () => {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-background">
-        <Header title={getHeaderTitle()} />
+        <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
         
         <main className="pb-safe">
           {currentPage === "home" && <HomePage />}

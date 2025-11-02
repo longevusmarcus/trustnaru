@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   title: string;
+  onNavigate?: (page: string) => void;
 }
 
-export const Header = ({ title }: HeaderProps) => {
+export const Header = ({ title, onNavigate }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="max-w-md mx-auto flex items-center justify-between h-14 px-4">
@@ -14,7 +15,12 @@ export const Header = ({ title }: HeaderProps) => {
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
             <Bell className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full"
+            onClick={() => onNavigate?.("profile")}
+          >
             <User className="h-4 w-4" />
           </Button>
         </div>
