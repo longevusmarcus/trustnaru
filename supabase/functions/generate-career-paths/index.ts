@@ -49,7 +49,16 @@ serve(async (req) => {
           const cvResponse = await fetch(signedCvUrl.signedUrl);
           const cvBlob = await cvResponse.blob();
           const cvBuffer = await cvBlob.arrayBuffer();
-          const cvBase64 = btoa(String.fromCharCode(...new Uint8Array(cvBuffer)));
+          
+          // Convert to base64 in chunks to avoid stack overflow
+          const bytes = new Uint8Array(cvBuffer);
+          let binary = '';
+          const chunkSize = 8192;
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, i + chunkSize);
+            binary += String.fromCharCode(...chunk);
+          }
+          const cvBase64 = btoa(binary);
           
           const analysisPrompt = `Analyze this CV/resume document and extract key information.
 
@@ -146,41 +155,46 @@ Voice Interests Analysis:
     }
 
     // Step 3: Construct enhanced prompt for hybrid career paths
-    const prompt = `You are an expert career fusion strategist. Create exactly 7 UNIQUE and PERSONALIZED career paths by BLENDING professional skills from their CV with their personal interests and passions.
+    const prompt = `You are an expert career strategist specializing in PRACTICAL career fusion. Generate 7 career paths that intelligently blend CV skills with voice energy/interests.
 
 ${cvAnalysis}
 
 ${voiceInterests}
 
-Voice Transcription (full context):
-${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
+Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-CRITICAL FUSION STRATEGY:
-1. BLEND professional skills with personal passions to create HYBRID roles
-   Example: Sales skills + Tea passion = "Tea Sommelier & Corporate Wellness Consultant"
-   Example: Communication skills + Mindfulness = "Mindfulness Retreat Director & Corporate Training Lead"
-   Example: Tech skills + Travel = "Digital Nomad Tech Consultant"
+STRATEGY - Balance practicality with passion:
+1. ROOT IN REALITY: Start with their actual CV skills as the foundation
+   - If CV shows sales → roles must involve sales/business development
+   - If CV shows project management → roles involve coordination/leadership
+   - If CV shows communication → roles leverage presentation/writing
    
-2. Each path should COMBINE at least 2 elements:
-   - Professional expertise from CV
-   - Personal interest or passion from voice
+2. INFUSE PASSION: Weave voice interests/energy into the role context
+   - Tea passion → work IN tea industry or tea-adjacent (hospitality, wellness, import/export)
+   - Loves organizing events → event-driven roles or community building
+   - Energized by people → client-facing, collaborative, or coaching roles
    
-3. Make titles CREATIVE but PRACTICAL:
-   - "Wellness-Focused Sales Director for Conscious Brands"
-   - "Tea Travel Guide & Cultural Experience Designer"
-   - "Mindful Leadership Coach for Tech Companies"
-   - "Sustainable Business Consultant in Tea Industry"
-   
-4. Variety in paths:
-   - 2-3 corporate-hybrid roles (traditional job with passion twist)
-   - 2-3 entrepreneurial paths (building something around their passion)
-   - 1-2 completely reimagined careers (bold but grounded in their skills)
-   
-5. In descriptions, EXPLAIN THE FUSION:
-   "This role leverages your [CV skill] expertise while allowing you to pursue your passion for [interest]. You'd be working with [specific context] where both skills create unique value."
+3. CAREER MIX (7 paths):
+   - 3 PRACTICAL-FORWARD: Traditional role + passion twist (80% CV skills, 20% passion)
+     Ex: "Sales Manager at Premium Tea Importers" or "Event Sales Director for Wellness Brands"
+   - 2 BALANCED FUSION: Equal blend (50% CV skills, 50% passion)
+     Ex: "Tea Experience Designer & Retail Consultant" or "Corporate Wellness Program Lead"
+   - 2 PASSION-FORWARD: Entrepreneurial/bold but skill-grounded (70% passion, 30% CV skills)
+     Ex: "Tea Ceremony Facilitator & Mindfulness Coach" or "Tea Tourism Curator"
 
-Generate exactly 7 distinct FUSION career paths. Response format (JSON): 
-{"archetypes": [{"title": "Creative Fusion Title", "description": "2-3 sentences explaining HOW this fuses their professional skills with personal passions, WHY this is uniquely suited to them, and what their day-to-day would look like", "journey_duration": "1-3 years" or "3-5 years" or "5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["existing_skill_from_cv", "passion_skill_1", "skill_to_develop"], "target_companies": ["company1", "company2", "company3"], "category": "fusion|hybrid|entrepreneurial|corporate-reimagined|passion-career", "difficulty_level": "beginner|intermediate|advanced"}]}`;
+4. TITLES must be SPECIFIC and REAL:
+   - ✅ "Partnership Manager at Organic Tea Brands"
+   - ✅ "Sales Trainer for Hospitality & Wellness Sector"  
+   - ✅ "Tea Sommelier & Customer Experience Director"
+   - ❌ Avoid vague titles like "Wellness Advocate" or "Passion Entrepreneur"
+
+5. DESCRIPTIONS explain the FUSION:
+   - Start with CV skill: "Leveraging your [X years] in [CV role]..."
+   - Connect to passion: "...you'd work in [passion context] where [specific value]"
+   - Make it tangible: "Daily work includes [realistic tasks]"
+
+Generate 7 career paths (JSON):
+{"archetypes": [{"title": "Specific Role Title at [Context]", "description": "2-3 sentences: (1) How CV skills apply (2) How passion connects (3) What daily work looks like", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "$XX,XXX-$XX,XXX", "lifestyle_benefits": ["benefit1", "benefit2", "benefit3"], "impact_areas": ["impact1", "impact2"], "key_skills": ["cv_skill_1", "cv_skill_2", "passion_skill", "skill_to_develop"], "target_companies": ["real_company_1", "real_company_2", "real_company_3"], "category": "practical-fusion|balanced-fusion|passion-forward|corporate|entrepreneurial", "difficulty_level": "beginner|intermediate|advanced"}]}`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
