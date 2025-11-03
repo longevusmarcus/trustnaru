@@ -308,6 +308,7 @@ export type Database = {
           cv_url: string | null
           display_name: string | null
           id: string
+          onboarding_completed: boolean | null
           updated_at: string
           user_id: string
           voice_transcription: string | null
@@ -319,6 +320,7 @@ export type Database = {
           cv_url?: string | null
           display_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
           updated_at?: string
           user_id: string
           voice_transcription?: string | null
@@ -330,6 +332,7 @@ export type Database = {
           cv_url?: string | null
           display_name?: string | null
           id?: string
+          onboarding_completed?: boolean | null
           updated_at?: string
           user_id?: string
           voice_transcription?: string | null

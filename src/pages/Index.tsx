@@ -13,6 +13,8 @@ import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 import { IntroOnboarding } from "@/components/IntroOnboarding";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
@@ -20,12 +22,38 @@ const Index = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const location = useLocation();
   const isNavVisible = useScrollDirection();
   const [isCardScrolling, setIsCardScrolling] = useState(false);
+  const { user } = useAuth();
   
   const shouldHideNavOnScroll = currentPage === "mentors" || currentPage === "profile";
   const shouldShowNav = shouldHideNavOnScroll ? (isNavVisible && !isCardScrolling) : true;
+
+  // Check if user needs onboarding
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!user) {
+        setIsCheckingOnboarding(false);
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('onboarding_completed')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile && !profile.onboarding_completed) {
+        setShowIntro(true);
+      }
+      
+      setIsCheckingOnboarding(false);
+    };
+
+    checkOnboardingStatus();
+  }, [user]);
 
   // Check if we need to navigate to copilot page after path activation
   useEffect(() => {
@@ -67,10 +95,26 @@ const Index = () => {
     setShowIntro(true);
   };
 
-  const handleIntroComplete = () => {
+  const handleIntroComplete = async () => {
     setShowIntro(false);
     setCurrentPage("future");
+    
+    // Mark onboarding as completed
+    if (user) {
+      await supabase
+        .from('user_profiles')
+        .update({ onboarding_completed: true })
+        .eq('user_id', user.id);
+    }
   };
+
+  if (isCheckingOnboarding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (showWelcome) {
     return <WelcomeScreen onStart={() => setShowWelcome(false)} />;
