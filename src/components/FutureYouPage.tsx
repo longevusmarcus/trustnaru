@@ -16,13 +16,18 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   
   useEffect(() => {
+    if (user && !hasLoaded) {
+      loadCareerPaths();
+    }
+  }, [user, hasLoaded]);
+
+  // Update paths when careerPaths prop changes (e.g., from wizard)
+  useEffect(() => {
     if (careerPaths.length > 0) {
       setPaths(careerPaths);
       setHasLoaded(true);
-    } else if (!hasLoaded && user) {
-      loadCareerPaths();
     }
-  }, [careerPaths, user, hasLoaded]);
+  }, [careerPaths]);
 
   const loadCareerPaths = async () => {
     if (!user) {
