@@ -14,12 +14,27 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
+  const [isDemo, setIsDemo] = useState(false);
   
   useEffect(() => {
     if (user && !hasLoaded) {
       loadCareerPaths();
+      checkIfDemo();
     }
   }, [user, hasLoaded]);
+
+  const checkIfDemo = async () => {
+    if (!user) return;
+    
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('wizard_data')
+      .eq('user_id', user.id)
+      .single();
+    
+    // Show demo badge if user has no wizard data (hasn't completed wizard)
+    setIsDemo(!profile?.wizard_data);
+  };
 
   // Update paths when careerPaths prop changes (e.g., from wizard)
   useEffect(() => {
@@ -258,6 +273,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                   className="w-full h-full object-cover opacity-80"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                
+                {/* Demo Badge */}
+                {isDemo && (
+                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm border border-border/50">
+                    <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase">demo</span>
+                  </div>
+                )}
+                
                 <div className="absolute bottom-4 left-4 right-4 text-white">
                   <h3 className="text-xl font-bold mb-2">{card.title}</h3>
                 </div>
