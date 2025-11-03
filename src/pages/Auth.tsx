@@ -187,7 +187,7 @@ const Auth = () => {
             The world&apos;s first database of human potential.
           </p>
           <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto mt-1 font-light">
-            Become who you&apos;re meant to be.
+            Become (Naru) who you&apos;re meant to be.
           </p>
         </div>
 
