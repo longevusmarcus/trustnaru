@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X } from "lucide-react";
+import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -198,51 +198,24 @@ export const ActionPage = () => {
           </Card>
         </div>
 
-        {/* Goals */}
+        {/* Roadmap */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Your Goals</h3>
-          {goals.length > 0 ? (
+          <h3 className="text-lg font-semibold mb-3">
+            {activePath ? `Roadmap to ${activePath.title}` : 'Your Roadmap'}
+          </h3>
+          {activePath && roadmapMilestones.length > 0 ? (
             <div className="space-y-3">
-              {goals.map((goal: any) => (
-                <Card key={goal.id} className={goal.completed ? 'opacity-60' : ''}>
+              {roadmapMilestones.map((milestone: any, index: number) => (
+                <Card key={index}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <button 
-                        onClick={() => handleToggleGoal(goal.id, goal.completed)}
-                        className="mt-1 flex-shrink-0"
-                      >
-                        {goal.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </button>
+                      <div className="mt-1">
+                        <Circle className="h-5 w-5 text-muted-foreground" />
+                      </div>
                       <div className="flex-1">
-                        <h4 className={`font-medium mb-1 ${goal.completed ? 'line-through' : ''}`}>
-                          {goal.title}
-                        </h4>
-                        {goal.description && (
-                          <p className="text-xs text-muted-foreground mb-2">
-                            {goal.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              goal.priority === "high"
-                                ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                                : goal.priority === "medium"
-                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                            }`}
-                          >
-                            {goal.priority}
-                          </span>
-                          {goal.target_date && (
-                            <span className="text-xs text-muted-foreground">
-                              Target: {new Date(goal.target_date).toLocaleDateString()}
-                            </span>
-                          )}
+                        <h4 className="font-medium mb-1">{milestone.step}</h4>
+                        <div className="text-xs text-muted-foreground">
+                          {milestone.duration}
                         </div>
                       </div>
                     </div>
@@ -253,11 +226,11 @@ export const ActionPage = () => {
           ) : (
             <Card>
               <CardContent className="p-6 text-center">
-                <Target className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                <Map className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
                   {activePath 
-                    ? "Goals will be generated when you activate a path"
-                    : "Activate a career path to get personalized goals"}
+                    ? "No roadmap available for this path"
+                    : "Activate a career path to see your personalized roadmap"}
                 </p>
               </CardContent>
             </Card>
