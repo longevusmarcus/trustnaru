@@ -64,6 +64,15 @@ export const MentorsPage = () => {
       const lines = csvText.split('\n');
       const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
       
+      // Valid columns in the mentors table
+      const validColumns = [
+        'name', 'title', 'company', 'company_url', 'location', 'headline',
+        'experience_years', 'key_skills', 'education', 'achievements',
+        'career_path', 'industry', 'profile_url', 'profile_image_url',
+        'follower_count', 'category', 'visualization_images',
+        'typical_day_routine', 'leadership_philosophy'
+      ];
+      
       const mentorsToInsert = [];
       
       for (let i = 1; i < lines.length; i++) {
@@ -74,6 +83,9 @@ export const MentorsPage = () => {
         
         const mentor: any = {};
         headers.forEach((header, index) => {
+          // Skip columns that don't exist in the database
+          if (!validColumns.includes(header)) return;
+          
           let value = values[index];
           
           if (value.startsWith('"') && value.endsWith('"')) {
@@ -99,7 +111,10 @@ export const MentorsPage = () => {
           }
         });
         
-        mentorsToInsert.push(mentor);
+        // Only add if mentor has a name
+        if (mentor.name) {
+          mentorsToInsert.push(mentor);
+        }
       }
       
       if (mentorsToInsert.length > 0) {
