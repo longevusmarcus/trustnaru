@@ -394,7 +394,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           ))}
         </div>
 
-        <div className="flex gap-2 items-center justify-center text-xs text-muted-foreground">
+        <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
           <Button 
             variant="ghost" 
             size="sm"
@@ -405,7 +405,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
             generate versions (75% CV focus)
           </Button>
-          <span>•</span>
           <Button 
             variant="ghost" 
             size="sm"
