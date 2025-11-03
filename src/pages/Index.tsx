@@ -28,7 +28,7 @@ const Index = () => {
   const [isCardScrolling, setIsCardScrolling] = useState(false);
   const { user } = useAuth();
   
-  const shouldHideNavOnScroll = currentPage === "mentors" || currentPage === "profile";
+  const shouldHideNavOnScroll = currentPage === "mentors";
   const shouldShowNav = shouldHideNavOnScroll ? (isNavVisible && !isCardScrolling) : true;
 
   // Check if user needs onboarding
