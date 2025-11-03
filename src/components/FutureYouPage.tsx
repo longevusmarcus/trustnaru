@@ -419,9 +419,24 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                 )}
 
                 <div className="space-y-2 pt-4 border-t border-border/50">
+                  <Button
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    size="sm"
+                    onClick={() => navigate(`/path/${index}`, { state: { card } })}
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    View Path
+                  </Button>
+                  
+                  <Button variant="ghost" className="w-full justify-start" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  
                   {/* Feedback buttons */}
                   {card.id && (
-                    <div className="flex gap-1 pb-2">
+                    <div className="flex gap-1 justify-end pt-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -440,21 +455,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                       </Button>
                     </div>
                   )}
-                  
-                  <Button
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    size="sm"
-                    onClick={() => navigate(`/path/${index}`, { state: { card } })}
-                  >
-                    <Target className="h-4 w-4 mr-2" />
-                    View Path
-                  </Button>
-                  
-                  <Button variant="ghost" className="w-full justify-start" size="sm">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
                 </div>
               </CardContent>
             </Card>
