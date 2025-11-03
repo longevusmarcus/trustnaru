@@ -1,16 +1,59 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export default function PathDetail() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [activating, setActivating] = useState(false);
   const card = location.state?.card;
 
   if (!card) {
     navigate("/");
     return null;
   }
+
+  const handleActivatePath = async () => {
+    if (!user || !card.id) return;
+    
+    setActivating(true);
+    try {
+      // Update user profile with active path
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          active_path_id: card.id
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Path activated!",
+        description: "Your action plan has been updated with this career path.",
+      });
+
+      // Navigate to action page
+      navigate("/", { state: { navigateTo: "action" } });
+    } catch (error) {
+      console.error('Error activating path:', error);
+      toast({
+        title: "Activation failed",
+        description: "Failed to activate this path. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setActivating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,8 +115,13 @@ export default function PathDetail() {
         </div>
 
         {/* Action Button */}
-        <Button className="w-full" size="lg" onClick={() => navigate("/")}>
-          Activate This Path
+        <Button 
+          className="w-full" 
+          size="lg" 
+          onClick={handleActivatePath}
+          disabled={activating}
+        >
+          {activating ? "Activating..." : "Activate This Path"}
         </Button>
       </div>
     </div>

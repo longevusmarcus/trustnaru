@@ -186,6 +186,7 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          active_path_id: string | null
           created_at: string
           cv_url: string | null
           display_name: string | null
@@ -196,6 +197,7 @@ export type Database = {
           wizard_data: Json | null
         }
         Insert: {
+          active_path_id?: string | null
           created_at?: string
           cv_url?: string | null
           display_name?: string | null
@@ -206,6 +208,7 @@ export type Database = {
           wizard_data?: Json | null
         }
         Update: {
+          active_path_id?: string | null
           created_at?: string
           cv_url?: string | null
           display_name?: string | null
@@ -215,7 +218,15 @@ export type Database = {
           voice_transcription?: string | null
           wizard_data?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_active_path_id_fkey"
+            columns: ["active_path_id"]
+            isOneToOne: false
+            referencedRelation: "career_paths"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_stats: {
         Row: {
