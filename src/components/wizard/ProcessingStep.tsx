@@ -2,11 +2,11 @@ import { Circle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const ProcessingStep = () => {
-  const [seconds, setSeconds] = useState(0);
+  const [seconds, setSeconds] = useState(180);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSeconds(s => s + 1);
+      setSeconds(s => s > 0 ? s - 1 : 0);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -15,7 +15,7 @@ export const ProcessingStep = () => {
   const formatTime = (s: number) => {
     const mins = Math.floor(s / 60);
     const secs = s % 60;
-    return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : `${secs}s`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
