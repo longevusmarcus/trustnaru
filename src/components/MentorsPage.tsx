@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, MapPin, Building, Users, Search, Loader2 } from "lucide-react";
+import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import useEmblaCarousel from 'embla-carousel-react';
 
 export const MentorsPage = () => {
   const [mentors, setMentors] = useState<any[]>([]);
@@ -16,6 +17,7 @@ export const MentorsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
+  const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
 
   const categories = ["Business", "Technology", "Design", "Marketing", "Finance", "Healthcare"];
 
@@ -37,7 +39,6 @@ export const MentorsPage = () => {
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        // Auto-import if no mentors exist
         await importMentorsFromCSV();
       } else {
         setMentors(data);
@@ -64,7 +65,6 @@ export const MentorsPage = () => {
       const lines = csvText.split('\n');
       const headers = lines[0].split(',').map(h => h.trim().replace(/^"(.*)"$/, '$1'));
       
-      // Valid columns in the mentors table
       const validColumns = [
         'name', 'title', 'company', 'company_url', 'location', 'headline',
         'experience_years', 'key_skills', 'education', 'achievements',
@@ -83,7 +83,6 @@ export const MentorsPage = () => {
         
         const mentor: any = {};
         headers.forEach((header, index) => {
-          // Skip columns that don't exist in the database
           if (!validColumns.includes(header)) return;
           
           let value = values[index];
@@ -111,7 +110,6 @@ export const MentorsPage = () => {
           }
         });
         
-        // Only add if mentor has a name
         if (mentor.name) {
           mentorsToInsert.push(mentor);
         }
@@ -204,9 +202,9 @@ export const MentorsPage = () => {
   }
 
   return (
-    <div className="px-4 pb-24 pt-4 max-w-4xl mx-auto">
+    <div className="px-4 pb-24 pt-4 max-w-full">
       {/* Search Bar */}
-      <div className="mb-6">
+      <div className="mb-6 max-w-4xl mx-auto">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -219,7 +217,7 @@ export const MentorsPage = () => {
       </div>
 
       {/* Category Filter */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="mb-6 max-w-4xl mx-auto flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <Button
           variant={selectedCategory === null ? "default" : "outline"}
           size="sm"
@@ -240,74 +238,178 @@ export const MentorsPage = () => {
       </div>
 
       {/* Results Count */}
-      <div className="mb-4">
+      <div className="mb-4 max-w-4xl mx-auto">
         <p className="text-sm text-muted-foreground">
           {filteredMentors.length} {filteredMentors.length === 1 ? 'mentor' : 'mentors'} found
         </p>
       </div>
 
-      {/* Mentor Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredMentors.map((mentor) => (
-          <Card key={mentor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <Avatar className="h-16 w-16 bg-primary/10">
-                  <AvatarFallback className="text-lg font-semibold bg-primary/10 text-foreground">
-                    {mentor.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">{mentor.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{mentor.title}</p>
-                </div>
-              </div>
+      {/* Swipeable Mentor Cards */}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex gap-4">
+          {filteredMentors.map((mentor) => (
+            <div key={mentor.id} className="flex-[0_0_85%] min-w-0 md:flex-[0_0_45%]">
+              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
+                <CardContent className="p-6 h-full overflow-y-auto max-h-[70vh]">
+                  {/* Header */}
+                  <div className="flex items-start gap-4 mb-6">
+                    <Avatar className="h-16 w-16 bg-primary/10 flex-shrink-0">
+                      <AvatarFallback className="text-lg font-semibold bg-primary/10 text-foreground">
+                        {mentor.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg mb-1">{mentor.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{mentor.title}</p>
+                    </div>
+                  </div>
 
-              {mentor.company && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <Building className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{mentor.company}</span>
-                </div>
-              )}
+                  {/* Basic Info */}
+                  {mentor.company && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <Building className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{mentor.company}</span>
+                    </div>
+                  )}
 
-              {mentor.location && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{mentor.location}</span>
-                </div>
-              )}
+                  {mentor.location && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{mentor.location}</span>
+                    </div>
+                  )}
 
-              {mentor.follower_count && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                  <Users className="h-4 w-4 flex-shrink-0" />
-                  <span>{mentor.follower_count} followers</span>
-                </div>
-              )}
+                  {mentor.follower_count && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                      <Users className="h-4 w-4 flex-shrink-0" />
+                      <span>{mentor.follower_count} followers</span>
+                    </div>
+                  )}
 
-              {mentor.key_skills && mentor.key_skills.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {mentor.key_skills.slice(0, 3).map((skill: string, idx: number) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                  {/* Skills */}
+                  {mentor.key_skills && mentor.key_skills.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                        <Briefcase className="h-4 w-4" />
+                        Key Skills
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {mentor.key_skills.map((skill: string, idx: number) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-              {mentor.profile_url && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => window.open(mentor.profile_url, '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View LinkedIn Profile
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                  {/* Career Path */}
+                  {mentor.career_path && mentor.career_path.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Briefcase className="h-4 w-4" />
+                        Career Journey
+                      </h4>
+                      <div className="space-y-3">
+                        {mentor.career_path.map((job: any, idx: number) => (
+                          <div key={idx} className="border-l-2 border-primary/30 pl-4 py-1">
+                            <p className="text-sm font-medium">{job.title}</p>
+                            <p className="text-xs text-muted-foreground">{job.company}</p>
+                            <p className="text-xs text-muted-foreground/70">{job.duration}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Education */}
+                  {mentor.education && mentor.education.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4" />
+                        Education
+                      </h4>
+                      <div className="space-y-2">
+                        {mentor.education.map((edu: any, idx: number) => (
+                          <div key={idx} className="text-sm">
+                            <p className="font-medium">{edu.school}</p>
+                            <p className="text-xs text-muted-foreground">{edu.degree}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Achievements */}
+                  {mentor.achievements && mentor.achievements.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Trophy className="h-4 w-4" />
+                        Achievements
+                      </h4>
+                      <ul className="space-y-2">
+                        {mentor.achievements.map((achievement: string, idx: number) => (
+                          <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{achievement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Typical Day */}
+                  {mentor.typical_day_routine && mentor.typical_day_routine.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        Typical Day
+                      </h4>
+                      <ul className="space-y-2">
+                        {mentor.typical_day_routine.map((activity: string, idx: number) => (
+                          <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{activity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Leadership Philosophy */}
+                  {mentor.leadership_philosophy && mentor.leadership_philosophy.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4" />
+                        Leadership Philosophy
+                      </h4>
+                      <ul className="space-y-2">
+                        {mentor.leadership_philosophy.map((philosophy: string, idx: number) => (
+                          <li key={idx} className="text-xs text-muted-foreground italic border-l-2 border-primary/20 pl-3 py-1">
+                            {philosophy}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* LinkedIn Profile Button */}
+                  {mentor.profile_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => window.open(mentor.profile_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View LinkedIn Profile
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
       </div>
 
       {filteredMentors.length === 0 && !loading && (
