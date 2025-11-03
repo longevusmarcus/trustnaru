@@ -25,7 +25,8 @@ const slides = [
   {
     icon: Crown,
     title: "The Vision",
-    content: "The OS for becoming. We're turning career development into a science, so every person can live the life they were meant for.",
+    content:
+      "The OS for becoming. We're turning career development into a science, so every person can live the life they were meant for.",
   },
   {
     icon: Zap,
@@ -34,7 +35,7 @@ const slides = [
     items: [
       "Align your energy",
       "See your future self",
-      "Unlock your career paths"
+      "Unlock your career paths",
       "Take action every day",
       "Track your evolution",
     ],
@@ -42,12 +43,13 @@ const slides = [
   {
     icon: Eye,
     title: "Your Journey",
-    content: "\"This is who you could become, and here's how.\"",
+    content: '"This is who you could become, and here\'s how."',
   },
   {
     icon: LineChart,
     title: "Collective Intelligence",
-    content: "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
+    content:
+      "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
   },
 ];
 
@@ -63,9 +65,12 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
     if (slide.items) {
       const timers: NodeJS.Timeout[] = [];
       slide.items.forEach((_, index) => {
-        const timer = setTimeout(() => {
-          setVisibleItems(index + 1);
-        }, (index + 1) * 600);
+        const timer = setTimeout(
+          () => {
+            setVisibleItems(index + 1);
+          },
+          (index + 1) * 600,
+        );
         timers.push(timer);
       });
       return () => timers.forEach(clearTimeout);
@@ -76,7 +81,7 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
     if (isLast) {
       onComplete();
     } else {
-      setCurrentSlide(prev => prev + 1);
+      setCurrentSlide((prev) => prev + 1);
     }
   };
 
@@ -93,26 +98,18 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
         {/* Content */}
         <div className="text-center space-y-6">
           <h2 className="text-2xl font-light tracking-wide">{slide.title}</h2>
-          
-          {slide.content && (
-            <p className="text-muted-foreground text-base leading-relaxed">
-              {slide.content}
-            </p>
-          )}
+
+          {slide.content && <p className="text-muted-foreground text-base leading-relaxed">{slide.content}</p>}
 
           {slide.items && (
             <div className="space-y-4 pt-2">
-              {slide.subtitle && (
-                <p className="text-muted-foreground text-sm">{slide.subtitle}</p>
-              )}
+              {slide.subtitle && <p className="text-muted-foreground text-sm">{slide.subtitle}</p>}
               <div className="space-y-4">
                 {slide.items.map((item, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`flex items-center gap-3 justify-center transition-all duration-500 ${
-                      index < visibleItems 
-                        ? 'opacity-100 translate-y-0' 
-                        : 'opacity-0 translate-y-4'
+                      index < visibleItems ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                     }`}
                   >
                     <MoveRight className="w-4 h-4 text-primary" strokeWidth={1.5} />
@@ -132,20 +129,15 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
               <div
                 key={index}
                 className={`h-1.5 rounded-full transition-all ${
-                  index === currentSlide 
-                    ? 'w-8 bg-primary' 
-                    : 'w-1.5 bg-primary/20'
+                  index === currentSlide ? "w-8 bg-primary" : "w-1.5 bg-primary/20"
                 }`}
               />
             ))}
           </div>
 
           {/* Button */}
-          <Button 
-            onClick={handleNext}
-            className="w-full h-11 text-base font-medium group"
-          >
-            {isLast ? 'Begin Your Journey' : 'Continue'}
+          <Button onClick={handleNext} className="w-full h-11 text-base font-medium group">
+            {isLast ? "Begin Your Journey" : "Continue"}
             <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
