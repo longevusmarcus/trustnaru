@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Target, Compass, Database, Rocket, Zap, Eye, Activity, TrendingUp } from "lucide-react";
+import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart } from "lucide-react";
 
 interface IntroOnboardingProps {
   onComplete: () => void;
@@ -8,7 +8,7 @@ interface IntroOnboardingProps {
 
 const slides = [
   {
-    icon: Target,
+    icon: Sparkles,
     title: "The Problem",
     content: "People don't know who they're becoming, or how to become it.",
   },
@@ -23,7 +23,7 @@ const slides = [
     content: "Proprietary dataset of human potential.",
   },
   {
-    icon: Rocket,
+    icon: Crown,
     title: "The Vision",
     content: "The OS for becoming. We're turning self-development into a science, so every person can live the life they were meant for.",
   },
@@ -44,7 +44,7 @@ const slides = [
     content: "\"This is who I could become, and here's how.\"",
   },
   {
-    icon: TrendingUp,
+    icon: LineChart,
     title: "Collective Intelligence",
     content: "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
   },
@@ -69,8 +69,8 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
       <div className="max-w-lg w-full space-y-12 animate-fade-in">
         {/* Icon */}
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-            <Icon className="w-8 h-8 text-primary" />
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center backdrop-blur-sm border border-primary/10">
+            <Icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
           </div>
         </div>
 
