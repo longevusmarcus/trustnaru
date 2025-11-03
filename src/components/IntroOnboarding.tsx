@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart } from "lucide-react";
+import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart, MoveRight } from "lucide-react";
 
 interface IntroOnboardingProps {
   onComplete: () => void;
@@ -30,7 +30,7 @@ const slides = [
   {
     icon: Zap,
     title: "Life OS",
-    subtitle: "Path Genius will evolve into the Life OS:",
+    subtitle: "Naru will evolve into the Life OS:",
     items: [
       "Align your energy",
       "See your future self",
@@ -52,9 +52,24 @@ const slides = [
 
 export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [visibleItems, setVisibleItems] = useState<number>(0);
   const slide = slides[currentSlide];
   const Icon = slide.icon;
   const isLast = currentSlide === slides.length - 1;
+
+  useEffect(() => {
+    setVisibleItems(0);
+    if (slide.items) {
+      const timers: NodeJS.Timeout[] = [];
+      slide.items.forEach((_, index) => {
+        const timer = setTimeout(() => {
+          setVisibleItems(index + 1);
+        }, (index + 1) * 600);
+        timers.push(timer);
+      });
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [currentSlide]);
 
   const handleNext = () => {
     if (isLast) {
@@ -89,10 +104,17 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
               {slide.subtitle && (
                 <p className="text-muted-foreground text-sm">{slide.subtitle}</p>
               )}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {slide.items.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3 justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-3 justify-center transition-all duration-500 ${
+                      index < visibleItems 
+                        ? 'opacity-100 translate-y-0' 
+                        : 'opacity-0 translate-y-4'
+                    }`}
+                  >
+                    <MoveRight className="w-4 h-4 text-primary" strokeWidth={1.5} />
                     <span className="text-foreground text-sm">{item}</span>
                   </div>
                 ))}
