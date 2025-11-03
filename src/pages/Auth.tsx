@@ -141,72 +141,78 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <AuthStatusBanner isOffline={isOffline} />
-          <CardTitle className="text-2xl">
-            {isSignUp ? "Create an account" : "Welcome back"}
-          </CardTitle>
-          <CardDescription>
-            {isSignUp
-              ? "Enter your details to create your account"
-              : "Enter your credentials to access your account"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-muted/20 p-4">
+      <div className="w-full max-w-md">
+        <AuthStatusBanner isOffline={isOffline} />
+        
+        {/* Crystal Ball and Welcome Text */}
+        <div className="text-center mb-8 animate-fade-in">
+          <div className="w-32 h-32 mx-auto mb-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 rounded-full blur-2xl animate-pulse" />
+            <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-500/30 backdrop-blur-sm flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400/40 to-emerald-600/30 backdrop-blur-md" />
+            </div>
+          </div>
+          
+          <h1 className="text-4xl font-serif italic mb-2">Welcome to Naru</h1>
+          <p className="text-muted-foreground">
+            Learn to trust your gut and make decisions that feel right.
+          </p>
+        </div>
+
+        {/* Auth Card */}
+        <Card className="border-muted/50 shadow-xl">
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="Email address"
+                className="h-12 bg-background/50"
                 {...register("email")}
                 disabled={isLoading}
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Password"
+                className="h-12 bg-background/50"
                 {...register("password")}
                 disabled={isLoading}
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
-            </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSignUp ? "Sign up" : "Sign in"}
-            </Button>
-
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="link"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  reset();
-                }}
-                disabled={isLoading}
-              >
-                {isSignUp
-                  ? "Already have an account? Sign in"
-                  : "Don't have an account? Sign up"}
+              <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSignUp ? "Sign up" : "Sign in"}
               </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+
+              <div className="text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-muted-foreground"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    reset();
+                  }}
+                  disabled={isLoading}
+                >
+                  {isSignUp
+                    ? "Already have an account? Sign in"
+                    : "Don't have an account? Sign up"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
