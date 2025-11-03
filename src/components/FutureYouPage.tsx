@@ -263,6 +263,29 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <p className="text-muted-foreground">7 possible versions of you in 2029</p>
         </div>
 
+        <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleGenerateNewVersions}
+            disabled={loading}
+            className="h-auto py-1 px-2 text-xs"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+            generate versions (75% CV focus)
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleGenerateNewVersions}
+            disabled={loading}
+            className="h-auto py-1 px-2 text-xs"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+            generate more versions (75% energy focus)
+          </Button>
+        </div>
+
         <div className="space-y-4">
           {futureCards.map((card, index) => (
             <Card key={index} className="overflow-hidden border-border/50">
