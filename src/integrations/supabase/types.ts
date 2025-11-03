@@ -46,6 +46,7 @@ export type Database = {
       }
       career_paths: {
         Row: {
+          affirmations: string[] | null
           all_images: string[] | null
           category: string | null
           created_at: string
@@ -57,6 +58,7 @@ export type Database = {
           journey_duration: string | null
           key_skills: string[] | null
           lifestyle_benefits: string[] | null
+          roadmap: Json | null
           salary_range: string | null
           target_companies: string[] | null
           title: string
@@ -64,6 +66,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affirmations?: string[] | null
           all_images?: string[] | null
           category?: string | null
           created_at?: string
@@ -75,6 +78,7 @@ export type Database = {
           journey_duration?: string | null
           key_skills?: string[] | null
           lifestyle_benefits?: string[] | null
+          roadmap?: Json | null
           salary_range?: string | null
           target_companies?: string[] | null
           title: string
@@ -82,6 +86,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affirmations?: string[] | null
           all_images?: string[] | null
           category?: string | null
           created_at?: string
@@ -93,6 +98,7 @@ export type Database = {
           journey_duration?: string | null
           key_skills?: string[] | null
           lifestyle_benefits?: string[] | null
+          roadmap?: Json | null
           salary_range?: string | null
           target_companies?: string[] | null
           title?: string

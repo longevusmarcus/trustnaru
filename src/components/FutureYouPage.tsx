@@ -137,8 +137,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     category: path.category,
     keySkills: path.key_skills || [],
     lifestyleBenefits: path.lifestyle_benefits || [],
-    roadmap: [],
-    affirmations: []
+    roadmap: path.roadmap || [],
+    affirmations: path.affirmations || []
   })) : [
     {
       title: "Creative Strategist",
@@ -281,6 +281,31 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                 <div className="text-sm text-muted-foreground">
                   <p className="line-clamp-3">{card.role}</p>
                 </div>
+
+                {/* Mini Roadmap - show first 2 steps */}
+                {card.roadmap && card.roadmap.length > 0 && (
+                  <div className="space-y-2 pt-2">
+                    <h4 className="text-xs font-semibold text-foreground/80">Quick Roadmap:</h4>
+                    {card.roadmap.slice(0, 2).map((step: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="flex-shrink-0 w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-medium mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          <span className="font-medium">{step.step}</span>
+                          <span className="text-muted-foreground/70"> • {step.duration}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Affirmation - show first one */}
+                {card.affirmations && card.affirmations.length > 0 && (
+                  <div className="pt-2 border-t border-border/30">
+                    <p className="text-xs italic text-muted-foreground/80">"{card.affirmations[0]}"</p>
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
