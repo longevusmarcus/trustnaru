@@ -11,6 +11,7 @@ import { ProfilePage } from "@/components/ProfilePage";
 import { InsightsPage } from "@/components/InsightsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
@@ -18,6 +19,9 @@ const Index = () => {
   const [showWizard, setShowWizard] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const location = useLocation();
+  const isNavVisible = useScrollDirection();
+  
+  const shouldHideNavOnScroll = currentPage === "mentors" || currentPage === "profile";
 
   // Check if we need to navigate to copilot page after path activation
   useEffect(() => {
@@ -85,7 +89,11 @@ const Index = () => {
         {currentPage === "profile" && <ProfilePage />}
       </main>
 
-      <BottomNav active={currentPage} onNavigate={handleNavigation} />
+      <BottomNav 
+        active={currentPage} 
+        onNavigate={handleNavigation}
+        isVisible={shouldHideNavOnScroll ? isNavVisible : true}
+      />
     </div>
   );
 };

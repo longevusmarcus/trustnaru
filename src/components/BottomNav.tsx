@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 interface BottomNavProps {
   active: string;
   onNavigate: (page: string) => void;
+  isVisible?: boolean;
 }
 
-export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
+export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavProps) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 pb-safe pointer-events-none">
+    <nav className={`fixed bottom-0 left-0 right-0 pb-safe pointer-events-none transition-transform duration-300 ${
+      isVisible ? 'translate-y-0' : 'translate-y-full'
+    }`}>
       <div className="max-w-md mx-auto px-4 pb-6">
         <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-full shadow-lg pointer-events-auto">
           <div className="flex items-center justify-around h-16 px-6 relative">
