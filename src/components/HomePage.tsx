@@ -181,7 +181,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       <div className="max-w-md mx-auto space-y-6">
         {/* Greeting */}
         <div className="flex items-center justify-between">
-          <h2 className="text-4xl font-cursive font-medium">Hey, {displayName || 'there'}</h2>
+          <h2 className="text-4xl font-light tracking-wide">Hey, {displayName || 'there'}</h2>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/5">
               <Flame className="h-4 w-4 text-orange-500" />
