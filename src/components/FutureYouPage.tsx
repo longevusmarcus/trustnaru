@@ -294,7 +294,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             className="h-auto py-1 px-2 text-xs"
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate versions (75% CV focus)
+            generate more versions (75% CV focus)
           </Button>
           <Button 
             variant="ghost" 
@@ -470,7 +470,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             className="h-auto py-1 px-2 text-xs"
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate versions (75% CV focus)
+            generate more versions (75% CV focus)
           </Button>
           <Button 
             variant="ghost" 
