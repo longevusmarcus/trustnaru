@@ -6,12 +6,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 export const ActionPage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [activePath, setActivePath] = useState<any>(null);
   const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [goalDialogOpen, setGoalDialogOpen] = useState(false);
+  const [quickWinsOpen, setQuickWinsOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState("");
 
   useEffect(() => {
     loadData();
@@ -87,6 +94,28 @@ export const ActionPage = () => {
 
   const goalsCompleted = activePath ? 1 : 0;
   const totalGoals = activePath ? roadmapMilestones.length : 0;
+
+  const quickWinsSuggestions = activePath ? [
+    `Update LinkedIn with "${activePath.title}" as target role`,
+    `Spend 15 minutes researching ${activePath.target_companies?.[0] || 'top companies'}`,
+    `Watch one tutorial about ${activePath.key_skills?.[0] || 'key skills'}`,
+    `Connect with one person working as ${activePath.title}`,
+    `Read one article about ${activePath.category} careers`,
+  ] : [
+    "Activate a career path first",
+  ];
+
+  const handleAddGoal = () => {
+    if (!newGoal.trim()) return;
+    
+    toast({
+      title: "Goal added!",
+      description: "Keep pushing towards your future.",
+    });
+    
+    setNewGoal("");
+    setGoalDialogOpen(false);
+  };
 
   if (loading) {
     return (
@@ -236,14 +265,63 @@ export const ActionPage = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <Target className="h-5 w-5" />
-              <span className="text-xs">Set Goals</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <Zap className="h-5 w-5" />
-              <span className="text-xs">Quick Wins</span>
-            </Button>
+            <Dialog open={goalDialogOpen} onOpenChange={setGoalDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Target className="h-5 w-5" />
+                  <span className="text-xs">Set Goals</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add a Goal</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <Input
+                    placeholder="What do you want to achieve?"
+                    value={newGoal}
+                    onChange={(e) => setNewGoal(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
+                  />
+                  <Button onClick={handleAddGoal} className="w-full">
+                    Add Goal
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Zap className="h-5 w-5" />
+                  <span className="text-xs">Quick Wins</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Quick Wins</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-2 pt-4">
+                  {quickWinsSuggestions.map((win, idx) => (
+                    <Button
+                      key={idx}
+                      variant="ghost"
+                      className="w-full justify-start h-auto py-3 text-left"
+                      onClick={() => {
+                        toast({
+                          title: "Nice!",
+                          description: "Task added to today's actions.",
+                        });
+                        setQuickWinsOpen(false);
+                      }}
+                    >
+                      <Zap className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="text-sm">{win}</span>
+                    </Button>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
