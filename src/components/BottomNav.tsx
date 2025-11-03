@@ -54,7 +54,7 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
               }`}
             >
               <Eye className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Journey</span>
+              <span className="text-[10px] font-medium">Futures</span>
             </Button>
             
             <Button
@@ -66,7 +66,7 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
               }`}
             >
               <Target className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Profile</span>
+              <span className="text-[10px] font-medium">Copilot</span>
             </Button>
           </div>
         </div>
