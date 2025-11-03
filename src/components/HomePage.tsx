@@ -1,4 +1,4 @@
-import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Sparkles, X, ArrowRight } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -317,7 +317,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           >
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                <Sparkles className="h-5 w-5 text-primary" />
+                <Lightbulb className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold mb-2">{dailyTopic.title}</h3>
