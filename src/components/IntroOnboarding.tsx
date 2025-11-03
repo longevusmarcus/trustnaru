@@ -41,7 +41,7 @@ const slides = [
   {
     icon: Eye,
     title: "Your Journey",
-    content: "\"This is who I could become, and here's how.\"",
+    content: "\"This is who you could become, and here's how.\"",
   },
   {
     icon: LineChart,
