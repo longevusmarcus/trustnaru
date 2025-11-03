@@ -40,7 +40,7 @@ const Index = () => {
   const getHeaderTitle = () => {
     switch (currentPage) {
       case "home": return "dashboard";
-      case "mentors": return "mentors";
+      case "mentors": return "clones";
       case "insights": return "insights";
       case "future": return "your futures";
       case "copilot": return "copilot";

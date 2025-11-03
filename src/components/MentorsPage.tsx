@@ -208,7 +208,7 @@ export const MentorsPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search mentors by name, title, or company..."
+            placeholder="Search clones by name, title, or company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -240,7 +240,7 @@ export const MentorsPage = () => {
       {/* Results Count */}
       <div className="mb-4 max-w-4xl mx-auto">
         <p className="text-sm text-muted-foreground">
-          {filteredMentors.length} {filteredMentors.length === 1 ? 'mentor' : 'mentors'} found
+          {filteredMentors.length} {filteredMentors.length === 1 ? 'clone' : 'clones'} found
         </p>
       </div>
 
@@ -393,18 +393,15 @@ export const MentorsPage = () => {
                     </div>
                   )}
 
-                  {/* LinkedIn Profile Button */}
-                  {mentor.profile_url && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => window.open(mentor.profile_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View LinkedIn Profile
-                    </Button>
-                  )}
+                  {/* Clone Profile Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled
+                  >
+                    Clone Profile (Soon Available)
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -414,7 +411,7 @@ export const MentorsPage = () => {
 
       {filteredMentors.length === 0 && !loading && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No mentors found matching your criteria.</p>
+          <p className="text-muted-foreground">No clones found matching your criteria.</p>
         </div>
       )}
     </div>
