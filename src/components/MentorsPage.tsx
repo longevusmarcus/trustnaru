@@ -252,9 +252,9 @@ export const MentorsPage = () => {
           <Card key={mentor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start gap-4 mb-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="text-lg font-semibold">
-                    {mentor.name?.split(' ').map((n: string) => n[0]).join('')}
+                <Avatar className="h-16 w-16 bg-primary/10">
+                  <AvatarFallback className="text-lg font-semibold bg-primary/10 text-foreground">
+                    {mentor.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
