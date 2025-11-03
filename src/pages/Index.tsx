@@ -22,7 +22,7 @@ const Index = () => {
   const isNavVisible = useScrollDirection();
   const [isCardScrolling, setIsCardScrolling] = useState(false);
   
-  const shouldHideNavOnScroll = currentPage === "mentors";
+  const shouldHideNavOnScroll = currentPage === "mentors" || currentPage === "profile";
   const shouldShowNav = shouldHideNavOnScroll ? (isNavVisible && !isCardScrolling) : true;
 
   // Check if we need to navigate to copilot page after path activation
