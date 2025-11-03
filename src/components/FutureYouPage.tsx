@@ -307,6 +307,32 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     <p className="text-xs italic text-muted-foreground/80">"{card.affirmations[0]}"</p>
                   </div>
                 )}
+
+                {/* Lifestyle Benefits - show first 2 */}
+                {card.lifestyleBenefits && card.lifestyleBenefits.length > 0 && (
+                  <div className="pt-3 space-y-2">
+                    <h4 className="text-xs font-semibold text-foreground/80">Lifestyle:</h4>
+                    {card.lifestyleBenefits.slice(0, 2).map((benefit: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                        <span>{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Daily Routine - show first 2 */}
+                {card.typicalDayRoutine && card.typicalDayRoutine.length > 0 && (
+                  <div className="pt-3 space-y-2">
+                    <h4 className="text-xs font-semibold text-foreground/80">Daily Routine:</h4>
+                    {card.typicalDayRoutine.slice(0, 2).map((activity: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                        <span>{activity}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
