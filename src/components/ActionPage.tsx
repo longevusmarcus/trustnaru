@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp } from "lucide-react";
+import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -272,20 +272,47 @@ export const ActionPage = () => {
                   <span className="text-xs">Set Goals</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add a Goal</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 pt-4">
-                  <Input
-                    placeholder="What do you want to achieve?"
-                    value={newGoal}
-                    onChange={(e) => setNewGoal(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
-                  />
-                  <Button onClick={handleAddGoal} className="w-full">
-                    Add Goal
+              <DialogContent className="max-w-2xl p-0 gap-0 border-0">
+                <div className="relative">
+                  {/* Header */}
+                  <div className="text-center pt-8 pb-6 px-6 border-b">
+                    <h2 className="text-2xl font-bold mb-2">Set Your Goal</h2>
+                    <p className="text-sm text-muted-foreground">Define what you want to achieve</p>
+                  </div>
+                  
+                  {/* Close Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="absolute top-4 right-4 rounded-full"
+                    onClick={() => setGoalDialogOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
                   </Button>
+
+                  {/* Content Card */}
+                  <div className="p-6">
+                    <div className="bg-muted/30 rounded-2xl p-8">
+                      <Input
+                        placeholder="What do you want to achieve?"
+                        value={newGoal}
+                        onChange={(e) => setNewGoal(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
+                        className="h-14 text-base border-0 bg-background/50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="px-6 pb-6">
+                    <Button 
+                      onClick={handleAddGoal}
+                      className="w-full h-12 rounded-full text-base font-semibold"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Add Goal
+                    </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>
@@ -297,28 +324,58 @@ export const ActionPage = () => {
                   <span className="text-xs">Quick Wins</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Quick Wins</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-2 pt-4">
-                  {quickWinsSuggestions.map((win, idx) => (
-                    <Button
-                      key={idx}
-                      variant="ghost"
-                      className="w-full justify-start h-auto py-3 text-left"
-                      onClick={() => {
-                        toast({
-                          title: "Nice!",
-                          description: "Task added to today's actions.",
-                        });
-                        setQuickWinsOpen(false);
-                      }}
+              <DialogContent className="max-w-2xl p-0 gap-0 border-0">
+                <div className="relative">
+                  {/* Header */}
+                  <div className="text-center pt-8 pb-6 px-6 border-b">
+                    <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
+                    <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
+                  </div>
+                  
+                  {/* Close Button */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="absolute top-4 right-4 rounded-full"
+                    onClick={() => setQuickWinsOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+
+                  {/* Content Card */}
+                  <div className="p-6">
+                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
+                      {quickWinsSuggestions.map((win, idx) => (
+                        <button
+                          key={idx}
+                          className="w-full text-left p-4 rounded-xl bg-background/50 hover:bg-background transition-colors"
+                          onClick={() => {
+                            toast({
+                              title: "Nice!",
+                              description: "Task added to today's actions.",
+                            });
+                            setQuickWinsOpen(false);
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-sm leading-relaxed">{win}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="px-6 pb-6">
+                    <Button 
+                      onClick={() => setQuickWinsOpen(false)}
+                      className="w-full h-12 rounded-full text-base font-semibold"
                     >
-                      <Zap className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <span className="text-sm">{win}</span>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Taking Action
                     </Button>
-                  ))}
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>

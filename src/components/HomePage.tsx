@@ -337,53 +337,67 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
         {/* Featured Content Dialog */}
         <Dialog open={featuredDialogOpen} onOpenChange={setFeaturedDialogOpen}>
-          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            <div className="space-y-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold">{dailyTopic.title}</h2>
-                    <p className="text-sm text-muted-foreground">Personalized for you</p>
-                  </div>
+          <DialogContent className="max-w-2xl p-0 gap-0 border-0">
+            <div className="relative">
+              {/* Header */}
+              <div className="text-center pt-8 pb-6 px-6 border-b">
+                <h2 className="text-2xl font-bold mb-2">{dailyTopic.title}</h2>
+                <p className="text-sm text-muted-foreground">Personalized insights for your journey</p>
+              </div>
+              
+              {/* Close Button */}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="absolute top-4 right-4 rounded-full"
+                onClick={() => setFeaturedDialogOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+
+              {/* Content Card */}
+              <div className="p-6">
+                <div className="bg-muted/30 rounded-2xl p-8 min-h-[300px]">
+                  {loadingContent ? (
+                    <div className="space-y-4">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-4/6" />
+                      <div className="pt-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-5/6" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      <div className="text-foreground/90 whitespace-pre-line leading-relaxed">
+                        {featuredContent}
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="px-6 pb-6">
                 <Button 
-                  variant="ghost" 
-                  size="icon"
+                  className="w-full h-12 rounded-full text-base font-semibold" 
                   onClick={() => setFeaturedDialogOpen(false)}
                 >
-                  <X className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Continue Your Journey
                 </Button>
               </div>
 
-              {loadingContent ? (
-                <div className="space-y-4 py-4">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-4/6" />
-                  <div className="pt-4">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
+              {/* Info Section */}
+              <div className="px-6 pb-6">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
+                  <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Sparkles className="h-2.5 w-2.5 text-primary" />
                   </div>
+                  <span>AI-Personalized Daily Feature</span>
                 </div>
-              ) : (
-                <div className="prose prose-sm max-w-none">
-                  <div className="text-foreground/90 whitespace-pre-line leading-relaxed">
-                    {featuredContent}
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-4 border-t">
-                <Button 
-                  className="w-full" 
-                  onClick={() => setFeaturedDialogOpen(false)}
-                >
-                  Close
-                </Button>
               </div>
             </div>
           </DialogContent>
