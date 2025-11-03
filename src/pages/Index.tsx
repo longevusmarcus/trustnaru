@@ -11,12 +11,14 @@ import { ProfilePage } from "@/components/ProfilePage";
 import { InsightsPage } from "@/components/InsightsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
+import { IntroOnboarding } from "@/components/IntroOnboarding";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState("home");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const location = useLocation();
   const isNavVisible = useScrollDirection();
@@ -62,6 +64,11 @@ const Index = () => {
   const handleWizardComplete = (paths: any[]) => {
     setShowWizard(false);
     setCareerPaths(paths);
+    setShowIntro(true);
+  };
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
     setCurrentPage("future");
   };
 
@@ -76,6 +83,10 @@ const Index = () => {
         onClose={() => setShowWizard(false)}
       />
     );
+  }
+
+  if (showIntro) {
+    return <IntroOnboarding onComplete={handleIntroComplete} />;
   }
 
   return (
