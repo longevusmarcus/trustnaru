@@ -279,15 +279,17 @@ const Auth = () => {
                     </Button>
                     
                     {!isSignUp && (
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0 block"
-                        onClick={() => setShowForgotPassword(true)}
-                        disabled={isLoading}
-                      >
-                        Forgot password?
-                      </Button>
+                      <div className="w-full flex justify-center">
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
+                          onClick={() => setShowForgotPassword(true)}
+                          disabled={isLoading}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
                     )}
                   </>
                 )}
