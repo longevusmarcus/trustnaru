@@ -49,8 +49,8 @@ export const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onNavigate("action")}
-          className={active === "action" ? "text-foreground" : "text-muted-foreground"}
+          onClick={() => onNavigate("copilot")}
+          className={active === "copilot" ? "text-foreground" : "text-muted-foreground"}
         >
           <Target className="h-5 w-5" />
         </Button>
