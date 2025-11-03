@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { HomePage } from "@/components/HomePage";
 import { SearchPage } from "@/components/SearchPage";
+import { MentorsPage } from "@/components/MentorsPage";
 import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
 import { ProfilePage } from "@/components/ProfilePage";
@@ -77,7 +78,7 @@ const Index = () => {
       
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
-        {currentPage === "mentors" && <SearchPage />}
+        {currentPage === "mentors" && <MentorsPage />}
         {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "copilot" && <ActionPage />}
