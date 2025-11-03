@@ -74,6 +74,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [featuredDialogOpen, setFeaturedDialogOpen] = useState(false);
   const [featuredContent, setFeaturedContent] = useState<string>('');
   const [loadingContent, setLoadingContent] = useState(false);
+  const [displayName, setDisplayName] = useState<string>('');
   const weekDates = getWeekDates();
   const dailyTopic = getDailyFeaturedTopic();
 
@@ -85,7 +86,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const weekEnd = weekDates[6].toISOString().split('T')[0];
 
       // Fetch all data in parallel
-      const [statsResult, streakResult, badgesResult, pathsResult] = await Promise.all([
+      const [statsResult, streakResult, badgesResult, pathsResult, profileResult] = await Promise.all([
         supabase
           .from('user_stats')
           .select('*')
@@ -109,7 +110,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(1)
+          .limit(1),
+        supabase
+          .from('user_profiles')
+          .select('display_name')
+          .eq('user_id', user.id)
+          .maybeSingle()
       ]);
 
       if (!statsResult.data) {
@@ -133,6 +139,13 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       if (pathsResult.data && pathsResult.data.length > 0) {
         setFirstPath(pathsResult.data[0]);
+      }
+
+      if (profileResult.data?.display_name) {
+        setDisplayName(profileResult.data.display_name);
+      } else {
+        const defaultName = user.email?.split('@')[0] || 'there';
+        setDisplayName(defaultName);
       }
     };
 
@@ -168,7 +181,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       <div className="max-w-md mx-auto space-y-6">
         {/* Greeting */}
         <div className="flex items-center justify-between">
-          <h2 className="text-4xl font-cursive font-medium">Hey, Izzy</h2>
+          <h2 className="text-4xl font-cursive font-medium">Hey, {displayName || 'there'}</h2>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/5">
               <Flame className="h-4 w-4 text-orange-500" />
