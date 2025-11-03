@@ -1,10 +1,13 @@
-import { ChevronRight, Target, BookOpen, Compass, Flame, Award } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Sparkles, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -44,6 +47,22 @@ const dailyMissions = [
   }
 ];
 
+const featuredTopics = [
+  { title: "Design Your Future", description: "A guided pathway to visualize and plan your ideal future self" },
+  { title: "Build Your Network", description: "Strategic approaches to connect with the right people" },
+  { title: "Master Your Craft", description: "Daily practices to develop expertise in your field" },
+  { title: "Find Your Voice", description: "Discover and communicate your unique value proposition" },
+  { title: "Create Impact", description: "Transform your work into meaningful contributions" },
+  { title: "Stay Resilient", description: "Build mental strength for your career journey" },
+  { title: "Embrace Change", description: "Navigate transitions with confidence and clarity" },
+];
+
+const getDailyFeaturedTopic = () => {
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+  return featuredTopics[dayOfYear % featuredTopics.length];
+};
+
 
 export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const { toast } = useToast();
@@ -52,7 +71,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [streaks, setStreaks] = useState<Date[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
   const [firstPath, setFirstPath] = useState<any>(null);
+  const [featuredDialogOpen, setFeaturedDialogOpen] = useState(false);
+  const [featuredContent, setFeaturedContent] = useState<string>('');
+  const [loadingContent, setLoadingContent] = useState(false);
   const weekDates = getWeekDates();
+  const dailyTopic = getDailyFeaturedTopic();
 
   useEffect(() => {
     const fetchGamificationData = async () => {
@@ -115,6 +138,30 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
     fetchGamificationData();
   }, [user]);
+
+  const handleFeaturedClick = async () => {
+    setFeaturedDialogOpen(true);
+    setLoadingContent(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-featured-content', {
+        body: { topic: dailyTopic.title }
+      });
+
+      if (error) throw error;
+      setFeaturedContent(data.content);
+    } catch (error) {
+      console.error('Error generating featured content:', error);
+      toast({
+        title: "Unable to load content",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+      setFeaturedDialogOpen(false);
+    } finally {
+      setLoadingContent(false);
+    }
+  };
 
   return (
     <div className="px-4 pb-24 pt-4">
@@ -263,15 +310,84 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
         {/* Featured */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured</p>
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-2">Design Your Future</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              A guided pathway to visualize and plan your ideal future self
-            </p>
-            <div className="text-xs text-muted-foreground">30 min • Beginner friendly</div>
+          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured Today</p>
+          <Card 
+            className="p-6 cursor-pointer hover:shadow-lg transition-all group"
+            onClick={handleFeaturedClick}
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-2">{dailyTopic.title}</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {dailyTopic.description}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>AI-Personalized</span>
+                  <span>•</span>
+                  <span>Daily Feature</span>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
           </Card>
         </div>
+
+        {/* Featured Content Dialog */}
+        <Dialog open={featuredDialogOpen} onOpenChange={setFeaturedDialogOpen}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            <div className="space-y-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold">{dailyTopic.title}</h2>
+                    <p className="text-sm text-muted-foreground">Personalized for you</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setFeaturedDialogOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {loadingContent ? (
+                <div className="space-y-4 py-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/6" />
+                  <div className="pt-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none">
+                  <div className="text-foreground/90 whitespace-pre-line leading-relaxed">
+                    {featuredContent}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 border-t">
+                <Button 
+                  className="w-full" 
+                  onClick={() => setFeaturedDialogOpen(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
