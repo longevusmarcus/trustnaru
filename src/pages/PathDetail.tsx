@@ -145,14 +145,6 @@ export default function PathDetail() {
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-full max-h-full w-screen h-screen p-0 border-0 bg-black/95">
           <div className="relative w-full h-full flex items-center justify-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X className="h-6 w-6" />
-            </Button>
             {selectedImage && (
               <img 
                 src={selectedImage} 
