@@ -55,7 +55,7 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter code"
-            className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+            className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors"
             autoFocus
           />
         </form>

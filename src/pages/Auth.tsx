@@ -210,7 +210,7 @@ const Auth = () => {
                 id="email"
                 type="email"
                 placeholder="Email address"
-                className="h-11 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+                className="h-11 bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors"
                 {...register("email")}
                 disabled={isLoading}
               />
@@ -224,7 +224,7 @@ const Auth = () => {
                     id="password"
                     type="password"
                     placeholder="Password"
-                    className="h-11 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+                    className="h-11 bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors"
                     {...register("password")}
                     disabled={isLoading}
                   />
