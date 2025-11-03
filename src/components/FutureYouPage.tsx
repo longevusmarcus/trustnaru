@@ -394,16 +394,29 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           ))}
         </div>
 
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          size="lg"
-          onClick={handleGenerateNewVersions}
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Generate New Versions
-        </Button>
+        <div className="flex gap-2 items-center justify-center text-xs text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleGenerateNewVersions}
+            disabled={loading}
+            className="h-auto py-1 px-2 text-xs"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+            generate versions (75% CV focus)
+          </Button>
+          <span>•</span>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleGenerateNewVersions}
+            disabled={loading}
+            className="h-auto py-1 px-2 text-xs"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+            generate more versions (75% energy focus)
+          </Button>
+        </div>
       </div>
     </div>
   );
