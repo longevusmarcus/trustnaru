@@ -253,8 +253,9 @@ export const MentorsPage = () => {
             <CardContent className="p-6">
               <div className="flex items-start gap-4 mb-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={mentor.profile_image_url} alt={mentor.name} />
-                  <AvatarFallback>{mentor.name?.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
+                  <AvatarFallback className="text-lg font-semibold">
+                    {mentor.name?.split(' ').map((n: string) => n[0]).join('')}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg truncate">{mentor.name}</h3>
