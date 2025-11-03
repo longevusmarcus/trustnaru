@@ -34,7 +34,7 @@ export const MobileOnly = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-center text-3xl font-light tracking-wide mb-3" style={{ fontFamily: "'Dancing Script', cursive" }}>
+          <h1 className="text-center text-3xl font-light tracking-wide mb-3">
             Naru
           </h1>
 
