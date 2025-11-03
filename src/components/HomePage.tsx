@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -335,12 +335,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           </Card>
         </div>
 
-        {/* Featured Content Dialog */}
-        <Dialog open={featuredDialogOpen} onOpenChange={setFeaturedDialogOpen}>
-          <DialogContent className="max-w-2xl p-0 gap-0 border-0">
-            <div className="relative">
+        {/* Featured Content Drawer */}
+        <Drawer open={featuredDialogOpen} onOpenChange={setFeaturedDialogOpen}>
+          <DrawerContent className="max-h-[90vh]">
+            <div className="relative overflow-y-auto">
               {/* Header */}
-              <div className="text-center pt-8 pb-6 px-6 border-b">
+              <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                 <h2 className="text-2xl font-bold mb-2">{dailyTopic.title}</h2>
                 <p className="text-sm text-muted-foreground">Personalized insights for your journey</p>
               </div>
@@ -349,7 +349,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               <Button 
                 variant="ghost" 
                 size="icon"
-                className="absolute top-4 right-4 rounded-full"
+                className="absolute top-4 right-4 rounded-full z-20"
                 onClick={() => setFeaturedDialogOpen(false)}
               >
                 <X className="h-5 w-5" />
@@ -380,7 +380,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               </div>
 
               {/* Action Button */}
-              <div className="px-6 pb-6">
+              <div className="px-6 pb-6 sticky bottom-0 bg-background">
                 <Button 
                   className="w-full h-12 rounded-full text-base font-semibold" 
                   onClick={() => setFeaturedDialogOpen(false)}
@@ -400,8 +400,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </DrawerContent>
+        </Drawer>
       </div>
     </div>
   );

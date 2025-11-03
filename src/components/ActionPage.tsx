@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
@@ -265,17 +265,17 @@ export const ActionPage = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Dialog open={goalDialogOpen} onOpenChange={setGoalDialogOpen}>
-              <DialogTrigger asChild>
+            <Drawer open={goalDialogOpen} onOpenChange={setGoalDialogOpen}>
+              <DrawerTrigger asChild>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <Target className="h-5 w-5" />
                   <span className="text-xs">Set Goals</span>
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl p-0 gap-0 border-0">
-                <div className="relative">
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh]">
+                <div className="relative overflow-y-auto">
                   {/* Header */}
-                  <div className="text-center pt-8 pb-6 px-6 border-b">
+                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Set Your Goal</h2>
                     <p className="text-sm text-muted-foreground">Define what you want to achieve</p>
                   </div>
@@ -284,7 +284,7 @@ export const ActionPage = () => {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className="absolute top-4 right-4 rounded-full"
+                    className="absolute top-4 right-4 rounded-full z-20"
                     onClick={() => setGoalDialogOpen(false)}
                   >
                     <X className="h-5 w-5" />
@@ -304,7 +304,7 @@ export const ActionPage = () => {
                   </div>
 
                   {/* Action Button */}
-                  <div className="px-6 pb-6">
+                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
                     <Button 
                       onClick={handleAddGoal}
                       className="w-full h-12 rounded-full text-base font-semibold"
@@ -314,20 +314,20 @@ export const ActionPage = () => {
                     </Button>
                   </div>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </DrawerContent>
+            </Drawer>
 
-            <Dialog open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
-              <DialogTrigger asChild>
+            <Drawer open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
+              <DrawerTrigger asChild>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <Zap className="h-5 w-5" />
                   <span className="text-xs">Quick Wins</span>
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl p-0 gap-0 border-0">
-                <div className="relative">
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh]">
+                <div className="relative overflow-y-auto">
                   {/* Header */}
-                  <div className="text-center pt-8 pb-6 px-6 border-b">
+                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
                     <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
                   </div>
@@ -336,7 +336,7 @@ export const ActionPage = () => {
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    className="absolute top-4 right-4 rounded-full"
+                    className="absolute top-4 right-4 rounded-full z-20"
                     onClick={() => setQuickWinsOpen(false)}
                   >
                     <X className="h-5 w-5" />
@@ -367,7 +367,7 @@ export const ActionPage = () => {
                   </div>
 
                   {/* Action Button */}
-                  <div className="px-6 pb-6">
+                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
                     <Button 
                       onClick={() => setQuickWinsOpen(false)}
                       className="w-full h-12 rounded-full text-base font-semibold"
@@ -377,8 +377,8 @@ export const ActionPage = () => {
                     </Button>
                   </div>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
       </div>
