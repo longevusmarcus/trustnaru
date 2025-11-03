@@ -10,15 +10,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const ActionPage = () => {
   const { user } = useAuth();
   const [activePath, setActivePath] = useState<any>(null);
+  const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const currentStreak = 12;
-  const totalPoints = 847;
 
   useEffect(() => {
-    loadActivePath();
+    loadData();
   }, [user]);
 
-  const loadActivePath = async () => {
+  const loadData = async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -42,24 +41,52 @@ export const ActionPage = () => {
 
         setActivePath(path);
       }
+
+      // Get user stats
+      let { data: stats } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Create default stats if they don't exist
+      if (!stats) {
+        const { data: newStats } = await supabase
+          .from('user_stats')
+          .insert({
+            user_id: user.id,
+            current_streak: 0,
+            total_points: 0,
+            missions_completed: 0,
+            paths_explored: 0
+          })
+          .select()
+          .single();
+        
+        stats = newStats;
+      }
+
+      setUserStats(stats);
     } catch (error) {
-      console.error('Error loading active path:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const roadmapMilestones = activePath?.roadmap || [
-    { step: "Learn product storytelling", duration: "3 months", status: "completed", progress: 100 },
-    { step: "Launch a side project", duration: "6 months", status: "in-progress", progress: 65 },
-    { step: "Build your brand online", duration: "9 months", status: "upcoming", progress: 0 },
+  const roadmapMilestones = activePath?.roadmap || [];
+
+  // Generate today's actions based on the first roadmap step
+  const todayActions = activePath && roadmapMilestones.length > 0 ? [
+    { task: `Start: ${roadmapMilestones[0].step}`, priority: "high", done: false },
+    { task: `Research resources for ${activePath.title}`, priority: "medium", done: false },
+    { task: `Connect with someone in ${activePath.category} field`, priority: "medium", done: false },
+  ] : [
+    { task: "Activate a career path to get started", priority: "low", done: false },
   ];
 
-  const todayActions = [
-    { task: "Review UI/UX principles", priority: "high", done: true },
-    { task: "Connect with 3 designers", priority: "medium", done: false },
-    { task: "Document project progress", priority: "low", done: false },
-  ];
+  const goalsCompleted = activePath ? 1 : 0;
+  const totalGoals = activePath ? roadmapMilestones.length : 0;
 
   if (loading) {
     return (
@@ -96,21 +123,21 @@ export const ActionPage = () => {
           <Card>
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
-              <div className="text-2xl font-bold">{currentStreak}</div>
+              <div className="text-2xl font-bold">{userStats?.current_streak || 0}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
-              <div className="text-2xl font-bold">{totalPoints}</div>
+              <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
               <div className="text-xs text-muted-foreground">Points</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <Circle className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
-              <div className="text-2xl font-bold">3/5</div>
+              <Target className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
+              <div className="text-2xl font-bold">{goalsCompleted}/{totalGoals || '0'}</div>
               <div className="text-xs text-muted-foreground">Goals</div>
             </CardContent>
           </Card>
