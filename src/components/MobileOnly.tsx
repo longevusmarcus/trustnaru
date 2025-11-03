@@ -1,5 +1,4 @@
 import { Smartphone } from "lucide-react";
-import crystalBall from "@/assets/crystal-ball-emerald.png";
 
 export const MobileOnly = () => {
   return (
@@ -14,13 +13,13 @@ export const MobileOnly = () => {
             {/* Middle glow layer */}
             <div className="absolute inset-3 bg-gradient-to-br from-emerald-300/40 to-emerald-500/30 rounded-full blur-2xl animate-[pulse_3s_ease-in-out_infinite]" />
             
-            {/* Crystal ball image */}
-            <div className="relative w-full h-full rounded-full flex items-center justify-center">
-              <img 
-                src={crystalBall} 
-                alt="Naru Crystal Ball" 
-                className="w-full h-full object-contain drop-shadow-2xl"
-              />
+            {/* Crystal ball container */}
+            <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm flex items-center justify-center border border-emerald-400/20 shadow-2xl animate-[pulse_3.5s_ease-in-out_infinite]">
+              {/* Inner sphere with light reflection */}
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30 backdrop-blur-md relative overflow-hidden">
+                <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/30 blur-md" />
+                <div className="absolute bottom-5 left-5 w-9 h-9 rounded-full bg-emerald-200/20 blur-lg" />
+              </div>
             </div>
           </div>
         </div>
