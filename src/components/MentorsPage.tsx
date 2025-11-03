@@ -231,9 +231,9 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   }
 
   return (
-    <div className="px-4 pb-24 pt-4 max-w-full">
+    <div className="px-4 pb-24 pt-4 max-w-md mx-auto">
       {/* Search Bar */}
-      <div className="mb-6 max-w-4xl mx-auto">
+      <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -246,7 +246,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       </div>
 
       {/* Category Filter */}
-      <div className="mb-6 max-w-4xl mx-auto flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <Button
           variant={selectedCategory === null ? "default" : "outline"}
           size="sm"
@@ -267,22 +267,20 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       </div>
 
       {/* Results Count */}
-      <div className="mb-4 max-w-4xl mx-auto">
+      <div className="mb-4">
         <p className="text-sm text-muted-foreground">
           {filteredMentors.length} {filteredMentors.length === 1 ? 'clone' : 'clones'} found
         </p>
       </div>
 
-      {/* Swipeable Mentor Cards */}
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4">
-          {filteredMentors.map((mentor) => (
-            <div key={mentor.id} className="flex-[0_0_85%] min-w-0 md:flex-[0_0_45%]">
-              <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent 
-                  className="p-4 h-full overflow-y-auto max-h-[55vh]"
-                  onScroll={handleCardScroll}
-                >
+      {/* Mentor Cards */}
+      <div className="space-y-4">
+        {filteredMentors.map((mentor) => (
+          <Card key={mentor.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <CardContent 
+              className="p-4 overflow-y-auto max-h-[55vh]"
+              onScroll={handleCardScroll}
+            >
                   {/* Header */}
                   <div className="flex items-start gap-3 mb-4">
                     <Avatar className="h-12 w-12 bg-primary/10 flex-shrink-0">
@@ -435,9 +433,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                   </Button>
                 </CardContent>
               </Card>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
 
       {filteredMentors.length === 0 && !loading && (
