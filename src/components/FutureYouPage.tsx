@@ -332,28 +332,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
               </div>
               
               <CardContent className="p-6 space-y-4">
-                {/* Feedback buttons */}
-                {card.id && (
-                  <div className="flex gap-1 justify-end -mt-2 -mr-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFeedback(card.id, 'up')}
-                      className={`h-auto p-1 ${card.userFeedback === 'up' ? 'text-primary' : 'text-muted-foreground/40'} hover:text-primary`}
-                    >
-                      <ThumbsUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFeedback(card.id, 'down')}
-                      className={`h-auto p-1 ${card.userFeedback === 'down' ? 'text-destructive' : 'text-muted-foreground/40'} hover:text-destructive`}
-                    >
-                      <ThumbsDown className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                )}
-                
                 {/* Show 3 generated images if available */}
                 {card.pathImages && card.pathImages.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mb-4">
@@ -441,7 +419,29 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                 )}
 
                 <div className="space-y-2 pt-4 border-t border-border/50">
-                  <Button 
+                  {/* Feedback buttons */}
+                  {card.id && (
+                    <div className="flex gap-1 pb-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFeedback(card.id, 'up')}
+                        className={`h-auto p-1 ${card.userFeedback === 'up' ? 'text-primary' : 'text-muted-foreground/40'} hover:text-primary`}
+                      >
+                        <ThumbsUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFeedback(card.id, 'down')}
+                        className={`h-auto p-1 ${card.userFeedback === 'down' ? 'text-destructive' : 'text-muted-foreground/40'} hover:text-destructive`}
+                      >
+                        <ThumbsDown className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  
+                  <Button
                     variant="ghost" 
                     className="w-full justify-start" 
                     size="sm"
