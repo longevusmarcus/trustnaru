@@ -34,7 +34,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       
       const timeout = setTimeout(() => {
         onScrollChange(false);
-      }, 5000);
+      }, 3000);
       
       setScrollTimeout(timeout);
     }
