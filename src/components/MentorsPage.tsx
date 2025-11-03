@@ -9,7 +9,11 @@ import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, Grad
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
 
-export const MentorsPage = () => {
+interface MentorsPageProps {
+  onScrollChange?: (isScrolling: boolean) => void;
+}
+
+export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [mentors, setMentors] = useState<any[]>([]);
   const [filteredMentors, setFilteredMentors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +22,23 @@ export const MentorsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { toast } = useToast();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
+  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const handleCardScroll = () => {
+    if (onScrollChange) {
+      onScrollChange(true);
+      
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      const timeout = setTimeout(() => {
+        onScrollChange(false);
+      }, 150);
+      
+      setScrollTimeout(timeout);
+    }
+  };
 
   const categories = ["Business", "Technology", "Design", "Marketing", "Finance", "Healthcare"];
 
@@ -250,7 +271,10 @@ export const MentorsPage = () => {
           {filteredMentors.map((mentor) => (
             <div key={mentor.id} className="flex-[0_0_85%] min-w-0 md:flex-[0_0_45%]">
               <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-4 h-full overflow-y-auto max-h-[55vh]">
+                <CardContent 
+                  className="p-4 h-full overflow-y-auto max-h-[55vh]"
+                  onScroll={handleCardScroll}
+                >
                   {/* Header */}
                   <div className="flex items-start gap-3 mb-4">
                     <Avatar className="h-12 w-12 bg-primary/10 flex-shrink-0">

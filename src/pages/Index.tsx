@@ -20,8 +20,10 @@ const Index = () => {
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const location = useLocation();
   const isNavVisible = useScrollDirection();
+  const [isCardScrolling, setIsCardScrolling] = useState(false);
   
   const shouldHideNavOnScroll = currentPage === "mentors" || currentPage === "profile";
+  const shouldShowNav = shouldHideNavOnScroll ? (isNavVisible && !isCardScrolling) : true;
 
   // Check if we need to navigate to copilot page after path activation
   useEffect(() => {
@@ -82,7 +84,7 @@ const Index = () => {
       
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
-        {currentPage === "mentors" && <MentorsPage />}
+        {currentPage === "mentors" && <MentorsPage onScrollChange={setIsCardScrolling} />}
         {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "copilot" && <ActionPage />}
@@ -92,7 +94,7 @@ const Index = () => {
       <BottomNav 
         active={currentPage} 
         onNavigate={handleNavigation}
-        isVisible={shouldHideNavOnScroll ? isNavVisible : true}
+        isVisible={shouldShowNav}
       />
     </div>
   );
