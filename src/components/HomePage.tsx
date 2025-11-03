@@ -321,14 +321,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold mb-2">{dailyTopic.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3">
+                <p className="text-sm text-muted-foreground">
                   {dailyTopic.description}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>AI-Personalized</span>
-                  <span>•</span>
-                  <span>Daily Feature</span>
-                </div>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </div>
