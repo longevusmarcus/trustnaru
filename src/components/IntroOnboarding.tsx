@@ -15,7 +15,7 @@ const slides = [
   {
     icon: Compass,
     title: "The Solution",
-    content: "Instantly see your future self and path.",
+    content: "Instantly see your future self and how to become it.",
   },
   {
     icon: Database,
@@ -25,7 +25,7 @@ const slides = [
   {
     icon: Crown,
     title: "The Vision",
-    content: "The OS for becoming. We're turning self-development into a science, so every person can live the life they were meant for.",
+    content: "The OS for becoming. We're turning career development into a science, so every person can live the life they were meant for.",
   },
   {
     icon: Zap,
@@ -34,6 +34,7 @@ const slides = [
     items: [
       "Align your energy",
       "See your future self",
+      "Unlock your career paths"
       "Take action every day",
       "Track your evolution",
     ],
