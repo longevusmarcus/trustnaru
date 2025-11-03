@@ -326,7 +326,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                 <div className="space-y-2 pt-4 border-t border-border/50">
                   <Button 
                     variant="ghost" 
-                    className="w-full justify-start" 
+                    className="w-full justify-center" 
                     size="sm"
                     onClick={() => navigate(`/path/${index}`, { state: { card } })}
                   >
@@ -334,7 +334,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     View Path
                   </Button>
                   
-                  <Button variant="ghost" className="w-full justify-start" size="sm">
+                  <Button variant="ghost" className="w-full justify-center" size="sm">
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
