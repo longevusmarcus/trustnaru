@@ -8,6 +8,7 @@ import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
 import { ProfilePage } from "@/components/ProfilePage";
 import { InsightsPage } from "@/components/InsightsPage";
+import { MentorsPage } from "@/components/MentorsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 
@@ -77,7 +78,7 @@ const Index = () => {
       
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
-        {currentPage === "mentors" && <SearchPage />}
+        {currentPage === "mentors" && <MentorsPage />}
         {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "copilot" && <ActionPage />}

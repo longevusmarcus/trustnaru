@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { ImportMentorsUtil } from "@/components/ImportMentorsUtil";
 
 export const ProfilePage = () => {
   const { toast } = useToast();
@@ -281,6 +282,10 @@ export const ProfilePage = () => {
             <Settings className="h-4 w-4 mr-3" />
             Account Settings
           </Button>
+          
+          {/* Dev Utility: Import Mentors */}
+          <ImportMentorsUtil />
+          
           <Button 
             variant="ghost" 
             className="w-full justify-start text-muted-foreground hover:text-destructive" 
