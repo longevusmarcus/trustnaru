@@ -45,12 +45,13 @@ const dailyMissions = [
 ];
 
 
-export const HomePage = () => {
+export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [userStats, setUserStats] = useState<any>(null);
   const [streaks, setStreaks] = useState<Date[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
+  const [firstPath, setFirstPath] = useState<any>(null);
   const weekDates = getWeekDates();
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export const HomePage = () => {
       const weekEnd = weekDates[6].toISOString().split('T')[0];
 
       // Fetch all data in parallel
-      const [statsResult, streakResult, badgesResult] = await Promise.all([
+      const [statsResult, streakResult, badgesResult, pathsResult] = await Promise.all([
         supabase
           .from('user_stats')
           .select('*')
@@ -79,7 +80,13 @@ export const HomePage = () => {
           .select('*, badges (name, icon, description)')
           .eq('user_id', user.id)
           .order('earned_at', { ascending: false })
-          .limit(3)
+          .limit(3),
+        supabase
+          .from('career_paths')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
       ]);
 
       if (!statsResult.data) {
@@ -99,6 +106,10 @@ export const HomePage = () => {
 
       if (badgesResult.data) {
         setEarnedBadges(badgesResult.data);
+      }
+
+      if (pathsResult.data && pathsResult.data.length > 0) {
+        setFirstPath(pathsResult.data[0]);
       }
     };
 
@@ -167,25 +178,56 @@ export const HomePage = () => {
         {/* Main Future Self Card */}
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Your Future Self</p>
-          <Card className="bg-card-dark text-card-dark-foreground overflow-hidden">
-            <div className="aspect-[4/5] relative bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center">
-              <div className="text-center p-8">
-                <div className="w-24 h-24 rounded-full bg-neutral-700 mx-auto mb-4" />
-                <p className="text-sm text-neutral-400 mb-2">Your future self awaits</p>
-                <h3 className="text-lg font-semibold mb-1">Generate Your Vision</h3>
-                <p className="text-xs text-neutral-500">Upload your photo to see who you'll become</p>
-              </div>
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-bold mb-2">See Your Path</h3>
-              <p className="text-sm text-neutral-400 mb-4">
-                Discover your future self and the journey to become them.
-              </p>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-500">Start your transformation</span>
-                <ChevronRight className="h-4 w-4" />
-              </div>
-            </div>
+          <Card 
+            className="bg-card-dark text-card-dark-foreground overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => onNavigate('future')}
+          >
+            {firstPath ? (
+              <>
+                <div className="aspect-[4/5] relative bg-gradient-to-br from-neutral-800 to-neutral-900">
+                  <img 
+                    src={firstPath.image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop"} 
+                    alt={firstPath.title}
+                    className="w-full h-full object-cover opacity-80"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-xl font-bold text-white mb-1">{firstPath.title}</h3>
+                    <p className="text-sm text-neutral-300">{firstPath.journey_duration}</p>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-neutral-400 mb-4 line-clamp-2">
+                    {firstPath.description}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-neutral-300">Start your transformation</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="aspect-[4/5] relative bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="w-24 h-24 rounded-full bg-neutral-700 mx-auto mb-4" />
+                    <p className="text-sm text-neutral-400 mb-2">Your future self awaits</p>
+                    <h3 className="text-lg font-semibold mb-1">Generate Your Vision</h3>
+                    <p className="text-xs text-neutral-500">Upload your photo to see who you'll become</p>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">See Your Path</h3>
+                  <p className="text-sm text-neutral-400 mb-4">
+                    Discover your future self and the journey to become them.
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-neutral-500">Start your transformation</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              </>
+            )}
           </Card>
         </div>
 

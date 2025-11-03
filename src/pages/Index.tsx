@@ -76,7 +76,7 @@ const Index = () => {
       <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
       
       <main className="pb-safe">
-        {currentPage === "home" && <HomePage />}
+        {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
         {currentPage === "mentors" && <SearchPage />}
         {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
