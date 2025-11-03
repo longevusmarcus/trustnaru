@@ -157,60 +157,60 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-muted/10 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-muted/10 p-4">
       <div className="w-full max-w-md">
         <AuthStatusBanner isOffline={isOffline} />
         
         {/* Crystal Ball and Welcome Text */}
-        <div className="text-center mb-12 animate-fade-in">
-          <div className="w-40 h-40 mx-auto mb-8 relative">
+        <div className="text-center mb-6 animate-fade-in">
+          <div className="w-28 h-28 mx-auto mb-4 relative">
             {/* Outer glow with elegant pulse */}
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 rounded-full blur-3xl animate-[pulse_4s_ease-in-out_infinite]" />
             
             {/* Middle glow layer */}
-            <div className="absolute inset-4 bg-gradient-to-br from-emerald-300/40 to-emerald-500/30 rounded-full blur-2xl animate-[pulse_3s_ease-in-out_infinite]" />
+            <div className="absolute inset-3 bg-gradient-to-br from-emerald-300/40 to-emerald-500/30 rounded-full blur-2xl animate-[pulse_3s_ease-in-out_infinite]" />
             
             {/* Crystal ball container */}
             <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm flex items-center justify-center border border-emerald-400/20 shadow-2xl animate-[pulse_3.5s_ease-in-out_infinite]">
               {/* Inner sphere with light reflection */}
-              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30 backdrop-blur-md relative overflow-hidden">
-                <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/30 blur-md" />
-                <div className="absolute bottom-6 left-6 w-12 h-12 rounded-full bg-emerald-200/20 blur-lg" />
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30 backdrop-blur-md relative overflow-hidden">
+                <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/30 blur-md" />
+                <div className="absolute bottom-4 left-4 w-8 h-8 rounded-full bg-emerald-200/20 blur-lg" />
               </div>
             </div>
           </div>
           
-          <h1 className="text-3xl font-light tracking-wide mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-light tracking-wide mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             Welcome to Naru
           </h1>
-          <p className="text-base text-muted-foreground/90 max-w-sm mx-auto leading-relaxed font-light">
+          <p className="text-sm text-muted-foreground/90 max-w-xs mx-auto leading-relaxed font-light">
             The world&apos;s first database of human potential.
           </p>
-          <p className="text-base text-muted-foreground/80 max-w-sm mx-auto mt-2 font-light">
+          <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto mt-1 font-light">
             Become who you&apos;re meant to be.
           </p>
         </div>
 
-        {/* Rating Section */}
-        <div className="text-center mb-8 animate-fade-in">
-          <p className="text-sm text-muted-foreground/70 mb-2 font-light tracking-wide">Our customers rated us</p>
-          <div className="flex items-center justify-center gap-1 mb-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star key={star} className="w-5 h-5 fill-emerald-500 text-emerald-500" />
-            ))}
-          </div>
-          <p className="text-base font-light text-foreground/90">4.8 out of 5</p>
-        </div>
-
         {/* Auth Card */}
         <Card className="border-muted/30 shadow-2xl backdrop-blur-sm bg-card/50">
-          <CardContent className="pt-8 pb-8 px-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <CardContent className="pt-6 pb-6 px-6">
+            {/* Rating Section - Inside Card */}
+            <div className="text-center mb-6">
+              <p className="text-xs text-muted-foreground/70 mb-2 font-light">Our customers rated us</p>
+              <div className="flex items-center justify-center gap-1 mb-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className="w-4 h-4 fill-emerald-500 text-emerald-500" />
+                ))}
+              </div>
+              <p className="text-sm font-light text-foreground/90">4.8 out of 5</p>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 id="email"
                 type="email"
                 placeholder="Email address"
-                className="h-12 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+                className="h-11 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
                 {...register("email")}
                 disabled={isLoading}
               />
@@ -224,7 +224,7 @@ const Auth = () => {
                     id="password"
                     type="password"
                     placeholder="Password"
-                    className="h-12 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+                    className="h-11 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
                     {...register("password")}
                     disabled={isLoading}
                   />
@@ -236,7 +236,7 @@ const Auth = () => {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-light tracking-wide bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300" 
+                className="w-full h-11 text-sm font-light tracking-wide bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300" 
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -247,12 +247,12 @@ const Auth = () => {
                     : "Continue Your Journey"}
               </Button>
 
-              <div className="text-center pt-2 space-y-1">
+              <div className="text-center pt-1 space-y-1">
                 {!isSignUp && !showForgotPassword && (
                   <Button
                     type="button"
                     variant="link"
-                    className="text-muted-foreground/70 hover:text-muted-foreground font-light block w-full"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
                     onClick={() => setShowForgotPassword(true)}
                     disabled={isLoading}
                   >
@@ -264,7 +264,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="link"
-                    className="text-muted-foreground/70 hover:text-muted-foreground font-light"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
                     onClick={() => {
                       setShowForgotPassword(false);
                       reset();
@@ -277,7 +277,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="link"
-                    className="text-muted-foreground/70 hover:text-muted-foreground font-light"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
                     onClick={() => {
                       setIsSignUp(!isSignUp);
                       reset();
