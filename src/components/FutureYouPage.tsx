@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target } from "lucide-react";
+import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -140,6 +140,27 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     });
   }, [paths.map(p => p.id).join(',')]); // Only re-run if path IDs change
 
+  const handleFeedback = async (pathId: string, feedback: 'up' | 'down') => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('career_paths')
+        .update({ user_feedback: feedback })
+        .eq('id', pathId)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPaths(paths.map(p => 
+        p.id === pathId ? { ...p, user_feedback: feedback } : p
+      ));
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+    }
+  };
+
   const futureCards = paths.length > 0 ? paths.map(path => ({
     id: path.id,
     title: path.title,
@@ -154,7 +175,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     lifestyleBenefits: path.lifestyle_benefits || [],
     roadmap: path.roadmap || [],
     affirmations: path.affirmations || [],
-    typicalDayRoutine: path.typical_day_routine || []
+    typicalDayRoutine: path.typical_day_routine || [],
+    userFeedback: path.user_feedback
   })) : [
     {
       title: "Creative Strategist",
@@ -310,6 +332,28 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
               </div>
               
               <CardContent className="p-6 space-y-4">
+                {/* Feedback buttons */}
+                {card.id && (
+                  <div className="flex gap-1 justify-end -mt-2 -mr-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFeedback(card.id, 'up')}
+                      className={`h-auto p-1 ${card.userFeedback === 'up' ? 'text-primary' : 'text-muted-foreground/40'} hover:text-primary`}
+                    >
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFeedback(card.id, 'down')}
+                      className={`h-auto p-1 ${card.userFeedback === 'down' ? 'text-destructive' : 'text-muted-foreground/40'} hover:text-destructive`}
+                    >
+                      <ThumbsDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                )}
+                
                 {/* Show 3 generated images if available */}
                 {card.pathImages && card.pathImages.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mb-4">
