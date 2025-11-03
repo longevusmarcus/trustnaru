@@ -36,6 +36,8 @@ const slides = [
       "See your future self",
       "Take action every day",
       "Track your evolution",
+      "Partners Jobs (soon)",
+      "Automations (soon)",
     ],
   },
   {
