@@ -1,4 +1,4 @@
-import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Sparkles, X } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Sparkles, X, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -387,7 +387,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   className="w-full h-12 rounded-full text-base font-semibold" 
                   onClick={() => setFeaturedDialogOpen(false)}
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <ArrowRight className="h-4 w-4 mr-2" />
                   Continue Your Journey
                 </Button>
               </div>
