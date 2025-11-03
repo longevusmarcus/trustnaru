@@ -250,52 +250,52 @@ export const MentorsPage = () => {
           {filteredMentors.map((mentor) => (
             <div key={mentor.id} className="flex-[0_0_85%] min-w-0 md:flex-[0_0_45%]">
               <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 h-full overflow-y-auto max-h-[70vh]">
+                <CardContent className="p-4 h-full overflow-y-auto max-h-[55vh]">
                   {/* Header */}
-                  <div className="flex items-start gap-4 mb-6">
-                    <Avatar className="h-16 w-16 bg-primary/10 flex-shrink-0">
-                      <AvatarFallback className="text-lg font-semibold bg-primary/10 text-foreground">
+                  <div className="flex items-start gap-3 mb-4">
+                    <Avatar className="h-12 w-12 bg-primary/10 flex-shrink-0">
+                      <AvatarFallback className="text-base font-semibold bg-primary/10 text-foreground">
                         {mentor.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg mb-1">{mentor.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{mentor.title}</p>
+                      <h3 className="font-semibold text-base mb-0.5">{mentor.name}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{mentor.title}</p>
                     </div>
                   </div>
 
                   {/* Basic Info */}
                   {mentor.company && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <Building className="h-4 w-4 flex-shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+                      <Building className="h-3.5 w-3.5 flex-shrink-0" />
                       <span className="truncate">{mentor.company}</span>
                     </div>
                   )}
 
                   {mentor.location && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1.5">
+                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                       <span className="truncate">{mentor.location}</span>
                     </div>
                   )}
 
                   {mentor.follower_count && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                      <Users className="h-4 w-4 flex-shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                      <Users className="h-3.5 w-3.5 flex-shrink-0" />
                       <span>{mentor.follower_count} followers</span>
                     </div>
                   )}
 
                   {/* Skills */}
                   {mentor.key_skills && mentor.key_skills.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                        <Briefcase className="h-3.5 w-3.5" />
                         Key Skills
                       </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {mentor.key_skills.map((skill: string, idx: number) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                      <div className="flex flex-wrap gap-1.5">
+                        {mentor.key_skills.slice(0, 6).map((skill: string, idx: number) => (
+                          <Badge key={idx} variant="secondary" className="text-[10px] px-2 py-0.5">
                             {skill}
                           </Badge>
                         ))}
@@ -305,17 +305,16 @@ export const MentorsPage = () => {
 
                   {/* Career Path */}
                   {mentor.career_path && mentor.career_path.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <Briefcase className="h-3.5 w-3.5" />
                         Career Journey
                       </h4>
-                      <div className="space-y-3">
-                        {mentor.career_path.map((job: any, idx: number) => (
-                          <div key={idx} className="border-l-2 border-primary/30 pl-4 py-1">
-                            <p className="text-sm font-medium">{job.title}</p>
-                            <p className="text-xs text-muted-foreground">{job.company}</p>
-                            <p className="text-xs text-muted-foreground/70">{job.duration}</p>
+                      <div className="space-y-2">
+                        {mentor.career_path.slice(0, 3).map((job: any, idx: number) => (
+                          <div key={idx} className="border-l-2 border-primary/30 pl-3 py-0.5">
+                            <p className="text-xs font-medium">{job.title}</p>
+                            <p className="text-[10px] text-muted-foreground">{job.company}</p>
                           </div>
                         ))}
                       </div>
@@ -324,16 +323,16 @@ export const MentorsPage = () => {
 
                   {/* Education */}
                   {mentor.education && mentor.education.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4" />
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <GraduationCap className="h-3.5 w-3.5" />
                         Education
                       </h4>
-                      <div className="space-y-2">
-                        {mentor.education.map((edu: any, idx: number) => (
-                          <div key={idx} className="text-sm">
+                      <div className="space-y-1.5">
+                        {mentor.education.slice(0, 2).map((edu: any, idx: number) => (
+                          <div key={idx} className="text-xs">
                             <p className="font-medium">{edu.school}</p>
-                            <p className="text-xs text-muted-foreground">{edu.degree}</p>
+                            <p className="text-[10px] text-muted-foreground">{edu.degree}</p>
                           </div>
                         ))}
                       </div>
@@ -342,15 +341,15 @@ export const MentorsPage = () => {
 
                   {/* Achievements */}
                   {mentor.achievements && mentor.achievements.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Trophy className="h-4 w-4" />
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <Trophy className="h-3.5 w-3.5" />
                         Achievements
                       </h4>
-                      <ul className="space-y-2">
-                        {mentor.achievements.map((achievement: string, idx: number) => (
-                          <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
+                      <ul className="space-y-1">
+                        {mentor.achievements.slice(0, 3).map((achievement: string, idx: number) => (
+                          <li key={idx} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                            <span className="text-primary mt-0.5">•</span>
                             <span>{achievement}</span>
                           </li>
                         ))}
@@ -360,15 +359,15 @@ export const MentorsPage = () => {
 
                   {/* Typical Day */}
                   {mentor.typical_day_routine && mentor.typical_day_routine.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
                         Typical Day
                       </h4>
-                      <ul className="space-y-2">
-                        {mentor.typical_day_routine.map((activity: string, idx: number) => (
-                          <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
+                      <ul className="space-y-1">
+                        {mentor.typical_day_routine.slice(0, 3).map((activity: string, idx: number) => (
+                          <li key={idx} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                            <span className="text-primary mt-0.5">•</span>
                             <span>{activity}</span>
                           </li>
                         ))}
@@ -378,14 +377,14 @@ export const MentorsPage = () => {
 
                   {/* Leadership Philosophy */}
                   {mentor.leadership_philosophy && mentor.leadership_philosophy.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Leadership Philosophy
+                    <div className="mb-4">
+                      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <Lightbulb className="h-3.5 w-3.5" />
+                        Leadership
                       </h4>
-                      <ul className="space-y-2">
-                        {mentor.leadership_philosophy.map((philosophy: string, idx: number) => (
-                          <li key={idx} className="text-xs text-muted-foreground italic border-l-2 border-primary/20 pl-3 py-1">
+                      <ul className="space-y-1">
+                        {mentor.leadership_philosophy.slice(0, 2).map((philosophy: string, idx: number) => (
+                          <li key={idx} className="text-[10px] text-muted-foreground italic border-l-2 border-primary/20 pl-2 py-0.5">
                             {philosophy}
                           </li>
                         ))}
