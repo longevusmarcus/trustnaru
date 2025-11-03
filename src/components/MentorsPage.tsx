@@ -34,11 +34,19 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       
       const timeout = setTimeout(() => {
         onScrollChange(false);
-      }, 150);
+      }, 5000);
       
       setScrollTimeout(timeout);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+    };
+  }, [scrollTimeout]);
 
   const categories = ["Business", "Technology", "Design", "Marketing", "Finance", "Healthcare"];
 
