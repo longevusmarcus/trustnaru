@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { AuthStatusBanner } from "@/components/AuthStatusBanner";
 
 const authSchema = z.object({
@@ -24,6 +24,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -134,7 +135,22 @@ const Auth = () => {
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
     try {
-      await attemptAuth(data);
+      if (showForgotPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+          redirectTo: `${window.location.origin}/auth`,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Password reset email sent",
+          description: "Check your email for the password reset link.",
+        });
+        setShowForgotPassword(false);
+        reset();
+      } else {
+        await attemptAuth(data);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -175,6 +191,17 @@ const Auth = () => {
           </p>
         </div>
 
+        {/* Rating Section */}
+        <div className="text-center mb-8 animate-fade-in">
+          <p className="text-sm text-muted-foreground/70 mb-2 font-light tracking-wide">Our customers rated us</p>
+          <div className="flex items-center justify-center gap-1 mb-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star key={star} className="w-5 h-5 fill-emerald-500 text-emerald-500" />
+            ))}
+          </div>
+          <p className="text-base font-light text-foreground/90">4.8 out of 5</p>
+        </div>
+
         {/* Auth Card */}
         <Card className="border-muted/30 shadow-2xl backdrop-blur-sm bg-card/50">
           <CardContent className="pt-8 pb-8 px-8">
@@ -191,16 +218,20 @@ const Auth = () => {
                 <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
 
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                className="h-12 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
-                {...register("password")}
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+              {!showForgotPassword && (
+                <>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Password"
+                    className="h-12 bg-background/50 border-muted/40 focus-visible:border-emerald-400/50 transition-colors"
+                    {...register("password")}
+                    disabled={isLoading}
+                  />
+                  {errors.password && (
+                    <p className="text-sm text-destructive">{errors.password.message}</p>
+                  )}
+                </>
               )}
 
               <Button 
@@ -209,24 +240,55 @@ const Auth = () => {
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSignUp ? "Begin Your Journey" : "Continue Your Journey"}
+                {showForgotPassword 
+                  ? "Send Reset Link" 
+                  : isSignUp 
+                    ? "Begin Your Journey" 
+                    : "Continue Your Journey"}
               </Button>
 
-              <div className="text-center pt-2">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-muted-foreground/70 hover:text-muted-foreground font-light"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp);
-                    reset();
-                  }}
-                  disabled={isLoading}
-                >
-                  {isSignUp
-                    ? "Already have an account? Sign in"
-                    : "New to Naru? Create account"}
-                </Button>
+              <div className="text-center pt-2 space-y-1">
+                {!isSignUp && !showForgotPassword && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light block w-full"
+                    onClick={() => setShowForgotPassword(true)}
+                    disabled={isLoading}
+                  >
+                    Forgot password?
+                  </Button>
+                )}
+                
+                {showForgotPassword ? (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      reset();
+                    }}
+                    disabled={isLoading}
+                  >
+                    Back to sign in
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-muted-foreground/70 hover:text-muted-foreground font-light"
+                    onClick={() => {
+                      setIsSignUp(!isSignUp);
+                      reset();
+                    }}
+                    disabled={isLoading}
+                  >
+                    {isSignUp
+                      ? "Already have an account? Sign in"
+                      : "New to Naru? Create account"}
+                  </Button>
+                )}
               </div>
             </form>
           </CardContent>
