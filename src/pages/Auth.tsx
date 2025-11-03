@@ -248,18 +248,6 @@ const Auth = () => {
               </Button>
 
               <div className="text-center pt-1 space-y-1">
-                {!isSignUp && !showForgotPassword && (
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
-                    onClick={() => setShowForgotPassword(true)}
-                    disabled={isLoading}
-                  >
-                    Forgot password?
-                  </Button>
-                )}
-                
                 {showForgotPassword ? (
                   <Button
                     type="button"
@@ -274,20 +262,34 @@ const Auth = () => {
                     Back to sign in
                   </Button>
                 ) : (
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
-                    onClick={() => {
-                      setIsSignUp(!isSignUp);
-                      reset();
-                    }}
-                    disabled={isLoading}
-                  >
-                    {isSignUp
-                      ? "Already have an account? Sign in"
-                      : "New to Naru? Create account"}
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0"
+                      onClick={() => {
+                        setIsSignUp(!isSignUp);
+                        reset();
+                      }}
+                      disabled={isLoading}
+                    >
+                      {isSignUp
+                        ? "Already have an account? Sign in"
+                        : "New to Naru? Create account"}
+                    </Button>
+                    
+                    {!isSignUp && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-muted-foreground/70 hover:text-muted-foreground font-light text-xs h-auto p-0 block"
+                        onClick={() => setShowForgotPassword(true)}
+                        disabled={isLoading}
+                      >
+                        Forgot password?
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </form>
