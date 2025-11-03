@@ -20,7 +20,7 @@ const slides = [
   {
     icon: Database,
     title: "Our Moat",
-    content: "Proprietary dataset of human potential. Naru is building the first Future-Intelligence Platform, helping people forecast who they'll become, and showing them how to get there.",
+    content: "Proprietary dataset of human potential.",
   },
   {
     icon: Rocket,
@@ -35,18 +35,18 @@ const slides = [
       "Align your energy",
       "See your future self",
       "Take action every day",
-      "Track your evolution over years",
+      "Track your evolution",
     ],
   },
   {
     icon: Eye,
     title: "Your Journey",
-    content: "This is who I could become, and here's how.",
+    content: "\"This is who I could become, and here's how.\"",
   },
   {
     icon: TrendingUp,
     title: "Collective Intelligence",
-    content: "Every new Future-Self Card trains our model to predict what real success looks like — so every new user gets a smarter path than the last.",
+    content: "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
   },
 ];
 
