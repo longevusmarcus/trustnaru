@@ -36,13 +36,23 @@ export default function PathDetail() {
 
       if (error) throw error;
 
-      toast({
-        title: "Path activated!",
-        description: "Your action plan has been updated with this career path.",
+      // Generate goals for this path
+      const { error: goalsError } = await supabase.functions.invoke('generate-goals', {
+        body: { pathId: card.id, userId: user.id }
       });
 
-      // Navigate to action page
-      navigate("/", { state: { navigateTo: "action" } });
+      if (goalsError) {
+        console.error('Error generating goals:', goalsError);
+        // Don't fail the activation if goal generation fails
+      }
+
+      toast({
+        title: "Path activated!",
+        description: "Your personalized goals have been generated.",
+      });
+
+      // Navigate to copilot page
+      navigate("/", { state: { navigateTo: "copilot" } });
     } catch (error) {
       console.error('Error activating path:', error);
       toast({

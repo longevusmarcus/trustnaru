@@ -19,6 +19,7 @@ export const ActionPage = () => {
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
   const [quickWinsOpen, setQuickWinsOpen] = useState(false);
   const [newGoal, setNewGoal] = useState("");
+  const [goals, setGoals] = useState<any[]>([]);
 
   useEffect(() => {
     loadData();
@@ -47,6 +48,19 @@ export const ActionPage = () => {
           .single();
 
         setActivePath(path);
+
+        // Get goals for this path
+        const { data: goalsData } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('path_id', profile.active_path_id)
+          .order('priority', { ascending: false })
+          .order('created_at', { ascending: true });
+
+        if (goalsData) {
+          setGoals(goalsData);
+        }
       }
 
       // Get user stats
@@ -92,8 +106,8 @@ export const ActionPage = () => {
     { task: "Activate a career path to get started", priority: "low", done: false },
   ];
 
-  const goalsCompleted = activePath ? 1 : 0;
-  const totalGoals = activePath ? roadmapMilestones.length : 0;
+  const goalsCompleted = goals.filter(g => g.completed).length;
+  const totalGoals = goals.length;
 
   const quickWinsSuggestions = activePath ? [
     `Update LinkedIn with "${activePath.title}" as target role`,
@@ -105,16 +119,67 @@ export const ActionPage = () => {
     "Activate a career path first",
   ];
 
-  const handleAddGoal = () => {
-    if (!newGoal.trim()) return;
+  const handleAddGoal = async () => {
+    if (!newGoal.trim() || !user || !activePath) return;
     
-    toast({
-      title: "Goal added!",
-      description: "Keep pushing towards your future.",
-    });
-    
-    setNewGoal("");
-    setGoalDialogOpen(false);
+    try {
+      const targetDate = new Date();
+      targetDate.setMonth(targetDate.getMonth() + 3); // Default 3 months
+
+      const { error } = await supabase
+        .from('goals')
+        .insert({
+          user_id: user.id,
+          path_id: activePath.id,
+          title: newGoal,
+          priority: 'medium',
+          target_date: targetDate.toISOString().split('T')[0],
+          completed: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Goal added!",
+        description: "Keep pushing towards your future.",
+      });
+      
+      setNewGoal("");
+      setGoalDialogOpen(false);
+      loadData(); // Reload to show new goal
+    } catch (error) {
+      console.error('Error adding goal:', error);
+      toast({
+        title: "Failed to add goal",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleToggleGoal = async (goalId: string, completed: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .update({ completed: !completed })
+        .eq('id', goalId);
+
+      if (error) throw error;
+
+      // Update local state
+      setGoals(goals.map(g => 
+        g.id === goalId ? { ...g, completed: !completed } : g
+      ));
+
+      if (!completed) {
+        toast({
+          title: "Goal completed!",
+          description: "Great progress on your journey.",
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling goal:', error);
+    }
   };
 
   if (loading) {
@@ -172,24 +237,51 @@ export const ActionPage = () => {
           </Card>
         </div>
 
-        {/* Roadmap */}
+        {/* Goals */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">
-            {activePath ? `Roadmap to ${activePath.title}` : 'Your Roadmap'}
-          </h3>
-          {activePath ? (
+          <h3 className="text-lg font-semibold mb-3">Your Goals</h3>
+          {goals.length > 0 ? (
             <div className="space-y-3">
-              {roadmapMilestones.map((milestone: any, index: number) => (
-                <Card key={index}>
+              {goals.map((goal: any) => (
+                <Card key={goal.id} className={goal.completed ? 'opacity-60' : ''}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Circle className="h-5 w-5 text-muted-foreground" />
-                      </div>
+                      <button 
+                        onClick={() => handleToggleGoal(goal.id, goal.completed)}
+                        className="mt-1 flex-shrink-0"
+                      >
+                        {goal.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
                       <div className="flex-1">
-                        <h4 className="font-medium mb-1">{milestone.step}</h4>
-                        <div className="text-xs text-muted-foreground">
-                          {milestone.duration}
+                        <h4 className={`font-medium mb-1 ${goal.completed ? 'line-through' : ''}`}>
+                          {goal.title}
+                        </h4>
+                        {goal.description && (
+                          <p className="text-xs text-muted-foreground mb-2">
+                            {goal.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${
+                              goal.priority === "high"
+                                ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                                : goal.priority === "medium"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                            }`}
+                          >
+                            {goal.priority}
+                          </span>
+                          {goal.target_date && (
+                            <span className="text-xs text-muted-foreground">
+                              Target: {new Date(goal.target_date).toLocaleDateString()}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -202,7 +294,9 @@ export const ActionPage = () => {
               <CardContent className="p-6 text-center">
                 <Target className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
-                  Activate a career path to see your personalized roadmap
+                  {activePath 
+                    ? "Goals will be generated when you activate a path"
+                    : "Activate a career path to get personalized goals"}
                 </p>
               </CardContent>
             </Card>
