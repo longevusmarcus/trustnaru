@@ -138,7 +138,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     keySkills: path.key_skills || [],
     lifestyleBenefits: path.lifestyle_benefits || [],
     roadmap: path.roadmap || [],
-    affirmations: path.affirmations || []
+    affirmations: path.affirmations || [],
+    typicalDayRoutine: path.typical_day_routine || []
   })) : [
     {
       title: "Creative Strategist",

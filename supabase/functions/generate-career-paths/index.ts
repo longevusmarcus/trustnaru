@@ -244,7 +244,7 @@ CRITICAL PERSONALIZATION RULES:
    - Make sure the careers are REAL and VIABLE in the market
 
 Generate 7 career paths in this exact order (2 progression + 2 career change + 3 passion):
-{"archetypes": [{"title": "Specific Role Title", "description": "3 sentences following structure", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"], "impact_areas": ["impact 1", "impact 2"], "key_skills": ["skill 1", "skill 2", "skill 3", "skill 4"], "target_companies": ["company 1", "company 2", "company 3"], "category": "natural-progression|career-change|passion-driven", "difficulty_level": "entry|mid|senior|executive", "roadmap": [{"step": "Specific action step", "duration": "X months"}], "affirmations": ["Powerful I-statement affirmation 1", "Powerful I-statement affirmation 2", "Powerful I-statement affirmation 3"]}]}
+{"archetypes": [{"title": "Specific Role Title", "description": "3 sentences following structure", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"], "impact_areas": ["impact 1", "impact 2"], "key_skills": ["skill 1", "skill 2", "skill 3", "skill 4"], "target_companies": ["company 1", "company 2", "company 3"], "category": "natural-progression|career-change|passion-driven", "difficulty_level": "entry|mid|senior|executive", "roadmap": [{"step": "Specific action step", "duration": "X months"}], "affirmations": ["Powerful I-statement affirmation 1", "Powerful I-statement affirmation 2", "Powerful I-statement affirmation 3"], "typical_day_routine": ["Morning: activity 1", "Midday: activity 2", "Afternoon: activity 3", "Evening: activity 4"]}]}
 
 IMPORTANT ROADMAP REQUIREMENTS:
 - Each path must have 3-5 specific, actionable roadmap steps
@@ -256,7 +256,14 @@ IMPORTANT AFFIRMATIONS REQUIREMENTS:
 - Must be written in first person ("I am", "I create", "My")
 - Should be empowering and specific to the career path
 - Must reflect the person's actual strengths and passions
-- Example affirmations for "Tea Sommelier": ["I transform tea into unforgettable experiences", "My expertise helps people discover the art of tea", "I build a thriving business around what I love"]`;
+- Example affirmations for "Tea Sommelier": ["I transform tea into unforgettable experiences", "My expertise helps people discover the art of tea", "I build a thriving business around what I love"]
+
+TYPICAL DAY ROUTINE REQUIREMENTS:
+- Should describe 4-6 specific activities throughout a typical workday
+- Must be realistic and specific to the role
+- Should capture the rhythm and flow of the day
+- Include time-of-day context (Morning, Midday, Afternoon, Evening)
+- Example for "Tea Sommelier": ["Morning: Curate daily tea selections and prepare tasting notes", "Midday: Lead private tea tasting sessions for clients", "Afternoon: Source new tea varieties from suppliers worldwide", "Evening: Develop tea pairing menus for events"]`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -303,6 +310,7 @@ IMPORTANT AFFIRMATIONS REQUIREMENTS:
           difficulty_level: archetype.difficulty_level,
           roadmap: archetype.roadmap || [],
           affirmations: archetype.affirmations || [],
+          typical_day_routine: archetype.typical_day_routine || [],
         })
         .select()
         .single();

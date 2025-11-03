@@ -62,6 +62,7 @@ export type Database = {
           salary_range: string | null
           target_companies: string[] | null
           title: string
+          typical_day_routine: string[] | null
           updated_at: string
           user_id: string
         }
@@ -82,6 +83,7 @@ export type Database = {
           salary_range?: string | null
           target_companies?: string[] | null
           title: string
+          typical_day_routine?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -102,6 +104,7 @@ export type Database = {
           salary_range?: string | null
           target_companies?: string[] | null
           title?: string
+          typical_day_routine?: string[] | null
           updated_at?: string
           user_id?: string
         }
@@ -167,6 +170,81 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      mentors: {
+        Row: {
+          achievements: string[] | null
+          career_path: Json | null
+          category: string | null
+          company: string | null
+          company_url: string | null
+          created_at: string
+          education: Json | null
+          experience_years: number | null
+          follower_count: string | null
+          headline: string | null
+          id: string
+          industry: string | null
+          key_skills: string[] | null
+          leadership_philosophy: string[] | null
+          location: string | null
+          name: string
+          profile_image_url: string | null
+          profile_url: string | null
+          title: string | null
+          typical_day_routine: string[] | null
+          updated_at: string
+          visualization_images: string[] | null
+        }
+        Insert: {
+          achievements?: string[] | null
+          career_path?: Json | null
+          category?: string | null
+          company?: string | null
+          company_url?: string | null
+          created_at?: string
+          education?: Json | null
+          experience_years?: number | null
+          follower_count?: string | null
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          key_skills?: string[] | null
+          leadership_philosophy?: string[] | null
+          location?: string | null
+          name: string
+          profile_image_url?: string | null
+          profile_url?: string | null
+          title?: string | null
+          typical_day_routine?: string[] | null
+          updated_at?: string
+          visualization_images?: string[] | null
+        }
+        Update: {
+          achievements?: string[] | null
+          career_path?: Json | null
+          category?: string | null
+          company?: string | null
+          company_url?: string | null
+          created_at?: string
+          education?: Json | null
+          experience_years?: number | null
+          follower_count?: string | null
+          headline?: string | null
+          id?: string
+          industry?: string | null
+          key_skills?: string[] | null
+          leadership_philosophy?: string[] | null
+          location?: string | null
+          name?: string
+          profile_image_url?: string | null
+          profile_url?: string | null
+          title?: string | null
+          typical_day_routine?: string[] | null
+          updated_at?: string
+          visualization_images?: string[] | null
         }
         Relationships: []
       }

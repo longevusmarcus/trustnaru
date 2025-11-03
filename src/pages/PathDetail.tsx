@@ -130,6 +130,36 @@ export default function PathDetail() {
           </div>
         </div>
 
+        {/* Typical Day Routine */}
+        {card.typicalDayRoutine && card.typicalDayRoutine.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Typical Day</h2>
+            <div className="space-y-2">
+              {card.typicalDayRoutine.map((activity: string, idx: number) => (
+                <div key={idx} className="flex items-start gap-3 py-2">
+                  <div className="h-2 w-2 rounded-full bg-foreground/40 mt-1.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground/90">{activity}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Lifestyle */}
+        {card.lifestyleBenefits && card.lifestyleBenefits.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Lifestyle Benefits</h2>
+            <div className="space-y-2">
+              {card.lifestyleBenefits.map((benefit: string, idx: number) => (
+                <div key={idx} className="flex items-start gap-3 py-2">
+                  <div className="h-2 w-2 rounded-full bg-foreground/40 mt-1.5 flex-shrink-0" />
+                  <p className="text-sm text-foreground/90">{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Action Button */}
         <Button 
           className="w-full" 
