@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { HomePage } from "@/components/HomePage";
 import { SearchPage } from "@/components/SearchPage";
 import { FutureYouPage } from "@/components/FutureYouPage";
-import { ActionPage } from "@/components/ActionPage";
+import { CopilotPage } from "@/components/CopilotPage";
 import { ProfilePage } from "@/components/ProfilePage";
 import { InsightsPage } from "@/components/InsightsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -18,7 +18,7 @@ const Index = () => {
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const location = useLocation();
 
-  // Check if we need to navigate to action page after path activation
+  // Check if we need to navigate to copilot page after path activation
   useEffect(() => {
     if (location.state?.navigateTo) {
       setCurrentPage(location.state.navigateTo);
@@ -38,7 +38,7 @@ const Index = () => {
       case "mentors": return "mentors";
       case "insights": return "insights";
       case "future": return "your futures";
-      case "action": return "action";
+      case "copilot": return "copilot";
       case "profile": return "profile";
       default: return "path genius";
     }
@@ -80,7 +80,7 @@ const Index = () => {
         {currentPage === "mentors" && <SearchPage />}
         {currentPage === "insights" && <InsightsPage />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
-        {currentPage === "action" && <ActionPage />}
+        {currentPage === "copilot" && <CopilotPage />}
         {currentPage === "profile" && <ProfilePage />}
       </main>
 

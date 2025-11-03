@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
-export const ActionPage = () => {
+export const CopilotPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activePath, setActivePath] = useState<any>(null);

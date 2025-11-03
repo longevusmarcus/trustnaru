@@ -38,11 +38,11 @@ export default function PathDetail() {
 
       toast({
         title: "Path activated!",
-        description: "Your action plan has been updated with this career path.",
+        description: "Your copilot has been updated with this career path.",
       });
 
-      // Navigate to action page
-      navigate("/", { state: { navigateTo: "action" } });
+      // Navigate to copilot page
+      navigate("/", { state: { navigateTo: "copilot" } });
     } catch (error) {
       console.error('Error activating path:', error);
       toast({
