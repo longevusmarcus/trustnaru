@@ -199,7 +199,7 @@ const Auth = () => {
               <p className="text-xs text-muted-foreground/70 mb-2 font-light">Our customers rated us</p>
               <div className="flex items-center justify-center gap-1 mb-1">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-4 h-4 fill-emerald-500 text-emerald-500" />
+                  <Star key={star} className="w-4 h-4 fill-emerald-400 text-emerald-400" />
                 ))}
               </div>
               <p className="text-sm font-light text-foreground/90">4.8 out of 5</p>
