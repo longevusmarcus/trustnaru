@@ -62,12 +62,14 @@ ${activePathContext || 'The user is exploring their career options.'}
 
 Create inspiring, actionable content about "${topic}" specifically tailored to this person's journey. 
 
-Structure your response as:
-1. A powerful opening statement (1-2 sentences)
-2. Three key insights or actions (each 2-3 sentences)
-3. A motivating closing thought (1-2 sentences)
+Format your response in clean, beautiful paragraphs without any markdown symbols (no **, no #, no bullets).
 
-Be specific, authentic, and inspiring. Use "you" to make it personal. Keep it concise and impactful.`;
+Structure:
+• Start with a powerful opening statement (1-2 sentences)
+• Follow with three key insights or actionable steps (each 2-3 sentences), separated by blank lines
+• End with a motivating closing thought (1-2 sentences)
+
+Use "you" to make it personal. Be specific, authentic, and inspiring. Keep it concise and elegant.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

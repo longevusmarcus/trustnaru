@@ -370,17 +370,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                       </div>
                     </div>
                   ) : (
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <div className="text-foreground/90 whitespace-pre-line leading-relaxed">
-                        {featuredContent}
-                      </div>
+                    <div className="space-y-4">
+                      {featuredContent.split('\n\n').map((paragraph, idx) => (
+                        <p key={idx} className="text-foreground/90 leading-relaxed text-[15px]">
+                          {paragraph}
+                        </p>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Action Button */}
-              <div className="px-6 pb-6 sticky bottom-0 bg-background">
+              <div className="px-6 pb-8 sticky bottom-0 bg-background">
                 <Button 
                   className="w-full h-12 rounded-full text-base font-semibold" 
                   onClick={() => setFeaturedDialogOpen(false)}
@@ -388,16 +390,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <Sparkles className="h-4 w-4 mr-2" />
                   Continue Your Journey
                 </Button>
-              </div>
-
-              {/* Info Section */}
-              <div className="px-6 pb-6">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
-                  <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Sparkles className="h-2.5 w-2.5 text-primary" />
-                  </div>
-                  <span>AI-Personalized Daily Feature</span>
-                </div>
               </div>
             </div>
           </DrawerContent>
