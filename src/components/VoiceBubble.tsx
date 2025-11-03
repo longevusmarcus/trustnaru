@@ -148,45 +148,51 @@ export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
         className="relative group"
         aria-label={isRecording ? "Stop recording" : "Start recording"}
       >
-        {/* Outer glow rings */}
+        {/* Outer glow with elegant pulse - matching crystal ball */}
         <div className={`absolute inset-0 rounded-full ${
           isRecording 
-            ? 'animate-ping bg-primary/30' 
-            : 'bg-primary/10 group-hover:bg-primary/20'
+            ? 'bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 blur-3xl animate-[pulse_4s_ease-in-out_infinite]' 
+            : 'bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 blur-3xl group-hover:from-emerald-400/30 group-hover:to-emerald-600/20'
         } transition-all duration-300`} style={{ 
-          transform: 'scale(1.5)',
-          animation: isRecording ? 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none'
+          transform: 'scale(1.8)',
         }} />
         
-        {/* Middle pulse ring */}
-        {isRecording && (
-          <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" style={{ 
-            transform: 'scale(1.3)',
-            animation: 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-          }} />
-        )}
+        {/* Middle glow layer - matching crystal ball */}
+        <div className={`absolute inset-1 rounded-full ${
+          isRecording
+            ? 'bg-gradient-to-br from-emerald-300/40 to-emerald-500/30 blur-2xl animate-[pulse_3s_ease-in-out_infinite]'
+            : 'bg-gradient-to-br from-emerald-300/30 to-emerald-500/20 blur-2xl'
+        } transition-all duration-300`} style={{
+          transform: 'scale(1.4)',
+        }} />
         
-        {/* Main bubble */}
+        {/* Main crystal ball bubble */}
         <div className={`
           relative w-20 h-20 rounded-full 
-          bg-gradient-to-br from-primary via-primary/90 to-primary/80
+          bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25
+          backdrop-blur-sm
           flex items-center justify-center
+          border border-emerald-400/20
+          shadow-2xl
           transition-all duration-300
-          shadow-[0_0_40px_rgba(var(--primary-rgb),0.4)]
-          ${isRecording ? 'scale-110 shadow-[0_0_60px_rgba(var(--primary-rgb),0.6)]' : 'group-hover:scale-105'}
+          ${isRecording ? 'scale-110 animate-[pulse_3.5s_ease-in-out_infinite]' : 'group-hover:scale-105'}
           ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}>
-          {/* Inner glow */}
+          {/* Inner sphere with light reflection - matching crystal ball */}
           <div className={`
-            absolute inset-2 rounded-full 
-            bg-gradient-to-br from-white/20 to-transparent
+            w-14 h-14 rounded-full 
+            bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30
+            backdrop-blur-md relative overflow-hidden
             ${isRecording ? 'animate-pulse' : ''}
-          `} />
+          `}>
+            <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-white/30 blur-md" />
+            <div className="absolute bottom-3 left-3 w-6 h-6 rounded-full bg-emerald-200/20 blur-lg" />
+          </div>
           
           {/* Center dot indicator */}
           <div className={`
-            w-3 h-3 rounded-full 
-            ${isRecording ? 'bg-white animate-pulse' : 'bg-white/80'}
+            absolute w-2 h-2 rounded-full 
+            ${isRecording ? 'bg-white animate-pulse' : 'bg-white/60'}
             ${isProcessing ? 'animate-spin' : ''}
             transition-all duration-300
           `} />
@@ -194,7 +200,7 @@ export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
           {/* Recording indicator text */}
           {isRecording && (
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="text-xs font-medium text-primary animate-pulse">
+              <span className="text-xs font-light text-emerald-600 animate-pulse">
                 Recording...
               </span>
             </div>
@@ -203,7 +209,7 @@ export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
           {/* Processing indicator text */}
           {isProcessing && (
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="text-xs font-light text-muted-foreground">
                 Processing...
               </span>
             </div>
