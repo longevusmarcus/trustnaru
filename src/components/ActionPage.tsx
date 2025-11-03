@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map, Briefcase } from "lucide-react";
+import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map, Briefcase, Bot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -460,6 +460,11 @@ export const ActionPage = () => {
               <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
                 <Briefcase className="h-5 w-5" />
                 <span className="text-xs">Partners Jobs (soon)</span>
+              </Button>
+
+              <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+                <Bot className="h-5 w-5" />
+                <span className="text-xs">Automations (soon)</span>
               </Button>
             </div>
           </div>
