@@ -272,7 +272,12 @@ export const ProfilePage = () => {
 
         {/* Account Actions */}
         <div className="space-y-2 pt-4">
-          <Button variant="ghost" className="w-full justify-start" size="lg">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start" 
+            size="lg"
+            onClick={() => window.location.href = '/settings'}
+          >
             <Settings className="h-4 w-4 mr-3" />
             Account Settings
           </Button>
