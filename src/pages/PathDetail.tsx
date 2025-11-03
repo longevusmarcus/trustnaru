@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +13,7 @@ export default function PathDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activating, setActivating] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const card = location.state?.card;
 
   if (!card) {
@@ -78,7 +80,7 @@ export default function PathDetail() {
 
       <div className="px-4 pb-8">
         {/* Hero Image */}
-        <div className="relative h-64 -mx-4 mb-6">
+        <div className="relative h-64 -mx-4 mb-6 cursor-pointer" onClick={() => setSelectedImage(card.image)}>
           <img 
             src={card.image} 
             alt={card.title}
@@ -90,7 +92,11 @@ export default function PathDetail() {
         {/* Path Images */}
         <div className="grid grid-cols-3 gap-2 mb-8">
           {card.pathImages.map((img: string, imgIndex: number) => (
-            <div key={imgIndex} className="aspect-square rounded-lg overflow-hidden">
+            <div 
+              key={imgIndex} 
+              className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setSelectedImage(img)}
+            >
               <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
             </div>
           ))}
@@ -134,6 +140,29 @@ export default function PathDetail() {
           {activating ? "Activating..." : "Activate This Path"}
         </Button>
       </div>
+
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-full max-h-full w-screen h-screen p-0 border-0 bg-black/95">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+            {selectedImage && (
+              <img 
+                src={selectedImage} 
+                alt="Full view" 
+                className="max-w-full max-h-full object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
