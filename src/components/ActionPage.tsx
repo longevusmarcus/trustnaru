@@ -18,7 +18,6 @@ export const ActionPage = () => {
   const [loading, setLoading] = useState(true);
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
   const [quickWinsOpen, setQuickWinsOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState("");
   const [goals, setGoals] = useState<any[]>([]);
 
   useEffect(() => {
@@ -118,44 +117,6 @@ export const ActionPage = () => {
   ] : [
     "Activate a career path first",
   ];
-
-  const handleAddGoal = async () => {
-    if (!newGoal.trim() || !user || !activePath) return;
-    
-    try {
-      const targetDate = new Date();
-      targetDate.setMonth(targetDate.getMonth() + 3); // Default 3 months
-
-      const { error } = await supabase
-        .from('goals')
-        .insert({
-          user_id: user.id,
-          path_id: activePath.id,
-          title: newGoal,
-          priority: 'medium',
-          target_date: targetDate.toISOString().split('T')[0],
-          completed: false
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Goal added!",
-        description: "Keep pushing towards your future.",
-      });
-      
-      setNewGoal("");
-      setGoalDialogOpen(false);
-      loadData(); // Reload to show new goal
-    } catch (error) {
-      console.error('Error adding goal:', error);
-      toast({
-        title: "Failed to add goal",
-        description: "Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const handleToggleGoal = async (goalId: string, completed: boolean) => {
     try {
@@ -363,15 +324,15 @@ export const ActionPage = () => {
               <DrawerTrigger asChild>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
                   <Target className="h-5 w-5" />
-                  <span className="text-xs">Set Goals</span>
+                  <span className="text-xs">View Goals</span>
                 </Button>
               </DrawerTrigger>
               <DrawerContent className="max-h-[80vh]">
                 <div className="relative overflow-y-auto">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <h2 className="text-2xl font-bold mb-2">Set Your Goal</h2>
-                    <p className="text-sm text-muted-foreground">Define what you want to achieve</p>
+                    <h2 className="text-2xl font-bold mb-2">Your Goals</h2>
+                    <p className="text-sm text-muted-foreground">Track your progress towards your future</p>
                   </div>
                   
                   {/* Close Button */}
@@ -386,25 +347,74 @@ export const ActionPage = () => {
 
                   {/* Content Card */}
                   <div className="p-6">
-                    <div className="bg-muted/30 rounded-2xl p-8">
-                      <Input
-                        placeholder="What do you want to achieve?"
-                        value={newGoal}
-                        onChange={(e) => setNewGoal(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
-                        className="h-14 text-base border-0 bg-background/50"
-                      />
+                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
+                      {goals.length > 0 ? (
+                        goals.map((goal: any) => (
+                          <div
+                            key={goal.id}
+                            className="p-4 rounded-xl bg-background/50"
+                          >
+                            <div className="flex items-start gap-3">
+                              <button 
+                                onClick={() => handleToggleGoal(goal.id, goal.completed)}
+                                className="mt-1 flex-shrink-0"
+                              >
+                                {goal.completed ? (
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <Circle className="h-5 w-5 text-muted-foreground" />
+                                )}
+                              </button>
+                              <div className="flex-1">
+                                <h4 className={`font-medium mb-1 ${goal.completed ? 'line-through' : ''}`}>
+                                  {goal.title}
+                                </h4>
+                                {goal.description && (
+                                  <p className="text-xs text-muted-foreground mb-2">
+                                    {goal.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`text-xs px-2 py-1 rounded-full ${
+                                      goal.priority === "high"
+                                        ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                                        : goal.priority === "medium"
+                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                                    }`}
+                                  >
+                                    {goal.priority}
+                                  </span>
+                                  {goal.target_date && (
+                                    <span className="text-xs text-muted-foreground">
+                                      Target: {new Date(goal.target_date).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Target className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                          <p className="text-sm text-muted-foreground">
+                            Activate a career path to get personalized goals
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Action Button */}
-                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
+                  <div className="px-6 pb-8 sticky bottom-0 bg-background">
                     <Button 
-                      onClick={handleAddGoal}
+                      onClick={() => setGoalDialogOpen(false)}
                       className="w-full h-12 rounded-full text-base font-semibold"
                     >
                       <Target className="h-4 w-4 mr-2" />
-                      Add Goal
+                      Keep Going
                     </Button>
                   </div>
                 </div>
