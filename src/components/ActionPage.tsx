@@ -1,4 +1,4 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map } from "lucide-react";
+import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map, Briefcase } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -454,10 +454,15 @@ export const ActionPage = () => {
                     </Button>
                   </div>
                 </div>
-              </DrawerContent>
-            </Drawer>
+                </DrawerContent>
+              </Drawer>
+
+              <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+                <Briefcase className="h-5 w-5" />
+                <span className="text-xs">Partners Jobs (soon)</span>
+              </Button>
+            </div>
           </div>
-        </div>
       </div>
     </div>
   );
