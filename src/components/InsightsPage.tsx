@@ -108,6 +108,15 @@ export const InsightsPage = () => {
     const messageToSend = inputMessage.trim();
     if (!messageToSend || isGenerating) return;
 
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to use Daily Insights",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setInputMessage('');
     setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
     setIsGenerating(true);
@@ -117,7 +126,14 @@ export const InsightsPage = () => {
         body: { message: messageToSend }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
+
+      if (!data?.insight) {
+        throw new Error('No insight received');
+      }
 
       setChatMessages(prev => [...prev, { 
         role: 'assistant', 
@@ -125,9 +141,10 @@ export const InsightsPage = () => {
       }]);
     } catch (error) {
       console.error('Error generating insight:', error);
+      setChatMessages(prev => prev.slice(0, -1)); // Remove user message on error
       toast({
         title: "Unable to generate insight",
-        description: "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive"
       });
     } finally {

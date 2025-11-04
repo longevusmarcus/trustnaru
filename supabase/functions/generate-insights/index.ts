@@ -14,21 +14,34 @@ serve(async (req) => {
 
   try {
     const { message } = await req.json();
+    console.log('Received message:', message);
+    
+    const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
     
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader! },
         },
       }
     );
 
     // Get user from auth
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    console.log('Auth user:', user?.id, 'Auth error:', authError);
+    
     if (authError || !user) {
-      throw new Error('Unauthorized');
+      console.error('Authentication failed:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Please sign in to use Daily Insights' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Get user profile and active path
