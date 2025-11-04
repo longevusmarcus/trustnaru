@@ -15,7 +15,7 @@ const slides = [
   {
     icon: Compass,
     title: "The Solution",
-    content: "Instantly see your future self and how to become it.",
+    content: "Instantly see your future self, and how to become it.",
   },
   {
     icon: Database,
@@ -26,7 +26,7 @@ const slides = [
     icon: Crown,
     title: "The Vision",
     content:
-      "The OS for becoming. We're turning career development into a science, so every person can live the life they were meant for.",
+      "The OS for becoming. By reverse-engineering career and life success, we’re transforming career development to help people realize their full potential.",
   },
   {
     icon: Zap,
