@@ -30,21 +30,58 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser();
     
     if (!user) {
-      console.warn('Proceeding without auth user (generic insights).');
-    } else {
-      console.log('User authenticated:', user.id);
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { 
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    let pathContext = '';
-    if (user) {
-      // Get user profile and active path
-      const { data: profile } = await supabaseClient
-        .from('user_profiles')
-        .select('active_path_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+    console.log('User authenticated:', user.id);
 
-      if (profile?.active_path_id) {
+    // Get comprehensive user profile data
+    const { data: profile } = await supabaseClient
+      .from('user_profiles')
+      .select('active_path_id, display_name, cv_url, voice_transcription, wizard_data')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    let pathContext = '';
+    let userInfo = '';
+
+    if (profile) {
+      // User's name
+      const userName = profile.display_name || user.email?.split('@')[0] || 'there';
+      userInfo = `User's Name: ${userName}\n`;
+
+      // CV information
+      if (profile.cv_url) {
+        userInfo += `User has uploaded a CV.\n`;
+      }
+
+      // Wizard data (interests, aspirations, etc.)
+      if (profile.wizard_data) {
+        const wizardData = profile.wizard_data as any;
+        if (wizardData.interests) {
+          userInfo += `User Interests: ${wizardData.interests}\n`;
+        }
+        if (wizardData.currentRole) {
+          userInfo += `Current Role: ${wizardData.currentRole}\n`;
+        }
+        if (wizardData.experience) {
+          userInfo += `Experience Level: ${wizardData.experience}\n`;
+        }
+      }
+
+      // Voice transcription (user's aspirations/values)
+      if (profile.voice_transcription) {
+        userInfo += `User's Aspirations (from voice): ${profile.voice_transcription.substring(0, 500)}\n`;
+      }
+
+      // Active path details
+      if (profile.active_path_id) {
         const { data: path } = await supabaseClient
           .from('career_paths')
           .select('*')
@@ -53,14 +90,27 @@ serve(async (req) => {
 
         if (path) {
           pathContext = `
-User's Active Career Path: ${path.title}
+Active Career Path: ${path.title}
 Description: ${path.description}
 Category: ${path.category}
-Key Skills: ${path.key_skills?.join(', ') || 'N/A'}
+Key Skills to Develop: ${path.key_skills?.join(', ') || 'N/A'}
 Target Companies: ${path.target_companies?.join(', ') || 'N/A'}
 Impact Areas: ${path.impact_areas?.join(', ') || 'N/A'}
+Journey Duration: ${path.journey_duration || 'N/A'}
+Salary Range: ${path.salary_range || 'N/A'}
 `;
         }
+      }
+
+      // Get all user's career paths for context
+      const { data: allPaths } = await supabaseClient
+        .from('career_paths')
+        .select('title, category')
+        .eq('user_id', user.id)
+        .limit(10);
+
+      if (allPaths && allPaths.length > 0) {
+        pathContext += `\nOther Career Paths User is Exploring:\n${allPaths.map(p => `- ${p.title} (${p.category})`).join('\n')}`;
       }
     }
 
@@ -69,21 +119,30 @@ Impact Areas: ${path.impact_areas?.join(', ') || 'N/A'}
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const systemPrompt = `You are a sophisticated career advisor and industry analyst. 
-Provide concise, actionable insights about the user's career journey and market trends.
+    const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
+
+    const systemPrompt = `You are a sophisticated career advisor and personal coach for ${userName}. 
+You have deep knowledge about their background, aspirations, and career journey.
+
+${userInfo}
 
 ${pathContext}
 
 Your responses should be:
-- Brief (2-3 sentences max)
-- Focused on actionable insights
+- Personal and warm (use their name "${userName}" occasionally)
+- Brief (2-3 sentences max, unless they ask for detailed analysis)
+- Focused on actionable insights based on THEIR specific data
+- When they mention their CV, skills, or path - you KNOW these details from the context above
+- Reference their specific career path, skills, and goals naturally
 - Based on current market trends when relevant
 - Encouraging yet realistic
-- Professional and sophisticated in tone
+- Professional yet conversational
 
-If the user asks about their journey, reference their active path. 
-If they ask about market trends, provide current industry insights.
-Keep responses conversational and smooth.`;
+IMPORTANT:
+- You have access to ${userName}'s CV, career paths, interests, and aspirations (shown above)
+- When they ask about "my field" or "my path", reference their active path: ${profile?.active_path_id ? 'they have an active path' : 'they should activate a path'}
+- When they mention their CV, acknowledge you have reviewed it
+- Be specific and personal - avoid generic advice`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

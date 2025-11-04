@@ -49,12 +49,14 @@ export const InsightsPage = () => {
     }
 
     try {
-      // Get user profile with active path
+      // Get user profile with active path and name
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('active_path_id')
+        .select('active_path_id, display_name')
         .eq('user_id', user.id)
         .maybeSingle();
+
+      const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
       if (profile?.active_path_id) {
         const { data: path } = await supabase
@@ -65,18 +67,18 @@ export const InsightsPage = () => {
 
         setActivePath(path);
         
-        // Set initial welcome message
+        // Set initial personalized welcome message
         if (!hasInitialMessage) {
           setChatMessages([{
             role: 'assistant',
-            content: `Great to see you here! I can help you with insights about ${path?.title || 'your career path'}, market trends, or answer any questions about your journey.`
+            content: `Hey ${userName}! 👋 I can help you with insights about ${path?.title || 'your career path'}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
           }]);
           setHasInitialMessage(true);
         }
       } else if (!hasInitialMessage) {
         setChatMessages([{
           role: 'assistant',
-          content: "Welcome! Activate a career path to get personalized insights and market analysis."
+          content: `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`
         }]);
         setHasInitialMessage(true);
       }
