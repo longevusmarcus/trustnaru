@@ -45,7 +45,7 @@ export const InsightsPage = () => {
           .from('user_profiles')
           .select('active_path_id, display_name')
           .eq('user_id', user.id)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('career_paths')
           .select('id, title, category')
