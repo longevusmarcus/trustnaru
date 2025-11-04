@@ -16,33 +16,31 @@ serve(async (req) => {
     const { message } = await req.json();
     console.log('Received message:', message);
     
-    const authHeader = req.headers.get('Authorization');
-    console.log('Auth header present:', !!authHeader);
-    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: authHeader! },
+          headers: { Authorization: req.headers.get('Authorization')! },
         },
       }
     );
 
-    // Get user from auth
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    console.log('Auth user:', user?.id, 'Auth error:', authError);
+    // Get user from auth (JWT already verified by Supabase)
+    const { data: { user } } = await supabaseClient.auth.getUser();
     
-    if (authError || !user) {
-      console.error('Authentication failed:', authError);
+    if (!user) {
+      console.error('No user found after JWT verification');
       return new Response(
-        JSON.stringify({ error: 'Please sign in to use Daily Insights' }),
+        JSON.stringify({ error: 'Authentication required' }),
         { 
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
+    
+    console.log('User authenticated:', user.id);
 
     // Get user profile and active path
     const { data: profile } = await supabaseClient
