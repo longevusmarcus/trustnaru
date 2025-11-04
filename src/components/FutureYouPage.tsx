@@ -257,7 +257,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       <div className="px-4 pb-24 pt-4">
         <div className="max-w-md mx-auto space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold">Your Future Selves</h1>
             <p className="text-muted-foreground">Loading your personalized career paths...</p>
           </div>
           <div className="space-y-4">
@@ -280,10 +279,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Your Future Selves</h1>
-          <p className="text-muted-foreground">7 possible versions of you in 2029</p>
-        </div>
 
         <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
           <Button 
