@@ -30,7 +30,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       .from('user_profiles')
       .select('wizard_data')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
     
     // Show demo badge if user has no wizard data (hasn't completed wizard)
     setIsDemo(!profile?.wizard_data);
