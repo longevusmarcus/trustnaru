@@ -16,9 +16,10 @@ serve(async (req) => {
     const { message } = await req.json();
     console.log('Received message:', message);
     
+    // Use service role key for server-side operations
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -26,10 +27,11 @@ serve(async (req) => {
       }
     );
 
-    // Get user from auth (JWT already verified by Supabase)
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    // Get user from the JWT token (already verified by Supabase when verify_jwt = true)
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     
-    if (!user) {
+    if (userError || !user) {
+      console.error('Auth error:', userError);
       return new Response(
         JSON.stringify({ error: 'Authentication required' }),
         { 
