@@ -485,43 +485,28 @@ export const ActionPage = () => {
         )}
 
         {/* Roadmap */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">
-            {activePath ? `Roadmap to ${activePath.title}` : 'Your Roadmap'}
-          </h3>
-          {activePath && roadmapMilestones.length > 0 ? (
-            <div className="space-y-3">
+        {activePath && roadmapMilestones.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Your Roadmap</h3>
+            <div className="space-y-2">
               {roadmapMilestones.map((milestone: any, index: number) => (
-                <Card key={index}>
+                <Card key={index} className="hover:shadow-sm transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <Circle className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-0.5">
+                        {index + 1}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-1">{milestone.step}</h4>
-                        <div className="text-xs text-muted-foreground">
-                          {milestone.duration}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm mb-1">{milestone.step}</h4>
+                        <p className="text-xs text-muted-foreground">{milestone.duration}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          ) : (
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Map className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  {activePath 
-                    ? "No roadmap available for this path"
-                    : "Activate a career path to see your personalized roadmap"}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Affirmations */}
         {activePath && activePath.affirmations?.length > 0 && (

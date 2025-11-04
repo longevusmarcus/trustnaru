@@ -1,17 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Sparkles } from "lucide-react";
+import { TrendingUp, Target, Award, Lightbulb, Send, Bot } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const InsightsPage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [hasInitialMessage, setHasInitialMessage] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages, isGenerating]);
 
   // Always reload when component mounts or user changes
   useEffect(() => {
@@ -50,6 +64,21 @@ export const InsightsPage = () => {
           .single();
 
         setActivePath(path);
+        
+        // Set initial welcome message
+        if (!hasInitialMessage) {
+          setChatMessages([{
+            role: 'assistant',
+            content: `Great to see you here! I can help you with insights about ${path?.title || 'your career path'}, market trends, or answer any questions about your journey.`
+          }]);
+          setHasInitialMessage(true);
+        }
+      } else if (!hasInitialMessage) {
+        setChatMessages([{
+          role: 'assistant',
+          content: "Welcome! Activate a career path to get personalized insights and market analysis."
+        }]);
+        setHasInitialMessage(true);
       }
 
       // Get all career paths
@@ -72,6 +101,37 @@ export const InsightsPage = () => {
       console.error('Error loading insights:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    const messageToSend = inputMessage.trim();
+    if (!messageToSend || isGenerating) return;
+
+    setInputMessage('');
+    setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
+    setIsGenerating(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { message: messageToSend }
+      });
+
+      if (error) throw error;
+
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.insight 
+      }]);
+    } catch (error) {
+      console.error('Error generating insight:', error);
+      toast({
+        title: "Unable to generate insight",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -154,7 +214,7 @@ export const InsightsPage = () => {
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <Target className="h-5 w-5 mx-auto mb-2 text-primary/70" />
                 <div className="text-2xl font-bold">{allPaths.length}</div>
                 <div className="text-xs text-muted-foreground">Paths Explored</div>
               </CardContent>
@@ -214,26 +274,108 @@ export const InsightsPage = () => {
           </div>
         </motion.div>
 
-        {/* Weekly Summary */}
+        {/* AI Insights Chat */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="text-lg font-semibold mb-3">This Week</h3>
-          <Card className="bg-card/50">
-            <CardContent className="p-6">
-              <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
-                  <Sparkles className="h-6 w-6 text-primary" />
+          <h3 className="text-lg font-semibold mb-3">Career Advisor</h3>
+          <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
+            <CardContent className="p-0">
+              {/* Chat Messages */}
+              <div className="px-4 py-4 space-y-3 max-h-80 overflow-y-auto">
+                {chatMessages.map((msg, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {msg.role === 'assistant' && (
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Bot className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                    )}
+                    <div 
+                      className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-primary text-primary-foreground ml-auto' 
+                          : 'bg-muted/70 text-foreground'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                {isGenerating && (
+                  <div className="flex gap-2 justify-start">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Bot className="h-3.5 w-3.5 text-primary animate-pulse" />
+                    </div>
+                    <div className="bg-muted/70 rounded-2xl px-3.5 py-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Quick Suggestions */}
+              {chatMessages.length <= 1 && !isGenerating && (
+                <div className="px-4 pb-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      setInputMessage("What skills should I focus on this week?");
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="text-[11px] px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    Key skills
+                  </button>
+                  <button
+                    onClick={() => {
+                      setInputMessage("What are the market trends in my field?");
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="text-[11px] px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    Market trends
+                  </button>
+                  <button
+                    onClick={() => {
+                      setInputMessage("How can I accelerate my progress?");
+                      setTimeout(() => handleSendMessage(), 100);
+                    }}
+                    className="text-[11px] px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    Progress tips
+                  </button>
                 </div>
-                <h4 className="font-medium">Keep Building Momentum</h4>
-                <p className="text-sm text-muted-foreground">
-                  {activePath 
-                    ? `You're on track with ${activePath.title}. Complete today's actions to maintain your streak!`
-                    : "Start by activating a career path to begin your journey"
-                  }
-                </p>
+              )}
+
+              {/* Input Area */}
+              <div className="border-t border-border/50 px-3 py-2.5">
+                <div className="flex gap-2">
+                  <Input
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    placeholder="Ask about your journey, skills, market..."
+                    className="flex-1 h-9 text-[13px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 placeholder:text-muted-foreground/60"
+                    disabled={isGenerating}
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() || isGenerating}
+                    size="sm"
+                    className="h-9 w-9 p-0 rounded-full flex-shrink-0"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
