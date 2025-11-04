@@ -30,35 +30,29 @@ serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser();
     
     if (!user) {
-      console.error('No user found after JWT verification');
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      console.warn('Proceeding without auth user (generic insights).');
+    } else {
+      console.log('User authenticated:', user.id);
     }
-    
-    console.log('User authenticated:', user.id);
-
-    // Get user profile and active path
-    const { data: profile } = await supabaseClient
-      .from('user_profiles')
-      .select('active_path_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
 
     let pathContext = '';
-    if (profile?.active_path_id) {
-      const { data: path } = await supabaseClient
-        .from('career_paths')
-        .select('*')
-        .eq('id', profile.active_path_id)
-        .single();
+    if (user) {
+      // Get user profile and active path
+      const { data: profile } = await supabaseClient
+        .from('user_profiles')
+        .select('active_path_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (path) {
-        pathContext = `
+      if (profile?.active_path_id) {
+        const { data: path } = await supabaseClient
+          .from('career_paths')
+          .select('*')
+          .eq('id', profile.active_path_id)
+          .single();
+
+        if (path) {
+          pathContext = `
 User's Active Career Path: ${path.title}
 Description: ${path.description}
 Category: ${path.category}
@@ -66,6 +60,7 @@ Key Skills: ${path.key_skills?.join(', ') || 'N/A'}
 Target Companies: ${path.target_companies?.join(', ') || 'N/A'}
 Impact Areas: ${path.impact_areas?.join(', ') || 'N/A'}
 `;
+        }
       }
     }
 
