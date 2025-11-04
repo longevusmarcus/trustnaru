@@ -44,38 +44,43 @@ export const InsightsPage = () => {
     }
 
     try {
-      // Fetch all data in parallel with complete fields needed for insights
-      const [profileResult, pathsResult, statsResult] = await Promise.all([
+      // Fetch profile and base data in parallel
+      const [profileResult, statsResult, allPathsResult] = await Promise.all([
         supabase
           .from('user_profiles')
           .select('active_path_id, display_name')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
-          .from('career_paths')
-          .select('*')
-          .eq('user_id', user.id),
-        supabase
           .from('user_stats')
           .select('current_streak, missions_completed')
           .eq('user_id', user.id)
-          .maybeSingle()
+          .maybeSingle(),
+        supabase
+          .from('career_paths')
+          .select('id, category')
+          .eq('user_id', user.id)
       ]);
 
       const profile = profileResult.data;
       const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
-      // Find and set active path from the fetched paths
+      // Fetch active path only if exists
       let activePathData = null;
-      if (profile?.active_path_id && pathsResult.data) {
-        activePathData = pathsResult.data.find(p => p.id === profile.active_path_id) || null;
+      if (profile?.active_path_id) {
+        const { data } = await supabase
+          .from('career_paths')
+          .select('id, title, category, key_skills, target_companies')
+          .eq('id', profile.active_path_id)
+          .single();
+        activePathData = data;
       }
       
       setActivePath(activePathData);
-      setAllPaths(pathsResult.data || []);
+      setAllPaths(allPathsResult.data || []);
       setUserStats(statsResult.data || { current_streak: 0, missions_completed: 0 });
 
-      // Always set welcome message based on current active path state
+      // Set welcome message
       const welcomeMsg = activePathData
         ? `Hey ${userName}! 👋 I can help you with insights about ${activePathData.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
         : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
