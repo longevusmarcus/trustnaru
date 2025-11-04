@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,20 +27,10 @@ export const InsightsPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, isGenerating]);
 
-  // Always reload when component mounts or user changes
+  // Load insights only on mount or when user changes
   useEffect(() => {
     loadInsights();
-  }, [user]);
-
-  // Also reload when page becomes visible (browser tab focus)
-  useEffect(() => {
-    const handleFocus = () => {
-      loadInsights();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [user]);
+  }, [user?.id]);
 
   const loadInsights = async () => {
     if (!user) {
@@ -49,56 +39,46 @@ export const InsightsPage = () => {
     }
 
     try {
-      // Get user profile with active path and name
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('active_path_id, display_name')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Fetch all data in parallel with optimized queries
+      const [profileResult, pathsResult, statsResult] = await Promise.all([
+        supabase
+          .from('user_profiles')
+          .select('active_path_id, display_name')
+          .eq('user_id', user.id)
+          .single(),
+        supabase
+          .from('career_paths')
+          .select('id, title, category')
+          .eq('user_id', user.id)
+          .limit(10),
+        supabase
+          .from('user_stats')
+          .select('current_streak, missions_completed')
+          .eq('user_id', user.id)
+          .maybeSingle()
+      ]);
 
+      const profile = profileResult.data;
       const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
-      if (profile?.active_path_id) {
-        const { data: path } = await supabase
-          .from('career_paths')
-          .select('*')
-          .eq('id', profile.active_path_id)
-          .single();
+      // Find and set active path from the fetched paths
+      let activePath = null;
+      if (profile?.active_path_id && pathsResult.data) {
+        activePath = pathsResult.data.find(p => p.id === profile.active_path_id) || null;
+      }
+      setActivePath(activePath);
+      setAllPaths(pathsResult.data || []);
+      setUserStats(statsResult.data || { current_streak: 0, missions_completed: 0 });
 
-        setActivePath(path);
+      // Set initial welcome message only once
+      if (!hasInitialMessage) {
+        const welcomeMsg = activePath
+          ? `Hey ${userName}! 👋 I can help you with insights about ${activePath.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
+          : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
         
-        // Set initial personalized welcome message
-        if (!hasInitialMessage) {
-          setChatMessages([{
-            role: 'assistant',
-            content: `Hey ${userName}! 👋 I can help you with insights about ${path?.title || 'your career path'}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
-          }]);
-          setHasInitialMessage(true);
-        }
-      } else if (!hasInitialMessage) {
-        setChatMessages([{
-          role: 'assistant',
-          content: `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`
-        }]);
+        setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
         setHasInitialMessage(true);
       }
-
-      // Get all career paths
-      const { data: paths } = await supabase
-        .from('career_paths')
-        .select('*')
-        .eq('user_id', user.id);
-
-      setAllPaths(paths || []);
-
-      // Get user stats
-      const { data: stats } = await supabase
-        .from('user_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      setUserStats(stats);
     } catch (error) {
       console.error('Error loading insights:', error);
     } finally {
@@ -154,18 +134,30 @@ export const InsightsPage = () => {
     }
   };
 
-  // Calculate insights
-  const pathCategories = [...new Set(allPaths.map(p => p.category).filter(Boolean))];
-  const progressPercentage = activePath ? Math.min(33, (userStats?.missions_completed || 0) * 10) : 0;
+  // Memoize calculated insights
+  const pathCategories = useMemo(
+    () => [...new Set(allPaths.map(p => p.category).filter(Boolean))],
+    [allPaths]
+  );
   
-  const personalizedTips = activePath ? [
-    `Focus on ${activePath.key_skills?.[0] || 'key skills'} this week to accelerate your progress`,
-    `Research ${activePath.target_companies?.[0] || 'companies'} to understand their culture`,
-    `Connect with professionals in ${activePath.category} on LinkedIn`,
-  ] : [
-    "Activate a career path to get personalized guidance",
-    "Complete the wizard to discover paths tailored to you",
-  ];
+  const progressPercentage = useMemo(
+    () => activePath ? Math.min(33, (userStats?.missions_completed || 0) * 10) : 0,
+    [activePath, userStats?.missions_completed]
+  );
+  
+  const personalizedTips = useMemo(() => {
+    if (!activePath) {
+      return [
+        "Activate a career path to get personalized guidance",
+        "Complete the wizard to discover paths tailored to you",
+      ];
+    }
+    return [
+      `Focus on building your core skills this week`,
+      `Research companies in ${activePath.category} to understand their culture`,
+      `Connect with professionals in ${activePath.category} on LinkedIn`,
+    ];
+  }, [activePath?.category]);
 
   if (loading) {
     return (

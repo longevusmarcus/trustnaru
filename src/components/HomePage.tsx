@@ -2,7 +2,7 @@ import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, Ar
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -109,10 +109,15 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [displayName, setDisplayName] = useState<string>('');
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
-  const weekDates = getWeekDates();
   
-  // Dynamic topic based on user context
-  const dailyTopic = getFeaturedTopicForUser(activePath, userStats, allPaths);
+  // Memoize week dates (only changes when date changes)
+  const weekDates = useMemo(() => getWeekDates(), []);
+  
+  // Dynamic topic based on user context - memoized
+  const dailyTopic = useMemo(
+    () => getFeaturedTopicForUser(activePath, userStats, allPaths),
+    [activePath, userStats?.current_streak, allPaths.length]
+  );
 
   useEffect(() => {
     const fetchGamificationData = async () => {
@@ -121,11 +126,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const weekStart = weekDates[0].toISOString().split('T')[0];
       const weekEnd = weekDates[6].toISOString().split('T')[0];
 
-      // Fetch all data in parallel
-      const [statsResult, streakResult, badgesResult, profileResult, allPathsResult] = await Promise.all([
+      // Fetch only essential data in parallel - optimized queries
+      const [statsResult, streakResult, badgesResult, profileResult, pathsResult] = await Promise.all([
         supabase
           .from('user_stats')
-          .select('*')
+          .select('current_streak, longest_streak, total_points')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
@@ -137,7 +142,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .lte('streak_date', weekEnd),
         supabase
           .from('user_badges')
-          .select('*, badges (name, icon, description)')
+          .select('badges (name, icon, description)')
           .eq('user_id', user.id)
           .order('earned_at', { ascending: false })
           .limit(3),
@@ -145,70 +150,67 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .from('user_profiles')
           .select('display_name, active_path_id')
           .eq('user_id', user.id)
-          .maybeSingle(),
+          .single(),
         supabase
           .from('career_paths')
-          .select('*')
+          .select('id, title, description, image_url, journey_duration, category, key_skills, target_companies')
           .eq('user_id', user.id)
+          .limit(10)
       ]);
 
-      // Set active path
-      if (profileResult.data?.active_path_id) {
-        const activePathData = allPathsResult.data?.find(p => p.id === profileResult.data.active_path_id);
-        setActivePath(activePathData);
+      // Process results efficiently
+      if (profileResult.data) {
+        setDisplayName(profileResult.data.display_name || user.email?.split('@')[0] || 'there');
+        
+        if (profileResult.data.active_path_id && pathsResult.data) {
+          const activePathData = pathsResult.data.find(p => p.id === profileResult.data.active_path_id);
+          setActivePath(activePathData || null);
+        }
       }
 
-      // Set all paths
-      if (allPathsResult.data) {
-        setAllPaths(allPathsResult.data);
+      if (pathsResult.data) {
+        setAllPaths(pathsResult.data);
+        setFirstPath(pathsResult.data[0] || null);
       }
 
-      if (!statsResult.data) {
-        await supabase.from('user_stats').insert({
-          user_id: user.id,
-          current_streak: 0,
-          longest_streak: 0,
-          total_points: 0
-        });
-      } else {
-        setUserStats(statsResult.data);
-      }
-
-      if (streakResult.data) {
-        setStreaks(streakResult.data.map(s => new Date(s.streak_date)));
-      }
-
-      if (badgesResult.data) {
-        setEarnedBadges(badgesResult.data);
-      }
-
-      // Use first path from all paths result
-      if (allPathsResult.data && allPathsResult.data.length > 0) {
-        setFirstPath(allPathsResult.data[0]);
-      }
-
-      if (profileResult.data?.display_name) {
-        setDisplayName(profileResult.data.display_name);
-      } else {
-        const defaultName = user.email?.split('@')[0] || 'there';
-        setDisplayName(defaultName);
-      }
+      setUserStats(statsResult.data || { current_streak: 0, longest_streak: 0, total_points: 0 });
+      setStreaks(streakResult.data?.map(s => new Date(s.streak_date)) || []);
+      setEarnedBadges(badgesResult.data || []);
     };
 
     fetchGamificationData();
-  }, [user]);
+  }, [user?.id]);
 
   const handleFeaturedClick = async () => {
     setFeaturedDialogOpen(true);
-    setLoadingContent(true);
     
+    // Check cache first (5 minute expiry)
+    const cacheKey = `featured_${dailyTopic.title}_${user?.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { content, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 5 * 60 * 1000) { // 5 minutes
+          setFeaturedContent(content);
+          return;
+        }
+      } catch {}
+    }
+    
+    setLoadingContent(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-featured-content', {
         body: { topic: dailyTopic.title }
       });
 
       if (error) throw error;
+      
       setFeaturedContent(data.content);
+      // Cache the result
+      localStorage.setItem(cacheKey, JSON.stringify({
+        content: data.content,
+        timestamp: Date.now()
+      }));
     } catch (error) {
       console.error('Error generating featured content:', error);
       toast({
