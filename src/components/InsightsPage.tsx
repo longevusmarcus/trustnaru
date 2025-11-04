@@ -44,7 +44,7 @@ export const InsightsPage = () => {
     }
 
     try {
-      // Fetch all data in parallel with optimized queries
+      // Fetch all data in parallel with complete fields needed for insights
       const [profileResult, pathsResult, statsResult] = await Promise.all([
         supabase
           .from('user_profiles')
@@ -53,9 +53,8 @@ export const InsightsPage = () => {
           .maybeSingle(),
         supabase
           .from('career_paths')
-          .select('id, title, category, key_skills, target_companies')
-          .eq('user_id', user.id)
-          .limit(10),
+          .select('*')
+          .eq('user_id', user.id),
         supabase
           .from('user_stats')
           .select('current_streak, missions_completed')
