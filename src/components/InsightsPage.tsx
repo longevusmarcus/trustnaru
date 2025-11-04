@@ -3,11 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Send, Bot } from "lucide-react";
+import { TrendingUp, Target, Award, Lightbulb, Send } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import crystalBallIcon from "@/assets/crystal-ball-emerald.png";
 
 export const InsightsPage = () => {
   const { user } = useAuth();
@@ -161,8 +162,8 @@ export const InsightsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-md mx-auto px-4 pt-6 space-y-6 pb-8">
         {/* Progress Overview */}
         {activePath && (
           <motion.div
@@ -280,7 +281,7 @@ export const InsightsPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="text-lg font-semibold mb-3">Career Advisor</h3>
+          <h3 className="text-lg font-semibold mb-3">Daily Insights</h3>
           <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
             <CardContent className="p-0">
               {/* Chat Messages */}
@@ -291,8 +292,8 @@ export const InsightsPage = () => {
                     className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     {msg.role === 'assistant' && (
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Bot className="h-3.5 w-3.5 text-primary" />
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <img src={crystalBallIcon} alt="" className="w-5 h-5 object-contain" />
                       </div>
                     )}
                     <div 
@@ -308,8 +309,8 @@ export const InsightsPage = () => {
                 ))}
                 {isGenerating && (
                   <div className="flex gap-2 justify-start">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Bot className="h-3.5 w-3.5 text-primary animate-pulse" />
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <img src={crystalBallIcon} alt="" className="w-5 h-5 object-contain animate-pulse" />
                     </div>
                     <div className="bg-muted/70 rounded-2xl px-3.5 py-2">
                       <div className="flex gap-1">
