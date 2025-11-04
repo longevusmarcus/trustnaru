@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import crystalBallIcon from "@/assets/crystal-ball-emerald.png";
 
 export const InsightsPage = () => {
   const { user } = useAuth();
@@ -292,8 +291,17 @@ export const InsightsPage = () => {
                     className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     {msg.role === 'assistant' && (
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <img src={crystalBallIcon} alt="" className="w-5 h-5 object-contain" />
+                      <div className="relative w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {/* Mini emerald bubble matching signup page */}
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 blur-sm" />
+                        <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20">
+                          <div className="absolute inset-1 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30">
+                            <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white/30 blur-[1px]" />
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-0.5 h-0.5 rounded-full bg-white/60" />
+                          </div>
+                        </div>
                       </div>
                     )}
                     <div 
@@ -309,8 +317,17 @@ export const InsightsPage = () => {
                 ))}
                 {isGenerating && (
                   <div className="flex gap-2 justify-start">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <img src={crystalBallIcon} alt="" className="w-5 h-5 object-contain animate-pulse" />
+                    <div className="relative w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {/* Pulsing mini emerald bubble */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 blur-sm animate-pulse" />
+                      <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20 animate-pulse">
+                        <div className="absolute inset-1 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30">
+                          <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white/30 blur-[1px]" />
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-0.5 h-0.5 rounded-full bg-white animate-pulse" />
+                        </div>
+                      </div>
                     </div>
                     <div className="bg-muted/70 rounded-2xl px-3.5 py-2">
                       <div className="flex gap-1">
