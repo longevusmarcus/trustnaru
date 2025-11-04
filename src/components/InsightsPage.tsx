@@ -66,23 +66,22 @@ export const InsightsPage = () => {
       const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
       // Find and set active path from the fetched paths
-      let activePath = null;
+      let activePathData = null;
       if (profile?.active_path_id && pathsResult.data) {
-        activePath = pathsResult.data.find(p => p.id === profile.active_path_id) || null;
+        activePathData = pathsResult.data.find(p => p.id === profile.active_path_id) || null;
       }
-      setActivePath(activePath);
+      
+      setActivePath(activePathData);
       setAllPaths(pathsResult.data || []);
       setUserStats(statsResult.data || { current_streak: 0, missions_completed: 0 });
 
-      // Set initial welcome message only once
-      if (!hasInitialMessage) {
-        const welcomeMsg = activePath
-          ? `Hey ${userName}! 👋 I can help you with insights about ${activePath.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
-          : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
-        
-        setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
-        setHasInitialMessage(true);
-      }
+      // Always set welcome message based on current active path state
+      const welcomeMsg = activePathData
+        ? `Hey ${userName}! 👋 I can help you with insights about ${activePathData.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
+        : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
+      
+      setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
+      setHasInitialMessage(true);
     } catch (error) {
       console.error('Error loading insights:', error);
     } finally {
