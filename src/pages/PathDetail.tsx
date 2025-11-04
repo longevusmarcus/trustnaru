@@ -27,7 +27,7 @@ export default function PathDetail() {
     setActivating(true);
     try {
       // Update user profile with active path
-      const { error } = await supabase
+      const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
           user_id: user.id,
@@ -36,7 +36,7 @@ export default function PathDetail() {
           onConflict: 'user_id'
         });
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       // Generate goals for this path
       const { error: goalsError } = await supabase.functions.invoke('generate-goals', {
@@ -45,16 +45,21 @@ export default function PathDetail() {
 
       if (goalsError) {
         console.error('Error generating goals:', goalsError);
-        // Don't fail the activation if goal generation fails
+        toast({
+          title: "Path activated",
+          description: "Path activated successfully, but goal generation is taking longer than expected.",
+        });
+      } else {
+        toast({
+          title: "Path activated!",
+          description: "Your personalized goals are ready.",
+        });
       }
 
-      toast({
-        title: "Path activated!",
-        description: "Your personalized goals have been generated.",
-      });
-
-      // Navigate to copilot page
-      navigate("/", { state: { navigateTo: "copilot" } });
+      // Navigate to copilot page with a slight delay to ensure state is updated
+      setTimeout(() => {
+        navigate("/", { state: { navigateTo: "copilot" } });
+      }, 500);
     } catch (error) {
       console.error('Error activating path:', error);
       toast({

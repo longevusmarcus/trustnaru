@@ -20,8 +20,19 @@ export const ActionPage = () => {
   const [quickWinsOpen, setQuickWinsOpen] = useState(false);
   const [goals, setGoals] = useState<any[]>([]);
 
+  // Always reload when component mounts or user changes
   useEffect(() => {
     loadData();
+  }, [user]);
+
+  // Also reload when page becomes visible (browser tab focus)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadData();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
 
   const loadData = async () => {

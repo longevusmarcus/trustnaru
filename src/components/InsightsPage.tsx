@@ -13,8 +13,19 @@ export const InsightsPage = () => {
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
 
+  // Always reload when component mounts or user changes
   useEffect(() => {
     loadInsights();
+  }, [user]);
+
+  // Also reload when page becomes visible (browser tab focus)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadInsights();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
 
   const loadInsights = async () => {

@@ -25,6 +25,7 @@ const Index = () => {
   const [showCodeEntry, setShowCodeEntry] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const [pageRenderKey, setPageRenderKey] = useState(0);
   const location = useLocation();
   const isNavVisible = useScrollDirection();
   const [isCardScrolling, setIsCardScrolling] = useState(false);
@@ -60,7 +61,12 @@ const Index = () => {
   // Check if we need to navigate to copilot page after path activation
   useEffect(() => {
     if (location.state?.navigateTo) {
-      setCurrentPage(location.state.navigateTo);
+      const targetPage = location.state.navigateTo;
+      setCurrentPage(targetPage);
+      // Increment key to force fresh data load
+      if (targetPage === "insights" || targetPage === "copilot") {
+        setPageRenderKey(prev => prev + 1);
+      }
       // Clear the state
       window.history.replaceState({}, document.title);
     }
@@ -88,6 +94,10 @@ const Index = () => {
       setShowWizard(true);
     } else {
       setCurrentPage(page);
+      // Increment key to force remount of insights/copilot pages
+      if (page === "insights" || page === "copilot") {
+        setPageRenderKey(prev => prev + 1);
+      }
     }
   };
 
@@ -151,9 +161,9 @@ const Index = () => {
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
         {currentPage === "mentors" && <MentorsPage onScrollChange={setIsCardScrolling} />}
-        {currentPage === "insights" && <InsightsPage />}
+        {currentPage === "insights" && <InsightsPage key={pageRenderKey} />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
-        {currentPage === "copilot" && <ActionPage />}
+        {currentPage === "copilot" && <ActionPage key={pageRenderKey} />}
         {currentPage === "profile" && <ProfilePage />}
       </main>
 
