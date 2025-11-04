@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+
+const CACHE_KEY = 'career_paths_cache';
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
@@ -16,9 +19,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   const [isDemo, setIsDemo] = useState(false);
   
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+  
   useEffect(() => {
     if (user && !hasLoaded) {
-      loadCareerPaths();
+      loadCareerPathsWithCache();
       checkIfDemo();
     }
   }, [user, hasLoaded]);
@@ -44,7 +52,37 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     }
   }, [careerPaths]);
 
-  const loadCareerPaths = async () => {
+  const loadCareerPathsWithCache = async () => {
+    if (!user) {
+      setPaths([]);
+      return;
+    }
+
+    // Check cache first
+    try {
+      const cacheKey = `${CACHE_KEY}_${user.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        
+        // Use cache if less than 10 minutes old
+        if (age < CACHE_DURATION && data && data.length > 0) {
+          setPaths(data);
+          setHasLoaded(true);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Cache read error:', e);
+    }
+
+    // Load from database if no valid cache
+    await loadCareerPaths();
+  };
+
+  const loadCareerPaths = async (skipCache = false) => {
     if (!user) {
       setPaths([]);
       return;
@@ -61,6 +99,17 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       if (!error && data) {
         setPaths(data);
         setHasLoaded(true);
+        
+        // Update cache
+        try {
+          const cacheKey = `${CACHE_KEY}_${user.id}`;
+          localStorage.setItem(cacheKey, JSON.stringify({
+            data,
+            timestamp: Date.now()
+          }));
+        } catch (e) {
+          console.warn('Cache write error:', e);
+        }
       }
     } catch (error) {
       console.error('Error loading career paths:', error);
@@ -74,7 +123,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     
     setLoading(true);
     try {
-
       // Get user profile data
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -95,7 +143,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
       if (error) throw error;
 
-      // Reload paths to include new ones
+      // Clear cache and reload paths
+      try {
+        const cacheKey = `${CACHE_KEY}_${user.id}`;
+        localStorage.removeItem(cacheKey);
+      } catch (e) {
+        console.warn('Cache clear error:', e);
+      }
+      
       await loadCareerPaths();
     } catch (error) {
       console.error('Error generating new versions:', error);
@@ -129,6 +184,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     }
   };
 
+  // Memoize path IDs to prevent unnecessary re-renders
+  const pathIds = useMemo(() => paths.map(p => p.id).join(','), [paths]);
+  
   useEffect(() => {
     // Auto-generate images for paths that don't have them (only once per path)
     if (paths.length === 0) return;
@@ -138,7 +196,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         generateImages(path.id);
       }
     });
-  }, [paths.map(p => p.id).join(',')]); // Only re-run if path IDs change
+  }, [pathIds]); // Only re-run if path IDs change
 
   const handleFeedback = async (pathId: string, feedback: 'up' | 'down') => {
     if (!user) return;
