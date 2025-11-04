@@ -22,6 +22,11 @@ export const InsightsPage = () => {
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,7 +53,7 @@ export const InsightsPage = () => {
           .maybeSingle(),
         supabase
           .from('career_paths')
-          .select('id, title, category')
+          .select('id, title, category, key_skills, target_companies')
           .eq('user_id', user.id)
           .limit(10),
         supabase
@@ -153,11 +158,11 @@ export const InsightsPage = () => {
       ];
     }
     return [
-      `Focus on building your core skills this week`,
-      `Research companies in ${activePath.category} to understand their culture`,
+      `Focus on ${activePath.key_skills?.[0] || 'key skills'} this week to accelerate your progress`,
+      `Research ${activePath.target_companies?.[0] || 'companies'} to understand their culture`,
       `Connect with professionals in ${activePath.category} on LinkedIn`,
     ];
-  }, [activePath?.category]);
+  }, [activePath?.category, activePath?.key_skills, activePath?.target_companies]);
 
   if (loading) {
     return (

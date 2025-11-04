@@ -119,6 +119,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     [activePath, userStats?.current_streak, allPaths.length]
   );
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   useEffect(() => {
     const fetchGamificationData = async () => {
       if (!user) return;
