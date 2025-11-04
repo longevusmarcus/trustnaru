@@ -1,3 +1,4 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -12,7 +13,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Generate goals function called');
     const { pathId, userId } = await req.json();
+    console.log('Parameters:', { pathId, userId });
     
     if (!pathId || !userId) {
       throw new Error('Missing required parameters');
@@ -29,6 +32,7 @@ serve(async (req) => {
     );
 
     // Get the career path details
+    console.log('Fetching career path...');
     const { data: path, error: pathError } = await supabaseClient
       .from('career_paths')
       .select('*')
@@ -36,12 +40,16 @@ serve(async (req) => {
       .single();
 
     if (pathError || !path) {
+      console.error('Failed to fetch career path:', pathError);
       throw new Error('Failed to fetch career path');
     }
+
+    console.log('Career path found:', path.title);
 
     // Generate goals using Lovable AI
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured');
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
@@ -64,6 +72,7 @@ Format each goal as:
 - Priority: high, medium, or low
 - Timeline: Number of months to achieve (1-6)`;
 
+    console.log('Calling AI to generate goals...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -119,14 +128,17 @@ Format each goal as:
     }
 
     const aiData = await aiResponse.json();
+    console.log('AI response received');
     const toolCall = aiData.choices[0]?.message?.tool_calls?.[0];
     
     if (!toolCall) {
+      console.error('No tool call in AI response:', JSON.stringify(aiData));
       throw new Error('No tool call in AI response');
     }
 
     const goalsData = JSON.parse(toolCall.function.arguments);
     const goals = goalsData.goals;
+    console.log(`Generated ${goals.length} goals`);
 
     // Insert goals into database
     const goalsToInsert = goals.map((goal: any) => {
@@ -144,6 +156,7 @@ Format each goal as:
       };
     });
 
+    console.log('Inserting goals into database...');
     const { data: insertedGoals, error: insertError } = await supabaseClient
       .from('goals')
       .insert(goalsToInsert)
@@ -154,6 +167,7 @@ Format each goal as:
       throw new Error('Failed to save goals');
     }
 
+    console.log(`Successfully inserted ${insertedGoals.length} goals`);
     return new Response(
       JSON.stringify({ goals: insertedGoals }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
