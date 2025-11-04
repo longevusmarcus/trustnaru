@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
+import { CloneButton } from "@/components/CloneButton";
 
 interface MentorsPageProps {
   onScrollChange?: (isScrolling: boolean) => void;
@@ -423,14 +424,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                   )}
 
                   {/* Clone Profile Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    disabled
-                  >
-                    Clone Profile (Soon Available)
-                  </Button>
+                  <CloneButton mentorId={mentor.id} />
                 </CardContent>
               </Card>
         ))}

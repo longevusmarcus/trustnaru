@@ -47,20 +47,52 @@ const dailyMissions = [
   }
 ];
 
-const featuredTopics = [
-  { title: "Design Your Future", description: "A guided pathway to visualize and plan your ideal future self" },
-  { title: "Build Your Network", description: "Strategic approaches to connect with the right people" },
-  { title: "Master Your Craft", description: "Daily practices to develop expertise in your field" },
-  { title: "Find Your Voice", description: "Discover and communicate your unique value proposition" },
-  { title: "Create Impact", description: "Transform your work into meaningful contributions" },
-  { title: "Stay Resilient", description: "Build mental strength for your career journey" },
-  { title: "Embrace Change", description: "Navigate transitions with confidence and clarity" },
-];
+const getFeaturedTopicForUser = (activePath: any, stats: any, allPaths: any[]) => {
+  const topics = [
+    { 
+      title: "Design Your Future", 
+      description: "A guided pathway to visualize and plan your ideal future self",
+      condition: !activePath // For users without active path
+    },
+    { 
+      title: "Master Key Skills", 
+      description: `Accelerate your ${activePath?.category || 'career'} development`,
+      condition: activePath && stats?.current_streak > 0 // Active users
+    },
+    { 
+      title: "Build Your Network", 
+      description: "Strategic approaches to connect with the right people in your field",
+      condition: activePath // Users with paths
+    },
+    { 
+      title: "Navigate Market Trends", 
+      description: `Current insights for ${activePath?.category || 'your industry'}`,
+      condition: activePath // Users with paths
+    },
+    { 
+      title: "Explore New Directions", 
+      description: "Discover adjacent career paths and opportunities",
+      condition: allPaths?.length > 2 // Users exploring multiple paths
+    },
+    { 
+      title: "Stay Consistent", 
+      description: "Build habits that transform your career trajectory",
+      condition: stats?.current_streak < 3 // Users who need motivation
+    },
+    { 
+      title: "Leverage Your Experience", 
+      description: "Turn your background into your competitive advantage",
+      condition: activePath // Users with defined paths
+    },
+  ];
 
-const getDailyFeaturedTopic = () => {
+  // Filter topics that match current user state
+  const relevantTopics = topics.filter(t => t.condition !== false);
+  
+  // Rotate through relevant topics daily
   const today = new Date();
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-  return featuredTopics[dayOfYear % featuredTopics.length];
+  return relevantTopics[dayOfYear % relevantTopics.length] || topics[0];
 };
 
 
@@ -75,8 +107,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [featuredContent, setFeaturedContent] = useState<string>('');
   const [loadingContent, setLoadingContent] = useState(false);
   const [displayName, setDisplayName] = useState<string>('');
+  const [activePath, setActivePath] = useState<any>(null);
+  const [allPaths, setAllPaths] = useState<any[]>([]);
   const weekDates = getWeekDates();
-  const dailyTopic = getDailyFeaturedTopic();
+  
+  // Dynamic topic based on user context
+  const dailyTopic = getFeaturedTopicForUser(activePath, userStats, allPaths);
 
   useEffect(() => {
     const fetchGamificationData = async () => {
@@ -86,7 +122,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const weekEnd = weekDates[6].toISOString().split('T')[0];
 
       // Fetch all data in parallel
-      const [statsResult, streakResult, badgesResult, pathsResult, profileResult] = await Promise.all([
+      const [statsResult, streakResult, badgesResult, profileResult, allPathsResult] = await Promise.all([
         supabase
           .from('user_stats')
           .select('*')
@@ -106,17 +142,26 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .order('earned_at', { ascending: false })
           .limit(3),
         supabase
+          .from('user_profiles')
+          .select('display_name, active_path_id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
           .from('career_paths')
           .select('*')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1),
-        supabase
-          .from('user_profiles')
-          .select('display_name')
-          .eq('user_id', user.id)
-          .maybeSingle()
       ]);
+
+      // Set active path
+      if (profileResult.data?.active_path_id) {
+        const activePathData = allPathsResult.data?.find(p => p.id === profileResult.data.active_path_id);
+        setActivePath(activePathData);
+      }
+
+      // Set all paths
+      if (allPathsResult.data) {
+        setAllPaths(allPathsResult.data);
+      }
 
       if (!statsResult.data) {
         await supabase.from('user_stats').insert({
@@ -137,8 +182,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         setEarnedBadges(badgesResult.data);
       }
 
-      if (pathsResult.data && pathsResult.data.length > 0) {
-        setFirstPath(pathsResult.data[0]);
+      // Use first path from all paths result
+      if (allPathsResult.data && allPathsResult.data.length > 0) {
+        setFirstPath(allPathsResult.data[0]);
       }
 
       if (profileResult.data?.display_name) {

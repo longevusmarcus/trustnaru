@@ -34,42 +34,106 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Get user's active path for personalization
+    // Get comprehensive user data for deep personalization
     const { data: profile } = await supabaseClient
       .from('user_profiles')
-      .select('active_path_id')
+      .select('active_path_id, display_name, cv_url, voice_transcription, wizard_data')
       .eq('user_id', user.id)
       .maybeSingle();
 
-    let activePathContext = '';
-    if (profile?.active_path_id) {
-      const { data: path } = await supabaseClient
-        .from('career_paths')
-        .select('*')
-        .eq('id', profile.active_path_id)
-        .single();
+    // Get user stats for progress context
+    const { data: stats } = await supabaseClient
+      .from('user_stats')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-      if (path) {
-        activePathContext = `The user is currently working towards becoming a ${path.title}. Their key skills include: ${path.key_skills?.join(', ')}.`;
+    // Get all career paths for diversity insights
+    const { data: allPaths } = await supabaseClient
+      .from('career_paths')
+      .select('title, category, key_skills')
+      .eq('user_id', user.id)
+      .limit(5);
+
+    let userContext = '';
+    const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
+    
+    // Build rich user context
+    if (profile) {
+      userContext += `User's Name: ${userName}\n`;
+      
+      // Active path details
+      if (profile.active_path_id) {
+        const { data: path } = await supabaseClient
+          .from('career_paths')
+          .select('*')
+          .eq('id', profile.active_path_id)
+          .single();
+
+        if (path) {
+          userContext += `Active Path: ${path.title}\n`;
+          userContext += `Category: ${path.category}\n`;
+          userContext += `Key Skills: ${path.key_skills?.join(', ') || 'N/A'}\n`;
+          userContext += `Target Companies: ${path.target_companies?.join(', ') || 'N/A'}\n`;
+          userContext += `Journey Duration: ${path.journey_duration || 'N/A'}\n`;
+        }
+      }
+
+      // CV info
+      if (profile.cv_url) {
+        userContext += `Has uploaded CV: Yes\n`;
+      }
+
+      // Wizard data
+      if (profile.wizard_data) {
+        const wizardData = profile.wizard_data as any;
+        if (wizardData.currentRole) {
+          userContext += `Current Role: ${wizardData.currentRole}\n`;
+        }
+        if (wizardData.experience) {
+          userContext += `Experience: ${wizardData.experience}\n`;
+        }
+      }
+
+      // Voice aspirations
+      if (profile.voice_transcription) {
+        userContext += `Career Aspirations: ${profile.voice_transcription.substring(0, 200)}...\n`;
       }
     }
 
-    const prompt = `You are a sophisticated career coach providing personalized guidance.
+    // Progress stats
+    if (stats) {
+      userContext += `\nProgress:\n`;
+      userContext += `- Current Streak: ${stats.current_streak} days\n`;
+      userContext += `- Paths Explored: ${stats.paths_explored}\n`;
+      userContext += `- Missions Completed: ${stats.missions_completed}\n`;
+    }
+
+    // Path diversity
+    if (allPaths && allPaths.length > 0) {
+      userContext += `\nExploring ${allPaths.length} Career Directions:\n`;
+      allPaths.forEach(p => {
+        userContext += `- ${p.title} (${p.category})\n`;
+      });
+    }
+
+    const prompt = `You are a sophisticated career coach providing deeply personalized guidance for ${userName}.
 
 Topic: ${topic}
 
-${activePathContext || 'The user is exploring their career options.'}
+User Context:
+${userContext || 'The user is exploring their career options.'}
 
-Create inspiring, actionable content about "${topic}" specifically tailored to this person's journey. 
+Create inspiring, actionable content about "${topic}" specifically tailored to ${userName}'s journey, current progress, and career aspirations. Reference their specific path, skills, and goals when relevant.
 
 Format your response in clean, beautiful paragraphs without any markdown symbols (no **, no #, no bullets).
 
 Structure:
-• Start with a powerful opening statement (1-2 sentences)
+• Start with a powerful opening statement addressing ${userName} (1-2 sentences)
 • Follow with three key insights or actionable steps (each 2-3 sentences), separated by blank lines
 • End with a motivating closing thought (1-2 sentences)
 
-Use "you" to make it personal. Be specific, authentic, and inspiring. Keep it concise and elegant.`;
+Use "you" to make it personal. Be specific, authentic, and inspiring. Keep it concise and elegant. Reference market trends in ${profile?.active_path_id ? 'their field' : 'general career development'} when relevant.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
