@@ -253,21 +253,36 @@ export const ProfilePage = () => {
           </Card>
         )}
 
-        {/* Badges */}
+        {/* Badge Collection */}
         {badges.length > 0 && (
-          <div>
-            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-3">
-              Badges
-            </h3>
-            <div className="grid grid-cols-4 gap-3">
-              {badges.map((badge: any, index: number) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="text-2xl">{badge.badges.icon}</div>
-                  <p className="text-xs text-center text-muted-foreground">{badge.badges.name}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                  Collection
+                </h3>
+                <Badge variant="outline" className="text-xs font-normal">
+                  {badges.length}/6
+                </Badge>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {badges.map((badge: any, index: number) => (
+                  <div 
+                    key={index} 
+                    className="flex flex-col items-center gap-2.5 p-3 rounded-lg border border-border/40 bg-muted/30 transition-all hover:border-border hover:bg-muted/50"
+                  >
+                    <div className="text-3xl opacity-90">{badge.badges.icon}</div>
+                    <div className="text-center space-y-1">
+                      <p className="text-xs font-medium">{badge.badges.name}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">
+                        {badge.badges.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Account Actions */}
