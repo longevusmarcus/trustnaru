@@ -247,7 +247,7 @@ const Auth = () => {
                     : "Continue Your Journey"}
               </Button>
 
-              <div className="text-center pt-1 space-y-1">
+              <div className="text-center pt-1 space-y-3">
                 {showForgotPassword ? (
                   <Button
                     type="button"
@@ -291,6 +291,27 @@ const Auth = () => {
                         </Button>
                       </div>
                     )}
+
+                    <p className="text-xs text-muted-foreground/60 font-light px-4">
+                      By continuing, you agree to Hara&apos;s{" "}
+                      <a 
+                        href="/terms" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+                      >
+                        Terms of Service
+                      </a>
+                      {" "}and{" "}
+                      <a 
+                        href="/privacy" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+                      >
+                        Privacy Policy
+                      </a>
+                    </p>
                   </>
                 )}
               </div>
