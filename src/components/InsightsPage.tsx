@@ -22,14 +22,9 @@ const formatMessageContent = (content: string) => {
     if (currentList.length > 0) {
       const ListTag = listType === 'number' ? 'ol' : 'ul';
       elements.push(
-        <ListTag key={elements.length} className="space-y-1.5 text-[13px] text-muted-foreground">
+        <ListTag key={elements.length} className="ml-4 my-2 space-y-1">
           {currentList.map((item, i) => (
-            <li key={i} className="flex items-start gap-2">
-              <span className="text-primary mt-0.5 flex-shrink-0">
-                {listType === 'number' ? `${i + 1}.` : '•'}
-              </span>
-              <span className="flex-1">{item}</span>
-            </li>
+            <li key={i} className="text-[13px]">{item}</li>
           ))}
         </ListTag>
       );
@@ -49,21 +44,21 @@ const formatMessageContent = (content: string) => {
     if (trimmed.startsWith('###')) {
       flushList();
       elements.push(
-        <h4 key={elements.length} className="font-semibold text-sm mt-2 mb-1 text-foreground">
+        <h4 key={elements.length} className="font-semibold text-[14px] mt-3 mb-1">
           {trimmed.replace(/^###\s*/, '')}
         </h4>
       );
     } else if (trimmed.startsWith('##')) {
       flushList();
       elements.push(
-        <h3 key={elements.length} className="font-semibold text-sm mt-2 mb-1 text-foreground">
+        <h3 key={elements.length} className="font-semibold text-[15px] mt-3 mb-1">
           {trimmed.replace(/^##\s*/, '')}
         </h3>
       );
     } else if (trimmed.startsWith('#')) {
       flushList();
       elements.push(
-        <h2 key={elements.length} className="font-semibold text-[15px] mt-2 mb-1 text-foreground">
+        <h2 key={elements.length} className="font-semibold text-base mt-3 mb-1">
           {trimmed.replace(/^#\s*/, '')}
         </h2>
       );
@@ -89,7 +84,7 @@ const formatMessageContent = (content: string) => {
       const cleanText = trimmed.replace(/\*\*(.+?)\*\*/g, '$1');
       if (cleanText) {
         elements.push(
-          <p key={elements.length} className="text-[13px] leading-relaxed text-foreground">
+          <p key={elements.length} className="text-[13px] leading-relaxed mb-2">
             {cleanText}
           </p>
         );
@@ -98,7 +93,7 @@ const formatMessageContent = (content: string) => {
   });
 
   flushList();
-  return elements.length > 0 ? elements : <p className="text-[13px] text-muted-foreground">{content}</p>;
+  return elements;
 };
 
 export const InsightsPage = () => {
@@ -468,55 +463,58 @@ export const InsightsPage = () => {
           <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
             <CardContent className="p-0">
               {/* Chat Messages */}
-              <div className="px-4 py-4 space-y-4 max-h-80 overflow-y-auto">
+              <div className="px-4 py-4 space-y-3 max-h-80 overflow-y-auto">
                 {chatMessages.map((msg, idx) => (
                   <div 
                     key={idx} 
                     className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     {msg.role === 'assistant' && (
-                      <div className="relative w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        {/* Mini emerald bubble */}
+                      <div className="relative w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {/* Mini emerald bubble matching signup page */}
                         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 blur-sm" />
-                        <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20">
+                        <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20">
                           <div className="absolute inset-1 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30">
                             <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white/30 blur-[1px]" />
+                          </div>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-0.5 h-0.5 rounded-full bg-white/60" />
                           </div>
                         </div>
                       </div>
                     )}
-                    {msg.role === 'user' ? (
-                      <div className="max-w-[75%] rounded-2xl px-4 py-2.5 bg-primary text-primary-foreground ml-auto">
-                        <p className="text-[13px] leading-relaxed">{msg.content}</p>
-                      </div>
-                    ) : (
-                      <Card className="max-w-[85%] border-border/50 bg-card/50 backdrop-blur-sm">
-                        <CardContent className="p-4 space-y-2">
-                          {formatMessageContent(msg.content)}
-                        </CardContent>
-                      </Card>
-                    )}
+                    <div 
+                      className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-primary text-primary-foreground ml-auto' 
+                          : 'bg-muted/70 text-foreground'
+                      }`}
+                    >
+                      {formatMessageContent(msg.content)}
+                    </div>
                   </div>
                 ))}
                 {isGenerating && (
                   <div className="flex gap-2 justify-start">
-                    <div className="relative w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="relative w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {/* Pulsing mini emerald bubble */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 blur-sm animate-pulse" />
-                      <div className="relative w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20 animate-pulse">
+                      <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm border border-emerald-400/20 animate-pulse">
                         <div className="absolute inset-1 rounded-full bg-gradient-to-br from-emerald-400/30 via-emerald-300/20 to-emerald-600/30">
                           <div className="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white/30 blur-[1px]" />
                         </div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-0.5 h-0.5 rounded-full bg-white animate-pulse" />
+                        </div>
                       </div>
                     </div>
-                    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-                      <CardContent className="p-4">
-                        <div className="flex gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="bg-muted/70 rounded-2xl px-3.5 py-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
