@@ -11,32 +11,89 @@ import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
-// Format message content: remove markdown symbols and create proper formatting with paragraphs
+// Format message content: properly parse markdown and create natural formatting
 const formatMessageContent = (content: string) => {
-  // Split by double line breaks or numbered lists to create paragraphs
-  const paragraphs = content.split(/\n\n+|\n(?=\d+\.)/);
-  
-  return paragraphs.map((paragraph, pIdx) => {
-    // Skip empty paragraphs
-    if (!paragraph.trim()) return null;
-    
-    // Split by ** and format as sections
-    const parts = paragraph.split(/\*\*(.+?)\*\*/g);
-    
-    const formattedParts = parts.map((part, idx) => {
-      // Odd indices are the text inside **
-      if (idx % 2 === 1) {
-        return <strong key={idx} className="font-semibold">{part}</strong>;
+  const lines = content.split('\n');
+  const elements: JSX.Element[] = [];
+  let currentList: string[] = [];
+  let listType: 'bullet' | 'number' | null = null;
+
+  const flushList = () => {
+    if (currentList.length > 0) {
+      const ListTag = listType === 'number' ? 'ol' : 'ul';
+      elements.push(
+        <ListTag key={elements.length} className="ml-4 my-2 space-y-1">
+          {currentList.map((item, i) => (
+            <li key={i} className="text-[13px]">{item}</li>
+          ))}
+        </ListTag>
+      );
+      currentList = [];
+      listType = null;
+    }
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      return;
+    }
+
+    // Handle headings (###, ##, #)
+    if (trimmed.startsWith('###')) {
+      flushList();
+      elements.push(
+        <h4 key={elements.length} className="font-semibold text-[14px] mt-3 mb-1">
+          {trimmed.replace(/^###\s*/, '')}
+        </h4>
+      );
+    } else if (trimmed.startsWith('##')) {
+      flushList();
+      elements.push(
+        <h3 key={elements.length} className="font-semibold text-[15px] mt-3 mb-1">
+          {trimmed.replace(/^##\s*/, '')}
+        </h3>
+      );
+    } else if (trimmed.startsWith('#')) {
+      flushList();
+      elements.push(
+        <h2 key={elements.length} className="font-semibold text-base mt-3 mb-1">
+          {trimmed.replace(/^#\s*/, '')}
+        </h2>
+      );
+    }
+    // Handle numbered lists
+    else if (/^\d+\.\s/.test(trimmed)) {
+      if (listType !== 'number') flushList();
+      listType = 'number';
+      const text = trimmed.replace(/^\d+\.\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+      currentList.push(text);
+    }
+    // Handle bullet points
+    else if (trimmed.startsWith('*') && !trimmed.startsWith('**')) {
+      if (listType !== 'bullet') flushList();
+      listType = 'bullet';
+      const text = trimmed.replace(/^\*\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+      currentList.push(text);
+    }
+    // Handle regular paragraphs
+    else {
+      flushList();
+      // Remove bold markdown and just use regular text
+      const cleanText = trimmed.replace(/\*\*(.+?)\*\*/g, '$1');
+      if (cleanText) {
+        elements.push(
+          <p key={elements.length} className="text-[13px] leading-relaxed mb-2">
+            {cleanText}
+          </p>
+        );
       }
-      return <span key={idx}>{part}</span>;
-    });
-    
-    return (
-      <p key={pIdx} className={pIdx > 0 ? "mt-2" : ""}>
-        {formattedParts}
-      </p>
-    );
+    }
   });
+
+  flushList();
+  return elements;
 };
 
 export const InsightsPage = () => {
