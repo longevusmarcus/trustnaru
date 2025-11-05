@@ -196,7 +196,7 @@ const Auth = () => {
           <CardContent className="pt-6 pb-6 px-6">
             {/* Rating Section - Inside Card */}
             <div className="text-center mb-6">
-              <p className="text-xs text-muted-foreground/70 mb-2 font-light">Our customers rated us</p>
+              <p className="text-xs text-muted-foreground/70 mb-2 font-light">My creators rated me</p>
               <div className="flex items-center justify-center gap-1 mb-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star key={star} className="w-4 h-4 fill-emerald-400 text-emerald-400" />
