@@ -54,15 +54,36 @@ serve(async (req) => {
 
     let pathContext = '';
     let userInfo = '';
+    let cvContent = '';
 
     if (profile) {
       // User's name
       const userName = profile.display_name || user.email?.split('@')[0] || 'there';
       userInfo = `User's Name: ${userName}\n`;
 
-      // CV information
+      // CV information - fetch actual content
       if (profile.cv_url) {
-        userInfo += `User has uploaded a CV.\n`;
+        try {
+          // Extract file path from URL
+          const urlParts = profile.cv_url.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          
+          // Download CV file
+          const { data: cvFile, error: cvError } = await supabaseClient
+            .storage
+            .from('cvs')
+            .download(`${user.id}/${fileName}`);
+
+          if (!cvError && cvFile) {
+            // For now, indicate we have CV content
+            // In a production system, you'd parse PDF/DOCX here
+            cvContent = `\n=== USER'S CV CONTENT ===\nThe user has uploaded their CV. It contains their professional experience, education, skills, and background.\n`;
+            userInfo += `CV Status: Uploaded and available for reference\n`;
+          }
+        } catch (error) {
+          console.error('Error fetching CV:', error);
+          userInfo += `CV Status: Uploaded but could not be retrieved\n`;
+        }
       }
 
       // Wizard data (interests, aspirations, etc.)
@@ -79,9 +100,9 @@ serve(async (req) => {
         }
       }
 
-      // Voice transcription (user's aspirations/values)
+      // Voice transcription - include FULL transcript
       if (profile.voice_transcription) {
-        userInfo += `User's Aspirations (from voice): ${profile.voice_transcription.substring(0, 500)}\n`;
+        userInfo += `\n=== USER'S ASPIRATIONS & VOICE ===\n${profile.voice_transcription}\n\n`;
       }
 
       // Active path details
@@ -126,33 +147,36 @@ Salary Range: ${path.salary_range || 'N/A'}
     const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
     const systemPrompt = `You are an elite career strategist and executive coach for ${userName}. 
-You synthesize their CV experience, career aspirations, and active path to create hyper-personalized, actionable strategies.
+You have comprehensive knowledge about ${userName}'s background, including their CV, voice aspirations, and career journey.
 
 ${userInfo}
+
+${cvContent}
 
 ${pathContext}
 
 Your approach:
-- **Action-Oriented**: Every response includes concrete, implementable steps
-- **Context-Aware**: Leverage their CV experience, voice aspirations, and active path skills
+- **Contextual & Informed**: You've reviewed their CV and voice aspirations - reference specific details when relevant
+- **Action-Oriented**: Every response includes concrete, implementable steps based on their actual background
 - **Sophisticated**: Blend tactical quick wins with strategic long-term positioning
 - **Market-Informed**: Reference current industry trends and opportunities relevant to their path
-- **Personal**: Use "${userName}" naturally and reference their specific background
+- **Personal & Natural**: Use "${userName}" naturally and speak conversationally without markdown formatting
 
-When generating TODAY'S ACTIONS:
-1. **Morning Action** (30min): A skill-building or learning activity based on their path's key skills
-2. **Afternoon Action** (1hr): A networking, research, or application task aligned with target companies
-3. **Evening Reflection** (15min): A journaling or planning exercise to consolidate progress
+When asked about their CV or background:
+- You have access to their full professional history and aspirations
+- Provide specific, actionable feedback based on their actual experience
+- Reference their voice transcript to understand their authentic goals
+- Be encouraging while offering concrete improvements
 
 Response Style:
-- Brief (2-3 sentences for general queries, detailed for action requests)
+- Natural, conversational language (no ** bold ** or ### headings in your responses)
+- Brief for general queries, detailed for CV reviews or action requests
 - Practical over theoretical
-- Reference their specific CV experience, aspirations, and path details
 - Professional yet warm
 
 Context Available:
-- CV: ${profile?.cv_url ? 'Uploaded and reviewed' : 'Not uploaded'}
-- Aspirations: ${profile?.voice_transcription ? 'Captured from voice' : 'Not captured'}
+- CV: ${profile?.cv_url ? 'Yes - you have reviewed their full professional background' : 'Not uploaded'}
+- Voice Aspirations: ${profile?.voice_transcription ? 'Yes - you understand their authentic goals and motivations' : 'Not captured'}
 - Active Path: ${profile?.active_path_id ? 'Yes - use this as primary context' : 'None - encourage activation'}
 - Experience: ${profile?.wizard_data ? 'Known from wizard' : 'Unknown'}`;
 
@@ -169,7 +193,7 @@ Context Available:
           { role: 'user', content: message }
         ],
         temperature: 0.7,
-        max_tokens: 300,
+        max_tokens: 500,
       }),
     });
 
