@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useDailyStreak } from "@/hooks/useDailyStreak";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -99,6 +100,7 @@ const getFeaturedTopicForUser = (activePath: any, stats: any, allPaths: any[]) =
 export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  useDailyStreak(); // Track daily login and update streak
   const [userStats, setUserStats] = useState<any>(null);
   const [streaks, setStreaks] = useState<Date[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
@@ -184,6 +186,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     };
 
     fetchGamificationData();
+    
+    // Listen for streak updates and refresh data
+    const handleStreakUpdate = () => {
+      fetchGamificationData();
+    };
+    window.addEventListener('streakUpdated', handleStreakUpdate);
+    
+    return () => {
+      window.removeEventListener('streakUpdated', handleStreakUpdate);
+    };
   }, [user?.id]);
 
   const handleFeaturedClick = async () => {
