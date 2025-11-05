@@ -226,27 +226,51 @@ export const ActionPage = () => {
       if (error) throw error;
       if (!data?.insight) throw new Error('No actions generated');
 
-      // Parse the AI response into action items
+      // Parse the AI response into structured action items
       const actionText = data.insight;
-      const actionLines = actionText.split('\n').filter((line: string) => line.trim().match(/^\d+\./));
       
-      const parsedActions = actionLines.slice(0, 3).map((line: string, idx: number) => {
-        const taskText = line.replace(/^\d+\./, '').trim();
-        return {
-          task: taskText,
-          priority: idx === 0 ? "high" : idx === 1 ? "medium" : "low",
-          done: false
-        };
-      });
+      // Extract Morning, Afternoon, Evening actions
+      const morningMatch = actionText.match(/\*\*Morning Action[^:]*:\*\*\s*(.+?)(?=\*\*|$)/s);
+      const afternoonMatch = actionText.match(/\*\*Afternoon Action[^:]*:\*\*\s*(.+?)(?=\*\*|$)/s);
+      const eveningMatch = actionText.match(/\*\*Evening[^:]*:\*\*\s*(.+?)(?=$)/s);
+
+      const parsedActions = [];
+      
+      if (morningMatch) {
+        parsedActions.push({
+          task: morningMatch[1].trim(),
+          priority: "high",
+          done: false,
+          label: "Morning (30min)"
+        });
+      }
+      
+      if (afternoonMatch) {
+        parsedActions.push({
+          task: afternoonMatch[1].trim(),
+          priority: "medium",
+          done: false,
+          label: "Afternoon (1hr)"
+        });
+      }
+      
+      if (eveningMatch) {
+        parsedActions.push({
+          task: eveningMatch[1].trim(),
+          priority: "low",
+          done: false,
+          label: "Evening (15min)"
+        });
+      }
 
       if (parsedActions.length > 0) {
         setTodayActions(parsedActions);
       } else {
         // Fallback if parsing fails
         setTodayActions([
-          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false },
-          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false },
-          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false },
+          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false, label: "Morning (30min)" },
+          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false, label: "Afternoon (1hr)" },
+          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false, label: "Evening (15min)" },
         ]);
       }
     } catch (error) {
@@ -254,9 +278,9 @@ export const ActionPage = () => {
       // Fallback actions
       if (activePathData) {
         setTodayActions([
-          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false },
-          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false },
-          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false },
+          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false, label: "Morning (30min)" },
+          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false, label: "Afternoon (1hr)" },
+          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false, label: "Evening (15min)" },
         ]);
       }
     } finally {
@@ -667,38 +691,62 @@ export const ActionPage = () => {
 
         {/* Today's Actions */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Today's Actions</h3>
-          <Card>
-            <CardContent className="p-4 space-y-3">
-              {todayActions.map((action, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <button className="flex-shrink-0">
-                    {action.done ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </button>
-                  <div className="flex-1">
-                    <p className={`text-sm ${action.done ? "line-through text-muted-foreground" : ""}`}>
-                      {action.task}
-                    </p>
-                  </div>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      action.priority === "high"
-                        ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                        : action.priority === "medium"
-                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                    }`}
-                  >
-                    {action.priority}
-                  </span>
-                </div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Today's Actions</h3>
+            {activePath && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => generateTodaysActions()}
+                disabled={loadingActions}
+                className="h-7 text-xs"
+              >
+                {loadingActions ? "Generating..." : "Refresh"}
+              </Button>
+            )}
+          </div>
+          {loadingActions ? (
+            <div className="space-y-2">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {todayActions.map((action: any, index: number) => (
+                <Card key={index}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Circle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        {action.label && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-semibold text-primary">
+                              {action.label}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                action.priority === "high"
+                                  ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                                  : action.priority === "medium"
+                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                  : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                              }`}
+                            >
+                              {action.priority}
+                            </span>
+                          </div>
+                        )}
+                        <p className="text-sm text-foreground leading-relaxed">
+                          {action.task}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
 
         {/* Quick Tools */}
