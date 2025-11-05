@@ -4,6 +4,11 @@ import { Card } from "@/components/ui/card";
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import * as pdfjsLib from "pdfjs-dist";
+// @ts-ignore - Vite will handle the worker asset
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.js?url";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc as string;
 
 interface UploadCVStepProps {
   onNext: (cvUrl?: string) => void;
@@ -60,68 +65,70 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
 
     try {
       console.log('Starting CV upload...', { fileName: file.name, fileSize: file.size });
-      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      // 1) Try to extract text client-side for PDFs
+      let extractedText: string | null = null;
+      if (file.type === 'application/pdf') {
+        try {
+          const ab = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = (content.items as any[]).map((it: any) => it.str).join(' ');
+            text += pageText + '\n';
+          }
+          extractedText = text.trim();
+          if (extractedText && extractedText.length > 60000) {
+            extractedText = extractedText.slice(0, 60000);
+          }
+          console.log('Extracted CV text length:', extractedText?.length);
+        } catch (e) {
+          console.warn('PDF text extraction failed:', e);
+        }
+      }
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
       console.log('Uploading to storage...', fileName);
 
-      // Add timeout to upload
       const uploadPromise = supabase.storage
         .from('cvs')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Upload timeout - please try again')), 30000)
-      );
-
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout - please try again')), 30000));
       const { error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
-
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw uploadError;
-      }
+      if (uploadError) { console.error('Storage upload error:', uploadError); throw uploadError; }
 
       console.log('Upload successful, updating profile...');
-
-      // Store storage path (private bucket)
       setUploadedFile(file.name);
       setCvUrl(fileName);
 
-      // Save to user profile immediately
+      // 2) Merge wizard_data to append cv_text without losing existing wizard fields
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('wizard_data')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const baseWizard: any = (existingProfile?.wizard_data as any) || {};
+      const mergedWizard = { ...baseWizard, ...(extractedText ? { cv_text: extractedText } : {}) };
+
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .upsert({ user_id: user.id, cv_url: fileName }, { onConflict: 'user_id' });
-      
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        throw profileError;
-      }
+        .upsert({ user_id: user.id, cv_url: fileName, wizard_data: mergedWizard }, { onConflict: 'user_id' });
+      if (profileError) { console.error('Profile update error:', profileError); throw profileError; }
 
       console.log('Profile updated successfully');
-
-      toast({
-        title: "CV uploaded successfully",
-        description: "Your CV has been uploaded and will be analyzed"
-      });
+      toast({ title: "CV uploaded successfully", description: extractedText ? "Your CV text was captured for AI insights" : "Your CV has been uploaded" });
     } catch (error) {
       console.error('Upload error:', error);
-      
-      // Reset state on error
       setUploadedFile(null);
       setCvUrl(null);
-      
-      toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to upload your CV. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: "Upload failed", description: error instanceof Error ? error.message : "Failed to upload your CV. Please try again.", variant: "destructive" });
     } finally {
       setUploading(false);
       console.log('Upload process complete');

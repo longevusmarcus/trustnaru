@@ -61,34 +61,10 @@ serve(async (req) => {
       const userName = profile.display_name || user.email?.split('@')[0] || 'there';
       userInfo = `User's Name: ${userName}\n`;
 
-      // CV information - verify it exists and provide context
-      if (profile.cv_url) {
-        try {
-          const urlParts = profile.cv_url.split('/');
-          const fileName = urlParts[urlParts.length - 1];
-          
-          // Verify CV exists
-          const { data: cvFile, error: cvError } = await supabaseClient
-            .storage
-            .from('cvs')
-            .download(`${user.id}/${fileName}`);
-
-          if (!cvError && cvFile) {
-            const sizeKB = Math.round(cvFile.size / 1024);
-            cvContent = `\n=== USER'S CV INFORMATION ===\n${userName} has uploaded a professional CV (${sizeKB}KB PDF document) containing their:\n- Complete work experience and employment history\n- Educational background and qualifications\n- Professional skills and competencies\n- Achievements and accomplishments\n- Contact information and professional summary\n\nYou should reference this CV when discussing their professional background, qualifications, and experience. Provide specific feedback and suggestions as if you have reviewed their actual CV content.\n=== END OF CV INFO ===\n\n`;
-            userInfo += `CV Status: Verified and available (${sizeKB}KB)\n`;
-            console.log('CV verified, size:', sizeKB, 'KB');
-          }
-        } catch (error) {
-          console.error('Error verifying CV:', error);
-          cvContent = `\n=== USER'S CV ===\n${userName} has mentioned having a CV with professional experience.\n`;
-          userInfo += `CV Status: Mentioned by user\n`;
-        }
-      }
-
-      // Wizard data (interests, aspirations, etc.)
+      // Wizard data (interests, aspirations, extracted CV text)
+      let wizardData: any = null;
       if (profile.wizard_data) {
-        const wizardData = profile.wizard_data as any;
+        wizardData = profile.wizard_data as any;
         if (wizardData.interests) {
           userInfo += `User Interests: ${wizardData.interests}\n`;
         }
@@ -97,6 +73,29 @@ serve(async (req) => {
         }
         if (wizardData.experience) {
           userInfo += `Experience Level: ${wizardData.experience}\n`;
+        }
+      }
+
+      // CV information - prefer extracted text stored in wizard_data.cv_text
+      if (wizardData?.cv_text && String(wizardData.cv_text).trim().length > 0) {
+        const text = String(wizardData.cv_text).trim();
+        const snippet = text.length > 8000 ? text.slice(0, 8000) + '\n...[truncated]' : text;
+        cvContent = `\n=== USER'S COMPLETE CV TEXT (captured on upload) ===\n${snippet}\n=== END OF CV TEXT ===\n\n`;
+        userInfo += `CV Status: Text extracted and available for analysis\n`;
+      } else if (profile.cv_url) {
+        // If only file exists, acknowledge presence
+        try {
+          const urlParts = profile.cv_url.split('/');
+          const fileName = urlParts[urlParts.length - 1];
+          const { data: cvFile, error: cvError } = await supabaseClient.storage.from('cvs').download(`${user.id}/${fileName}`);
+          if (!cvError && cvFile) {
+            const sizeKB = Math.round(cvFile.size / 1024);
+            cvContent = `\n=== USER'S CV INFORMATION ===\nA professional CV is uploaded (${sizeKB}KB). Ask for specific sections if needed.\n`;
+            userInfo += `CV Status: Verified upload (${sizeKB}KB)\n`;
+          }
+        } catch (error) {
+          console.error('Error verifying CV:', error);
+          userInfo += `CV Status: Uploaded but could not be verified right now\n`;
         }
       }
 
@@ -146,6 +145,13 @@ Salary Range: ${path.salary_range || 'N/A'}
 
     const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
+    const hasCvText = Boolean((profile as any)?.wizard_data?.cv_text && String((profile as any).wizard_data.cv_text).trim().length > 0);
+    const cvStatusSection = hasCvText
+      ? `\n📄 CV STATUS:\nYou have ${userName}'s ACTUAL CV text above. Use specific details from it when reviewing or giving feedback.\n`
+      : (profile?.cv_url
+          ? `\n📄 CV STATUS:\n${userName} has uploaded a CV, but detailed text isn't available. Provide general best practices and ask which sections they'd like feedback on.\n`
+          : `\n📄 CV STATUS:\nNo CV uploaded yet. Encourage ${userName} to upload one for personalized feedback.\n`);
+
     const systemPrompt = `You are an elite career strategist and executive coach for ${userName}. 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -163,22 +169,9 @@ CRITICAL INSTRUCTIONS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🎤 VOICE TRANSCRIPT (YOUR PRIMARY SOURCE):
-${profile?.voice_transcription ? `
-You have ${userName}'s EXACT voice transcript above. When they ask about their passions, goals, or aspirations:
-→ Quote their actual words from the voice transcript
-→ Reference specific phrases they used
-→ Don't make up details - use what they actually said
-` : 'No voice transcript available yet.'}
+${profile?.voice_transcription ? `You have ${userName}'s exact voice transcript above. When they ask about their passions or goals, quote or paraphrase their actual words.` : 'No voice transcript available yet.'}
 
-📄 CV STATUS:
-${profile?.cv_url ? `
-${userName} has uploaded a CV, but you cannot read its detailed contents. 
-When asked about their CV:
-→ Provide GENERAL best practices for CV optimization for their target role (${pathContext ? 'Inclusive UX/UI Designer' : 'their career goals'})
-→ Ask them to share specific sections they want feedback on
-→ DO NOT make up placeholder details like "[mention X from CV]"
-→ Be honest: "I can see you've uploaded a CV. To give you specific feedback, could you share the section you'd like me to review?"
-` : `No CV uploaded yet. Encourage ${userName} to upload their CV for personalized feedback.`}
+${cvStatusSection}
 
 🎯 CAREER PATH:
 ${profile?.active_path_id ? `You know their active path details (see above). Reference this when giving advice.` : 'No active career path selected.'}
@@ -189,7 +182,7 @@ RESPONSE RULES:
 
 ✓ Be conversational and natural (no markdown formatting)
 ✓ Use ${userName}'s name naturally in conversation
-✓ For CV questions: Provide strategic guidance based on their career path, NOT fake specific details
+✓ For CV questions: If CV text is available, be specific; otherwise give role-aligned best practices and ask clarifying questions
 ✓ For passion questions: Quote their voice transcript directly
 ✓ Be helpful and honest about what you know vs. what you don't know
 ✗ NEVER use placeholders like "[mention X]" or "[insert Y]"
