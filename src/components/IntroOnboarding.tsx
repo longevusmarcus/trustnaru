@@ -36,7 +36,7 @@ const slides = [
       "Share what gives you energy",
       "See your future selves",
       "Unlock your career paths",
-      "Take action every day",
+      "Get daily guidance/insights",
       "Track your evolution",
     ],
   },
