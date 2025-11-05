@@ -81,13 +81,18 @@ export const InsightsPage = () => {
       setAllPaths(allPathsResult.data || []);
       setUserStats(statsResult.data || { current_streak: 0, missions_completed: 0 });
 
-      // Set welcome message
+      // Set welcome message and auto-generate today's actions if path is active
       const welcomeMsg = activePathData
         ? `Hey ${userName}! 👋 I can help you with insights about ${activePathData.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
         : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
       
       setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
       setHasInitialMessage(true);
+
+      // Auto-generate today's actions if active path exists
+      if (activePathData) {
+        setTimeout(() => generateTodaysActions(), 800);
+      }
     } catch (error) {
       console.error('Error loading insights:', error);
     } finally {
@@ -120,6 +125,36 @@ export const InsightsPage = () => {
         description: "Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  const generateTodaysActions = async () => {
+    if (!user || !activePath) return;
+    
+    setIsGenerating(true);
+    const actionPrompt = `Based on my CV experience, career aspirations, and current path (${activePath.title}), give me 3 practical actions for today: a 30-min morning skill-building activity, a 1-hour afternoon networking/research task, and a 15-min evening reflection. Be specific and actionable.`;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { message: actionPrompt }
+      });
+
+      if (error) throw error;
+      if (!data?.insight) throw new Error('No insight received');
+
+      setChatMessages(prev => [...prev, 
+        { role: 'user', content: "What are my actions for today?" },
+        { role: 'assistant', content: data.insight }
+      ]);
+    } catch (error) {
+      console.error('Error generating actions:', error);
+      toast({
+        title: "Unable to generate actions",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -448,8 +483,14 @@ export const InsightsPage = () => {
               </div>
 
               {/* Quick Suggestions */}
-              {chatMessages.length <= 1 && !isGenerating && (
+              {chatMessages.length <= 1 && !isGenerating && activePath && (
                 <div className="px-4 pb-3 flex flex-wrap gap-2">
+                  <button
+                    onClick={generateTodaysActions}
+                    className="text-[11px] px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                  >
+                    Today's Actions
+                  </button>
                   <button
                     onClick={() => {
                       setInputMessage("What skills should I focus on this week?");
@@ -467,15 +508,6 @@ export const InsightsPage = () => {
                     className="text-[11px] px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
                   >
                     Market trends
-                  </button>
-                  <button
-                    onClick={() => {
-                      setInputMessage("How can I accelerate my progress?");
-                      setTimeout(() => handleSendMessage(), 100);
-                    }}
-                    className="text-[11px] px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
-                  >
-                    Progress tips
                   </button>
                 </div>
               )}
