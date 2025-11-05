@@ -28,7 +28,9 @@ serve(async (req) => {
     );
 
     // Get user from the JWT token (already verified by Supabase when verify_jwt = true)
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const authHeader = req.headers.get('Authorization') || '';
+    const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(jwt);
     
     if (userError || !user) {
       console.error('Auth error:', userError);
