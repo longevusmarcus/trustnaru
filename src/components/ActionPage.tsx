@@ -11,11 +11,12 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { checkAndAwardBadges } from "@/lib/badgeUtils";
+import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
 
 export const ActionPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkAndAwardBadges } = useBadgeAwarding();
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
@@ -316,7 +317,7 @@ export const ActionPage = () => {
       if (error) throw error;
       
       // Check and award badges after activating path
-      await checkAndAwardBadges(user.id);
+      await checkAndAwardBadges();
       
       // Reload all data to update with new active path
       await loadData();

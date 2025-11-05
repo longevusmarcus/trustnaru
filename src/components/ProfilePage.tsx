@@ -9,10 +9,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
 
 export const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { checkAndAwardBadges } = useAutoBadgeCheck();
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);

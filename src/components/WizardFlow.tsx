@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { checkAndAwardBadges } from "@/lib/badgeUtils";
+import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
 
 interface WizardFlowProps {
   onComplete: (careerPaths: any[]) => void;
@@ -19,6 +19,7 @@ interface WizardFlowProps {
 export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkAndAwardBadges } = useBadgeAwarding();
   const [step, setStep] = useState(1);
   const [cvUrl, setCvUrl] = useState<string | undefined>();
   const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
@@ -96,10 +97,8 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
         .select('*')
         .in('id', paths.map((p: any) => p.id));
 
-      // Check and award badges after path generation
-      if (user) {
-        await checkAndAwardBadges(user.id);
-      }
+      // Check and award badges after paths are generated
+      await checkAndAwardBadges();
 
       setTimeout(() => {
         onComplete(updatedPaths || paths);
