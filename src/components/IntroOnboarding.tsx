@@ -42,8 +42,8 @@ const slides = [
   },
   {
     icon: Eye,
-    title: "Your Journey",
-    content: '"This is who you could become, and here\'s how."',
+    title: "Is it another career coach / job copilot?",
+    content: '"No, this is who you can become, who you should become, and how to get there"',
   },
   {
     icon: LineChart,
