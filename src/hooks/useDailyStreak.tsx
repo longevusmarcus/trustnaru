@@ -20,23 +20,19 @@ export const useDailyStreak = () => {
           .eq('streak_date', today)
           .maybeSingle();
 
-        if (existingStreak) {
-          // Already tracked today
-          return;
-        }
+        // Insert today's streak if not already tracked
+        if (!existingStreak) {
+          const { error: insertError } = await supabase
+            .from('daily_streaks')
+            .insert({
+              user_id: user.id,
+              streak_date: today,
+              completed: true
+            });
 
-        // Record today's login
-        const { error: insertError } = await supabase
-          .from('daily_streaks')
-          .insert({
-            user_id: user.id,
-            streak_date: today,
-            completed: true
-          });
-
-        if (insertError) {
-          console.error('Error recording daily streak:', insertError);
-          return;
+          if (insertError) {
+            console.error('Error recording daily streak:', insertError);
+          }
         }
 
         // Calculate current streak
@@ -78,13 +74,29 @@ export const useDailyStreak = () => {
           existingStats?.longest_streak || 0
         );
 
-        await supabase
-          .from('user_stats')
-          .upsert({
-            user_id: user.id,
-            current_streak: currentStreak,
-            longest_streak: longestStreak
-          }, { onConflict: 'user_id' });
+        if (existingStats) {
+          const { error: updateError } = await supabase
+            .from('user_stats')
+            .update({
+              current_streak: currentStreak,
+              longest_streak: longestStreak
+            })
+            .eq('user_id', user.id);
+          if (updateError) {
+            console.error('Error updating user_stats:', updateError);
+          }
+        } else {
+          const { error: insertStatsError } = await supabase
+            .from('user_stats')
+            .insert({
+              user_id: user.id,
+              current_streak: currentStreak,
+              longest_streak: longestStreak
+            });
+          if (insertStatsError) {
+            console.error('Error inserting user_stats:', insertStatsError);
+          }
+        }
 
         console.log('Daily streak tracked:', { currentStreak, longestStreak });
         
