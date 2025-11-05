@@ -43,7 +43,7 @@ const slides = [
   {
     icon: Eye,
     title: "Is Naru another career coach / job copilot?",
-    content: '"No, this is who you can become, who you should become, and how to get there"',
+    content: '"No, Naru is about who you can become, who you should become, and how to get there"',
   },
   {
     icon: LineChart,
