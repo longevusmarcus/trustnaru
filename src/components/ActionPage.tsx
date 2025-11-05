@@ -21,6 +21,8 @@ export const ActionPage = () => {
   const [quickWinsOpen, setQuickWinsOpen] = useState(false);
   const [goals, setGoals] = useState<any[]>([]);
   const [currentLevel, setCurrentLevel] = useState(1);
+  const [todayActions, setTodayActions] = useState<any[]>([]);
+  const [loadingActions, setLoadingActions] = useState(false);
 
   const guidanceLevels = [
     {
@@ -156,6 +158,12 @@ export const ActionPage = () => {
         if (goalsData) {
           setGoals(goalsData);
         }
+
+        // Generate personalized actions for today
+        generateTodaysActions(path);
+      } else {
+        // No active path
+        setTodayActions([{ task: "Activate a career path to get started", priority: "low", done: false }]);
       }
 
       // Get user stats
@@ -190,16 +198,60 @@ export const ActionPage = () => {
     }
   };
 
-  const roadmapMilestones = activePath?.roadmap || [];
+  const generateTodaysActions = async (path?: any) => {
+    const activePathData = path || activePath;
+    if (!user || !activePathData) return;
 
-  // Generate today's actions based on the first roadmap step
-  const todayActions = activePath && roadmapMilestones.length > 0 ? [
-    { task: `Start: ${roadmapMilestones[0].step}`, priority: "high", done: false },
-    { task: `Research resources for ${activePath.title}`, priority: "medium", done: false },
-    { task: `Connect with someone in ${activePath.category} field`, priority: "medium", done: false },
-  ] : [
-    { task: "Activate a career path to get started", priority: "low", done: false },
-  ];
+    setLoadingActions(true);
+    try {
+      const actionPrompt = `Based on my CV, aspirations, and active path (${activePathData.title}), give me exactly 3 specific, practical actions for today. Format as a simple numbered list (1., 2., 3.) with one concrete action per line. Each action should be achievable today and directly relevant to my career path.`;
+
+      const { data, error } = await supabase.functions.invoke('generate-insights', {
+        body: { message: actionPrompt }
+      });
+
+      if (error) throw error;
+      if (!data?.insight) throw new Error('No actions generated');
+
+      // Parse the AI response into action items
+      const actionText = data.insight;
+      const actionLines = actionText.split('\n').filter((line: string) => line.trim().match(/^\d+\./));
+      
+      const parsedActions = actionLines.slice(0, 3).map((line: string, idx: number) => {
+        const taskText = line.replace(/^\d+\./, '').trim();
+        return {
+          task: taskText,
+          priority: idx === 0 ? "high" : idx === 1 ? "medium" : "low",
+          done: false
+        };
+      });
+
+      if (parsedActions.length > 0) {
+        setTodayActions(parsedActions);
+      } else {
+        // Fallback if parsing fails
+        setTodayActions([
+          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false },
+          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false },
+          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false },
+        ]);
+      }
+    } catch (error) {
+      console.error('Error generating actions:', error);
+      // Fallback actions
+      if (activePathData) {
+        setTodayActions([
+          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false },
+          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false },
+          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false },
+        ]);
+      }
+    } finally {
+      setLoadingActions(false);
+    }
+  };
+
+  const roadmapMilestones = activePath?.roadmap || [];
 
   const goalsCompleted = goals.filter(g => g.completed).length;
   const totalGoals = goals.length;
@@ -500,12 +552,12 @@ export const ActionPage = () => {
                         <h4 className="font-medium text-sm mb-1">{milestone.step}</h4>
                         <p className="text-xs text-muted-foreground">{milestone.duration}</p>
                       </div>
-                    </div>
+                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
+              </Card>
+            ))}
           </div>
+        </div>
         )}
 
         {/* Affirmations */}
