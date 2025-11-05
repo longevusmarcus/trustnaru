@@ -51,7 +51,7 @@ export const ProfilePage = () => {
           supabase
             .from('badges')
             .select('*')
-            .order('requirement_count', { ascending: true })
+            .order('display_order', { ascending: true })
         ]);
 
         if (profileResult.data) {

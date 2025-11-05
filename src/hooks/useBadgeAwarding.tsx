@@ -12,7 +12,8 @@ export const useBadgeAwarding = () => {
       // Get all badges
       const { data: allBadges } = await supabase
         .from('badges')
-        .select('*');
+        .select('*')
+        .order('display_order', { ascending: true });
 
       if (!allBadges) return;
 
