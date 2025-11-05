@@ -20,7 +20,7 @@ const Privacy = () => {
           <section className="mb-8">
             <h2 className="text-xl font-light mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Welcome to Hara. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.
+              Welcome to Naru. We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.
             </p>
           </section>
 

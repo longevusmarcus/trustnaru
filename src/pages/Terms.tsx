@@ -20,14 +20,14 @@ const Terms = () => {
           <section className="mb-8">
             <h2 className="text-xl font-light mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              By accessing and using Hara ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the Service.
+              By accessing and using Naru ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the Service.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-xl font-light mb-4">2. Description of Service</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Hara provides a platform for personal and professional development, career guidance, and AI-powered insights. The Service includes access to mentorship resources, goal tracking, and personalized recommendations.
+              Naru provides a platform for personal and professional development, career guidance, and AI-powered insights. The Service includes access to mentorship resources, goal tracking, and personalized recommendations.
             </p>
           </section>
 
@@ -63,7 +63,7 @@ const Terms = () => {
           <section className="mb-8">
             <h2 className="text-xl font-light mb-4">5. Intellectual Property</h2>
             <p className="text-muted-foreground leading-relaxed">
-              All content, features, and functionality of the Service are owned by Hara and are protected by international copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
+              All content, features, and functionality of the Service are owned by Naru and are protected by international copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.
             </p>
           </section>
 
@@ -98,7 +98,7 @@ const Terms = () => {
           <section className="mb-8">
             <h2 className="text-xl font-light mb-4">10. Limitation of Liability</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, Hara shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly.
+              To the maximum extent permitted by law, Naru shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly.
             </p>
           </section>
 

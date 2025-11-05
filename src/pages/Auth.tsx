@@ -192,7 +192,7 @@ const Auth = () => {
         </div>
 
         {/* Auth Card */}
-        <Card className="border-muted/30 shadow-2xl backdrop-blur-sm bg-card/50">
+        <Card className="border-muted/30 shadow-2xl backdrop-blur-sm bg-card/50 mb-6">
           <CardContent className="pt-6 pb-6 px-6">
             {/* Rating Section - Inside Card */}
             <div className="text-center mb-6">
@@ -291,33 +291,43 @@ const Auth = () => {
                         </Button>
                       </div>
                     )}
-
-                    <p className="text-xs text-muted-foreground/60 font-light px-4">
-                      By continuing, you agree to Hara&apos;s{" "}
-                      <a 
-                        href="/terms" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
-                      >
-                        Terms of Service
-                      </a>
-                      {" "}and{" "}
-                      <a 
-                        href="/privacy" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
-                      >
-                        Privacy Policy
-                      </a>
-                    </p>
                   </>
                 )}
               </div>
             </form>
           </CardContent>
         </Card>
+
+        {/* Terms and Privacy - Outside Card */}
+        <p className="text-xs text-center text-muted-foreground/60 font-light px-4">
+          By continuing, you agree to Naru&apos;s{" "}
+          <a 
+            href="/terms" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            Terms of Service
+          </a>
+          {", "}
+          <a 
+            href="/privacy" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            Privacy Policy
+          </a>
+          {" and "}
+          <a 
+            href="/cookies" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            Cookie Policy
+          </a>
+        </p>
       </div>
     </div>
   );
