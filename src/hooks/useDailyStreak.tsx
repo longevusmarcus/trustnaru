@@ -10,14 +10,15 @@ export const useDailyStreak = () => {
 
     const trackDailyLogin = async () => {
       try {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; // YYYY-MM-DD local
 
         // Check if today's streak already exists
         const { data: existingStreak } = await supabase
           .from('daily_streaks')
           .select('id')
           .eq('user_id', user.id)
-          .eq('streak_date', today)
+          .eq('streak_date', todayStr)
           .maybeSingle();
 
         // Insert today's streak if not already tracked
@@ -26,7 +27,7 @@ export const useDailyStreak = () => {
             .from('daily_streaks')
             .insert({
               user_id: user.id,
-              streak_date: today,
+              streak_date: todayStr,
               completed: true
             });
 
@@ -50,9 +51,8 @@ export const useDailyStreak = () => {
         let expectedDate = new Date();
         
         for (const streak of allStreaks) {
-          const streakDate = new Date(streak.streak_date + 'T00:00:00');
-          const expectedDateStr = expectedDate.toISOString().split('T')[0];
-          const streakDateStr = streakDate.toISOString().split('T')[0];
+          const expectedDateStr = `${expectedDate.getFullYear()}-${String(expectedDate.getMonth() + 1).padStart(2, '0')}-${String(expectedDate.getDate()).padStart(2, '0')}`;
+          const streakDateStr = streak.streak_date;
 
           if (streakDateStr === expectedDateStr) {
             currentStreak++;
