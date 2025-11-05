@@ -58,7 +58,7 @@ const Index = () => {
     checkOnboardingStatus();
   }, [user]);
 
-  // Check if we need to navigate to copilot page after path activation
+  // Check if we need to navigate to copilot page after path activation or show wizard
   useEffect(() => {
     if (location.state?.navigateTo) {
       const targetPage = location.state.navigateTo;
@@ -67,6 +67,12 @@ const Index = () => {
       if (targetPage === "insights" || targetPage === "copilot") {
         setPageRenderKey(prev => prev + 1);
       }
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+    
+    if (location.state?.showWizard) {
+      setShowWizard(true);
       // Clear the state
       window.history.replaceState({}, document.title);
     }

@@ -132,6 +132,13 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
       if (!profile) return;
 
+      // Check if user has completed the wizard (has CV, photos, and voice)
+      if (!profile.cv_url || !profile.voice_transcription || !profile.wizard_data) {
+        setLoading(false);
+        navigate('/', { state: { showWizard: true } });
+        return;
+      }
+
       // Call generate-career-paths function
       const { data: newPaths, error } = await supabase.functions.invoke('generate-career-paths', {
         body: {
