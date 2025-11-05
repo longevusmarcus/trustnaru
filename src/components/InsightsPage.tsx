@@ -11,17 +11,31 @@ import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
-// Format message content: remove markdown symbols and create proper formatting
+// Format message content: remove markdown symbols and create proper formatting with paragraphs
 const formatMessageContent = (content: string) => {
-  // Split by ** and format as sections
-  const parts = content.split(/\*\*(.+?)\*\*/g);
+  // Split by double line breaks or numbered lists to create paragraphs
+  const paragraphs = content.split(/\n\n+|\n(?=\d+\.)/);
   
-  return parts.map((part, idx) => {
-    // Odd indices are the text inside **
-    if (idx % 2 === 1) {
-      return <strong key={idx} className="font-semibold">{part}</strong>;
-    }
-    return <span key={idx}>{part}</span>;
+  return paragraphs.map((paragraph, pIdx) => {
+    // Skip empty paragraphs
+    if (!paragraph.trim()) return null;
+    
+    // Split by ** and format as sections
+    const parts = paragraph.split(/\*\*(.+?)\*\*/g);
+    
+    const formattedParts = parts.map((part, idx) => {
+      // Odd indices are the text inside **
+      if (idx % 2 === 1) {
+        return <strong key={idx} className="font-semibold">{part}</strong>;
+      }
+      return <span key={idx}>{part}</span>;
+    });
+    
+    return (
+      <p key={pIdx} className={pIdx > 0 ? "mt-2" : ""}>
+        {formattedParts}
+      </p>
+    );
   });
 };
 
