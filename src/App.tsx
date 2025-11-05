@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MobileOnly } from "@/components/MobileOnly";
-import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -33,9 +33,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [isMobile] = useState(true);
-
-  useEffect(() => {}, []);
+  const isMobile = useIsMobile();
 
   if (!isMobile) {
     return (
