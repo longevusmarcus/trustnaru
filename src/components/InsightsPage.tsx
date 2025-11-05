@@ -176,8 +176,10 @@ export const InsightsPage = () => {
     setIsGenerating(true);
 
     try {
+      const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke('generate-insights', {
-        body: { message: messageToSend }
+        body: { message: messageToSend },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       if (error) {

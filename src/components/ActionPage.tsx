@@ -217,8 +217,10 @@ export const ActionPage = () => {
     try {
       const actionPrompt = `Based on my CV, aspirations, and active path (${activePathData.title}), give me exactly 3 specific, practical actions for today. Format as a simple numbered list (1., 2., 3.) with one concrete action per line. Each action should be achievable today and directly relevant to my career path.`;
 
+      const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke('generate-insights', {
-        body: { message: actionPrompt }
+        body: { message: actionPrompt },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       if (error) throw error;
