@@ -33,8 +33,8 @@ const slides = [
     title: "Life OS",
     subtitle: "Naru will evolve into the Life OS:",
     items: [
-      "Align your energy",
-      "See your future self",
+      "Share what gives you energy",
+      "See your future selves",
       "Unlock your career paths",
       "Take action every day",
       "Track your evolution",
