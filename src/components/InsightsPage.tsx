@@ -66,11 +66,11 @@ const formatMessageContent = (content: string) => {
         </h2>
       );
     }
-    // Handle numbered lists
-    else if (/^\d+\.\s/.test(trimmed)) {
+    // Handle numbered lists (1. item or 1) item)
+    else if (/^\d+[\.)]\s/.test(trimmed)) {
       if (listType !== 'number') flushList();
       listType = 'number';
-      const text = trimmed.replace(/^\d+\.\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+      const text = trimmed.replace(/^\d+[\.)]\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
       currentList.push(text);
     }
     // Handle bullet points
@@ -78,6 +78,13 @@ const formatMessageContent = (content: string) => {
       if (listType !== 'bullet') flushList();
       listType = 'bullet';
       const text = trimmed.replace(/^\*\s*/, '').replace(/\*\*(.+?)\*\*/g, '$1');
+      currentList.push(text);
+    }
+    // Handle implicit list items: lines starting with capital and early colon (like "Item title: description")
+    else if (/^[A-Z]/.test(trimmed) && /^[^:]{3,50}:/.test(trimmed)) {
+      if (listType !== 'bullet') flushList();
+      listType = 'bullet';
+      const text = trimmed.replace(/\*\*(.+?)\*\*/g, '$1');
       currentList.push(text);
     }
     // Handle regular paragraphs
