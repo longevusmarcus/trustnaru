@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
 export default function PathDetail() {
   const location = useLocation();
@@ -55,6 +56,9 @@ export default function PathDetail() {
           description: "Your personalized goals are ready.",
         });
       }
+
+      // Check and award badges after activating path
+      await checkAndAwardBadges(user.id);
 
       // Navigate to copilot page with a slight delay to ensure state is updated
       setTimeout(() => {

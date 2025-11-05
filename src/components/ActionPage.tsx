@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
 export const ActionPage = () => {
   const { user } = useAuth();
@@ -313,6 +314,9 @@ export const ActionPage = () => {
         .eq('user_id', user.id);
       
       if (error) throw error;
+      
+      // Check and award badges after activating path
+      await checkAndAwardBadges(user.id);
       
       // Reload all data to update with new active path
       await loadData();

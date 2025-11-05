@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
 export const InsightsPage = () => {
   const { user } = useAuth();
@@ -110,6 +111,9 @@ export const InsightsPage = () => {
         .eq('user_id', user.id);
       
       if (error) throw error;
+      
+      // Check and award badges after activating path
+      await checkAndAwardBadges(user.id);
       
       // Reload insights to update with new active path
       await loadInsights();
