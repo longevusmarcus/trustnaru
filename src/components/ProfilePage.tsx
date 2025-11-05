@@ -283,8 +283,8 @@ export const ProfilePage = () => {
                     key={badge.id} 
                     className={`flex flex-col items-center gap-2.5 p-3 rounded-lg border transition-all ${
                       isEarned 
-                        ? 'border-border/40 bg-muted/30 hover:border-border hover:bg-muted/50' 
-                        : 'border-border/20 bg-muted/10 opacity-40'
+                        ? 'border-border bg-card hover:bg-accent' 
+                        : 'border-border/50 bg-card/50 opacity-40 grayscale'
                     }`}
                   >
                     <div className="text-3xl">{badge.icon}</div>
