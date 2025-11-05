@@ -257,9 +257,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
         {/* Streak Calendar */}
         <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4">
             <span className="text-xs font-medium text-muted-foreground">DAILY STREAKS</span>
-            <Flame className="h-4 w-4 text-orange-500" />
           </div>
           <div className="grid grid-cols-7 gap-2">
             {weekDates.map((date, i) => {
@@ -270,7 +269,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               return (
                 <div key={i} className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">{dayNames[date.getDay()]}</div>
-                  <div className={`text-sm font-medium rounded-lg py-2 transition-colors ${
+                  <div className={`text-sm font-medium rounded-lg py-2 transition-colors flex items-center justify-center gap-1 ${
                     hasStreak 
                       ? 'bg-primary text-primary-foreground' 
                       : isToday 
@@ -278,6 +277,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                       : 'bg-muted/30'
                   }`}>
                     {date.getDate()}
+                    {hasStreak && <Flame className="h-3 w-3 text-orange-500" />}
                   </div>
                 </div>
               );
