@@ -10,11 +10,13 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export const ActionPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activePath, setActivePath] = useState<any>(null);
+  const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
@@ -129,12 +131,21 @@ export const ActionPage = () => {
     }
 
     try {
-      // Get user profile with active path
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('active_path_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Fetch all paths and profile in parallel
+      const [profileResult, allPathsResult] = await Promise.all([
+        supabase
+          .from('user_profiles')
+          .select('active_path_id')
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('career_paths')
+          .select('id, title, category')
+          .eq('user_id', user.id)
+      ]);
+
+      const profile = profileResult.data;
+      setAllPaths(allPathsResult.data || []);
 
       if (profile?.active_path_id) {
         // Get the career path details
@@ -266,6 +277,34 @@ export const ActionPage = () => {
     "Activate a career path first",
   ];
 
+  const handleSetActivePath = async (pathId: string) => {
+    if (!user || pathId === activePath?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ active_path_id: pathId })
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      // Reload all data to update with new active path
+      await loadData();
+      
+      toast({
+        title: "Active path updated",
+        description: "Your actions are now personalized to your new path."
+      });
+    } catch (error) {
+      console.error('Error updating active path:', error);
+      toast({
+        title: "Failed to update path",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleToggleGoal = async (goalId: string, completed: boolean) => {
     try {
       const { error } = await supabase
@@ -329,6 +368,54 @@ export const ActionPage = () => {
               </p>
             </CardContent>
           </Card>
+        )}
+
+
+        {/* Path Switcher Accordion - Show only if multiple paths */}
+        {allPaths.length > 1 && (
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="paths" className="border-border/50 rounded-lg overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-medium">Switch Active Path</span>
+                  <span className="text-xs text-muted-foreground">({allPaths.length} paths)</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-2 pb-2">
+                <div className="space-y-1">
+                  {allPaths.map((path: any) => {
+                    const isActive = path.id === activePath?.id;
+                    return (
+                      <button
+                        key={path.id}
+                        onClick={() => handleSetActivePath(path.id)}
+                        disabled={isActive}
+                        className={`w-full text-left px-3 py-2.5 rounded-md transition-all ${
+                          isActive 
+                            ? 'bg-primary/10 text-primary cursor-default' 
+                            : 'hover:bg-muted/50 text-foreground hover:scale-[1.01]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{path.title}</p>
+                            {path.category && (
+                              <p className="text-xs text-muted-foreground mt-0.5">{path.category}</p>
+                            )}
+                          </div>
+                          {isActive && (
+                            <div className="ml-2 flex-shrink-0">
+                              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
 
         {/* 10 Levels of Guidance */}
