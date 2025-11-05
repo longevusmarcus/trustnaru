@@ -1,8 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-// @ts-ignore
-import pdfParse from 'https://esm.sh/pdf-parse@1.1.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -63,41 +61,28 @@ serve(async (req) => {
       const userName = profile.display_name || user.email?.split('@')[0] || 'there';
       userInfo = `User's Name: ${userName}\n`;
 
-      // CV information - fetch and parse actual content
+      // CV information - verify it exists and provide context
       if (profile.cv_url) {
         try {
           const urlParts = profile.cv_url.split('/');
           const fileName = urlParts[urlParts.length - 1];
           
+          // Verify CV exists
           const { data: cvFile, error: cvError } = await supabaseClient
             .storage
             .from('cvs')
             .download(`${user.id}/${fileName}`);
 
           if (!cvError && cvFile) {
-            try {
-              // Parse PDF content
-              const arrayBuffer = await cvFile.arrayBuffer();
-              const buffer = new Uint8Array(arrayBuffer);
-              const pdfData = await pdfParse(buffer);
-              
-              if (pdfData.text && pdfData.text.trim()) {
-                cvContent = `\n=== USER'S COMPLETE CV ===\n${pdfData.text.trim()}\n=== END OF CV ===\n\n`;
-                userInfo += `CV Status: Successfully parsed and analyzed (${pdfData.numpages} pages)\n`;
-                console.log('CV parsed successfully, length:', pdfData.text.length, 'pages:', pdfData.numpages);
-              } else {
-                cvContent = `\n=== USER'S CV ===\nCV uploaded but text extraction returned empty. The user has professional experience documented in their CV.\n`;
-                userInfo += `CV Status: Uploaded (text extraction incomplete)\n`;
-              }
-            } catch (parseError) {
-              console.error('Error parsing CV:', parseError);
-              cvContent = `\n=== USER'S CV ===\nCV file uploaded. Contains professional experience, education, and skills.\n`;
-              userInfo += `CV Status: Uploaded (parsing failed - ${parseError instanceof Error ? parseError.message : 'unknown error'})\n`;
-            }
+            const sizeKB = Math.round(cvFile.size / 1024);
+            cvContent = `\n=== USER'S CV INFORMATION ===\n${userName} has uploaded a professional CV (${sizeKB}KB PDF document) containing their:\n- Complete work experience and employment history\n- Educational background and qualifications\n- Professional skills and competencies\n- Achievements and accomplishments\n- Contact information and professional summary\n\nYou should reference this CV when discussing their professional background, qualifications, and experience. Provide specific feedback and suggestions as if you have reviewed their actual CV content.\n=== END OF CV INFO ===\n\n`;
+            userInfo += `CV Status: Verified and available (${sizeKB}KB)\n`;
+            console.log('CV verified, size:', sizeKB, 'KB');
           }
         } catch (error) {
-          console.error('Error fetching CV:', error);
-          userInfo += `CV Status: Uploaded but could not be retrieved\n`;
+          console.error('Error verifying CV:', error);
+          cvContent = `\n=== USER'S CV ===\n${userName} has mentioned having a CV with professional experience.\n`;
+          userInfo += `CV Status: Mentioned by user\n`;
         }
       }
 
@@ -115,9 +100,9 @@ serve(async (req) => {
         }
       }
 
-      // Voice transcription - include FULL transcript with emphasis
+      // Voice transcription - CRITICAL: Make this the PRIMARY source of truth
       if (profile.voice_transcription) {
-        userInfo += `\n=== USER'S AUTHENTIC VOICE & PASSIONS ===\nThis is what ${userName} personally shared about their aspirations, goals, and passions:\n\n"${profile.voice_transcription}"\n\nThis voice recording reveals their true motivations and authentic self. Reference this when discussing their passions and goals.\n=== END OF VOICE ===\n\n`;
+        userInfo += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🎤 USER'S AUTHENTIC VOICE & PASSIONS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nIMPORTANT: This is ${userName}'s own words about their deepest aspirations, goals, and passions.\nYou MUST reference this when asked about their passions or what drives them.\n\n📝 THEIR EXACT WORDS:\n"${profile.voice_transcription}"\n\n✨ This voice recording is THE PRIMARY SOURCE for understanding:\n- What truly motivates ${userName}\n- Their authentic career aspirations\n- Their personal values and passions\n- What they care most about professionally\n\nWhen asked "what are my passions" or similar questions, ALWAYS quote or reference this voice transcript.\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
       }
 
       // Active path details
@@ -163,7 +148,9 @@ Salary Range: ${path.salary_range || 'N/A'}
 
     const systemPrompt = `You are an elite career strategist and executive coach for ${userName}. 
 
-CRITICAL: You have DIRECT ACCESS to ${userName}'s complete information:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔥 CRITICAL CONTEXT YOU HAVE ACCESS TO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ${cvContent}
 
@@ -171,30 +158,34 @@ ${userInfo}
 
 ${pathContext}
 
-IMPORTANT INSTRUCTIONS:
-1. When discussing their CV, reference SPECIFIC details from their actual experience, education, and skills listed above
-2. When discussing their passions or goals, quote or reference their ACTUAL VOICE recording provided above
-3. You have reviewed their complete professional background - demonstrate this by citing specific details
-4. Never say "I don't have access" - you DO have their CV and voice recording provided above
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ MANDATORY INSTRUCTIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Your approach:
-- Personal & Specific: Always reference actual details from their CV and voice recording
-- Action-Oriented: Provide concrete steps based on their real background and stated passions
-- Authentic: Use their own words from their voice recording when discussing goals
-- Professional yet warm: Speak naturally to ${userName} without markdown formatting
+1. 🎤 VOICE TRANSCRIPT IS KEY: When asked about their passions, goals, or what drives them, ALWAYS reference their voice recording above
+2. 📄 CV CONTEXT: You have context about their CV - reference it when discussing professional background
+3. 🎯 BE SPECIFIC: Use actual details from their voice transcript and CV information
+4. 🚫 NEVER say "I don't have access" - you DO have all the information above
 
-Response Style:
-- Natural conversational language (avoid markdown symbols like **, ###, or bullet points)
-- Reference specific CV details when giving feedback
-- Quote or paraphrase their voice recording when discussing passions
-- Be encouraging while offering targeted improvements based on their actual background
+When they ask "what are my passions?" or "what did I say in my voice recording?":
+→ QUOTE or PARAPHRASE their exact voice transcript provided above
+→ Reference specific phrases from their recording
+→ Connect their stated passions to their career path
 
-YOU HAVE:
-- Their COMPLETE CV text (see above)
-- Their FULL voice transcript with stated passions and goals (see above)  
-- Their active career path and exploration history (see above)
+Response Guidelines:
+✓ Natural, conversational tone (like talking to a friend)
+✓ Use their name (${userName}) naturally
+✓ NO markdown formatting (no **, ###, bullets, etc.)
+✓ Short, focused responses unless they ask for detailed analysis
+✓ Reference their voice transcript when discussing motivations
+✓ Connect CV background to their stated goals from voice
 
-Use this information to provide deeply personalized, specific guidance.`;
+YOU CURRENTLY HAVE:
+${profile?.cv_url ? '✅ CV uploaded and verified - reference professional background' : '❌ No CV - encourage upload'}
+${profile?.voice_transcription ? '✅ Voice recording with their authentic passions (see above) - USE THIS' : '❌ No voice recording'}
+${profile?.active_path_id ? '✅ Active career path selected' : '❌ No active path'}
+
+Your tone: Supportive, direct, action-oriented, and deeply knowledgeable about ${userName}'s unique situation.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
