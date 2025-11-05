@@ -16,6 +16,7 @@ export const ProfilePage = () => {
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);
+  const [allBadges, setAllBadges] = useState<any[]>([]);
   const [joinDate, setJoinDate] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const [editName, setEditName] = useState<string>("");
@@ -29,7 +30,7 @@ export const ProfilePage = () => {
         setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
         // Load all data in parallel
-        const [profileResult, statsResult, badgesResult] = await Promise.all([
+        const [profileResult, statsResult, badgesResult, allBadgesResult] = await Promise.all([
           supabase
             .from('user_profiles')
             .select('display_name, cv_url, voice_transcription')
@@ -44,7 +45,11 @@ export const ProfilePage = () => {
             .from('user_badges')
             .select('*, badges (name, icon, description)')
             .eq('user_id', user.id)
-            .order('earned_at', { ascending: false })
+            .order('earned_at', { ascending: false }),
+          supabase
+            .from('badges')
+            .select('*')
+            .order('requirement_count', { ascending: true })
         ]);
 
         if (profileResult.data) {
@@ -69,6 +74,10 @@ export const ProfilePage = () => {
 
         if (badgesResult.data) {
           setBadges(badgesResult.data);
+        }
+
+        if (allBadgesResult.data) {
+          setAllBadges(allBadgesResult.data);
         }
       }
     };
@@ -254,36 +263,41 @@ export const ProfilePage = () => {
         )}
 
         {/* Badge Collection */}
-        {badges.length > 0 && (
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                  Collection
-                </h3>
-                <Badge variant="outline" className="text-xs font-normal">
-                  {badges.length}/6
-                </Badge>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                {badges.map((badge: any, index: number) => (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                Collection
+              </h3>
+              <Badge variant="outline" className="text-xs font-normal">
+                {badges.length}/{allBadges.length}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {allBadges.map((badge: any) => {
+                const isEarned = badges.some((userBadge: any) => userBadge.badges?.name === badge.name);
+                return (
                   <div 
-                    key={index} 
-                    className="flex flex-col items-center gap-2.5 p-3 rounded-lg border border-border/40 bg-muted/30 transition-all hover:border-border hover:bg-muted/50"
+                    key={badge.id} 
+                    className={`flex flex-col items-center gap-2.5 p-3 rounded-lg border transition-all ${
+                      isEarned 
+                        ? 'border-border/40 bg-muted/30 hover:border-border hover:bg-muted/50' 
+                        : 'border-border/20 bg-muted/10 opacity-40'
+                    }`}
                   >
-                    <div className="text-3xl opacity-90">{badge.badges.icon}</div>
+                    <div className="text-3xl">{badge.icon}</div>
                     <div className="text-center space-y-1">
-                      <p className="text-xs font-medium">{badge.badges.name}</p>
+                      <p className="text-xs font-medium">{badge.name}</p>
                       <p className="text-[10px] text-muted-foreground leading-tight">
-                        {badge.badges.description}
+                        {badge.description}
                       </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Account Actions */}
         <div className="space-y-2 pt-4">
