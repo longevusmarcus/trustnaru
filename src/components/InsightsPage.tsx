@@ -11,6 +11,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
+// Format message content: remove markdown symbols and create proper formatting
+const formatMessageContent = (content: string) => {
+  // Split by ** and format as sections
+  const parts = content.split(/\*\*(.+?)\*\*/g);
+  
+  return parts.map((part, idx) => {
+    // Odd indices are the text inside **
+    if (idx % 2 === 1) {
+      return <strong key={idx} className="font-semibold">{part}</strong>;
+    }
+    return <span key={idx}>{part}</span>;
+  });
+};
+
 export const InsightsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -405,7 +419,7 @@ export const InsightsPage = () => {
                           : 'bg-muted/70 text-foreground'
                       }`}
                     >
-                      {msg.content}
+                      {formatMessageContent(msg.content)}
                     </div>
                   </div>
                 ))}
