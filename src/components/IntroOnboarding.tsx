@@ -42,7 +42,7 @@ const slides = [
   },
   {
     icon: Eye,
-    title: "Is it another career coach / job copilot?",
+    title: "Is Naru another career coach / job copilot?",
     content: '"No, this is who you can become, who you should become, and how to get there"',
   },
   {
