@@ -22,9 +22,12 @@ const formatMessageContent = (content: string) => {
     if (currentList.length > 0) {
       const ListTag = listType === 'number' ? 'ol' : 'ul';
       elements.push(
-        <ListTag key={elements.length} className="ml-4 my-2 space-y-1">
+        <ListTag key={elements.length} className={`ml-3 my-1.5 space-y-0.5 ${listType === 'bullet' ? 'list-none' : 'list-decimal'}`}>
           {currentList.map((item, i) => (
-            <li key={i} className="text-[13px]">{item}</li>
+            <li key={i} className="text-[13px] leading-snug flex items-start">
+              {listType === 'bullet' && <span className="text-muted-foreground mr-2 mt-0.5">•</span>}
+              <span>{item}</span>
+            </li>
           ))}
         </ListTag>
       );
