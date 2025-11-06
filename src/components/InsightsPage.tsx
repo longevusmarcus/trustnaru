@@ -568,43 +568,6 @@ export const InsightsPage = () => {
           )}
         </motion.div>
 
-        {/* Level Resources */}
-        {personalizedGuidance?.levelResources?.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-          >
-            <h3 className="text-lg font-semibold mb-3">Level Resources</h3>
-            {loadingGuidance ? (
-              <div className="space-y-3">
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-                <Skeleton className="h-24 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {personalizedGuidance.levelResources.map((resource: any, idx: number) => (
-                  <Card key={idx} className="border-primary/10">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Award className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 space-y-1.5">
-                          <p className="text-sm font-medium">{resource.resource}</p>
-                          <p className="text-xs text-muted-foreground">{resource.commitment}</p>
-                          <p className="text-xs text-primary/80">{resource.impact}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        )}
-
         {/* AI Insights Chat */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
