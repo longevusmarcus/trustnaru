@@ -120,6 +120,7 @@ export const InsightsPage = () => {
   const [personalizedGuidance, setPersonalizedGuidance] = useState<any>(null);
   const [loadingGuidance, setLoadingGuidance] = useState(false);
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
+  const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount
@@ -136,6 +137,19 @@ export const InsightsPage = () => {
   useEffect(() => {
     loadInsights();
   }, [user?.id]);
+
+  // Load guidance only when level changes and not cached
+  useEffect(() => {
+    const currentLevel = userStats?.current_level || 1;
+    if (activePath && user && !guidanceCache[currentLevel]) {
+      setTimeout(() => {
+        loadPersonalizedGuidance(activePath, 1, currentLevel);
+      }, 800);
+    } else if (guidanceCache[currentLevel]) {
+      // Use cached guidance
+      setPersonalizedGuidance(guidanceCache[currentLevel]);
+    }
+  }, [userStats?.current_level, activePath?.id, user]);
 
   const loadInsights = async () => {
     if (!user) {
@@ -192,7 +206,6 @@ export const InsightsPage = () => {
       if (activePathData) {
         setTimeout(() => {
           generateTodaysActions();
-          loadPersonalizedGuidance(activePathData);
         }, 800);
       }
     } catch (error) {
@@ -216,6 +229,9 @@ export const InsightsPage = () => {
       // Check and award badges after activating path
       await checkAndAwardBadges(user.id);
       
+      // Clear guidance cache when switching paths
+      setGuidanceCache({});
+      
       // Reload insights to update with new active path
       await loadInsights();
       
@@ -233,8 +249,10 @@ export const InsightsPage = () => {
     }
   };
 
-  const loadPersonalizedGuidance = async (pathArg?: any, attempt: number = 1) => {
+  const loadPersonalizedGuidance = async (pathArg?: any, attempt: number = 1, level?: number) => {
     const activePathData = pathArg || activePath;
+    const currentLevel = level || userStats?.current_level || 1;
+    
     if (!user || !activePathData) {
       setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
       setGuidanceError('Please activate a path to get smart tips.');
@@ -242,9 +260,17 @@ export const InsightsPage = () => {
       return;
     }
     
+    // Check cache first
+    if (guidanceCache[currentLevel]) {
+      console.log(`Using cached guidance for Level ${currentLevel}`);
+      setPersonalizedGuidance(guidanceCache[currentLevel]);
+      return;
+    }
+    
     setLoadingGuidance(true);
     setGuidanceError(null);
     try {
+      console.log(`Fetching guidance for Level ${currentLevel}...`);
       const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke('generate-personalized-guidance', {
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
@@ -260,16 +286,19 @@ export const InsightsPage = () => {
 
       if (!hasAny && attempt === 1) {
         // Auto-retry once to avoid cold-start or transient empty payloads
-        setTimeout(() => loadPersonalizedGuidance(activePathData, 2), 900);
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2, currentLevel), 900);
         return;
       }
 
-      setPersonalizedGuidance(data || { dailyActions: [], smartTips: [], levelResources: [] });
+      const guidanceData = data || { dailyActions: [], smartTips: [], levelResources: [] };
+      setPersonalizedGuidance(guidanceData);
+      // Cache the guidance
+      setGuidanceCache(prev => ({ ...prev, [currentLevel]: guidanceData }));
       setGuidanceError(hasAny ? null : 'No guidance returned');
     } catch (error) {
       if (attempt === 1) {
         // Auto-retry once on error
-        setTimeout(() => loadPersonalizedGuidance(activePathData, 2), 900);
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2, currentLevel), 900);
         return;
       }
       console.error('Error loading personalized guidance:', error);
