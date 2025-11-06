@@ -350,21 +350,18 @@ export const InsightsPage = () => {
   );
   
   const personalizedTips = useMemo(() => {
+    if (loadingGuidance) {
+      return []; // Show loading state instead
+    }
     if (personalizedGuidance?.smartTips?.length) {
-      return personalizedGuidance.smartTips.map((item: any) => item.tip);
+      return personalizedGuidance.smartTips;
     }
     if (!activePath) {
-      return [
-        "Activate a career path to get personalized guidance",
-        "Complete the wizard to discover paths tailored to you",
-      ];
+      return [];
     }
-    return [
-      `Focus on ${activePath.key_skills?.[0] || 'key skills'} this week to accelerate your progress`,
-      `Research ${activePath.target_companies?.[0] || 'companies'} to understand their culture`,
-      `Connect with professionals in ${activePath.category} on LinkedIn`,
-    ];
-  }, [activePath?.category, activePath?.key_skills, activePath?.target_companies, personalizedGuidance]);
+    // Return empty while loading to show skeleton
+    return [];
+  }, [activePath, personalizedGuidance, loadingGuidance]);
 
   if (loading) {
     return (
@@ -485,18 +482,48 @@ export const InsightsPage = () => {
           <h3 className="text-lg font-semibold mb-3">Smart Tips</h3>
           {loadingGuidance ? (
             <div className="space-y-3">
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
-              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
             </div>
+          ) : !activePath ? (
+            <Card className="border-dashed">
+              <CardContent className="p-6 text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Activate a career path to get personalized smart tips
+                </p>
+              </CardContent>
+            </Card>
+          ) : personalizedTips.length === 0 ? (
+            <Card className="border-amber-500/20 bg-amber-500/5">
+              <CardContent className="p-6 text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-3 text-amber-500" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generating personalized tips based on your CV and market insights...
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-3">
-              {personalizedTips.map((tip, idx) => (
-                <Card key={idx}>
+              {personalizedTips.map((tip: any, idx: number) => (
+                <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Lightbulb className="h-5 w-5 text-primary/70 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-muted-foreground">{tip}</p>
+                      <div className="flex-1 space-y-2">
+                        <p className="text-sm font-medium leading-relaxed">{tip.tip}</p>
+                        {tip.nextSteps && (
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold text-primary">Next steps:</span> {tip.nextSteps}
+                          </p>
+                        )}
+                        {tip.strategicValue && (
+                          <p className="text-xs text-muted-foreground italic">
+                            💡 {tip.strategicValue}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
