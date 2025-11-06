@@ -163,7 +163,7 @@ serve(async (req) => {
         smartTips: [
           { tip: `Follow ${(companies || 'leading companies').split(',')[0]} accessibility updates`, nextSteps: 'Subscribe to engineering/design blogs and a11y channels', strategicValue: 'Keeps your portfolio aligned with current practices' },
           { tip: 'Join accessibility communities (A11y Project, W3C WAI)', nextSteps: 'Introduce yourself and share 1 learning goal', strategicValue: 'Peer accountability and mentorship opportunities' },
-          { tip: `Map transferable steps toward ${futureTitles || 'your future paths'}`, nextSteps: 'List 3 overlapping skills and plan 1 artifact that serves both', strategicValue: 'Maintains optionality across paths' }
+          { tip: `Transferable plan across ${futureTitles || 'relevant future paths'}`, nextSteps: `Overlapping skills: ${skills || 'WCAG, User research, Prototyping'}. Artifact to build: "Accessible Signup Flow" (Figma + HTML/CSS) including keyboard navigation, visible focus states, ARIA labels, and color-contrast tokens. Provide a 200-word rationale referencing WCAG 2.1 AA and how it supports ${activePath.title}.`, strategicValue: 'A single artifact that advances multiple directions and showcases concrete a11y practice' }
         ],
         levelResources: [
           { resource: 'Deque University – Intro to Web Accessibility', commitment: '2–3 hours', impact: 'Hands-on foundations with exercises' },
@@ -211,9 +211,12 @@ STRUCTURE (valid JSON ONLY):
 }
 
 QUALITY RULES:
+- Do the work for the user. Never say “list”, “map”, “consider”, or “choose”. Provide the computed outputs directly.
 - Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
+- Transferable steps must include the 3 overlapping skills by name and 1 concrete artifact name with a one-sentence spec.
+- Outreach/networking items must include a ready-to-send message (no placeholders).
 - Output ONLY JSON. No markdown.`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
