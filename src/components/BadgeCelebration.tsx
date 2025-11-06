@@ -97,13 +97,9 @@ export const BadgeCelebration = ({ badge, onComplete }: BadgeCelebrationProps) =
                 className="absolute inset-0 bg-primary/20 rounded-full blur-2xl"
               />
               
-              {/* Badge image */}
-              <div className="relative w-32 h-32 rounded-full bg-card border-2 border-primary/20 overflow-hidden shadow-2xl">
-                <img 
-                  src={badge.icon} 
-                  alt={badge.name}
-                  className="w-full h-full object-cover"
-                />
+              {/* Badge icon */}
+              <div className="relative w-32 h-32 rounded-full bg-card border-2 border-primary/20 shadow-2xl flex items-center justify-center">
+                <span className="text-6xl">{badge.icon}</span>
               </div>
 
               {/* Sparkle icon */}

@@ -37,10 +37,10 @@ export const useBadgeAwarding = () => {
       const earnedBadgeIds = new Set(userBadges?.map(b => b.badge_id) || []);
 
       // Get user stats
-      const [statsResult, pathsResult, profileResult] = await Promise.all([
+      const [statsResult, pathsResult, profileResult, goalsResult, streaksResult] = await Promise.all([
         supabase
           .from('user_stats')
-          .select('missions_completed')
+          .select('missions_completed, current_level, longest_streak')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
@@ -51,12 +51,44 @@ export const useBadgeAwarding = () => {
           .from('user_profiles')
           .select('active_path_id')
           .eq('user_id', user.id)
-          .maybeSingle()
+          .maybeSingle(),
+        supabase
+          .from('goals')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1),
+        supabase
+          .from('daily_streaks')
+          .select('streak_date')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+          .order('streak_date', { ascending: false })
       ]);
 
       const missionsCompleted = statsResult.data?.missions_completed || 0;
       const pathsGenerated = pathsResult.data?.length || 0;
       const hasActivePath = !!profileResult.data?.active_path_id;
+      const currentLevel = statsResult.data?.current_level || 1;
+      const longestStreak = statsResult.data?.longest_streak || 0;
+      const hasUsedAiChat = (goalsResult.data?.length || 0) > 0;
+      
+      // Calculate consecutive streak
+      let consecutiveStreak = 0;
+      const streakDates = streaksResult.data || [];
+      if (streakDates.length > 0) {
+        consecutiveStreak = 1;
+        for (let i = 0; i < streakDates.length - 1; i++) {
+          const current = new Date(streakDates[i].streak_date);
+          const next = new Date(streakDates[i + 1].streak_date);
+          const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            consecutiveStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+      const hasSixMonthStreak = Math.max(consecutiveStreak, longestStreak) >= 180;
 
       // Check each badge
       const badgesToAward = [];
@@ -73,6 +105,9 @@ export const useBadgeAwarding = () => {
           shouldAward = pathsGenerated >= badge.requirement_count;
         } else if (badge.requirement_type === 'paths_activated') {
           shouldAward = hasActivePath && badge.requirement_count === 1;
+        } else if (badge.requirement_type === 'oracle_mastery') {
+          const hasCompletedAllLevels = currentLevel >= 10;
+          shouldAward = hasCompletedAllLevels && hasUsedAiChat && hasSixMonthStreak;
         }
 
         if (shouldAward) {

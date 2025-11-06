@@ -5,7 +5,7 @@ export const checkAndAwardBadges = async (userId: string) => {
     // Get user stats
     const { data: stats } = await supabase
       .from('user_stats')
-      .select('missions_completed, paths_explored')
+      .select('missions_completed, paths_explored, current_level, longest_streak')
       .eq('user_id', userId)
       .maybeSingle();
 
@@ -23,6 +23,39 @@ export const checkAndAwardBadges = async (userId: string) => {
       .maybeSingle();
 
     const hasActivePath = !!profile?.active_path_id;
+
+    // Check AI chat usage (goals)
+    const { count: goalsCount } = await supabase
+      .from('goals')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    const hasUsedAiChat = (goalsCount || 0) > 0;
+
+    // Get streak data
+    const { data: streakDates } = await supabase
+      .from('daily_streaks')
+      .select('streak_date')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .order('streak_date', { ascending: false });
+
+    // Calculate consecutive streak
+    let consecutiveStreak = 0;
+    if (streakDates && streakDates.length > 0) {
+      consecutiveStreak = 1;
+      for (let i = 0; i < streakDates.length - 1; i++) {
+        const current = new Date(streakDates[i].streak_date);
+        const next = new Date(streakDates[i + 1].streak_date);
+        const diffDays = Math.floor((current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) {
+          consecutiveStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+    const hasSixMonthStreak = Math.max(consecutiveStreak, stats?.longest_streak || 0) >= 180;
 
     // Get all badges and user's earned badges
     const [badgesResult, userBadgesResult] = await Promise.all([
@@ -56,6 +89,10 @@ export const checkAndAwardBadges = async (userId: string) => {
           break;
         case 'missions':
           shouldAward = (stats?.missions_completed || 0) >= badge.requirement_count;
+          break;
+        case 'oracle_mastery':
+          const hasCompletedAllLevels = (stats?.current_level || 1) >= 10;
+          shouldAward = hasCompletedAllLevels && hasUsedAiChat && hasSixMonthStreak;
           break;
       }
 
