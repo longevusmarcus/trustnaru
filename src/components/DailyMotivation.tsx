@@ -1,8 +1,8 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Download, Heart } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import html2canvas from "html2canvas";
 
 interface DailyMotivationProps {
@@ -33,7 +33,6 @@ const generateMotivation = (pathTitle?: string): string => {
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
   const motivation = generateMotivation(pathTitle);
   const { toast } = useToast();
-  const [isLiked, setIsLiked] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = async () => {
@@ -63,15 +62,6 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
     }
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (!isLiked) {
-      toast({
-        title: "Liked!",
-        description: "This motivation has been saved to your favorites.",
-      });
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,7 +71,7 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
             {motivation}
           </h1>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col items-center gap-6">
             <Button
               variant="ghost"
               size="icon"
@@ -92,11 +82,10 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
             </Button>
             <Button
               variant="ghost"
-              size="icon"
-              className={`rounded-full h-10 w-10 opacity-60 hover:opacity-100 transition-opacity ${isLiked ? 'text-red-500' : ''}`}
-              onClick={handleLike}
+              className="text-xs opacity-40 hover:opacity-100 transition-opacity"
+              onClick={() => onOpenChange(false)}
             >
-              <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
+              Close
             </Button>
           </div>
         </div>
