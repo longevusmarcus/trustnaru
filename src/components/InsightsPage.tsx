@@ -234,7 +234,12 @@ export const InsightsPage = () => {
   };
 
   const loadPersonalizedGuidance = async () => {
-    if (!user || !activePath) return;
+    if (!user || !activePath) {
+      setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
+      setGuidanceError('Please activate a path to get smart tips.');
+      setLoadingGuidance(false);
+      return;
+    }
     
     setLoadingGuidance(true);
     setGuidanceError(null);
@@ -245,13 +250,15 @@ export const InsightsPage = () => {
       });
 
       if (error) throw error;
-      if (data?.dailyActions || data?.smartTips || data?.levelResources) {
-        setPersonalizedGuidance(data);
-        setGuidanceError(null);
-      } else {
-        setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
-        setGuidanceError('No guidance returned');
-      }
+
+      const hasAny = Boolean(
+        (data?.dailyActions && data.dailyActions.length) ||
+        (data?.smartTips && data.smartTips.length) ||
+        (data?.levelResources && data.levelResources.length)
+      );
+
+      setPersonalizedGuidance(data || { dailyActions: [], smartTips: [], levelResources: [] });
+      setGuidanceError(hasAny ? null : 'No guidance returned');
     } catch (error) {
       console.error('Error loading personalized guidance:', error);
       setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
