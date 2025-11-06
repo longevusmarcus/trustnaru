@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DailyMotivationProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface DailyMotivationProps {
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
   const [motivation, setMotivation] = useState("Today is a great day to keep moving forward.");
   const { toast } = useToast();
+  const { user } = useAuth();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,9 +27,29 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
   }, [open]);
 
   const fetchPersonalizedMotivation = async () => {
+    if (!user) {
+      console.log('No user authenticated, skipping motivation fetch');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('generate-daily-motivation');
+      
+      // Get the current session to ensure we have a valid token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('No active session');
+        setIsLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('generate-daily-motivation', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
       
       if (error) throw error;
       
@@ -36,6 +58,11 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
       }
     } catch (error) {
       console.error('Error fetching motivation:', error);
+      toast({
+        title: "Unable to load motivation",
+        description: "Using a default message instead.",
+        variant: "default",
+      });
     } finally {
       setIsLoading(false);
     }
