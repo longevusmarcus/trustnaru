@@ -148,6 +148,31 @@ serve(async (req) => {
       for (const p of futurePaths) userContext += `- ${p.title} (${p.category})\n`;
     }
 
+    // Simple deterministic fallback in case AI fails
+    const buildFallbackGuidance = () => {
+      const futureTitles = (futurePaths || []).map(p => p.title).slice(0, 2).join(', ');
+      const companies = (activePath.target_companies || []).slice(0, 3).join(', ');
+      const skills = (activePath.key_skills || []).slice(0, 3).join(', ');
+
+      return {
+        dailyActions: [
+          { action: `Review WCAG checklist focusing on ${skills || 'key skills'}`, timeNeeded: '30 minutes', rationale: `Foundational work for ${activePath.title}` },
+          { action: `Identify 1 contact at ${companies || 'target companies'} on LinkedIn and craft a message`, timeNeeded: '45 minutes', rationale: 'Network aligned with your target path' },
+          { action: `Read 1 case study from ${(companies || 'leading orgs').split(',')[0]}`, timeNeeded: '20 minutes', rationale: 'Build market awareness with concrete examples' }
+        ],
+        smartTips: [
+          { tip: `Follow ${(companies || 'leading companies').split(',')[0]} accessibility updates`, nextSteps: 'Subscribe to engineering/design blogs and a11y channels', strategicValue: 'Keeps your portfolio aligned with current practices' },
+          { tip: 'Join accessibility communities (A11y Project, W3C WAI)', nextSteps: 'Introduce yourself and share 1 learning goal', strategicValue: 'Peer accountability and mentorship opportunities' },
+          { tip: `Map transferable steps toward ${futureTitles || 'your future paths'}`, nextSteps: 'List 3 overlapping skills and plan 1 artifact that serves both', strategicValue: 'Maintains optionality across paths' }
+        ],
+        levelResources: [
+          { resource: 'Deque University – Intro to Web Accessibility', commitment: '2–3 hours', impact: 'Hands-on foundations with exercises' },
+          { resource: 'WebAIM Contrast Checker', commitment: 'Ongoing (5 min per design)', impact: 'Fast contrast validation for design reviews' },
+          { resource: 'axe DevTools (browser extension)', commitment: '15 min setup', impact: 'Automated checks to catch common issues early' }
+        ]
+      };
+    };
+
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       console.error('GEMINI_API_KEY not configured');
@@ -236,7 +261,7 @@ QUALITY RULES:
       throw new Error('No content generated');
     }
 
-    // Extract JSON from response (handle code blocks defensively)
+    // Extract/parse JSON from response defensively
     let jsonText = String(generatedText).trim();
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -244,9 +269,22 @@ QUALITY RULES:
       jsonText = jsonText.replace(/```\n?/g, '').trim();
     }
 
-    const guidance = JSON.parse(jsonText);
+    let guidance: any = null;
+    try {
+      guidance = JSON.parse(jsonText);
+    } catch (_) {
+      try {
+        const match = jsonText.match(/\{[\s\S]*\}/);
+        if (match) guidance = JSON.parse(match[0]);
+      } catch (_) { /* ignore */ }
+    }
 
-    console.log('Successfully generated personalized guidance');
+    if (!guidance || !Array.isArray(guidance.smartTips)) {
+      console.warn('AI JSON parse failed or empty guidance, using fallback');
+      guidance = buildFallbackGuidance();
+    }
+
+    console.log('Successfully generated personalized guidance (parsed or fallback)');
 
     return new Response(
       JSON.stringify(guidance),
@@ -255,17 +293,10 @@ QUALITY RULES:
 
   } catch (error) {
     console.error('Error in generate-personalized-guidance function:', error);
+    // Final fallback to avoid blocking UI
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        dailyActions: [],
-        smartTips: [],
-        levelResources: []
-      }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ dailyActions: [], smartTips: [], levelResources: [] }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
