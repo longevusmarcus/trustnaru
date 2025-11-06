@@ -136,6 +136,18 @@ serve(async (req) => {
       userContext += `- Missions Completed: ${stats.missions_completed}\n`;
     }
 
+    // Include future (explored) paths besides active
+    const { data: futurePaths } = await supabaseClient
+      .from('career_paths')
+      .select('title, category')
+      .eq('user_id', user.id)
+      .neq('id', profile.active_path_id)
+      .limit(6);
+    if (futurePaths && futurePaths.length) {
+      userContext += `\nFuture Paths (consider when tailoring tips):\n`;
+      for (const p of futurePaths) userContext += `- ${p.title} (${p.category})\n`;
+    }
+
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       console.error('GEMINI_API_KEY not configured');
@@ -143,73 +155,41 @@ serve(async (req) => {
     }
 
     // Create sophisticated prompt for Gemini
-    const prompt = `You are an elite career strategist with deep industry connections and real-world expertise.
+    const prompt = `You are an elite career strategist with real market awareness.
 
 USER CONTEXT:
 ${userContext}
 
 CRITICAL INSTRUCTIONS:
-Generate HIGHLY SPECIFIC, ACTIONABLE guidance. NO GENERIC ADVICE ALLOWED.
+Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV text, active path, and future (explored) paths. NO GENERIC ADVICE.
 
-❌ FORBIDDEN (Generic/Vague):
-- "Connect with professionals on LinkedIn"
-- "Research companies in your field"
-- "Take an online course"
-- "Read industry blogs"
-- "Network with people"
+When referencing companies, include actual teams/roles and a real point of contact where possible.
+If you are unsure, prefer credible organizations, certifications, and named communities over vague suggestions.
 
-✅ REQUIRED (Specific/Actionable):
-- "DM Sarah Chen (@sarahchen_ux) on LinkedIn - she's Head of Accessibility at Airbnb and mentors designers transitioning to inclusive design"
-- "Apply to Fable's Accessibility Fellowship (closes March 15) - they specifically seek designers with UX backgrounds"
-- "Complete Nielsen Norman Group's 'Accessibility Specialist' certification (4 weeks, $1,200) - it's the gold standard for UX accessibility roles"
-- "Attend the CSUN Assistive Technology Conference (March 18-22, Anaheim) - 80% of accessibility hiring managers attend"
-
-Generate 3 sections in JSON format:
-
-1. DAILY ACTIONS (3 items):
-   - Each action must be completable TODAY
-   - Include SPECIFIC people to contact (with LinkedIn handles if networking)
-   - Include SPECIFIC resources/tools/events with dates
-   - State the exact time needed (e.g., "30 minutes", "1 hour")
-   - Explain WHY this specific action matters for their path
-
-2. SMART TIPS (3 items):
-   - Each tip must include SPECIFIC names, resources, or contacts
-   - Reference REAL industry leaders, companies, or resources
-   - Include actionable next steps with specifics
-   - Explain the strategic value for their career path
-
-3. LEVEL RESOURCES (3 items):
-   - Each resource must be REAL and verifiable (courses, certifications, books, communities)
-   - Include pricing/time commitment where relevant
-   - Match their current experience level (${stats?.missions_completed || 0} missions completed)
-   - Explain why THIS resource is crucial for their specific path
-
-QUALITY STANDARDS:
-- Every suggestion must pass this test: "Can the user take this action without Googling for more info?"
-- If you mention a person: Include their title, company, and where to find them
-- If you mention an event: Include dates, location, and why it matters
-- If you mention a course: Include provider, duration, cost, and ROI
-- If you mention a company: Explain why THEY SPECIFICALLY are hiring for this path
-
-Return ONLY valid JSON in this exact format:
+STRUCTURE (valid JSON ONLY):
 {
   "dailyActions": [
-    {
-      "action": "Specific action with all details",
-      "timeNeeded": "30 minutes",
-      "rationale": "Why this matters for their path"
-    }
+    { "action": "...", "timeNeeded": "30 minutes", "rationale": "..." },
+    { "action": "...", "timeNeeded": "1 hour", "rationale": "..." },
+    { "action": "...", "timeNeeded": "15 minutes", "rationale": "..." }
   ],
   "smartTips": [
-    {
-      "tip": "Specific tip with names/resources",
-      "nextSteps": "Exact steps to implement",
-      "strategicValue": "Why this advances their career"
-    }
+    { "tip": "...", "nextSteps": "...", "strategicValue": "..." },
+    { "tip": "...", "nextSteps": "...", "strategicValue": "..." },
+    { "tip": "...", "nextSteps": "...", "strategicValue": "..." }
   ],
   "levelResources": [
-    {
+    { "resource": "...", "commitment": "...", "impact": "..." },
+    { "resource": "...", "commitment": "...", "impact": "..." },
+    { "resource": "...", "commitment": "...", "impact": "..." }
+  ]
+}
+
+QUALITY RULES:
+- Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
+- Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
+- Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
+- Output ONLY JSON. No markdown.`;
       "resource": "Specific resource name and details",
       "commitment": "Time/cost investment",
       "impact": "How this accelerates their path"

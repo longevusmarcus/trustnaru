@@ -12,6 +12,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
 
+import * as pdfjsLib from 'pdfjs-dist';
+// @ts-ignore - worker URL import for pdfjs
+import pdfWorker from 'pdfjs-dist/build/pdf.worker?url';
+(pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorker;
+
 export const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -121,16 +126,28 @@ export const ProfilePage = () => {
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive"
-      });
+      toast({ title: "Error signing out", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out"
-      });
+      toast({ title: "Signed out", description: "You have been successfully signed out" });
+    }
+  };
+
+  const extractTextFromPdf = async (file: File): Promise<string> => {
+    try {
+      const buf = await file.arrayBuffer();
+      const pdf = await (pdfjsLib as any).getDocument({ data: buf }).promise;
+      let text = '';
+      const maxPages = Math.min(pdf.numPages, 30);
+      for (let i = 1; i <= maxPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map((it: any) => it.str).join(' ');
+        text += strings + '\n';
+      }
+      return text.trim();
+    } catch (e) {
+      console.error('PDF parse failed:', e);
+      return '';
     }
   };
 
@@ -138,84 +155,59 @@ export const ProfilePage = () => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    // Validate file type
     const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!validTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a PDF or Word document",
-        variant: "destructive"
-      });
+      toast({ title: "Invalid file type", description: "Upload a PDF or Word document", variant: "destructive" });
       return;
     }
-
-    // Validate file size (max 20MB)
     if (file.size > 20 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Maximum file size is 20MB",
-        variant: "destructive"
-      });
+      toast({ title: "File too large", description: "Max size is 20MB", variant: "destructive" });
       return;
     }
 
     setUploadingCV(true);
 
     try {
-      // Delete old CV if exists
+      // Remove previous CV if present
       if (userProfile?.cv_url) {
-        const oldFileName = userProfile.cv_url.split('/').pop();
-        if (oldFileName) {
-          await supabase.storage
-            .from('cvs')
-            .remove([`${user.id}/${oldFileName}`]);
-        }
+        const parts = userProfile.cv_url.split('/');
+        const oldName = parts[parts.length - 1];
+        if (oldName) await supabase.storage.from('cvs').remove([`${user.id}/${oldName}`]);
       }
 
-      // Upload new CV
       const fileName = `cv-${Date.now()}.${file.name.split('.').pop()}`;
       const { error: uploadError } = await supabase.storage
         .from('cvs')
-        .upload(`${user.id}/${fileName}`, file);
-
+        .upload(`${user.id}/${fileName}`, file, { cacheControl: '3600' });
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('cvs')
-        .getPublicUrl(`${user.id}/${fileName}`);
+      const { data: { publicUrl } } = supabase.storage.from('cvs').getPublicUrl(`${user.id}/${fileName}`);
 
-      // Update profile
+      // Merge wizard_data with extracted cv_text (PDF only)
+      let cv_text = '';
+      if (file.type === 'application/pdf') {
+        cv_text = await extractTextFromPdf(file);
+      }
+      const { data: existing } = await supabase
+        .from('user_profiles')
+        .select('wizard_data')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      const mergedWizard = { ...(existing?.wizard_data || {}), ...(cv_text ? { cv_text } : {}) };
+
       const { error: updateError } = await supabase
         .from('user_profiles')
-        .upsert({
-          user_id: user.id,
-          cv_url: publicUrl
-        }, {
-          onConflict: 'user_id'
-        });
-
+        .upsert({ user_id: user.id, cv_url: publicUrl, wizard_data: mergedWizard }, { onConflict: 'user_id' });
       if (updateError) throw updateError;
 
-      // Update local state
       setUserProfile({ ...userProfile, cv_url: publicUrl });
-
-      toast({
-        title: "CV updated",
-        description: "Your CV has been successfully uploaded"
-      });
+      toast({ title: "CV updated", description: cv_text ? "Text extracted for smarter tips" : "Uploaded successfully" });
     } catch (error) {
       console.error('Error uploading CV:', error);
-      toast({
-        title: "Upload failed",
-        description: "Please try again",
-        variant: "destructive"
-      });
+      toast({ title: "Upload failed", description: "Please try again", variant: "destructive" });
     } finally {
       setUploadingCV(false);
-      if (cvInputRef.current) {
-        cvInputRef.current.value = '';
-      }
+      if (cvInputRef.current) cvInputRef.current.value = '';
     }
   };
 
