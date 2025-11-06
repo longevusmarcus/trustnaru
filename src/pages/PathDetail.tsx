@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
 export default function PathDetail() {
@@ -16,6 +16,10 @@ export default function PathDetail() {
   const [activating, setActivating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const card = location.state?.card;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!card) {
     navigate("/");
