@@ -1,6 +1,8 @@
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
-import { X, Share2, Heart } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Download, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface DailyMotivationProps {
   open: boolean;
@@ -29,28 +31,29 @@ const generateMotivation = (pathTitle?: string): string => {
 
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
   const motivation = generateMotivation(pathTitle);
+  const { toast } = useToast();
+  const [isLiked, setIsLiked] = useState(false);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text: motivation,
-          title: "My Daily Motivation - Naru",
-        });
-      } catch (err) {
-        console.log("Share cancelled");
-      }
+  const handleDownload = () => {
+    toast({
+      title: "Download",
+      description: "Screenshot this screen to save your motivation!",
+    });
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      toast({
+        title: "Liked!",
+        description: "This motivation has been saved to your favorites.",
+      });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-        <DialogClose className="absolute right-8 top-8 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10">
-          <X className="h-6 w-6" />
-          <span className="sr-only">Close</span>
-        </DialogClose>
-
         <div className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-center leading-tight tracking-tight">
             {motivation}
@@ -61,16 +64,17 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
               variant="ghost"
               size="icon"
               className="rounded-full h-12 w-12 hover:opacity-100 transition-opacity"
-              onClick={handleShare}
+              onClick={handleDownload}
             >
-              <Share2 className="h-5 w-5" />
+              <Download className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full h-12 w-12 hover:opacity-100 transition-opacity"
+              className={`rounded-full h-12 w-12 hover:opacity-100 transition-opacity ${isLiked ? 'text-red-500' : ''}`}
+              onClick={handleLike}
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
             </Button>
           </div>
         </div>
