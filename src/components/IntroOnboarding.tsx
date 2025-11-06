@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart, MoveRight } from "lucide-react";
+import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart, MoveRight, ArrowRight } from "lucide-react";
 
 interface IntroOnboardingProps {
   onComplete: () => void;
@@ -50,6 +50,11 @@ const slides = [
     title: "Collective Intelligence",
     content:
       "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
+  },
+  {
+    icon: ArrowRight,
+    title: "One more thing",
+    isComparison: true,
   },
 ];
 
@@ -116,6 +121,32 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                     <span className="text-foreground text-sm">{item}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {slide.isComparison && (
+            <div className="space-y-8 pt-4">
+              <div className="grid grid-cols-2 gap-6">
+                {/* LinkedIn Column */}
+                <div className="space-y-4">
+                  <div className="text-xs font-medium tracking-wider text-muted-foreground/60 uppercase">LinkedIn</div>
+                  <div className="space-y-3">
+                    {['Tracking past', 'Vanity', 'Static', 'No guidance', 'No rewards'].map((item, i) => (
+                      <div key={i} className="text-sm text-muted-foreground/50 font-light">{item}</div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Naru Column */}
+                <div className="space-y-4">
+                  <div className="text-xs font-medium tracking-wider text-primary uppercase">Naru</div>
+                  <div className="space-y-3">
+                    {['Tracking future', 'Value', 'Dynamic predictions', 'Personalized guidance', 'Rewards'].map((item, i) => (
+                      <div key={i} className="text-sm text-foreground font-light">{item}</div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
