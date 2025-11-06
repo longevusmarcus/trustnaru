@@ -188,11 +188,10 @@ export const InsightsPage = () => {
       setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
       setHasInitialMessage(true);
 
-      // Auto-generate personalized guidance if active path exists
       if (activePathData) {
         setTimeout(() => {
           generateTodaysActions();
-          loadPersonalizedGuidance();
+          loadPersonalizedGuidance(activePathData);
         }, 800);
       }
     } catch (error) {
@@ -233,8 +232,9 @@ export const InsightsPage = () => {
     }
   };
 
-  const loadPersonalizedGuidance = async () => {
-    if (!user || !activePath) {
+  const loadPersonalizedGuidance = async (pathArg?: any, attempt: number = 1) => {
+    const activePathData = pathArg || activePath;
+    if (!user || !activePathData) {
       setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
       setGuidanceError('Please activate a path to get smart tips.');
       setLoadingGuidance(false);
@@ -257,9 +257,20 @@ export const InsightsPage = () => {
         (data?.levelResources && data.levelResources.length)
       );
 
+      if (!hasAny && attempt === 1) {
+        // Auto-retry once to avoid cold-start or transient empty payloads
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2), 900);
+        return;
+      }
+
       setPersonalizedGuidance(data || { dailyActions: [], smartTips: [], levelResources: [] });
       setGuidanceError(hasAny ? null : 'No guidance returned');
     } catch (error) {
+      if (attempt === 1) {
+        // Auto-retry once on error
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2), 900);
+        return;
+      }
       console.error('Error loading personalized guidance:', error);
       setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
       setGuidanceError(error instanceof Error ? error.message : 'Unknown error');
