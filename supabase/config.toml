@@ -26,3 +26,6 @@ verify_jwt = true
 
 [functions.generate-level-resources]
 verify_jwt = true
+
+[functions.generate-daily-motivation]
+verify_jwt = true

@@ -2,8 +2,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import html2canvas from "html2canvas";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DailyMotivationProps {
   open: boolean;
@@ -11,29 +12,34 @@ interface DailyMotivationProps {
   pathTitle?: string;
 }
 
-const generateMotivation = (pathTitle?: string): string => {
-  if (!pathTitle) {
-    return "Today is a great day to get closer to your dreams.";
-  }
-
-  const motivations = [
-    `Today is a great day to get closer to your ${pathTitle} dream.`,
-    `Don't stop believing you can become what you want.`,
-    `Every step forward is a step toward ${pathTitle}.`,
-    `Your ${pathTitle} journey starts with today.`,
-    `Believe in your ability to change your life.`,
-    `Great things take time. Keep going.`,
-    `You are exactly where you need to be.`,
-    `Trust the process. Trust yourself.`,
-  ];
-
-  return motivations[Math.floor(Math.random() * motivations.length)];
-};
-
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
-  const motivation = generateMotivation(pathTitle);
+  const [motivation, setMotivation] = useState("Today is a great day to keep moving forward.");
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (open) {
+      fetchPersonalizedMotivation();
+    }
+  }, [open]);
+
+  const fetchPersonalizedMotivation = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('generate-daily-motivation');
+      
+      if (error) throw error;
+      
+      if (data?.motivation) {
+        setMotivation(data.motivation);
+      }
+    } catch (error) {
+      console.error('Error fetching motivation:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDownload = async () => {
     if (!contentRef.current) return;
@@ -68,7 +74,7 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
       <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm">
         <div ref={contentRef} className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-center leading-tight tracking-tight">
-            {motivation}
+            {isLoading ? "..." : motivation}
           </h1>
 
           <div className="flex flex-col items-center gap-6">
