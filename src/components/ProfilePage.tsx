@@ -10,11 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
+import { BadgeCelebration } from "@/components/BadgeCelebration";
 
 export const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { checkAndAwardBadges } = useAutoBadgeCheck();
+  const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useAutoBadgeCheck();
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [badges, setBadges] = useState<any[]>([]);
@@ -323,6 +324,8 @@ export const ProfilePage = () => {
           </Button>
         </div>
       </div>
+      
+      <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
   );
 };

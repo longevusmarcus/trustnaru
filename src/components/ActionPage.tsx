@@ -12,11 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
+import { BadgeCelebration } from "@/components/BadgeCelebration";
 
 export const ActionPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { checkAndAwardBadges } = useBadgeAwarding();
+  const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useBadgeAwarding();
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
@@ -934,6 +935,8 @@ export const ActionPage = () => {
             </div>
           </div>
       </div>
+      
+      <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
   );
 };

@@ -1,12 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  requirement_type: string;
+  requirement_count: number;
+  display_order: number;
+}
+
 export const useBadgeAwarding = () => {
   const { user } = useAuth();
+  const [newlyAwardedBadge, setNewlyAwardedBadge] = useState<Badge | null>(null);
 
   const checkAndAwardBadges = async () => {
-    if (!user) return;
+    if (!user) return null;
 
     try {
       // Get all badges
@@ -78,23 +89,33 @@ export const useBadgeAwarding = () => {
           .from('user_badges')
           .insert(badgesToAward);
 
-        console.log(`Awarded ${badgesToAward.length} new badge(s)`);
+        // Return the first newly awarded badge for celebration
+        const firstBadgeId = badgesToAward[0].badge_id;
+        const awardedBadge = allBadges.find(b => b.id === firstBadgeId);
+        
+        if (awardedBadge) {
+          setNewlyAwardedBadge(awardedBadge);
+          return awardedBadge;
+        }
       }
     } catch (error) {
       console.error('Error awarding badges:', error);
     }
+    return null;
   };
 
-  return { checkAndAwardBadges };
+  const clearCelebration = () => setNewlyAwardedBadge(null);
+
+  return { checkAndAwardBadges, newlyAwardedBadge, clearCelebration };
 };
 
 // Auto-check hook that runs on mount
 export const useAutoBadgeCheck = () => {
-  const { checkAndAwardBadges } = useBadgeAwarding();
+  const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useBadgeAwarding();
 
   useEffect(() => {
     checkAndAwardBadges();
   }, []);
 
-  return { checkAndAwardBadges };
+  return { checkAndAwardBadges, newlyAwardedBadge, clearCelebration };
 };

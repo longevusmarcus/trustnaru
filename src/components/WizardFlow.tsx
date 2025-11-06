@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
+import { BadgeCelebration } from "@/components/BadgeCelebration";
 
 interface WizardFlowProps {
   onComplete: (careerPaths: any[]) => void;
@@ -19,7 +20,7 @@ interface WizardFlowProps {
 export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { checkAndAwardBadges } = useBadgeAwarding();
+  const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useBadgeAwarding();
   const [step, setStep] = useState(1);
   const [cvUrl, setCvUrl] = useState<string | undefined>();
   const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
@@ -166,6 +167,8 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
         )}
         {step === 4 && <ProcessingStep />}
       </div>
+      
+      <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
   );
 };
