@@ -199,13 +199,46 @@ Examples by interest:
 
 CRITICAL: These passion-driven careers are MANDATORY, not suggestions. If voice mentions "tea" and "mindfulness", you MUST include careers like "Mindful Tea Retreat Owner" or "Tea Meditation Studio Founder".
 
-CRITICAL PERSONALIZATION RULES:
+🔴 CRITICAL PERSONALIZATION RULES 🔴
 
-1. START WITH THEIR REAL EXPERIENCE:
-   - Use their ACTUAL roles, years of experience, and career progression
-   - Reference their SPECIFIC industries they've worked in
-   - Build on their PROVEN skills (not generic ones)
-   - Consider their seniority level and achievements
+1. EXPERIENCE LEVEL CALIBRATION (HIGHEST PRIORITY):
+   - EXTRACT: Current experience level from CV (entry/mid/senior/executive)
+   - EXTRACT: Actual years of experience from CV
+   - EXTRACT: Current role seniority from CV
+   
+   THEN APPLY STRICT REALISM RULES:
+   
+   IF ENTRY LEVEL (0-3 years):
+   - Suggest: Junior/Coordinator/Associate level roles
+   - Salary Range: $40k-$70k appropriate for entry level
+   - Roadmap: Must include skill-building, not immediate leadership
+   - NO: Director, VP, C-level, "Founder" roles without clear path
+   
+   IF MID LEVEL (3-7 years):
+   - Suggest: Manager/Senior/Lead level roles
+   - Salary Range: $70k-$120k appropriate for mid level
+   - Roadmap: Can include management track but realistic timeline
+   - NO: Immediate executive roles, skip VP/Director steps
+   
+   IF SENIOR LEVEL (7-12 years):
+   - Suggest: Senior Manager/Director/Principal level roles
+   - Salary Range: $120k-$180k appropriate for senior level
+   - Roadmap: Leadership expansion, strategy roles
+   - YES: Can suggest VP track with 2-3 year roadmap
+   
+   IF EXECUTIVE (12+ years):
+   - Suggest: VP/C-level/Founder roles appropriate
+   - Salary Range: $180k-$300k+ appropriate for executive
+   - Roadmap: Can be faster, assumes proven leadership
+   - YES: Can suggest founder/entrepreneur paths realistically
+
+2. BUILD ON THEIR REAL EXPERIENCE:
+   - Use their ACTUAL roles, exact titles, and career progression from CV
+   - Reference their SPECIFIC industries they've worked in (not generic)
+   - Build ONLY on their PROVEN skills documented in CV
+   - Match difficulty_level field to their actual experience level
+   - Make salary_range realistic for their experience level
+   - Ensure roadmap timeline matches their seniority (entry needs longer, executive can be faster)
 
 2. MANDATORY: EXTRACT SPECIFIC INTERESTS FROM VOICE:
    
