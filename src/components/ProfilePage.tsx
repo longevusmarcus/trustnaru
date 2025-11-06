@@ -1,9 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Trophy, Target, Flame, Pencil, Calendar } from "lucide-react";
+import { LogOut, Settings, Trophy, Target, Flame, Pencil, Calendar, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,8 @@ export const ProfilePage = () => {
   const [displayName, setDisplayName] = useState<string>("");
   const [editName, setEditName] = useState<string>("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [uploadingCV, setUploadingCV] = useState(false);
+  const cvInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -132,6 +134,91 @@ export const ProfilePage = () => {
     }
   };
 
+  const handleCVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF or Word document",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 20MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingCV(true);
+
+    try {
+      // Delete old CV if exists
+      if (userProfile?.cv_url) {
+        const oldFileName = userProfile.cv_url.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage
+            .from('cvs')
+            .remove([`${user.id}/${oldFileName}`]);
+        }
+      }
+
+      // Upload new CV
+      const fileName = `cv-${Date.now()}.${file.name.split('.').pop()}`;
+      const { error: uploadError } = await supabase.storage
+        .from('cvs')
+        .upload(`${user.id}/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('cvs')
+        .getPublicUrl(`${user.id}/${fileName}`);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          cv_url: publicUrl
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setUserProfile({ ...userProfile, cv_url: publicUrl });
+
+      toast({
+        title: "CV updated",
+        description: "Your CV has been successfully uploaded"
+      });
+    } catch (error) {
+      console.error('Error uploading CV:', error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingCV(false);
+      if (cvInputRef.current) {
+        cvInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
@@ -208,9 +295,28 @@ export const ProfilePage = () => {
         {userProfile?.cv_url && (
           <Card>
             <CardContent className="p-6">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
-                Professional Background
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
+                  Professional Background
+                </h3>
+                <input
+                  ref={cvInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleCVUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => cvInputRef.current?.click()}
+                  disabled={uploadingCV}
+                  className="h-8 text-xs"
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />
+                  {uploadingCV ? "Uploading..." : "Re-upload"}
+                </Button>
+              </div>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2 text-foreground">
                   <div className="w-1.5 h-1.5 rounded-full bg-foreground/60" />
