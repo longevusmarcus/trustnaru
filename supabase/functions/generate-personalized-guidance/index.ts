@@ -186,9 +186,9 @@ serve(async (req) => {
           { tip: `Transferable plan across ${futureTitles || 'relevant future paths'}`, nextSteps: `Overlapping skills: ${cvSkills || 'WCAG, User research, Prototyping'}. Artifact to build: "Accessible Signup Flow" (Figma + HTML/CSS) including keyboard navigation, visible focus states, ARIA labels, and color-contrast tokens. Provide a 200-word rationale referencing WCAG 2.1 AA and how it supports ${activePath.title}.`, strategicValue: 'A single artifact that advances multiple directions and showcases concrete a11y practice' }
         ],
         levelResources: [
-          { resource: 'Deque University – Intro to Web Accessibility', commitment: '2–3 hours', impact: 'Hands-on foundations with exercises' },
-          { resource: 'WebAIM Contrast Checker', commitment: 'Ongoing (5 min per design)', impact: 'Fast contrast validation for design reviews' },
-          { resource: 'axe DevTools (browser extension)', commitment: '15 min setup', impact: 'Automated checks to catch common issues early' }
+          { resource: `IAAP CPACC (Certified Professional in Accessibility Core Competencies) prep course focusing on ${activePath.category} applications`, commitment: '12 weeks, 3-4 hours/week', impact: 'Industry-recognized certification that validates foundational accessibility knowledge for UX/UI roles' },
+          { resource: `"Inclusive Design Patterns" by Heydon Pickering - Complete practical guide with code examples for ${cvRole || 'designers'}`, commitment: '2 weeks to read + implement 3 patterns', impact: 'Build portfolio of 3 production-ready accessible components you can showcase' },
+          { resource: `WebAIM's WCAG 2.1 Checklist + weekly practice auditing 2 sites from your target companies (${companies || 'industry leaders'})`, commitment: '1 hour/week for 8 weeks', impact: `Develop systematic audit skills and understand real-world accessibility patterns at ${companies || 'top companies'}` }
         ]
       };
     };
@@ -238,6 +238,15 @@ QUALITY RULES:
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
 - Transferable steps must include the 3 overlapping skills by name and 1 concrete artifact name with a one-sentence spec.
 - Outreach/networking items must include a ready-to-send message (no placeholders).
+- Output ONLY JSON. No markdown.
+
+LEVEL RESOURCES REQUIREMENTS (CRITICAL):
+- For Level 1 (Foundation): Provide REAL, SPECIFIC resources that are concrete and actionable
+- Use actual course names, certification programs, tools, books, or platforms (e.g., "Deque University Web Accessibility Course", "IAAP CPACC Certification", "Inclusive Design Patterns by Heydon Pickering")
+- Include realistic time commitments (e.g., "8 hours over 2 weeks", "30 min daily practice", "12 weeks, 3-4 hours/week")
+- Explain tangible impact with outcomes (e.g., "Get certified credential for resume", "Build portfolio of 5 accessible components", "Industry-recognized certification")
+- Avoid vague suggestions like "take an online course" - name the exact course, book, certification, or tool
+- Resources should be directly relevant to the user's career path and leverage their current experience level
 - Output ONLY JSON. No markdown.`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -264,7 +273,7 @@ QUALITY RULES:
           { role: 'user', content: prompt }
         ],
         temperature: 0.4,
-        max_tokens: 700
+        max_tokens: 2500
       }),
       signal: controller.signal,
     });
@@ -284,6 +293,8 @@ QUALITY RULES:
       console.error('No content generated from AI Gateway');
       throw new Error('No content generated');
     }
+
+    console.log('AI response length:', generatedText.length, 'chars');
 
     // Extract/parse JSON from response defensively
     let jsonText = String(generatedText).trim();
