@@ -30,6 +30,7 @@ export const ActionPage = () => {
   const [loadingActions, setLoadingActions] = useState(false);
   const [levelResources, setLevelResources] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
+  const [resourcesCache, setResourcesCache] = useState<Record<number, any[]>>({});
 
   const guidanceLevels = [
     {
@@ -118,6 +119,16 @@ export const ActionPage = () => {
   useEffect(() => {
     loadData();
   }, [user]);
+
+  // Load level resources only when level changes and not cached
+  useEffect(() => {
+    if (activePath && user && !resourcesCache[currentLevel]) {
+      loadLevelResources(currentLevel);
+    } else if (resourcesCache[currentLevel]) {
+      // Use cached resources
+      setLevelResources(resourcesCache[currentLevel]);
+    }
+  }, [currentLevel, activePath, user]);
 
   // Also reload when page becomes visible (browser tab focus)
   useEffect(() => {
@@ -221,11 +232,6 @@ export const ActionPage = () => {
       }
 
       setUserStats(stats);
-
-      // Load level resources for current level (Level 1 by default)
-      if (profile?.active_path_id) {
-        await loadLevelResources(1);
-      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -236,8 +242,16 @@ export const ActionPage = () => {
   const loadLevelResources = async (level: number) => {
     if (!user) return;
     
+    // Check cache first
+    if (resourcesCache[level]) {
+      console.log(`Using cached resources for Level ${level}`);
+      setLevelResources(resourcesCache[level]);
+      return;
+    }
+    
     setLoadingResources(true);
     try {
+      console.log(`Fetching resources for Level ${level}...`);
       const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke('generate-level-resources', {
         body: { level },
@@ -251,6 +265,8 @@ export const ActionPage = () => {
 
       if (data?.resources && Array.isArray(data.resources)) {
         setLevelResources(data.resources);
+        // Cache the resources
+        setResourcesCache(prev => ({ ...prev, [level]: data.resources }));
       } else {
         setLevelResources([]);
       }
