@@ -38,7 +38,6 @@ export const ActionPage = () => {
       name: "Foundation",
       icon: BookOpen,
       description: "Essential skills and core knowledge",
-      unlocked: true,
       color: "bg-blue-500",
     },
     {
@@ -46,7 +45,6 @@ export const ActionPage = () => {
       name: "Development",
       icon: Target,
       description: "Intermediate skills and practical experience",
-      unlocked: false,
       color: "bg-purple-500",
     },
     {
@@ -54,7 +52,6 @@ export const ActionPage = () => {
       name: "Specialization",
       icon: Lightbulb,
       description: "Advanced expertise in key areas",
-      unlocked: false,
       color: "bg-green-500",
     },
     {
@@ -62,7 +59,6 @@ export const ActionPage = () => {
       name: "Leadership",
       icon: Users,
       description: "Team management and strategic thinking",
-      unlocked: false,
       color: "bg-orange-500",
     },
     {
@@ -70,7 +66,6 @@ export const ActionPage = () => {
       name: "Innovation",
       icon: Sparkles,
       description: "Creative problem-solving and innovation",
-      unlocked: false,
       color: "bg-pink-500",
     },
     {
@@ -78,7 +73,6 @@ export const ActionPage = () => {
       name: "Influence",
       icon: TrendingUp,
       description: "Industry impact and thought leadership",
-      unlocked: false,
       color: "bg-indigo-500",
     },
     {
@@ -86,7 +80,6 @@ export const ActionPage = () => {
       name: "Mastery",
       icon: Award,
       description: "Expert-level proficiency and recognition",
-      unlocked: false,
       color: "bg-red-500",
     },
     {
@@ -94,7 +87,6 @@ export const ActionPage = () => {
       name: "Mentorship",
       icon: MessageSquare,
       description: "Guide others and build community",
-      unlocked: false,
       color: "bg-teal-500",
     },
     {
@@ -102,7 +94,6 @@ export const ActionPage = () => {
       name: "Transformation",
       icon: Zap,
       description: "Drive industry transformation",
-      unlocked: false,
       color: "bg-yellow-500",
     },
     {
@@ -110,7 +101,6 @@ export const ActionPage = () => {
       name: "Legacy",
       icon: Trophy,
       description: "Create lasting impact and legacy",
-      unlocked: false,
       color: "bg-amber-500",
     },
   ];
@@ -207,7 +197,7 @@ export const ActionPage = () => {
         setTodayActions([{ task: "Activate a career path to get started", priority: "low", done: false }]);
       }
 
-      // Get user stats
+  // Get user stats
       let { data: stats } = await supabase
         .from('user_stats')
         .select('*')
@@ -223,7 +213,8 @@ export const ActionPage = () => {
             current_streak: 0,
             total_points: 0,
             missions_completed: 0,
-            paths_explored: 0
+            paths_explored: 0,
+            current_level: 1
           })
           .select()
           .single();
@@ -232,6 +223,10 @@ export const ActionPage = () => {
       }
 
       setUserStats(stats);
+      // Set current level from stats
+      if (stats?.current_level) {
+        setCurrentLevel(stats.current_level);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -440,6 +435,61 @@ export const ActionPage = () => {
     }
   };
 
+  const handleLevelComplete = async () => {
+    if (!user || !userStats) return;
+
+    const nextLevel = currentLevel + 1;
+    
+    // Check if can level up
+    if (nextLevel > 10) {
+      toast({
+        title: "🎊 All Levels Completed!",
+        description: "Congratulations! You've mastered all levels of your journey!",
+      });
+      await checkAndAwardBadges();
+      return;
+    }
+
+    try {
+      // Update level in database
+      const { error } = await supabase
+        .from('user_stats')
+        .update({ current_level: nextLevel })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setCurrentLevel(nextLevel);
+      setUserStats({ ...userStats, current_level: nextLevel });
+
+      // Clear cache and generate new content
+      setResourcesCache(prev => {
+        const newCache = { ...prev };
+        delete newCache[nextLevel];
+        return newCache;
+      });
+
+      toast({
+        title: `🎉 Level ${nextLevel} Unlocked!`,
+        description: `Congratulations! You've advanced to ${guidanceLevels[nextLevel - 1]?.name || 'the next level'}. New resources and actions await!`,
+      });
+
+      // Award badge
+      await checkAndAwardBadges();
+
+      // Generate new actions for the new level
+      await generateTodaysActions();
+    } catch (error) {
+      console.error('Error leveling up:', error);
+      toast({
+        title: "Error",
+        description: "Failed to advance level. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleToggleAction = async (index: number) => {
     if (!user || !activePath) return;
 
@@ -474,14 +524,14 @@ export const ActionPage = () => {
           description: "Keep working on this task"
         });
       } else {
-        toast({
-          title: "Action completed! 🎉",
-          description: allCompleted ? "All today's actions completed! New actions will be generated tomorrow." : "Great progress!"
-        });
-
-        // Award badge if all completed
+        // Check if level completed
         if (allCompleted) {
-          await checkAndAwardBadges();
+          await handleLevelComplete();
+        } else {
+          toast({
+            title: "Action completed! 🎉",
+            description: "Great progress!"
+          });
         }
       }
     } catch (error) {
@@ -588,19 +638,20 @@ export const ActionPage = () => {
           <div className="grid grid-cols-5 gap-2 mb-4">
             {guidanceLevels.map((level) => {
               const Icon = level.icon;
+              const isUnlocked = level.level <= currentLevel;
               return (
                 <div
                   key={level.level}
                   className={`relative aspect-square rounded-lg ${
-                    level.unlocked
+                    isUnlocked
                       ? level.color + " text-white"
                       : "bg-muted/50 text-muted-foreground"
                   } flex flex-col items-center justify-center p-2 ${
-                    level.unlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
+                    isUnlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
                   }`}
-                  onClick={() => level.unlocked && setCurrentLevel(level.level)}
+                  onClick={() => isUnlocked && setCurrentLevel(level.level)}
                 >
-                  {!level.unlocked && (
+                  {!isUnlocked && (
                     <Lock className="h-3 w-3 absolute top-1 right-1" />
                   )}
                   <Icon className="h-4 w-4 mb-1" />

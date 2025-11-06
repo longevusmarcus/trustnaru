@@ -153,7 +153,7 @@ export const InsightsPage = () => {
           .maybeSingle(),
         supabase
           .from('user_stats')
-          .select('current_streak, missions_completed')
+          .select('current_streak, missions_completed, current_level')
           .eq('user_id', user.id)
           .maybeSingle(),
         supabase
@@ -164,6 +164,7 @@ export const InsightsPage = () => {
 
       const profile = profileResult.data;
       const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
+      const stats = statsResult.data || { current_streak: 0, missions_completed: 0, current_level: 1 };
 
       // Fetch active path only if exists
       let activePathData = null;
@@ -178,11 +179,11 @@ export const InsightsPage = () => {
       
       setActivePath(activePathData);
       setAllPaths(allPathsResult.data || []);
-      setUserStats(statsResult.data || { current_streak: 0, missions_completed: 0 });
+      setUserStats(stats);
 
       // Set welcome message and auto-generate today's actions if path is active
       const welcomeMsg = activePathData
-        ? `Hey ${userName}! 👋 I can help you with insights about ${activePathData.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
+        ? `Hey ${userName}! 👋 You're on Level ${stats.current_level || 1}. I can help you with insights about ${activePathData.title}, analyze market trends, or dive into your CV and journey. What would you like to explore?`
         : `Hey ${userName}! 👋 Activate a career path to get personalized insights and market analysis tailored to your journey.`;
       
       setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
@@ -429,7 +430,7 @@ export const InsightsPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Journey Progress</span>
-                    <span className="font-medium">{progressPercentage}%</span>
+                    <span className="font-medium">{progressPercentage}% • Level {userStats?.current_level || 1}/10</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div 

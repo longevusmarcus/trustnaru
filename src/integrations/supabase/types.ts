@@ -419,6 +419,7 @@ export type Database = {
       user_stats: {
         Row: {
           created_at: string
+          current_level: number
           current_streak: number
           id: string
           longest_streak: number
@@ -430,6 +431,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_level?: number
           current_streak?: number
           id?: string
           longest_streak?: number
@@ -441,6 +443,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_level?: number
           current_streak?: number
           id?: string
           longest_streak?: number
