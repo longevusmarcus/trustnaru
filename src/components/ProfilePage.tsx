@@ -193,7 +193,7 @@ export const ProfilePage = () => {
         .select('wizard_data')
         .eq('user_id', user.id)
         .maybeSingle();
-      const mergedWizard = { ...(existing?.wizard_data || {}), ...(cv_text ? { cv_text } : {}) };
+      const mergedWizard = { ...((existing?.wizard_data as Record<string, any>) || {}), ...(cv_text ? { cv_text } : {}) };
 
       const { error: updateError } = await supabase
         .from('user_profiles')

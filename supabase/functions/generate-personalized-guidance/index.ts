@@ -190,12 +190,6 @@ QUALITY RULES:
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
 - Output ONLY JSON. No markdown.`;
-      "resource": "Specific resource name and details",
-      "commitment": "Time/cost investment",
-      "impact": "How this accelerates their path"
-    }
-  ]
-}`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
