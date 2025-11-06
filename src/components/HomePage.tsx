@@ -128,22 +128,22 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Show daily motivation once per day when streak is active
+  // Show daily motivation every time streak increases
   useEffect(() => {
     if (!userStats) return; // Wait for stats to load
     if (!userStats.current_streak || userStats.current_streak === 0) return;
 
-    const today = new Date().toDateString();
-    const lastShown = localStorage.getItem("lastMotivationShown");
+    const lastStreakShown = localStorage.getItem("lastStreakMotivationShown");
+    const lastStreakValue = lastStreakShown ? parseInt(lastStreakShown) : 0;
 
-    if (lastShown !== today) {
-      // Small delay to ensure smooth render
+    // Show motivation if current streak is higher than last shown
+    if (userStats.current_streak > lastStreakValue) {
       setTimeout(() => {
         setShowDailyMotivation(true);
-        localStorage.setItem("lastMotivationShown", today);
+        localStorage.setItem("lastStreakMotivationShown", userStats.current_streak.toString());
       }, 500);
     }
-  }, [userStats]);
+  }, [userStats?.current_streak]);
 
   useEffect(() => {
     const fetchGamificationData = async () => {
