@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.generate-insights]
 verify_jwt = true
+
+[functions.generate-personalized-guidance]
+verify_jwt = true

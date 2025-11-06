@@ -117,6 +117,8 @@ export const InsightsPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
+  const [personalizedGuidance, setPersonalizedGuidance] = useState<any>(null);
+  const [loadingGuidance, setLoadingGuidance] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount
@@ -185,9 +187,12 @@ export const InsightsPage = () => {
       setChatMessages([{ role: 'assistant', content: welcomeMsg }]);
       setHasInitialMessage(true);
 
-      // Auto-generate today's actions if active path exists
+      // Auto-generate personalized guidance if active path exists
       if (activePathData) {
-        setTimeout(() => generateTodaysActions(), 800);
+        setTimeout(() => {
+          generateTodaysActions();
+          loadPersonalizedGuidance();
+        }, 800);
       }
     } catch (error) {
       console.error('Error loading insights:', error);
@@ -224,6 +229,32 @@ export const InsightsPage = () => {
         description: "Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  const loadPersonalizedGuidance = async () => {
+    if (!user || !activePath) return;
+    
+    setLoadingGuidance(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke('generate-personalized-guidance', {
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) throw error;
+      if (data?.dailyActions || data?.smartTips || data?.levelResources) {
+        setPersonalizedGuidance(data);
+      }
+    } catch (error) {
+      console.error('Error loading personalized guidance:', error);
+      toast({
+        title: "Unable to load guidance",
+        description: "Using default recommendations.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingGuidance(false);
     }
   };
 
@@ -319,6 +350,9 @@ export const InsightsPage = () => {
   );
   
   const personalizedTips = useMemo(() => {
+    if (personalizedGuidance?.smartTips?.length) {
+      return personalizedGuidance.smartTips.map((item: any) => item.tip);
+    }
     if (!activePath) {
       return [
         "Activate a career path to get personalized guidance",
@@ -330,7 +364,7 @@ export const InsightsPage = () => {
       `Research ${activePath.target_companies?.[0] || 'companies'} to understand their culture`,
       `Connect with professionals in ${activePath.category} on LinkedIn`,
     ];
-  }, [activePath?.category, activePath?.key_skills, activePath?.target_companies]);
+  }, [activePath?.category, activePath?.key_skills, activePath?.target_companies, personalizedGuidance]);
 
   if (loading) {
     return (
@@ -449,18 +483,26 @@ export const InsightsPage = () => {
           transition={{ delay: 0.3 }}
         >
           <h3 className="text-lg font-semibold mb-3">Smart Tips</h3>
-          <div className="space-y-3">
-            {personalizedTips.map((tip, idx) => (
-              <Card key={idx}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="h-5 w-5 text-primary/70 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-muted-foreground">{tip}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loadingGuidance ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {personalizedTips.map((tip, idx) => (
+                <Card key={idx}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Lightbulb className="h-5 w-5 text-primary/70 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-muted-foreground">{tip}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* AI Insights Chat */}
