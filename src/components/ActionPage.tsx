@@ -721,55 +721,67 @@ export const ActionPage = () => {
           </Card>
         ) : null}
 
-        {/* Resources for Current Level */}
-        {activePath && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Level {currentLevel} Resources</h3>
-            <div className="space-y-3">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <BookOpen className="h-5 w-5 text-primary mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm mb-1">Foundation Skills</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {activePath.key_skills?.slice(0, 3).join(", ") || "Core competencies for your path"}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Users className="h-5 w-5 text-primary mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm mb-1">Target Companies</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {activePath.target_companies?.slice(0, 2).join(", ") || "Research industry leaders"}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Lightbulb className="h-5 w-5 text-primary mt-0.5" />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm mb-1">Impact Areas</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {activePath.impact_areas?.slice(0, 2).join(", ") || "Focus on these domains"}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+        {/* Level Resources */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
+            <span className="text-xs text-muted-foreground">Foundation</span>
           </div>
-        )}
+          
+          {loadingResources ? (
+            <div className="space-y-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : !activePath ? (
+            <Card className="border-dashed">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Activate a career path to get personalized learning resources
+                </p>
+              </CardContent>
+            </Card>
+          ) : levelResources.length === 0 ? (
+            <Card className="border-amber-500/20 bg-amber-500/5">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-amber-500" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generating personalized resources based on your CV and skill gaps...
+                </p>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => loadLevelResources(currentLevel)}
+                >
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {levelResources.map((resource: any, idx: number) => (
+                <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1 space-y-1.5">
+                        <p className="text-sm font-medium leading-relaxed">{resource.resource}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>⏱️ {resource.commitment}</span>
+                        </div>
+                        <p className="text-xs text-primary/80 italic">{resource.impact}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Roadmap */}
         {activePath && roadmapMilestones.length > 0 && (
@@ -1059,68 +1071,6 @@ export const ActionPage = () => {
               </Button>
             </div>
           </div>
-
-        {/* Level Resources */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
-            <span className="text-xs text-muted-foreground">Foundation</span>
-          </div>
-          
-          {loadingResources ? (
-            <div className="space-y-3">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          ) : !activePath ? (
-            <Card className="border-dashed">
-              <CardContent className="p-6 text-center">
-                <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  Activate a career path to get personalized learning resources
-                </p>
-              </CardContent>
-            </Card>
-          ) : levelResources.length === 0 ? (
-            <Card className="border-amber-500/20 bg-amber-500/5">
-              <CardContent className="p-6 text-center">
-                <BookOpen className="h-8 w-8 mx-auto mb-3 text-amber-500" />
-                <p className="text-sm text-muted-foreground mb-3">
-                  Generating personalized resources based on your CV and skill gaps...
-                </p>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => loadLevelResources(currentLevel)}
-                >
-                  Retry
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {levelResources.map((resource: any, idx: number) => (
-                <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-1.5">
-                        <p className="text-sm font-medium leading-relaxed">{resource.resource}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>⏱️ {resource.commitment}</span>
-                        </div>
-                        <p className="text-xs text-primary/80 italic">{resource.impact}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
       
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
