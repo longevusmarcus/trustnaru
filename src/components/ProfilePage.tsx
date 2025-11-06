@@ -185,15 +185,37 @@ export const ProfilePage = () => {
 
       // Merge wizard_data with extracted cv_text (PDF only)
       let cv_text = '';
+      let cv_structured = null;
       if (file.type === 'application/pdf') {
         cv_text = await extractTextFromPdf(file);
+        
+        // Vision-based parsing for structured data
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+          const pdfBase64 = `data:application/pdf;base64,${base64}`;
+          
+          const { data: structuredData } = await supabase.functions.invoke('parse-cv', {
+            body: { pdfBase64 }
+          });
+          if (structuredData && !structuredData.error) {
+            cv_structured = structuredData;
+            console.log('CV structured data extracted:', cv_structured);
+          }
+        } catch (err) {
+          console.warn('Vision parsing failed, using text only:', err);
+        }
       }
       const { data: existing } = await supabase
         .from('user_profiles')
         .select('wizard_data')
         .eq('user_id', user.id)
         .maybeSingle();
-      const mergedWizard = { ...((existing?.wizard_data as Record<string, any>) || {}), ...(cv_text ? { cv_text } : {}) };
+      const mergedWizard = { 
+        ...((existing?.wizard_data as Record<string, any>) || {}), 
+        ...(cv_text ? { cv_text } : {}),
+        ...(cv_structured ? { cv_structured } : {})
+      };
 
       const { error: updateError } = await supabase
         .from('user_profiles')
@@ -201,7 +223,12 @@ export const ProfilePage = () => {
       if (updateError) throw updateError;
 
       setUserProfile({ ...userProfile, cv_url: publicUrl });
-      toast({ title: "CV updated", description: cv_text ? "Text extracted for smarter tips" : "Uploaded successfully" });
+      const desc = cv_structured 
+        ? "Structured data extracted for personalized tips" 
+        : cv_text 
+          ? "Text extracted for smarter tips" 
+          : "Uploaded successfully";
+      toast({ title: "CV updated", description: desc });
     } catch (error) {
       console.error('Error uploading CV:', error);
       toast({ title: "Upload failed", description: "Please try again", variant: "destructive" });

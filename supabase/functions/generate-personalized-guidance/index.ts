@@ -108,8 +108,22 @@ serve(async (req) => {
       userContext += `Target Salary Range: ${activePath.salary_range}\n`;
     }
 
-    // Add CV context
-    if (profile.wizard_data?.cv_text) {
+    // Add CV context (structured first, then text fallback)
+    if (profile.wizard_data?.cv_structured) {
+      const cv = profile.wizard_data.cv_structured;
+      userContext += `\nCV Data (Structured):\n`;
+      if (cv.current_role) userContext += `- Current Role: ${cv.current_role}\n`;
+      if (cv.years_of_experience) userContext += `- Years of Experience: ${cv.years_of_experience}\n`;
+      if (cv.key_skills?.length) userContext += `- Key Skills: ${cv.key_skills.join(', ')}\n`;
+      if (cv.past_companies?.length) userContext += `- Companies: ${cv.past_companies.slice(0, 5).join(', ')}\n`;
+      if (cv.education?.length) {
+        userContext += `- Education: ${cv.education.map((e: any) => `${e.degree} from ${e.institution}`).join('; ')}\n`;
+      }
+      if (cv.certifications?.length) userContext += `- Certifications: ${cv.certifications.join(', ')}\n`;
+      if (cv.notable_achievements?.length) {
+        userContext += `- Achievements: ${cv.notable_achievements.slice(0, 3).join('; ')}\n`;
+      }
+    } else if (profile.wizard_data?.cv_text) {
       const cvText = String(profile.wizard_data.cv_text).trim();
       const snippet = cvText.length > 2000 ? cvText.slice(0, 2000) + '...' : cvText;
       userContext += `\nCV Summary:\n${snippet}\n`;
@@ -153,17 +167,23 @@ serve(async (req) => {
       const futureTitles = (futurePaths || []).map(p => p.title).slice(0, 2).join(', ');
       const companies = (activePath.target_companies || []).slice(0, 3).join(', ');
       const skills = (activePath.key_skills || []).slice(0, 3).join(', ');
+      
+      // Use structured CV data if available
+      const cv = profile.wizard_data?.cv_structured;
+      const cvRole = cv?.current_role || 'your current role';
+      const cvSkills = cv?.key_skills?.slice(0, 3).join(', ') || skills;
+      const cvYears = cv?.years_of_experience ? `${cv.years_of_experience} years` : '';
 
       return {
         dailyActions: [
-          { action: `Review WCAG checklist focusing on ${skills || 'key skills'}`, timeNeeded: '30 minutes', rationale: `Foundational work for ${activePath.title}` },
+          { action: `Review WCAG checklist focusing on ${cvSkills || 'key skills'}`, timeNeeded: '30 minutes', rationale: `Foundational work for ${activePath.title}` },
           { action: `Identify 1 contact at ${companies || 'target companies'} on LinkedIn and craft a message`, timeNeeded: '45 minutes', rationale: 'Network aligned with your target path' },
           { action: `Read 1 case study from ${(companies || 'leading orgs').split(',')[0]}`, timeNeeded: '20 minutes', rationale: 'Build market awareness with concrete examples' }
         ],
         smartTips: [
           { tip: `Follow ${(companies || 'leading companies').split(',')[0]} accessibility updates`, nextSteps: 'Subscribe to engineering/design blogs and a11y channels', strategicValue: 'Keeps your portfolio aligned with current practices' },
           { tip: 'Join accessibility communities (A11y Project, W3C WAI)', nextSteps: 'Introduce yourself and share 1 learning goal', strategicValue: 'Peer accountability and mentorship opportunities' },
-          { tip: `Transferable plan across ${futureTitles || 'relevant future paths'}`, nextSteps: `Overlapping skills: ${skills || 'WCAG, User research, Prototyping'}. Artifact to build: "Accessible Signup Flow" (Figma + HTML/CSS) including keyboard navigation, visible focus states, ARIA labels, and color-contrast tokens. Provide a 200-word rationale referencing WCAG 2.1 AA and how it supports ${activePath.title}.`, strategicValue: 'A single artifact that advances multiple directions and showcases concrete a11y practice' }
+          { tip: `Transferable plan across ${futureTitles || 'relevant future paths'}`, nextSteps: `Overlapping skills: ${cvSkills || 'WCAG, User research, Prototyping'}. Artifact to build: "Accessible Signup Flow" (Figma + HTML/CSS) including keyboard navigation, visible focus states, ARIA labels, and color-contrast tokens. Provide a 200-word rationale referencing WCAG 2.1 AA and how it supports ${activePath.title}.`, strategicValue: 'A single artifact that advances multiple directions and showcases concrete a11y practice' }
         ],
         levelResources: [
           { resource: 'Deque University – Intro to Web Accessibility', commitment: '2–3 hours', impact: 'Hands-on foundations with exercises' },
@@ -186,8 +206,9 @@ USER CONTEXT:
 ${userContext}
 
 CRITICAL INSTRUCTIONS:
-Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV text, active path, and future (explored) paths. NO GENERIC ADVICE.
+Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
 
+If CV structured data is present (current role, years of experience, key skills, companies, education), leverage those exact fields.
 When referencing companies, include actual teams/roles and a real point of contact where possible.
 If you are unsure, prefer credible organizations, certifications, and named communities over vague suggestions.
 

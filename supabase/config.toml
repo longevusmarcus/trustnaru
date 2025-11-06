@@ -20,3 +20,6 @@ verify_jwt = true
 
 [functions.generate-personalized-guidance]
 verify_jwt = true
+
+[functions.parse-cv]
+verify_jwt = true
