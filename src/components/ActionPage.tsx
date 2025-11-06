@@ -173,8 +173,22 @@ export const ActionPage = () => {
           setGoals(goalsData);
         }
 
-        // Generate personalized actions for today
-        generateTodaysActions(path);
+        // Check if we have today's actions already
+        const today = new Date().toISOString().split('T')[0];
+        const { data: existingActions } = await supabase
+          .from('daily_actions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('action_date', today)
+          .maybeSingle();
+
+        if (existingActions && !existingActions.all_completed) {
+          // Use existing actions if they exist and aren't all completed
+          setTodayActions(existingActions.actions as any[]);
+        } else {
+          // Generate new actions if none exist or all previous ones completed
+          await generateTodaysActions(path);
+        }
       } else {
         // No active path
         setTodayActions([{ task: "Activate a career path to get started", priority: "low", done: false }]);
@@ -258,6 +272,21 @@ export const ActionPage = () => {
       });
 
       setTodayActions(parsedActions);
+
+      // Save to database
+      const today = new Date().toISOString().split('T')[0];
+      await supabase
+        .from('daily_actions')
+        .upsert({
+          user_id: user.id,
+          path_id: activePathData.id,
+          action_date: today,
+          actions: parsedActions,
+          all_completed: false
+        }, {
+          onConflict: 'user_id,action_date'
+        });
+
     } catch (error) {
       console.error('Error generating actions:', error);
       
@@ -351,6 +380,60 @@ export const ActionPage = () => {
       }
     } catch (error) {
       console.error('Error toggling goal:', error);
+    }
+  };
+
+  const handleToggleAction = async (index: number) => {
+    if (!user || !activePath) return;
+
+    try {
+      // Update local state
+      const updatedActions = [...todayActions];
+      updatedActions[index] = { ...updatedActions[index], done: !updatedActions[index].done };
+      setTodayActions(updatedActions);
+
+      // Check if all actions are completed
+      const allCompleted = updatedActions.every(action => action.done);
+
+      // Save to database
+      const today = new Date().toISOString().split('T')[0];
+      const { error } = await supabase
+        .from('daily_actions')
+        .upsert({
+          user_id: user.id,
+          path_id: activePath.id,
+          action_date: today,
+          actions: updatedActions,
+          all_completed: allCompleted
+        }, {
+          onConflict: 'user_id,action_date'
+        });
+
+      if (error) throw error;
+
+      if (!updatedActions[index].done) {
+        toast({
+          title: "Action reopened",
+          description: "Keep working on this task"
+        });
+      } else {
+        toast({
+          title: "Action completed! 🎉",
+          description: allCompleted ? "All today's actions completed! New actions will be generated tomorrow." : "Great progress!"
+        });
+
+        // Award badge if all completed
+        if (allCompleted) {
+          await checkAndAwardBadges();
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling action:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update action",
+        variant: "destructive"
+      });
     }
   };
 
@@ -712,10 +795,19 @@ export const ActionPage = () => {
           ) : (
             <div className="space-y-3">
               {todayActions.map((action: any, index: number) => (
-                <Card key={index}>
+                <Card key={index} className={action.done ? "opacity-60" : ""}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <Circle className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                      <button
+                        onClick={() => handleToggleAction(index)}
+                        className="mt-0.5 flex-shrink-0"
+                      >
+                        {action.done ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
                       <div className="flex-1">
                         {action.label && (
                           <div className="flex items-center gap-2 mb-2">
@@ -735,7 +827,7 @@ export const ActionPage = () => {
                             </span>
                           </div>
                         )}
-                        <p className="text-sm text-foreground leading-relaxed">
+                        <p className={`text-sm text-foreground leading-relaxed ${action.done ? 'line-through' : ''}`}>
                           {action.task}
                         </p>
                       </div>

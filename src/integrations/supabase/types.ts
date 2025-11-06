@@ -145,6 +145,39 @@ export type Database = {
           },
         ]
       }
+      daily_actions: {
+        Row: {
+          action_date: string
+          actions: Json
+          all_completed: boolean
+          created_at: string
+          id: string
+          path_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_date?: string
+          actions?: Json
+          all_completed?: boolean
+          created_at?: string
+          id?: string
+          path_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_date?: string
+          actions?: Json
+          all_completed?: boolean
+          created_at?: string
+          id?: string
+          path_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_streaks: {
         Row: {
           completed: boolean
