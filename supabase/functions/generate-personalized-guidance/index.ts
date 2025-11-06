@@ -217,44 +217,53 @@ Return ONLY valid JSON in this exact format:
   ]
 }`;
 
-    console.log('Calling Gemini API for personalized guidance...');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('LOVABLE_API_KEY not configured');
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent', {
+    console.log('Calling Lovable AI Gateway (Gemini Flash) for personalized guidance...');
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 2048,
-          topP: 0.95,
-        }
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: 'You are a precise career strategist. Output valid JSON only. Never include markdown or commentary.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.4,
+        max_tokens: 700
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
-      throw new Error(`Gemini API failed with status ${response.status}`);
+      console.error('AI Gateway error:', response.status, errorText);
+      throw new Error(`AI generation failed: ${response.status}`);
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const generatedText = data.choices?.[0]?.message?.content;
 
     if (!generatedText) {
-      console.error('No content generated from Gemini');
+      console.error('No content generated from AI Gateway');
       throw new Error('No content generated');
     }
 
-    console.log('Generated text length:', generatedText.length);
-
-    // Extract JSON from response (handle markdown code blocks)
-    let jsonText = generatedText.trim();
+    // Extract JSON from response (handle code blocks defensively)
+    let jsonText = String(generatedText).trim();
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     } else if (jsonText.startsWith('```')) {

@@ -119,6 +119,7 @@ export const InsightsPage = () => {
   const [hasInitialMessage, setHasInitialMessage] = useState(false);
   const [personalizedGuidance, setPersonalizedGuidance] = useState<any>(null);
   const [loadingGuidance, setLoadingGuidance] = useState(false);
+  const [guidanceError, setGuidanceError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount
@@ -236,6 +237,7 @@ export const InsightsPage = () => {
     if (!user || !activePath) return;
     
     setLoadingGuidance(true);
+    setGuidanceError(null);
     try {
       const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke('generate-personalized-guidance', {
@@ -245,12 +247,18 @@ export const InsightsPage = () => {
       if (error) throw error;
       if (data?.dailyActions || data?.smartTips || data?.levelResources) {
         setPersonalizedGuidance(data);
+        setGuidanceError(null);
+      } else {
+        setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
+        setGuidanceError('No guidance returned');
       }
     } catch (error) {
       console.error('Error loading personalized guidance:', error);
+      setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
+      setGuidanceError(error instanceof Error ? error.message : 'Unknown error');
       toast({
         title: "Unable to load guidance",
-        description: "Using default recommendations.",
+        description: "Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -493,6 +501,16 @@ export const InsightsPage = () => {
                 <p className="text-sm text-muted-foreground">
                   Activate a career path to get personalized smart tips
                 </p>
+              </CardContent>
+            </Card>
+          ) : guidanceError ? (
+            <Card className="border-red-500/20 bg-red-500/5">
+              <CardContent className="p-6 text-center space-y-3">
+                <Lightbulb className="h-8 w-8 mx-auto mb-1 text-red-500" />
+                <p className="text-sm text-muted-foreground">Couldn't load smart tips. Please try again.</p>
+                <div className="flex justify-center">
+                  <Button size="sm" onClick={loadPersonalizedGuidance}>Retry</Button>
+                </div>
               </CardContent>
             </Card>
           ) : personalizedTips.length === 0 ? (
