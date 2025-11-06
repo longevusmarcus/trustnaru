@@ -276,39 +276,28 @@ CRITICAL: These passion-driven careers are MANDATORY, not suggestions. If voice 
    - Example: "Marketing Manager in tech" → "Brand Strategy Director in Consumer Goods", "Growth Lead in Fintech Startup"
    - Focus: 70% transferable skills, 30% new industry
    
-   PATH 5-6: VOICE-ONLY CUSTOM CAREERS (2 paths) 🔴 ABSOLUTELY CRITICAL 🔴
-   - MUST be 100% custom roles created by YOU by re-elaborating the voice transcript
-   - DO NOT use standard job titles - CREATE NEW, SPECIFIC roles based on voice keywords
-   - Extract every single passion, interest, and value from voice
-   - Combine multiple interests into unique hybrid roles
-   - MUST be ultra-specific to EXACT words used in voice
+   PATH 5-7: PASSION-DRIVEN CAREERS (3 paths) 🔴 MOST CRITICAL 🔴
+   - MUST be directly based on specific interests extracted from voice transcription
+   - Use EXACT words and topics from their voice (if they say "tea ceremony" → include tea ceremony)
+   - Create REAL, VIABLE careers that exist in the market around those interests
+   - Combine their professional experience WITH passion topics
+   - Must be PRACTICAL and REALISTIC - not fantasy careers
    
-   EXAMPLES OF CUSTOM ROLE CREATION:
-   • Voice: "I love tea, meditation, travel, wellness"
-     ✅ CORRECT: "Zen Tea Journey Curator", "Mindful Tea Ceremony Educator & Retreat Host"
-     ❌ WRONG: "Tea Brand Manager", "Wellness Coach" (too generic)
+   Examples of GOOD passion-driven paths:
+   • Voice: "I love tea and mindfulness" + Experience: "Marketing background"
+     → "Tea Brand Marketing Director", "Mindfulness App Product Manager", "Wellness Retreat Marketing Lead"
    
-   • Voice: "Passionate about sustainability, fashion, storytelling"
-     ✅ CORRECT: "Sustainable Fashion Storytelling Consultant", "Eco-Conscious Style Content Creator"
-     ❌ WRONG: "Marketing Manager", "Fashion Consultant" (too standard)
+   • Voice: "Passionate about sustainability and travel" + Experience: "Project Manager"
+     → "Sustainable Tourism Project Director", "Eco-Travel Experience Curator", "Green Hospitality Operations Manager"
    
-   • Voice: "Love yoga, community building, nature, photography"
-     ✅ CORRECT: "Outdoor Yoga Community Founder & Visual Storyteller", "Nature-Based Yoga Retreat Experience Designer"
-     ❌ WRONG: "Yoga Teacher", "Photographer" (too basic)
-   
-   PATH 7: PASSION-EXPERIENCE HYBRID (1 path) 🔴 CRITICAL 🔴
-   - Blend their CV experience WITH voice passions into ONE cohesive role
-   - Use their professional background as foundation
-   - Layer voice interests on top strategically
-   
-   Example: Voice "tea + mindfulness" + CV "10 years marketing" 
-   → "Mindful Living Brand Strategist specializing in Tea & Wellness Companies"
+   • Voice: "Love yoga and wellness" + Experience: "Operations role"
+     → "Yoga Studio Operations Director", "Wellness Retreat Coordinator", "Corporate Wellness Program Manager"
    
    These passion careers MUST:
-   - Exist in real market or be realistic entrepreneur paths
+   - Exist in real market (check actual job titles)
    - Leverage their experience level appropriately
-   - Be hyper-specific to exact voice keywords
-   - Include realistic salary ranges and target companies
+   - Be specific to exact interests mentioned
+   - Include realistic salary ranges and companies
 
 4. DESCRIPTION STRUCTURE (each path):
    - Sentence 1: "Building on your [X years] as [actual role] in [actual industry]..."

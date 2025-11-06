@@ -2,59 +2,27 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const checkAndAwardBadges = async (userId: string) => {
   try {
-    // Get user stats and additional data for complex badge requirements
-    const [statsResult, pathsResult, profileResult, streakResult, goalsResult] = await Promise.all([
-      supabase
-        .from('user_stats')
-        .select('missions_completed, paths_explored, current_level, longest_streak')
-        .eq('user_id', userId)
-        .maybeSingle(),
-      supabase
-        .from('career_paths')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId),
-      supabase
-        .from('user_profiles')
-        .select('active_path_id')
-        .eq('user_id', userId)
-        .maybeSingle(),
-      supabase
-        .from('daily_streaks')
-        .select('streak_date')
-        .eq('user_id', userId)
-        .eq('completed', true)
-        .order('streak_date', { ascending: false }),
-      supabase
-        .from('goals')
-        .select('id')
-        .eq('user_id', userId)
-        .limit(1)
-    ]);
+    // Get user stats
+    const { data: stats } = await supabase
+      .from('user_stats')
+      .select('missions_completed, paths_explored')
+      .eq('user_id', userId)
+      .maybeSingle();
 
-    const stats = statsResult.data;
-    const pathsGenerated = pathsResult.count || 0;
-    const hasActivePath = !!profileResult.data?.active_path_id;
-    const currentLevel = stats?.current_level || 1;
-    const longestStreak = stats?.longest_streak || 0;
-    
-    // Calculate consecutive streak days
-    const streakDates = streakResult.data || [];
-    let consecutiveStreak = 0;
-    if (streakDates.length > 0) {
-      consecutiveStreak = 1;
-      for (let i = 0; i < streakDates.length - 1; i++) {
-        const currentDate = new Date(streakDates[i].streak_date);
-        const nextDate = new Date(streakDates[i + 1].streak_date);
-        const dayDiff = Math.floor((currentDate.getTime() - nextDate.getTime()) / (1000 * 60 * 60 * 24));
-        if (dayDiff === 1) {
-          consecutiveStreak++;
-        } else {
-          break;
-        }
-      }
-    }
-    
-    const hasUsedAiChat = (goalsResult.data?.length || 0) > 0;
+    // Count total paths generated
+    const { count: pathsGenerated } = await supabase
+      .from('career_paths')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    // Check if user has an active path
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('active_path_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const hasActivePath = !!profile?.active_path_id;
 
     // Get all badges and user's earned badges
     const [badgesResult, userBadgesResult] = await Promise.all([
@@ -88,12 +56,6 @@ export const checkAndAwardBadges = async (userId: string) => {
           break;
         case 'missions':
           shouldAward = (stats?.missions_completed || 0) >= badge.requirement_count;
-          break;
-        case 'oracle_mastery':
-          // Oracle badge requires: completed all levels (10+), used AI chat, and 6-month streak (180 days)
-          const hasCompletedAllLevels = currentLevel >= 10;
-          const hasSixMonthStreak = Math.max(consecutiveStreak, longestStreak) >= badge.requirement_count;
-          shouldAward = hasCompletedAllLevels && hasUsedAiChat && hasSixMonthStreak;
           break;
       }
 
