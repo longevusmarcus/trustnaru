@@ -1,6 +1,9 @@
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
-import { X, Share2, Heart } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { X, Download, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useRef } from "react";
+import html2canvas from "html2canvas";
+import { useToast } from "@/hooks/use-toast";
 
 interface DailyMotivationProps {
   open: boolean;
@@ -29,29 +32,61 @@ const generateMotivation = (pathTitle?: string): string => {
 
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
   const motivation = generateMotivation(pathTitle);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const { toast } = useToast();
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text: motivation,
-          title: "My Daily Motivation - Naru",
-        });
-      } catch (err) {
-        console.log("Share cancelled");
-      }
+  const handleDownload = async () => {
+    if (!contentRef.current) return;
+
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+      
+      const link = document.createElement("a");
+      link.download = `naru-motivation-${Date.now()}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+      
+      toast({
+        title: "Downloaded!",
+        description: "Your motivation has been saved.",
+      });
+    } catch (err) {
+      console.error("Download failed:", err);
+      toast({
+        title: "Download failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    if (!isLiked) {
+      toast({
+        title: "Saved to favorites",
+        description: "This motivation has been liked.",
+      });
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-        <DialogClose className="absolute right-8 top-8 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none z-10">
+      <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm" hideCloseButton>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-8 top-8 rounded-full opacity-70 hover:opacity-100 transition-opacity z-10"
+          onClick={() => onOpenChange(false)}
+        >
           <X className="h-6 w-6" />
-          <span className="sr-only">Close</span>
-        </DialogClose>
+        </Button>
 
-        <div className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
+        <div ref={contentRef} className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-center leading-tight tracking-tight">
             {motivation}
           </h1>
@@ -61,16 +96,17 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
               variant="ghost"
               size="icon"
               className="rounded-full h-12 w-12 hover:opacity-100 transition-opacity"
-              onClick={handleShare}
+              onClick={handleDownload}
             >
-              <Share2 className="h-5 w-5" />
+              <Download className="h-5 w-5" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full h-12 w-12 hover:opacity-100 transition-opacity"
+              className={`rounded-full h-12 w-12 hover:opacity-100 transition-all ${isLiked ? 'opacity-100 text-red-500' : ''}`}
+              onClick={handleLike}
             >
-              <Heart className="h-5 w-5" />
+              <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
             </Button>
           </div>
         </div>
