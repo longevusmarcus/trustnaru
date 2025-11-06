@@ -130,16 +130,20 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
   // Show daily motivation once per day when streak is active
   useEffect(() => {
-    if (!userStats?.current_streak || userStats.current_streak === 0) return;
+    if (!userStats) return; // Wait for stats to load
+    if (!userStats.current_streak || userStats.current_streak === 0) return;
 
     const today = new Date().toDateString();
     const lastShown = localStorage.getItem("lastMotivationShown");
 
     if (lastShown !== today) {
-      setShowDailyMotivation(true);
-      localStorage.setItem("lastMotivationShown", today);
+      // Small delay to ensure smooth render
+      setTimeout(() => {
+        setShowDailyMotivation(true);
+        localStorage.setItem("lastMotivationShown", today);
+      }, 500);
     }
-  }, [userStats?.current_streak]);
+  }, [userStats]);
 
   useEffect(() => {
     const fetchGamificationData = async () => {
