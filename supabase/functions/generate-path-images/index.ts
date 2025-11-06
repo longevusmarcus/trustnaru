@@ -102,16 +102,16 @@ const constructScenePrompts = (careerPath: any): string[] => {
   const keySkills = careerPath.key_skills?.slice(0, 2).join(', ') || 'professional skills';
   const lifestyle = careerPath.lifestyle_benefits?.[0] || 'successful professional lifestyle';
   
-  // Generate exactly 3 ultra-photorealistic scene prompts featuring the SAME person from reference
+  // Generate exactly 3 HYPER-photorealistic scene prompts - emphasize realism
   return [
-    // 1) Professional Scene - working as the role, demonstrating key skills
-    `Ultra-photorealistic professional photograph of a ${roleTitle} working, demonstrating ${keySkills}. 50mm f/1.8 lens, soft natural light, editorial photography style. Same person from reference image - exact face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture. No face changes. Professional office environment.`,
+    // 1) Professional Scene - working as the role
+    `HYPERREALISTIC professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic work moment. Professional environment with depth and detail.`,
     
-    // 2) Leadership Moment - presenting/collaborating as the role
-    `Ultra-photorealistic medium shot of a ${roleTitle} presenting to colleagues or collaborating in a professional setting. Shallow depth of field, professional studio lighting. Same person from reference image - preserve exact identity, facial features, proportions. No face modifications. Contemporary workplace setting.`,
+    // 2) Leadership/Collaboration Scene
+    `HYPERREALISTIC candid shot of a ${roleTitle} collaborating with colleagues or presenting ideas. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. Documentary photography style. Contemporary workplace with realistic details and depth.`,
     
-    // 3) Success Lifestyle - aspirational but real lifestyle scene
-    `Ultra-photorealistic wide shot of a ${roleTitle} enjoying ${lifestyle}, golden hour natural lighting. Aspirational yet authentic lifestyle photography. Same person from reference image - exact same face, features, and proportions. No identity changes. Real-world lifestyle setting.`
+    // 3) Lifestyle Success Scene
+    `HYPERREALISTIC lifestyle photograph of a ${roleTitle} enjoying ${lifestyle}. Shot on Nikon Z9, 85mm f/1.4 lens, golden hour natural lighting. CRITICAL: IDENTICAL person from reference photo - same face, features, skin, hair, body entirely. NO changes whatsoever. Authentic moment, aspirational yet believable. Real-world setting with cinematic composition and shallow depth of field.`
   ];
 }
 
@@ -149,14 +149,12 @@ serve(async (req) => {
       throw new Error('Career path not found');
     }
 
-    // Get user's uploaded reference photo
+    // Get ALL user's uploaded photos for hyperrealistic generation
     const { data: userPhotos } = await supabaseClient
       .from('user_photos')
       .select('*')
       .eq('user_id', user.id)
-      .eq('is_reference', true)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .order('created_at', { ascending: false });
 
     if (!userPhotos || userPhotos.length === 0) {
       throw new Error('No reference photo found');
@@ -203,25 +201,58 @@ serve(async (req) => {
       throw new Error('Failed to access reference photo');
     }
 
-    // Use signed URL and convert to base64 ONCE (not per image)
-    const refImageUrl = signedUrlData.signedUrl;
-    console.log('Converting reference image to base64...');
-    const refImageBase64 = await urlToBase64(refImageUrl);
-    console.log('Reference image converted, size:', refImageBase64.length, 'chars');
+    // Convert ALL user photos to base64 for better variety and realism
+    console.log(`Converting ${userPhotos.length} reference images to base64...`);
+    const allRefImagesBase64: string[] = [];
+    
+    for (const photo of userPhotos.slice(0, 3)) { // Use up to 3 photos max
+      try {
+        const photoPath = photo.photo_url as string;
+        let objectPath = photoPath.startsWith('user-photos/')
+          ? photoPath.substring('user-photos/'.length)
+          : photoPath;
+        objectPath = objectPath.replace(/^\/+/, '');
+        
+        const { data: signedPhotoUrl } = await supabaseClient
+          .storage
+          .from('user-photos')
+          .createSignedUrl(objectPath, 3600);
+        
+        if (signedPhotoUrl) {
+          const photoBase64 = await urlToBase64(signedPhotoUrl.signedUrl);
+          allRefImagesBase64.push(photoBase64);
+          console.log(`Converted photo ${allRefImagesBase64.length}`);
+        }
+      } catch (e) {
+        console.error('Error converting photo:', e);
+      }
+    }
+    
+    if (allRefImagesBase64.length === 0) {
+      // Fallback to original single photo method
+      const refImageUrl = signedUrlData.signedUrl;
+      const refImageBase64 = await urlToBase64(refImageUrl);
+      allRefImagesBase64.push(refImageBase64);
+    }
+    
+    console.log(`Using ${allRefImagesBase64.length} reference photos for hyperrealistic generation`);
 
-    // Generate 3 images per career path
+    // Generate 3 images per career path, rotating through available photos
     const scenePrompts = constructScenePrompts(careerPath);
     console.log('Generating career images for:', careerPath.title);
 
     const allImageUrls: string[] = [];
 
-    // Generate all 3 images using the pre-converted base64
+    // Generate all 3 images, using different reference photos when available
     for (let i = 0; i < scenePrompts.length; i++) {
       const prompt = scenePrompts[i];
-      console.log(`Generating image ${i + 1}/3...`);
+      // Rotate through available reference photos for variety
+      const refPhotoIndex = i % allRefImagesBase64.length;
+      const selectedRefPhoto = allRefImagesBase64[refPhotoIndex];
+      console.log(`Generating image ${i + 1}/3 using reference photo ${refPhotoIndex + 1}...`);
       
       try {
-        const imageBytes = await generateWithGemini(prompt, refImageBase64);
+        const imageBytes = await generateWithGemini(prompt, selectedRefPhoto);
         
         // Upload to storage bucket
         const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;

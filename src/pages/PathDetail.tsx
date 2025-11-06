@@ -98,6 +98,14 @@ export default function PathDetail() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
 
+        {/* Bio Description */}
+        {card.description && (
+          <div className="mb-8">
+            <h2 className="text-sm font-medium text-muted-foreground mb-3">About This Path</h2>
+            <p className="text-sm text-foreground/90 leading-relaxed">{card.description}</p>
+          </div>
+        )}
+
         {/* Path Images */}
         <div className="grid grid-cols-3 gap-2 mb-8">
           {card.pathImages.map((img: string, imgIndex: number) => (

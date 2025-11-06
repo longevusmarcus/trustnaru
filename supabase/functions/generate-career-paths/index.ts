@@ -167,7 +167,7 @@ Voice Interests Analysis:
     }
 
     // Step 3: Construct deeply personalized prompt using real experience + passions
-    const prompt = `You are an expert career strategist. Create 7 DEEPLY PERSONALIZED, REALISTIC, and PRACTICAL career paths by analyzing their ACTUAL experience and REAL passions.
+    const prompt = `You are an expert career strategist. Create 7 DEEPLY PERSONALIZED, REALISTIC, and PRACTICAL career paths.
 
 ${cvAnalysis}
 
@@ -175,162 +175,121 @@ ${voiceInterests}
 
 Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-🔴 ABSOLUTE REQUIREMENT: EXTRACT AND USE SPECIFIC INTERESTS FROM VOICE 🔴
+🔴 CRITICAL: ULTRA-REALISTIC & VOICE-DRIVEN CAREERS 🔴
 
-STEP 1 - MANDATORY INTEREST EXTRACTION:
-Read the voice transcription CAREFULLY and extract EVERY specific interest, passion, hobby, or topic mentioned:
-- Foods/Beverages: tea, coffee, wine, chocolate, baking, matcha, craft beer, etc.
-- Practices: yoga, meditation, mindfulness, wellness, fitness, running, etc.
-- Creative: art, music, photography, writing, design, crafts, etc.
-- Topics: sustainability, technology, education, travel, nature, fashion, etc.
-- Activities: cooking, gaming, hiking, reading, gardening, etc.
+MANDATORY REQUIREMENTS:
 
-STEP 2 - MANDATORY SPECIALIZED CAREER CREATION:
-For EVERY interest you found, you MUST create at least ONE ultra-specific career:
+1. REALISTIC JOB TITLES & DESCRIPTIONS:
+   - Use REAL job titles that exist in the market (check LinkedIn, Indeed, Glassdoor)
+   - NO fantasy or made-up positions
+   - Each description must be 2-3 concise sentences, NOT paragraphs
+   - Focus on actual day-to-day work, not aspirational fluff
 
-Examples by interest:
-• "tea" → Tea Sommelier, Tea Brand Founder, Tea Ceremony Educator, Premium Tea Buyer, Tea Tourism Guide, Tea Café Owner
-• "mindfulness" → Mindfulness Retreat Director, Corporate Mindfulness Coach, Mindfulness App Developer, Meditation Studio Owner
-• "yoga" → Yoga Retreat Designer, Yoga Therapy Specialist, Corporate Wellness Director, Yoga Teacher Training Leader
-• "sustainability" → Sustainability Consultant, Circular Economy Advisor, Green Brand Strategist, Sustainability Educator
-• "travel" → Luxury Travel Curator, Destination Experience Designer, Travel Content Creator, Cultural Tour Operator
-• "wine" → Wine Sommelier, Wine Education Director, Wine Tour Operator, Wine Brand Ambassador
-• "wellness" → Wellness Retreat Coordinator, Holistic Health Coach, Wellness Product Developer, Spa Experience Designer
+2. MINIMAL TAGS (CRITICAL):
+   - key_skills: EXACTLY 3-4 skills maximum (not 8-10)
+   - target_companies: EXACTLY 3 real companies (not 5-7)
+   - lifestyle_benefits: EXACTLY 3 benefits (not more)
+   - impact_areas: EXACTLY 2 areas (not 4-5)
+   - Keep it CLEAN and FOCUSED
 
-CRITICAL: These passion-driven careers are MANDATORY, not suggestions. If voice mentions "tea" and "mindfulness", you MUST include careers like "Mindful Tea Retreat Owner" or "Tea Meditation Studio Founder".
+3. ULTRA-CUSTOMIZED VOICE-DRIVEN PATHS (3 OF 7 PATHS):
+   
+   STEP 1: Extract SPECIFIC passions from voice transcription:
+   Example extractions:
+   - "I love tea" → CREATE: Tea Sommelier, Tea Shop Owner, Tea Brand Consultant
+   - "passionate about mindfulness" → CREATE: Mindfulness Retreat Director, Meditation Coach
+   - "tea + mindfulness together" → CREATE: Mindful Tea Retreat Founder, Tea Meditation Studio Owner
+   - "wine enthusiast" → CREATE: Wine Sommelier, Wine Tour Guide, Wine Education Director
+   - "yoga practitioner" → CREATE: Yoga Retreat Designer, Yoga Studio Manager
+   - "sustainability advocate" → CREATE: Sustainability Consultant, Green Brand Advisor
+   
+   STEP 2: Create HYPER-SPECIFIC career titles:
+   - If voice says "tea ceremony" → Use "Tea Ceremony Educator" not generic "Tea Professional"
+   - If voice says "mindful living" → Use "Mindfulness Retreat Director" not "Wellness Coach"
+   - Combine passions: "tea + entrepreneurship" → "Specialty Tea Shop Owner"
+   - Be ULTRA SPECIFIC to their exact words
+   
+   CRITICAL: Paths 5, 6, 7 MUST be these ultra-customized passion careers
 
-🔴 CRITICAL PERSONALIZATION RULES 🔴
+4. EXPERIENCE-CALIBRATED REALISM:
+   
+   Entry Level (0-3 years):
+   - Titles: Coordinator, Associate, Junior roles
+   - Salary: $45k-$75k
+   - NO: Manager, Director, Founder (unless with 2+ year runway)
+   
+   Mid Level (3-7 years):
+   - Titles: Manager, Senior, Lead roles
+   - Salary: $75k-$130k
+   - NO: VP, C-level (unless with 3-year plan)
+   
+   Senior (7-12 years):
+   - Titles: Director, Senior Manager, Principal
+   - Salary: $130k-$200k
+   - YES: Can suggest VP track with clear roadmap
+   
+   Executive (12+ years):
+   - Titles: VP, C-level, Founder appropriate
+   - Salary: $200k-$350k+
+   - YES: Entrepreneurship paths realistic
 
-1. EXPERIENCE LEVEL CALIBRATION (HIGHEST PRIORITY):
-   - EXTRACT: Current experience level from CV (entry/mid/senior/executive)
-   - EXTRACT: Actual years of experience from CV
-   - EXTRACT: Current role seniority from CV
+5. PATH DISTRIBUTION:
    
-   THEN APPLY STRICT REALISM RULES:
+   Paths 1-2: NATURAL PROGRESSION
+   - Next logical step in current career
+   - Based 100% on CV experience
+   - Realistic promotion or lateral move
    
-   IF ENTRY LEVEL (0-3 years):
-   - Suggest: Junior/Coordinator/Associate level roles
-   - Salary Range: $40k-$70k appropriate for entry level
-   - Roadmap: Must include skill-building, not immediate leadership
-   - NO: Director, VP, C-level, "Founder" roles without clear path
+   Paths 3-4: SKILLS TRANSFER
+   - New industry, same skills
+   - 70% transferable + 30% learnable
+   - Must be hireable with current experience
    
-   IF MID LEVEL (3-7 years):
-   - Suggest: Manager/Senior/Lead level roles
-   - Salary Range: $70k-$120k appropriate for mid level
-   - Roadmap: Can include management track but realistic timeline
-   - NO: Immediate executive roles, skip VP/Director steps
-   
-   IF SENIOR LEVEL (7-12 years):
-   - Suggest: Senior Manager/Director/Principal level roles
-   - Salary Range: $120k-$180k appropriate for senior level
-   - Roadmap: Leadership expansion, strategy roles
-   - YES: Can suggest VP track with 2-3 year roadmap
-   
-   IF EXECUTIVE (12+ years):
-   - Suggest: VP/C-level/Founder roles appropriate
-   - Salary Range: $180k-$300k+ appropriate for executive
-   - Roadmap: Can be faster, assumes proven leadership
-   - YES: Can suggest founder/entrepreneur paths realistically
+   Paths 5-7: PASSION-DRIVEN (MOST IMPORTANT)
+   - DIRECTLY extract from voice transcript
+   - Use EXACT passion words mentioned
+   - Combine experience + specific passion
+   - Must be REAL careers that exist
+   - Examples:
+     * Voice: "tea enthusiast" → "Tea Sommelier", "Tea Shop Owner", "Tea Brand Manager"
+     * Voice: "mindfulness + retreat" → "Mindfulness Retreat Director", "Meditation Center Owner"
+     * Voice: "wine + travel" → "Wine Tourism Curator", "Vineyard Experience Designer"
 
-2. BUILD ON THEIR REAL EXPERIENCE:
-   - Use their ACTUAL roles, exact titles, and career progression from CV
-   - Reference their SPECIFIC industries they've worked in (not generic)
-   - Build ONLY on their PROVEN skills documented in CV
-   - Match difficulty_level field to their actual experience level
-   - Make salary_range realistic for their experience level
-   - Ensure roadmap timeline matches their seniority (entry needs longer, executive can be faster)
+6. DESCRIPTION FORMULA (2-3 sentences max):
+   - Sentence 1: "[Experience level] role in [specific industry]."
+   - Sentence 2: "Channels passion for [exact voice interest] into [specific work]."
+   - Sentence 3: "Involves [3 concrete daily activities]."
 
-2. MANDATORY: EXTRACT SPECIFIC INTERESTS FROM VOICE:
-   
-   STEP 1: Scan voice transcription for these types of specific interests:
-   - Foods/Beverages: tea, coffee, wine, chocolate, baking, cooking
-   - Activities: yoga, running, hiking, gaming, photography, painting
-   - Topics: sustainability, wellness, technology, education, music, fashion
-   - Places: travel, nature, cities, beaches, mountains
-   
-   STEP 2: For EACH specific interest found, create specialized careers:
-   - "tea" → Tea Sommelier, Tea Brand Founder, Tea Travel Guide, Tea Café Owner, Tea Educator, Tea Import Specialist
-   - "yoga" → Yoga Studio Owner, Yoga Retreat Designer, Corporate Wellness Coach, Yoga Therapy Specialist
-   - "travel" → Travel Curator, Destination Consultant, Travel Content Creator, Luxury Travel Advisor
-   - "cooking" → Personal Chef, Recipe Developer, Food Tourism Guide, Culinary Brand Consultant
-   - "wine" → Wine Sommelier, Wine Tour Operator, Wine Education Director, Wine Brand Ambassador
-   - "gaming" → Game Designer, Esports Coach, Gaming Content Creator, Game Studio Producer
-   - "photography" → Commercial Photographer, Photo Tour Leader, Photography Educator, Photo Brand Consultant
-   - "wellness" → Wellness Coach, Retreat Coordinator, Corporate Wellness Director, Wellness Product Developer
-   
-   STEP 3: These specialized careers are MANDATORY - not optional suggestions
+7. COMPANY EXAMPLES:
+   - List 3 REAL companies that hire this role
+   - Tea paths: Teavana, David's Tea, Harney & Sons
+   - Mindfulness: Headspace, Calm, meditation centers
+   - Wine: Local wineries, wine clubs, restaurants
+   - Be SPECIFIC and REAL
 
-3. MANDATORY PATH DISTRIBUTION (7 total paths):
-   
-   PATH 1-2: NATURAL CAREER PROGRESSION (2 paths)
-   - Direct next steps in their current field/industry based on CV
-   - Use their proven track record and experience level
-   - Must be realistic and achievable given their background
-   - Example: If they're a "Senior Marketing Manager" → "Marketing Director at Tech Company", "VP of Marketing Operations"
-   - Focus: 100% based on actual experience and career trajectory
-   
-   PATH 3-4: CAREER CHANGE WITH SKILLS TRANSFER (2 paths)
-   - New industries but leveraging existing skills from CV
-   - Realistic pivots that employers would hire them for
-   - Must be practical given their experience level
-   - Example: "Marketing Manager in tech" → "Brand Strategy Director in Consumer Goods", "Growth Lead in Fintech Startup"
-   - Focus: 70% transferable skills, 30% new industry
-   
-   PATH 5-7: PASSION-DRIVEN CAREERS (3 paths) 🔴 MOST CRITICAL 🔴
-   - MUST be directly based on specific interests extracted from voice transcription
-   - Use EXACT words and topics from their voice (if they say "tea ceremony" → include tea ceremony)
-   - Create REAL, VIABLE careers that exist in the market around those interests
-   - Combine their professional experience WITH passion topics
-   - Must be PRACTICAL and REALISTIC - not fantasy careers
-   
-   Examples of GOOD passion-driven paths:
-   • Voice: "I love tea and mindfulness" + Experience: "Marketing background"
-     → "Tea Brand Marketing Director", "Mindfulness App Product Manager", "Wellness Retreat Marketing Lead"
-   
-   • Voice: "Passionate about sustainability and travel" + Experience: "Project Manager"
-     → "Sustainable Tourism Project Director", "Eco-Travel Experience Curator", "Green Hospitality Operations Manager"
-   
-   • Voice: "Love yoga and wellness" + Experience: "Operations role"
-     → "Yoga Studio Operations Director", "Wellness Retreat Coordinator", "Corporate Wellness Program Manager"
-   
-   These passion careers MUST:
-   - Exist in real market (check actual job titles)
-   - Leverage their experience level appropriately
-   - Be specific to exact interests mentioned
-   - Include realistic salary ranges and companies
+EXAMPLE OUTPUT STRUCTURE:
+{"archetypes": [
+  {
+    "title": "Exact Job Title (Real)",
+    "description": "Concise 2-3 sentence description.",
+    "journey_duration": "Realistic timeframe",
+    "salary_range": "$XX,XXX - $XX,XXX",
+    "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"],
+    "impact_areas": ["area 1", "area 2"],
+    "key_skills": ["skill 1", "skill 2", "skill 3"],
+    "target_companies": ["Real Company 1", "Real Company 2", "Real Company 3"],
+    "category": "natural-progression|career-change|passion-driven",
+    "difficulty_level": "entry|mid|senior|executive",
+    "roadmap": [
+      {"step": "Concrete action", "duration": "X months"},
+      {"step": "Next concrete action", "duration": "X months"}
+    ],
+    "affirmations": ["I am...", "I create...", "My work..."],
+    "typical_day_routine": ["Morning: task", "Midday: task", "Afternoon: task"]
+  }
+]}
 
-4. DESCRIPTION STRUCTURE (each path):
-   - Sentence 1: "Building on your [X years] as [actual role] in [actual industry]..."
-   - Sentence 2: "This role channels your passion for [exact interest from voice] into [specific context]..."
-   - Sentence 3: "Day-to-day involves [realistic tasks using their proven skills + passion elements]."
-
-5. MAKE IT HYPER-SPECIFIC:
-   - For passion paths: Use EXACT words from their voice (if they say "tea ceremony" → include tea ceremony)
-   - Reference actual companies/industries that match their interests (e.g., tea companies: Teavana, Harney & Sons, Art of Tea)
-   - Use their experience level in titles appropriately
-   - Make sure the careers are REAL and VIABLE in the market
-
-Generate 7 career paths in this exact order (2 progression + 2 career change + 3 passion):
-{"archetypes": [{"title": "Specific Role Title", "description": "3 sentences following structure", "journey_duration": "1-3 years|3-5 years|5-7 years", "salary_range": "Realistic range", "lifestyle_benefits": ["benefit 1", "benefit 2", "benefit 3"], "impact_areas": ["impact 1", "impact 2"], "key_skills": ["skill 1", "skill 2", "skill 3", "skill 4"], "target_companies": ["company 1", "company 2", "company 3"], "category": "natural-progression|career-change|passion-driven", "difficulty_level": "entry|mid|senior|executive", "roadmap": [{"step": "Specific action step", "duration": "X months"}], "affirmations": ["Powerful I-statement affirmation 1", "Powerful I-statement affirmation 2", "Powerful I-statement affirmation 3"], "typical_day_routine": ["Morning: activity 1", "Midday: activity 2", "Afternoon: activity 3", "Evening: activity 4"]}]}
-
-IMPORTANT ROADMAP REQUIREMENTS:
-- Each path must have 3-5 specific, actionable roadmap steps
-- Each step must include a realistic duration (in months or years)
-- Steps should be progressive and build on each other
-- Example roadmap for "Tea Sommelier": [{"step": "Complete tea certification course", "duration": "3 months"}, {"step": "Work at premium tea house", "duration": "6 months"}, {"step": "Build personal tea brand", "duration": "9 months"}, {"step": "Launch tea consulting business", "duration": "12 months"}]
-
-IMPORTANT AFFIRMATIONS REQUIREMENTS:
-- Must be written in first person ("I am", "I create", "My")
-- Should be empowering and specific to the career path
-- Must reflect the person's actual strengths and passions
-- Example affirmations for "Tea Sommelier": ["I transform tea into unforgettable experiences", "My expertise helps people discover the art of tea", "I build a thriving business around what I love"]
-
-TYPICAL DAY ROUTINE REQUIREMENTS:
-- Should describe 4-6 specific activities throughout a typical workday
-- Must be realistic and specific to the role
-- Should capture the rhythm and flow of the day
-- Include time-of-day context (Morning, Midday, Afternoon, Evening)
-- Example for "Tea Sommelier": ["Morning: Curate daily tea selections and prepare tasting notes", "Midday: Lead private tea tasting sessions for clients", "Afternoon: Source new tea varieties from suppliers worldwide", "Evening: Develop tea pairing menus for events"]`;
+Generate exactly 7 paths following this structure.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
