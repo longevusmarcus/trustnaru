@@ -102,16 +102,51 @@ const constructScenePrompts = (careerPath: any): string[] => {
   const keySkills = careerPath.key_skills?.slice(0, 2).join(', ') || 'professional skills';
   const lifestyle = careerPath.lifestyle_benefits?.[0] || 'successful professional lifestyle';
   
-  // Generate exactly 3 ultra-photorealistic scene prompts featuring the SAME person from reference
+  // Generate exactly 3 hyper-photorealistic scene prompts with STRICT identity preservation
   return [
     // 1) Professional Scene - working as the role, demonstrating key skills
-    `Ultra-photorealistic professional photograph of a ${roleTitle} working, demonstrating ${keySkills}. 50mm f/1.8 lens, soft natural light, editorial photography style. Same person from reference image - exact face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture. No face changes. Professional office environment.`,
+    `HYPER-PHOTOREALISTIC professional photograph: ${roleTitle} actively working and demonstrating ${keySkills}. Shot with 50mm f/1.8 lens, soft natural window light at 45° angle, editorial magazine quality. 
+
+CRITICAL IDENTITY MATCH - Preserve EXACTLY from reference:
+- Exact face shape, jawline, cheekbones, forehead structure
+- Exact eye color, shape, spacing between eyes, eyelid structure  
+- Exact nose: bridge width, nostril shape, tip angle
+- Exact lips: shape, fullness, cupid's bow
+- Exact skin tone, texture with visible pores and natural characteristics
+- Exact hair: color, texture, density, natural hairline
+- Exact body proportions and build
+NO artistic interpretation - photographic accuracy only.
+
+Professional office environment, sharp focus on face, shallow DOF, authentic candid moment. 8K resolution, natural skin texture visible, realistic lighting and shadows.`,
     
     // 2) Leadership Moment - presenting/collaborating as the role
-    `Ultra-photorealistic medium shot of a ${roleTitle} presenting to colleagues or collaborating in a professional setting. Shallow depth of field, professional studio lighting. Same person from reference image - preserve exact identity, facial features, proportions. No face modifications. Contemporary workplace setting.`,
+    `HYPER-PHOTOREALISTIC medium shot (waist up): ${roleTitle} in leadership moment - presenting ideas or collaborating with team. 85mm f/1.4 lens, professional studio lighting with soft fill, magazine portrait quality.
+
+CRITICAL IDENTITY MATCH - Preserve EXACTLY from reference:
+- Exact facial structure: face shape, bone structure, proportions
+- Exact eye characteristics: color, shape, spacing, expression
+- Exact nose structure and profile
+- Exact mouth and lip formation
+- Exact skin tone with natural texture and detail
+- Exact hair characteristics and style
+- Exact posture and body proportions
+NO face modifications whatsoever - exact photographic match only.
+
+Confident engaged expression, shallow DOF isolating subject, corporate professional setting. High-resolution capturing every natural detail, realistic professional lighting.`,
     
     // 3) Success Lifestyle - aspirational but real lifestyle scene
-    `Ultra-photorealistic wide shot of a ${roleTitle} enjoying ${lifestyle}, golden hour natural lighting. Aspirational yet authentic lifestyle photography. Same person from reference image - exact same face, features, and proportions. No identity changes. Real-world lifestyle setting.`
+    `HYPER-PHOTOREALISTIC wide establishing shot: ${roleTitle} authentically enjoying ${lifestyle} during golden hour. 35mm f/2 lens, natural warm golden hour lighting, cinematic lifestyle editorial style.
+
+CRITICAL IDENTITY MATCH - Preserve EXACTLY from reference:
+- Exact facial features in natural lighting
+- Exact eye color and facial expression  
+- Exact nose, mouth, and facial structure
+- Exact skin tone appearing natural in golden light
+- Exact hair showing natural movement and texture
+- Exact body proportions in full-figure framing
+NO beautification filters or AI smoothing - natural authentic photography only.
+
+Real location (not studio), subject in environment reflecting career success, aspirational but authentic moment. 8K cinematic quality, natural depth and detail, professional color grading.`
   ];
 }
 
