@@ -29,6 +29,7 @@ export const ActionPage = () => {
   const [todayActions, setTodayActions] = useState<any[]>([]);
   const [loadingActions, setLoadingActions] = useState(false);
   const [levelResources, setLevelResources] = useState<any[]>([]);
+  const [loadingResources, setLoadingResources] = useState(false);
 
   const guidanceLevels = [
     {
@@ -220,10 +221,49 @@ export const ActionPage = () => {
       }
 
       setUserStats(stats);
+
+      // Load level resources for current level (Level 1 by default)
+      if (profile?.active_path_id) {
+        await loadLevelResources(1);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadLevelResources = async (level: number) => {
+    if (!user) return;
+    
+    setLoadingResources(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke('generate-level-resources', {
+        body: { level },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) {
+        console.error('Error loading level resources:', error);
+        throw error;
+      }
+
+      if (data?.resources && Array.isArray(data.resources)) {
+        setLevelResources(data.resources);
+      } else {
+        setLevelResources([]);
+      }
+    } catch (error) {
+      console.error('Failed to load level resources:', error);
+      toast({
+        title: "Unable to load resources",
+        description: "Please try refreshing the page.",
+        variant: "destructive"
+      });
+      setLevelResources([]);
+    } finally {
+      setLoadingResources(false);
     }
   };
 
@@ -245,11 +285,6 @@ export const ActionPage = () => {
 
       if (!data?.dailyActions || data.dailyActions.length === 0) {
         throw new Error('No actions generated');
-      }
-
-      // Store level resources if available
-      if (data?.levelResources && data.levelResources.length > 0) {
-        setLevelResources(data.levelResources);
       }
 
       // Transform the AI-generated actions into the expected format
@@ -1026,29 +1061,66 @@ export const ActionPage = () => {
           </div>
 
         {/* Level Resources */}
-        {levelResources.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Level Resources</h3>
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
+            <span className="text-xs text-muted-foreground">Foundation</span>
+          </div>
+          
+          {loadingResources ? (
+            <div className="space-y-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : !activePath ? (
+            <Card className="border-dashed">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Activate a career path to get personalized learning resources
+                </p>
+              </CardContent>
+            </Card>
+          ) : levelResources.length === 0 ? (
+            <Card className="border-amber-500/20 bg-amber-500/5">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-amber-500" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generating personalized resources based on your CV and skill gaps...
+                </p>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => loadLevelResources(currentLevel)}
+                >
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
             <div className="space-y-3">
               {levelResources.map((resource: any, idx: number) => (
-                <Card key={idx} className="border-primary/10">
+                <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Award className="h-4 w-4 text-primary" />
+                        <BookOpen className="h-4 w-4 text-primary" />
                       </div>
                       <div className="flex-1 space-y-1.5">
-                        <p className="text-sm font-medium">{resource.resource}</p>
-                        <p className="text-xs text-muted-foreground">{resource.commitment}</p>
-                        <p className="text-xs text-primary/80">{resource.impact}</p>
+                        <p className="text-sm font-medium leading-relaxed">{resource.resource}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>⏱️ {resource.commitment}</span>
+                        </div>
+                        <p className="text-xs text-primary/80 italic">{resource.impact}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />

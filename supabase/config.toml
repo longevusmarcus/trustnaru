@@ -23,3 +23,6 @@ verify_jwt = true
 
 [functions.parse-cv]
 verify_jwt = true
+
+[functions.generate-level-resources]
+verify_jwt = true
