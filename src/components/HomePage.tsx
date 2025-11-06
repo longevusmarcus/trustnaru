@@ -9,6 +9,7 @@ import { useDailyStreak } from "@/hooks/useDailyStreak";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DailyMotivation } from "./DailyMotivation";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -111,6 +112,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [displayName, setDisplayName] = useState<string>('');
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
+  const [showDailyMotivation, setShowDailyMotivation] = useState(false);
   
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -125,6 +127,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Show daily motivation once per day when streak is active
+  useEffect(() => {
+    if (!userStats?.current_streak || userStats.current_streak === 0) return;
+
+    const today = new Date().toDateString();
+    const lastShown = localStorage.getItem("lastMotivationShown");
+
+    if (lastShown !== today) {
+      setShowDailyMotivation(true);
+      localStorage.setItem("lastMotivationShown", today);
+    }
+  }, [userStats?.current_streak]);
 
   useEffect(() => {
     const fetchGamificationData = async () => {
@@ -242,7 +257,14 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   };
 
   return (
-    <div className="px-4 pb-24 pt-4">
+    <>
+      <DailyMotivation 
+        open={showDailyMotivation} 
+        onOpenChange={setShowDailyMotivation}
+        pathTitle={activePath?.title}
+      />
+      
+      <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
         {/* Greeting */}
         <div className="flex items-center justify-between">
@@ -468,6 +490,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           </DrawerContent>
         </Drawer>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
