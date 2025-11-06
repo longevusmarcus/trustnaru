@@ -218,74 +218,66 @@ export const ActionPage = () => {
 
     setLoadingActions(true);
     try {
-      const actionPrompt = `Based on my CV, aspirations, and active path (${activePathData.title}), give me exactly 3 specific, practical actions for today. Format as a simple numbered list (1., 2., 3.) with one concrete action per line. Each action should be achievable today and directly relevant to my career path.`;
-
       const session = (await supabase.auth.getSession()).data.session;
-      const { data, error } = await supabase.functions.invoke('generate-insights', {
-        body: { message: actionPrompt },
+      const { data, error } = await supabase.functions.invoke('generate-personalized-guidance', {
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
-      if (error) throw error;
-      if (!data?.insight) throw new Error('No actions generated');
-
-      // Parse the AI response into structured action items
-      const actionText = data.insight;
-      
-      // Extract Morning, Afternoon, Evening actions
-      const morningMatch = actionText.match(/\*\*Morning Action[^:]*:\*\*\s*(.+?)(?=\*\*|$)/s);
-      const afternoonMatch = actionText.match(/\*\*Afternoon Action[^:]*:\*\*\s*(.+?)(?=\*\*|$)/s);
-      const eveningMatch = actionText.match(/\*\*Evening[^:]*:\*\*\s*(.+?)(?=$)/s);
-
-      const parsedActions = [];
-      
-      if (morningMatch) {
-        parsedActions.push({
-          task: morningMatch[1].trim(),
-          priority: "high",
-          done: false,
-          label: "Morning (30min)"
-        });
-      }
-      
-      if (afternoonMatch) {
-        parsedActions.push({
-          task: afternoonMatch[1].trim(),
-          priority: "medium",
-          done: false,
-          label: "Afternoon (1hr)"
-        });
-      }
-      
-      if (eveningMatch) {
-        parsedActions.push({
-          task: eveningMatch[1].trim(),
-          priority: "low",
-          done: false,
-          label: "Evening (15min)"
-        });
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
       }
 
-      if (parsedActions.length > 0) {
-        setTodayActions(parsedActions);
-      } else {
-        // Fallback if parsing fails
-        setTodayActions([
-          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false, label: "Morning (30min)" },
-          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false, label: "Afternoon (1hr)" },
-          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false, label: "Evening (15min)" },
-        ]);
+      if (!data?.dailyActions || data.dailyActions.length === 0) {
+        throw new Error('No actions generated');
       }
+
+      // Transform the AI-generated actions into the expected format
+      const parsedActions = data.dailyActions.map((action: any, idx: number) => {
+        let label = "Action";
+        let priority = "medium";
+        
+        if (idx === 0) {
+          label = `Morning (${action.timeNeeded || '30min'})`;
+          priority = "high";
+        } else if (idx === 1) {
+          label = `Afternoon (${action.timeNeeded || '1hr'})`;
+          priority = "medium";
+        } else if (idx === 2) {
+          label = `Evening (${action.timeNeeded || '15min'})`;
+          priority = "low";
+        }
+
+        return {
+          task: action.action,
+          priority,
+          done: false,
+          label,
+          rationale: action.rationale
+        };
+      });
+
+      setTodayActions(parsedActions);
     } catch (error) {
       console.error('Error generating actions:', error);
-      // Fallback actions
-      if (activePathData) {
-        setTodayActions([
-          { task: `Focus on ${activePathData.key_skills?.[0] || 'key skills'}`, priority: "high", done: false, label: "Morning (30min)" },
-          { task: `Research ${activePathData.target_companies?.[0] || 'target companies'}`, priority: "medium", done: false, label: "Afternoon (1hr)" },
-          { task: `Network with professionals in ${activePathData.category}`, priority: "low", done: false, label: "Evening (15min)" },
-        ]);
-      }
+      
+      // Check if it's a function invocation error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.log('Error details:', errorMessage);
+      
+      toast({
+        title: "Unable to generate actions",
+        description: "Our AI is having trouble right now. Please refresh the page.",
+        variant: "destructive"
+      });
+      
+      // Show empty state instead of generic fallback
+      setTodayActions([{
+        task: "AI guidance temporarily unavailable - refresh to try again",
+        priority: "medium",
+        done: false,
+        label: "Status"
+      }]);
     } finally {
       setLoadingActions(false);
     }

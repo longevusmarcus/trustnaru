@@ -44,6 +44,8 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .maybeSingle();
 
+    console.log('Profile loaded:', { hasProfile: !!profile, hasActivePath: !!profile?.active_path_id });
+
     // Get user stats
     const { data: stats } = await supabaseClient
       .from('user_stats')
@@ -52,6 +54,7 @@ serve(async (req) => {
       .maybeSingle();
 
     if (!profile?.active_path_id) {
+      console.log('No active path found for user');
       return new Response(
         JSON.stringify({ 
           error: 'No active path',
@@ -71,8 +74,11 @@ serve(async (req) => {
       .single();
 
     if (!activePath) {
+      console.log('Active path not found in database');
       throw new Error('Active path not found');
     }
+
+    console.log('Generating guidance for path:', activePath.title);
 
     const userName = profile.display_name || user.email?.split('@')[0] || 'there';
     
@@ -132,6 +138,7 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY not configured');
       throw new Error('GEMINI_API_KEY not configured');
     }
 
@@ -233,17 +240,18 @@ Return ONLY valid JSON in this exact format:
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API error:', response.status, errorText);
-      throw new Error('Failed to generate guidance');
+      throw new Error(`Gemini API failed with status ${response.status}`);
     }
 
     const data = await response.json();
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!generatedText) {
+      console.error('No content generated from Gemini');
       throw new Error('No content generated');
     }
 
-    console.log('Generated text:', generatedText);
+    console.log('Generated text length:', generatedText.length);
 
     // Extract JSON from response (handle markdown code blocks)
     let jsonText = generatedText.trim();
