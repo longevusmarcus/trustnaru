@@ -106,7 +106,7 @@ export default function PathDetail() {
         {card.description && (
           <div className="mb-8">
             <h2 className="text-sm font-medium text-muted-foreground mb-3">About This Path</h2>
-            <p className="text-sm text-foreground/90 leading-relaxed">{card.description}</p>
+            <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap">{card.description}</p>
           </div>
         )}
 
