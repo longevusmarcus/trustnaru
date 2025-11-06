@@ -1,6 +1,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Sparkles, Compass, Database, Crown, Zap, Eye, LineChart, MoveRight, ArrowRight } from "lucide-react";
+import {
+  ChevronRight,
+  Sparkles,
+  Compass,
+  Database,
+  Crown,
+  Zap,
+  Eye,
+  LineChart,
+  MoveRight,
+  ArrowRight,
+} from "lucide-react";
 
 interface IntroOnboardingProps {
   onComplete: () => void;
@@ -26,12 +37,12 @@ const slides = [
     icon: Crown,
     title: "The Vision",
     content:
-      "The OS for becoming. By reverse-engineering career and life success, we’re transforming career development to help people realize their full potential.",
+      "By reverse-engineering career and life success, we’re transforming career development to help people realize their full potential.",
   },
   {
     icon: Zap,
-    title: "Life OS",
-    subtitle: "Naru will evolve into the Life OS:",
+    title: "The OS for Becoming",
+    subtitle: "Naru will evolve into the OS for Becoming:",
     items: [
       "Share what gives you energy",
       "See your future selves",
@@ -132,8 +143,10 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                 <div className="space-y-4">
                   <div className="text-xs font-medium tracking-wider text-muted-foreground/60 uppercase">LinkedIn</div>
                   <div className="space-y-3">
-                    {['Tracking past', 'Vanity', 'Static', 'No guidance', 'No rewards'].map((item, i) => (
-                      <div key={i} className="text-sm text-muted-foreground/50 font-light">{item}</div>
+                    {["Tracking past", "Vanity", "Static", "No guidance", "No rewards"].map((item, i) => (
+                      <div key={i} className="text-sm text-muted-foreground/50 font-light">
+                        {item}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -142,9 +155,13 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                 <div className="space-y-4">
                   <div className="text-xs font-medium tracking-wider text-primary uppercase">Naru</div>
                   <div className="space-y-3">
-                    {['Tracking future', 'Value', 'Dynamic predictions', 'Personalized guidance', 'Rewards'].map((item, i) => (
-                      <div key={i} className="text-sm text-foreground font-light">{item}</div>
-                    ))}
+                    {["Tracking future", "Value", "Dynamic predictions", "Personalized guidance", "Rewards"].map(
+                      (item, i) => (
+                        <div key={i} className="text-sm text-foreground font-light">
+                          {item}
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
