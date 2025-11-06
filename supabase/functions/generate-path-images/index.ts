@@ -99,13 +99,19 @@ async function generateWithGemini(prompt: string, refImageBase64: string, maxRet
 
 const constructScenePrompts = (careerPath: any): string[] => {
   const roleTitle = careerPath.title || 'Professional';
+  const keySkills = careerPath.key_skills?.slice(0, 2).join(', ') || 'professional skills';
+  const lifestyle = careerPath.lifestyle_benefits?.[0] || 'successful professional lifestyle';
   
-  // Simplified, generic prompts that are less likely to trigger safety filters
+  // Generate exactly 3 ultra-photorealistic scene prompts featuring the SAME person from reference
   return [
-    `Professional portrait of a ${roleTitle} in a modern office`,
-    `${roleTitle} working at desk in contemporary workspace`,
-    `${roleTitle} in business meeting with team members`,
-    `${roleTitle} in casual professional setting`
+    // 1) Professional Scene - working as the role, demonstrating key skills
+    `Ultra-photorealistic professional photograph of a ${roleTitle} working, demonstrating ${keySkills}. 50mm f/1.8 lens, soft natural light, editorial photography style. Same person from reference image - exact face shape, hairline, eye spacing, nose, lips, skin tone, body proportions, natural skin texture. No face changes. Professional office environment.`,
+    
+    // 2) Leadership Moment - presenting/collaborating as the role
+    `Ultra-photorealistic medium shot of a ${roleTitle} presenting to colleagues or collaborating in a professional setting. Shallow depth of field, professional studio lighting. Same person from reference image - preserve exact identity, facial features, proportions. No face modifications. Contemporary workplace setting.`,
+    
+    // 3) Success Lifestyle - aspirational but real lifestyle scene
+    `Ultra-photorealistic wide shot of a ${roleTitle} enjoying ${lifestyle}, golden hour natural lighting. Aspirational yet authentic lifestyle photography. Same person from reference image - exact same face, features, and proportions. No identity changes. Real-world lifestyle setting.`
   ];
 }
 
@@ -203,16 +209,16 @@ serve(async (req) => {
     const refImageBase64 = await urlToBase64(refImageUrl);
     console.log('Reference image converted, size:', refImageBase64.length, 'chars');
 
-    // Generate 4 images per career path
+    // Generate 3 images per career path
     const scenePrompts = constructScenePrompts(careerPath);
     console.log('Generating career images for:', careerPath.title);
 
     const allImageUrls: string[] = [];
 
-    // Generate all 4 images using the pre-converted base64
+    // Generate all 3 images using the pre-converted base64
     for (let i = 0; i < scenePrompts.length; i++) {
       const prompt = scenePrompts[i];
-      console.log(`Generating image ${i + 1}/4...`);
+      console.log(`Generating image ${i + 1}/3...`);
       
       try {
         const imageBytes = await generateWithGemini(prompt, refImageBase64);
@@ -240,9 +246,9 @@ serve(async (req) => {
           .getPublicUrl(fileName);
         
         allImageUrls.push(publicUrl);
-        console.log(`Successfully generated image ${i + 1}/4`);
+        console.log(`Successfully generated image ${i + 1}/3`);
       } catch (imageError) {
-        console.error(`Failed to generate image ${i + 1}/4:`, imageError);
+        console.error(`Failed to generate image ${i + 1}/3:`, imageError);
         // Continue with other images even if one fails
       }
       

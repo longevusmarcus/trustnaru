@@ -167,7 +167,7 @@ Voice Interests Analysis:
     }
 
     // Step 3: Construct deeply personalized prompt using real experience + passions
-    const prompt = `You are an expert career strategist. Create 7 DEEPLY PERSONALIZED career paths by analyzing their ACTUAL experience and REAL passions.
+    const prompt = `You are an expert career strategist. Create 7 DEEPLY PERSONALIZED, REALISTIC, and PRACTICAL career paths by analyzing their ACTUAL experience and REAL passions.
 
 ${cvAnalysis}
 
@@ -175,12 +175,29 @@ ${voiceInterests}
 
 Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
-⚠️ CRITICAL: SCAN THE VOICE TRANSCRIPTION FOR SPECIFIC INTERESTS ⚠️
-Before generating ANY career paths, you MUST:
-1. Read the voice transcription word-by-word
-2. Identify EVERY specific noun or activity mentioned (tea, yoga, cooking, travel, art, music, gaming, etc.)
-3. For EACH specific interest found, create AT LEAST ONE specialized career path around it
-4. These are NOT optional - if they mention "tea", you MUST include tea-related careers
+🔴 ABSOLUTE REQUIREMENT: EXTRACT AND USE SPECIFIC INTERESTS FROM VOICE 🔴
+
+STEP 1 - MANDATORY INTEREST EXTRACTION:
+Read the voice transcription CAREFULLY and extract EVERY specific interest, passion, hobby, or topic mentioned:
+- Foods/Beverages: tea, coffee, wine, chocolate, baking, matcha, craft beer, etc.
+- Practices: yoga, meditation, mindfulness, wellness, fitness, running, etc.
+- Creative: art, music, photography, writing, design, crafts, etc.
+- Topics: sustainability, technology, education, travel, nature, fashion, etc.
+- Activities: cooking, gaming, hiking, reading, gardening, etc.
+
+STEP 2 - MANDATORY SPECIALIZED CAREER CREATION:
+For EVERY interest you found, you MUST create at least ONE ultra-specific career:
+
+Examples by interest:
+• "tea" → Tea Sommelier, Tea Brand Founder, Tea Ceremony Educator, Premium Tea Buyer, Tea Tourism Guide, Tea Café Owner
+• "mindfulness" → Mindfulness Retreat Director, Corporate Mindfulness Coach, Mindfulness App Developer, Meditation Studio Owner
+• "yoga" → Yoga Retreat Designer, Yoga Therapy Specialist, Corporate Wellness Director, Yoga Teacher Training Leader
+• "sustainability" → Sustainability Consultant, Circular Economy Advisor, Green Brand Strategist, Sustainability Educator
+• "travel" → Luxury Travel Curator, Destination Experience Designer, Travel Content Creator, Cultural Tour Operator
+• "wine" → Wine Sommelier, Wine Education Director, Wine Tour Operator, Wine Brand Ambassador
+• "wellness" → Wellness Retreat Coordinator, Holistic Health Coach, Wellness Product Developer, Spa Experience Designer
+
+CRITICAL: These passion-driven careers are MANDATORY, not suggestions. If voice mentions "tea" and "mindfulness", you MUST include careers like "Mindful Tea Retreat Owner" or "Tea Meditation Studio Founder".
 
 CRITICAL PERSONALIZATION RULES:
 
@@ -213,24 +230,41 @@ CRITICAL PERSONALIZATION RULES:
 3. MANDATORY PATH DISTRIBUTION (7 total paths):
    
    PATH 1-2: NATURAL CAREER PROGRESSION (2 paths)
-   - Direct next steps in their current field/industry
+   - Direct next steps in their current field/industry based on CV
    - Use their proven track record and experience level
-   - Example: Senior Manager → Director → VP path
-   - Focus: 90% experience, 10% passion context
+   - Must be realistic and achievable given their background
+   - Example: If they're a "Senior Marketing Manager" → "Marketing Director at Tech Company", "VP of Marketing Operations"
+   - Focus: 100% based on actual experience and career trajectory
    
    PATH 3-4: CAREER CHANGE WITH SKILLS TRANSFER (2 paths)
-   - New industries but leveraging their existing skills
-   - Realistic pivots based on transferable expertise
-   - Example: Marketing Manager in tech → Marketing Director in another industry
-   - Focus: 60% experience, 40% new direction
+   - New industries but leveraging existing skills from CV
+   - Realistic pivots that employers would hire them for
+   - Must be practical given their experience level
+   - Example: "Marketing Manager in tech" → "Brand Strategy Director in Consumer Goods", "Growth Lead in Fintech Startup"
+   - Focus: 70% transferable skills, 30% new industry
    
-   PATH 5-7: PASSION-DRIVEN CAREERS (3 paths) ⚠️ MOST IMPORTANT ⚠️
-   - These MUST be based on specific interests mentioned in voice
-   - Use the EXACT words from their transcription
-   - Create niche, specialized careers around those interests
-   - Can combine their experience with passion (e.g., "Marketing expertise + tea passion = Tea Brand Marketing Director")
-   - Example: Loves tea → "Premium Tea Sommelier", "Tea Travel Guide", "Founder of Artisan Tea Company"
-   - Focus: 70% passion, 30% skills application
+   PATH 5-7: PASSION-DRIVEN CAREERS (3 paths) 🔴 MOST CRITICAL 🔴
+   - MUST be directly based on specific interests extracted from voice transcription
+   - Use EXACT words and topics from their voice (if they say "tea ceremony" → include tea ceremony)
+   - Create REAL, VIABLE careers that exist in the market around those interests
+   - Combine their professional experience WITH passion topics
+   - Must be PRACTICAL and REALISTIC - not fantasy careers
+   
+   Examples of GOOD passion-driven paths:
+   • Voice: "I love tea and mindfulness" + Experience: "Marketing background"
+     → "Tea Brand Marketing Director", "Mindfulness App Product Manager", "Wellness Retreat Marketing Lead"
+   
+   • Voice: "Passionate about sustainability and travel" + Experience: "Project Manager"
+     → "Sustainable Tourism Project Director", "Eco-Travel Experience Curator", "Green Hospitality Operations Manager"
+   
+   • Voice: "Love yoga and wellness" + Experience: "Operations role"
+     → "Yoga Studio Operations Director", "Wellness Retreat Coordinator", "Corporate Wellness Program Manager"
+   
+   These passion careers MUST:
+   - Exist in real market (check actual job titles)
+   - Leverage their experience level appropriately
+   - Be specific to exact interests mentioned
+   - Include realistic salary ranges and companies
 
 4. DESCRIPTION STRUCTURE (each path):
    - Sentence 1: "Building on your [X years] as [actual role] in [actual industry]..."

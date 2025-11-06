@@ -107,10 +107,28 @@ const Index = () => {
     }
   };
 
-  const handleWizardComplete = (paths: any[]) => {
+  const handleWizardComplete = async (paths: any[]) => {
     setShowWizard(false);
     setCareerPaths(paths);
-    setShowIntro(true);
+    
+    // Check if user has already completed onboarding
+    if (user) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('onboarding_completed')
+        .eq('user_id', user.id)
+        .single();
+      
+      // If already onboarded, go directly to futures page
+      if (profile?.onboarding_completed) {
+        setCurrentPage("future");
+      } else {
+        // Otherwise, show intro onboarding
+        setShowIntro(true);
+      }
+    } else {
+      setShowIntro(true);
+    }
   };
 
   const handleIntroComplete = () => {
