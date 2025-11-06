@@ -191,19 +191,28 @@ export const ProfilePage = () => {
         
         // Vision-based parsing for structured data
         try {
+          console.log('Starting CV vision parsing...');
           const arrayBuffer = await file.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
           const pdfBase64 = `data:application/pdf;base64,${base64}`;
           
-          const { data: structuredData } = await supabase.functions.invoke('parse-cv', {
+          console.log('Calling parse-cv edge function...');
+          const { data: structuredData, error: parseError } = await supabase.functions.invoke('parse-cv', {
             body: { pdfBase64 }
           });
-          if (structuredData && !structuredData.error) {
+          
+          if (parseError) {
+            console.error('Parse-cv error:', parseError);
+          } else if (structuredData?.error) {
+            console.error('Parse-cv returned error:', structuredData.error);
+          } else if (structuredData) {
             cv_structured = structuredData;
             console.log('CV structured data extracted:', cv_structured);
+          } else {
+            console.warn('Parse-cv returned empty data');
           }
         } catch (err) {
-          console.warn('Vision parsing failed, using text only:', err);
+          console.error('Vision parsing exception:', err);
         }
       }
       const { data: existing } = await supabase

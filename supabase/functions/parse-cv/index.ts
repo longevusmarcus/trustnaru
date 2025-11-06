@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Parse-cv function called');
     const { pdfBase64 } = await req.json();
+    console.log('PDF base64 received, length:', pdfBase64?.length || 0);
     
     if (!pdfBase64) {
       return new Response(
