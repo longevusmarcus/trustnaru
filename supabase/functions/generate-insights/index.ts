@@ -76,11 +76,28 @@ serve(async (req) => {
         }
       }
 
-      // CV information - prefer extracted text stored in wizard_data.cv_text
-      if (wizardData?.cv_text && String(wizardData.cv_text).trim().length > 0) {
+      // CV information - prioritize structured parsed data
+      if (wizardData?.cv_structured) {
+        const cv = wizardData.cv_structured;
+        cvContent = `\n=== USER'S CV (STRUCTURED DATA - PARSED WITH AI) ===\n`;
+        if (cv.current_role) cvContent += `Current Role: ${cv.current_role}\n`;
+        if (cv.years_of_experience) cvContent += `Years of Experience: ${cv.years_of_experience}\n`;
+        if (cv.key_skills?.length) cvContent += `Key Skills: ${cv.key_skills.join(', ')}\n`;
+        if (cv.past_companies?.length) cvContent += `Past Companies: ${cv.past_companies.join(', ')}\n`;
+        if (cv.education?.length) {
+          cvContent += `Education:\n${cv.education.map((e: any) => `  - ${e.degree} from ${e.institution}${e.year ? ` (${e.year})` : ''}`).join('\n')}\n`;
+        }
+        if (cv.certifications?.length) cvContent += `Certifications: ${cv.certifications.join(', ')}\n`;
+        if (cv.notable_achievements?.length) {
+          cvContent += `Notable Achievements:\n${cv.notable_achievements.map((a: string) => `  - ${a}`).join('\n')}\n`;
+        }
+        cvContent += `=== END OF CV ===\n\n`;
+        userInfo += `CV Status: Fully parsed with AI vision - you have complete access to their professional background\n`;
+      } else if (wizardData?.cv_text && String(wizardData.cv_text).trim().length > 0) {
+        // Fallback to text extraction
         const text = String(wizardData.cv_text).trim();
         const snippet = text.length > 8000 ? text.slice(0, 8000) + '\n...[truncated]' : text;
-        cvContent = `\n=== USER'S COMPLETE CV TEXT (captured on upload) ===\n${snippet}\n=== END OF CV TEXT ===\n\n`;
+        cvContent = `\n=== USER'S COMPLETE CV TEXT (text extraction) ===\n${snippet}\n=== END OF CV TEXT ===\n\n`;
         userInfo += `CV Status: Text extracted and available for analysis\n`;
       } else if (profile.cv_url) {
         // If only file exists, acknowledge presence
@@ -145,12 +162,15 @@ Salary Range: ${path.salary_range || 'N/A'}
 
     const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
 
+    const hasCvStructured = Boolean((profile as any)?.wizard_data?.cv_structured);
     const hasCvText = Boolean((profile as any)?.wizard_data?.cv_text && String((profile as any).wizard_data.cv_text).trim().length > 0);
-    const cvStatusSection = hasCvText
-      ? `\n📄 CV STATUS:\nYou have ${userName}'s ACTUAL CV text above. Use specific details from it when reviewing or giving feedback.\n`
-      : (profile?.cv_url
-          ? `\n📄 CV STATUS:\n${userName} has uploaded a CV, but detailed text isn't available. Provide general best practices and ask which sections they'd like feedback on.\n`
-          : `\n📄 CV STATUS:\nNo CV uploaded yet. Encourage ${userName} to upload one for personalized feedback.\n`);
+    const cvStatusSection = hasCvStructured
+      ? `\n📄 CV STATUS:\nYou have ${userName}'s COMPLETE CV parsed with AI vision. You can see their role, experience, skills, companies, education, certifications, and achievements. Use these SPECIFIC details when answering questions.\n`
+      : (hasCvText
+          ? `\n📄 CV STATUS:\nYou have ${userName}'s CV text. Use specific details from it when reviewing or giving feedback.\n`
+          : (profile?.cv_url
+              ? `\n📄 CV STATUS:\n${userName} has uploaded a CV, but detailed content isn't parsed yet. Encourage them to visit their profile to parse it.\n`
+              : `\n📄 CV STATUS:\nNo CV uploaded yet. Encourage ${userName} to upload one for personalized feedback.\n`));
 
     const systemPrompt = `You are an elite career strategist and executive coach for ${userName}. 
 
