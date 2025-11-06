@@ -2,7 +2,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Download, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import html2canvas from "html2canvas";
 
 interface DailyMotivationProps {
   open: boolean;
@@ -33,12 +34,33 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
   const motivation = generateMotivation(pathTitle);
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = () => {
-    toast({
-      title: "Download",
-      description: "Screenshot this screen to save your motivation!",
-    });
+  const handleDownload = async () => {
+    if (!contentRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(contentRef.current, {
+        backgroundColor: '#000000',
+        scale: 2,
+      });
+      
+      const link = document.createElement('a');
+      link.download = 'motivation.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      toast({
+        title: "Downloaded!",
+        description: "Your motivation has been saved.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to download image.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLike = () => {
@@ -54,27 +76,27 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-        <div className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
+        <div ref={contentRef} className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-center leading-tight tracking-tight">
             {motivation}
           </h1>
 
-          <div className="flex gap-6 opacity-50">
+          <div className="flex gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full h-12 w-12 hover:opacity-100 transition-opacity"
+              className="rounded-full h-10 w-10 opacity-60 hover:opacity-100 transition-opacity"
               onClick={handleDownload}
             >
-              <Download className="h-5 w-5" />
+              <Download className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className={`rounded-full h-12 w-12 hover:opacity-100 transition-opacity ${isLiked ? 'text-red-500' : ''}`}
+              className={`rounded-full h-10 w-10 opacity-60 hover:opacity-100 transition-opacity ${isLiked ? 'text-red-500' : ''}`}
               onClick={handleLike}
             >
-              <Heart className="h-5 w-5" fill={isLiked ? "currentColor" : "none"} />
+              <Heart className="h-4 w-4" fill={isLiked ? "currentColor" : "none"} />
             </Button>
           </div>
         </div>
