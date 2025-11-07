@@ -113,6 +113,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         } catch (e) {
           console.warn('Cache write error:', e);
         }
+        
+        // Recheck voice transcript status
+        checkIfDemo();
       }
     } catch (error) {
       console.error('Error loading career paths:', error);

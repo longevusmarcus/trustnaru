@@ -31,7 +31,6 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
     voice: false
   });
 
-  // Check for existing data on mount
   useEffect(() => {
     const checkExistingData = async () => {
       if (!user) return;
@@ -56,7 +55,9 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
       });
 
       if (profile?.cv_url) setCvUrl(profile.cv_url);
-      if (profile?.voice_transcription) setVoiceTranscription(profile.voice_transcription);
+      if (profile?.voice_transcription) {
+        setVoiceTranscription(profile.voice_transcription);
+      }
     };
 
     checkExistingData();
@@ -158,7 +159,11 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
         {step === 3 && (
           <VoiceStep 
             onNext={(transcription) => {
-              setVoiceTranscription(transcription);
+              // Only update voice if user recorded a new one
+              if (transcription && transcription !== "USE_EXISTING_VOICE") {
+                setVoiceTranscription(transcription);
+              }
+              // If USE_EXISTING_VOICE, keep the existing voiceTranscription from state
               handleComplete();
             }} 
             onBack={() => setStep(2)}

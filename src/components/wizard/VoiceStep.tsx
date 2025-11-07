@@ -11,9 +11,21 @@ interface VoiceStepProps {
 
 export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) => {
   const [transcription, setTranscription] = useState<string>("");
+  const [useExisting, setUseExisting] = useState(false);
 
   const handleTranscription = (text: string) => {
     setTranscription(text);
+    setUseExisting(false);
+  };
+
+  const handleContinue = () => {
+    if (transcription) {
+      onNext(transcription);
+    } else if (hasExistingVoice) {
+      // Pass a special marker to indicate using existing voice
+      setUseExisting(true);
+      onNext("USE_EXISTING_VOICE");
+    }
   };
 
   return (
@@ -60,7 +72,7 @@ export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) 
           Back
         </Button>
         <Button 
-          onClick={() => onNext(transcription)} 
+          onClick={handleContinue}
           className="flex-1" 
           disabled={!transcription && !hasExistingVoice}
         >

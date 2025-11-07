@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface VoiceBubbleProps {
   onTranscription?: (text: string) => void;
@@ -12,6 +13,7 @@ export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     return () => {
@@ -101,6 +103,18 @@ export const VoiceBubble = ({ onTranscription }: VoiceBubbleProps) => {
         const transcription = data?.text || '';
         
         if (transcription) {
+          // Save voice transcript to user profile immediately
+          if (user) {
+            const { error: saveError } = await supabase
+              .from('user_profiles')
+              .update({ voice_transcription: transcription })
+              .eq('user_id', user.id);
+            
+            if (saveError) {
+              console.error('Error saving voice transcript:', saveError);
+            }
+          }
+          
           toast({
             title: "Transcription complete",
             description: transcription,
