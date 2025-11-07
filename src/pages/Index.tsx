@@ -94,7 +94,7 @@ const Index = () => {
       case "future":
         return "your futures";
       case "copilot":
-        return "journeys";
+        return "copilot";
       case "profile":
         return "profile";
       default:
