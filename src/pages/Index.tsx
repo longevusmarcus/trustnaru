@@ -109,7 +109,8 @@ const Index = () => {
 
   const handleWizardComplete = async (paths: any[]) => {
     setShowWizard(false);
-    setCareerPaths(paths);
+    // Don't set careerPaths - let FutureYouPage load all paths from database
+    // This ensures both old and new paths are shown together
     
     // Check if user has already completed onboarding
     if (user) {

@@ -15,7 +15,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [paths, setPaths] = useState<any[]>(careerPaths);
+  const [paths, setPaths] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
@@ -48,14 +48,6 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     // Check if user has voice transcript
     setHasVoiceTranscript(!!profile?.voice_transcription);
   };
-
-  // Update paths when careerPaths prop changes (e.g., from wizard)
-  useEffect(() => {
-    if (careerPaths.length > 0) {
-      setPaths(careerPaths);
-      setHasLoaded(true);
-    }
-  }, [careerPaths]);
 
   const loadCareerPathsWithCache = async () => {
     if (!user) {
