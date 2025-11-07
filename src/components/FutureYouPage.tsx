@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const CACHE_KEY = 'career_paths_cache';
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
@@ -13,6 +14,7 @@ const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [paths, setPaths] = useState<any[]>(careerPaths);
   const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -127,6 +129,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const handleGenerateCVFocused = async () => {
     if (!user) return;
     
+    const previousCount = paths.length;
     setLoading(true);
     try {
       // Get user profile data
@@ -146,7 +149,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       }
 
       // Call generate-career-paths function (CV-focused)
-      const { data: newPaths, error } = await supabase.functions.invoke('generate-career-paths', {
+      const { data: result, error } = await supabase.functions.invoke('generate-career-paths', {
         body: {
           wizardData: profile.wizard_data,
           cvUrl: profile.cv_url,
@@ -156,6 +159,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
       if (error) throw error;
 
+      const newPathsCount = result?.careerPaths?.length || 7;
+
       // Clear cache and reload paths
       try {
         const cacheKey = `${CACHE_KEY}_${user.id}`;
@@ -165,8 +170,18 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       }
       
       await loadCareerPaths();
+
+      toast({
+        title: "New paths added!",
+        description: `${newPathsCount} CV-focused career paths added to your collection. Your previous ${previousCount} paths are still here.`,
+      });
     } catch (error) {
       console.error('Error generating CV-focused paths:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate new paths. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -175,12 +190,15 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const handleGenerateVoiceFocused = async () => {
     if (!user || !hasVoiceTranscript) return;
     
+    const previousCount = paths.length;
     setLoading(true);
     try {
       // Call voice-focused generation function
-      const { data: newPaths, error } = await supabase.functions.invoke('generate-voice-focused-paths');
+      const { data: result, error } = await supabase.functions.invoke('generate-voice-focused-paths');
 
       if (error) throw error;
+
+      const newPathsCount = result?.careerPaths?.length || 7;
 
       // Clear cache and reload paths
       try {
@@ -191,8 +209,18 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       }
       
       await loadCareerPaths();
+
+      toast({
+        title: "New paths added!",
+        description: `${newPathsCount} passion-driven career paths added to your collection. Your previous ${previousCount} paths are still here.`,
+      });
     } catch (error) {
       console.error('Error generating voice-focused paths:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate new paths. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
