@@ -191,12 +191,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         if (profileResult.data.active_path_id && pathsResult.data) {
           const activePathData = pathsResult.data.find(p => p.id === profileResult.data.active_path_id);
           setActivePath(activePathData || null);
+          setFirstPath(activePathData || null); // Show active path on dashboard
         }
       }
 
       if (pathsResult.data) {
         setAllPaths(pathsResult.data);
-        setFirstPath(pathsResult.data[0] || null);
+        // Only set firstPath if not already set by active path
+        if (!profileResult.data?.active_path_id) {
+          setFirstPath(pathsResult.data[0] || null);
+        }
       }
 
       setUserStats(statsResult.data || { current_streak: 0, longest_streak: 0, total_points: 0 });
