@@ -89,7 +89,7 @@ const Index = () => {
       case "mentors": return "clones";
       case "insights": return "insights";
       case "future": return "your futures";
-      case "copilot": return "copilot";
+      case "copilot": return "journeys";
       case "profile": return "profile";
       default: return "path genius";
     }

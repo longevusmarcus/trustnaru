@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [importing, setImporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [personalizedMentors, setPersonalizedMentors] = useState<any[]>([]);
+  const [loadingPersonalized, setLoadingPersonalized] = useState(false);
   const { toast } = useToast();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -218,6 +221,28 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     setFilteredMentors(filtered);
   };
 
+  const loadPersonalizedMentors = async () => {
+    setLoadingPersonalized(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-personalized-mentors');
+      
+      if (error) throw error;
+      
+      if (data?.mentors) {
+        setPersonalizedMentors(data.mentors);
+      }
+    } catch (error) {
+      console.error('Error loading personalized mentors:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load personalized recommendations.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingPersonalized(false);
+    }
+  };
+
   if (loading || importing) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -233,46 +258,53 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
 
   return (
     <div className="px-4 pb-24 pt-4 max-w-md mx-auto">
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search clones by name, title, or company..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+      <Tabs defaultValue="featured" className="w-full">
+        <TabsList className="w-full mb-4 h-9">
+          <TabsTrigger value="featured" className="flex-1 text-xs">Featured</TabsTrigger>
+          <TabsTrigger value="foryou" className="flex-1 text-xs">For You</TabsTrigger>
+        </TabsList>
 
-      {/* Category Filter */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <Button
-          variant={selectedCategory === null ? "default" : "outline"}
-          size="sm"
-          onClick={() => setSelectedCategory(null)}
-        >
-          All
-        </Button>
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={selectedCategory === category ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(category)}
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
+        <TabsContent value="featured" className="mt-0">
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search journeys by name, title, or company..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
 
-      {/* Results Count */}
-      <div className="mb-4">
-        <p className="text-sm text-muted-foreground">
-          {filteredMentors.length} {filteredMentors.length === 1 ? 'clone' : 'clones'} found
-        </p>
-      </div>
+          {/* Category Filter */}
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+            >
+              All
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+
+          {/* Results Count */}
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground">
+              {filteredMentors.length} featured {filteredMentors.length === 1 ? 'journey' : 'journeys'}
+            </p>
+          </div>
 
       {/* Mentor Cards */}
       <div className="space-y-4">
@@ -430,11 +462,92 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
         ))}
       </div>
 
-      {filteredMentors.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No clones found matching your criteria.</p>
-        </div>
-      )}
+          {filteredMentors.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No journeys found matching your criteria.</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="foryou" className="mt-0">
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Personalized recommendations based on your career interests
+            </p>
+            {personalizedMentors.length === 0 && !loadingPersonalized && (
+              <Button onClick={loadPersonalizedMentors} className="w-full">
+                Generate Recommendations
+              </Button>
+            )}
+          </div>
+
+          {loadingPersonalized && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground">Finding people who match your aspirations...</p>
+              </div>
+            </div>
+          )}
+
+          {personalizedMentors.length > 0 && (
+            <div className="space-y-4">
+              {personalizedMentors.map((mentor, idx) => (
+                <Card key={idx} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <h3 className="font-semibold text-base mb-1">{mentor.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-0.5">{mentor.title}</p>
+                      {mentor.company && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                          <Building className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>{mentor.company}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {mentor.description && (
+                      <p className="text-xs text-muted-foreground mb-3">{mentor.description}</p>
+                    )}
+
+                    {mentor.tags && mentor.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {mentor.tags.map((tag: string, tagIdx: number) => (
+                          <Badge key={tagIdx} variant="secondary" className="text-[10px] px-2 py-0.5">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {mentor.career_journey && (
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                          <Briefcase className="h-3.5 w-3.5" />
+                          Career Journey
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground">{mentor.career_journey}</p>
+                      </div>
+                    )}
+
+                    {mentor.profile_url && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => window.open(mentor.profile_url, '_blank')}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-2" />
+                        View LinkedIn Profile
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
