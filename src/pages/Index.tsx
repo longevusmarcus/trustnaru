@@ -30,9 +30,9 @@ const Index = () => {
   const isNavVisible = useScrollDirection();
   const [isCardScrolling, setIsCardScrolling] = useState(false);
   const { user } = useAuth();
-  
+
   const shouldHideNavOnScroll = currentPage === "mentors";
-  const shouldShowNav = shouldHideNavOnScroll ? (isNavVisible && !isCardScrolling) : true;
+  const shouldShowNav = shouldHideNavOnScroll ? isNavVisible && !isCardScrolling : true;
 
   // Check if user needs onboarding
   useEffect(() => {
@@ -43,15 +43,15 @@ const Index = () => {
       }
 
       const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('onboarding_completed')
-        .eq('user_id', user.id)
+        .from("user_profiles")
+        .select("onboarding_completed")
+        .eq("user_id", user.id)
         .single();
 
       if (profile && !profile.onboarding_completed) {
         setShowIntro(true);
       }
-      
+
       setIsCheckingOnboarding(false);
     };
 
@@ -65,12 +65,12 @@ const Index = () => {
       setCurrentPage(targetPage);
       // Increment key to force fresh data load
       if (targetPage === "insights" || targetPage === "copilot") {
-        setPageRenderKey(prev => prev + 1);
+        setPageRenderKey((prev) => prev + 1);
       }
       // Clear the state
       window.history.replaceState({}, document.title);
     }
-    
+
     if (location.state?.showWizard) {
       setShowWizard(true);
       // Clear the state
@@ -80,18 +80,25 @@ const Index = () => {
 
   // Scroll to top when page changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
   const getHeaderTitle = () => {
     switch (currentPage) {
-      case "home": return "dashboard";
-      case "mentors": return "clones";
-      case "insights": return "insights";
-      case "future": return "your futures";
-      case "copilot": return "journeys";
-      case "profile": return "profile";
-      default: return "path genius";
+      case "home":
+        return "dashboard";
+      case "mentors":
+        return "journeys";
+      case "insights":
+        return "insights";
+      case "future":
+        return "your futures";
+      case "copilot":
+        return "journeys";
+      case "profile":
+        return "profile";
+      default:
+        return "path genius";
     }
   };
 
@@ -102,7 +109,7 @@ const Index = () => {
       setCurrentPage(page);
       // Increment key to force remount of insights/copilot pages
       if (page === "insights" || page === "copilot") {
-        setPageRenderKey(prev => prev + 1);
+        setPageRenderKey((prev) => prev + 1);
       }
     }
   };
@@ -111,15 +118,15 @@ const Index = () => {
     setShowWizard(false);
     // Don't set careerPaths - let FutureYouPage load all paths from database
     // This ensures both old and new paths are shown together
-    
+
     // Check if user has already completed onboarding
     if (user) {
       const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('onboarding_completed')
-        .eq('user_id', user.id)
+        .from("user_profiles")
+        .select("onboarding_completed")
+        .eq("user_id", user.id)
         .single();
-      
+
       // If already onboarded, go directly to futures page
       if (profile?.onboarding_completed) {
         setCurrentPage("future");
@@ -140,13 +147,10 @@ const Index = () => {
   const handleCodeSuccess = async () => {
     setShowCodeEntry(false);
     setCurrentPage("future");
-    
+
     // Mark onboarding as completed
     if (user) {
-      await supabase
-        .from('user_profiles')
-        .update({ onboarding_completed: true })
-        .eq('user_id', user.id);
+      await supabase.from("user_profiles").update({ onboarding_completed: true }).eq("user_id", user.id);
     }
   };
 
@@ -163,12 +167,7 @@ const Index = () => {
   }
 
   if (showWizard) {
-    return (
-      <WizardFlow 
-        onComplete={handleWizardComplete}
-        onClose={() => setShowWizard(false)}
-      />
-    );
+    return <WizardFlow onComplete={handleWizardComplete} onClose={() => setShowWizard(false)} />;
   }
 
   if (showIntro) {
@@ -182,7 +181,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header title={getHeaderTitle()} onNavigate={handleNavigation} />
-      
+
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
         {currentPage === "mentors" && <MentorsPage onScrollChange={setIsCardScrolling} />}
@@ -192,11 +191,7 @@ const Index = () => {
         {currentPage === "profile" && <ProfilePage />}
       </main>
 
-      <BottomNav 
-        active={currentPage} 
-        onNavigate={handleNavigation}
-        isVisible={shouldShowNav}
-      />
+      <BottomNav active={currentPage} onNavigate={handleNavigation} isVisible={shouldShowNav} />
     </div>
   );
 };
