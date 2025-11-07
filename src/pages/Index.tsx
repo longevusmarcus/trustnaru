@@ -89,7 +89,7 @@ const Index = () => {
       case "mentors": return "clones";
       case "insights": return "insights";
       case "future": return "your futures";
-      case "copilot": return "copilot";
+      case "copilot": return "journeys";
       case "profile": return "profile";
       default: return "path genius";
     }
@@ -188,7 +188,7 @@ const Index = () => {
         {currentPage === "mentors" && <MentorsPage onScrollChange={setIsCardScrolling} />}
         {currentPage === "insights" && <InsightsPage key={pageRenderKey} />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
-        {currentPage === "copilot" && <ActionPage key={pageRenderKey} />}
+        {currentPage === "copilot" && <SearchPage key={pageRenderKey} />}
         {currentPage === "profile" && <ProfilePage />}
       </main>
 
