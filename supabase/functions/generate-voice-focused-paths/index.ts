@@ -43,6 +43,38 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
+    // Fetch liked career paths to learn from user preferences
+    let likedPathsContext = '';
+    const { data: likedPaths } = await supabaseClient
+      .from('career_paths')
+      .select('title, description, category, key_skills, salary_range, journey_duration')
+      .eq('user_id', user.id)
+      .eq('user_feedback', 'up')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (likedPaths && likedPaths.length > 0) {
+      likedPathsContext = `
+🎯 USER'S LIKED CAREER PATHS (Learn from these preferences):
+${likedPaths.map((path, idx) => `
+${idx + 1}. ${path.title}
+   - Category: ${path.category}
+   - Description: ${path.description}
+   - Key Skills: ${path.key_skills?.join(', ')}
+   - Salary: ${path.salary_range}
+   - Timeline: ${path.journey_duration}
+`).join('')}
+
+⚠️ CRITICAL: Use these liked paths to understand what resonates with the user:
+- Notice patterns in their preferred career types, industries, and work styles
+- Generate NEW paths with similar energy, passion focus, and career attributes
+- Match the experience level, salary expectations, and lifestyle they prefer
+- If they liked specific passion areas, double down on those themes
+- Maintain the same level of specificity and realism they responded to
+`;
+      console.log(`Found ${likedPaths.length} liked paths to learn from`);
+    }
+
     // Step 1: Quick CV analysis for baseline skills
     let cvSkills = 'General professional experience';
     let experienceLevel = 'mid';
@@ -116,6 +148,8 @@ ${profile.voice_transcription}
 PROFESSIONAL BASELINE (For realistic calibration - 25% weight):
 - Experience Level: ${experienceLevel}
 - Core Skills: ${cvSkills}
+
+${likedPathsContext}
 
 YOUR MISSION:
 Generate 7 REALISTIC career paths where paths 1-2 are standard, BUT paths 3-7 are ULTRA-CUSTOMIZED to the user's exact passions, interests, and energy from their voice transcript.

@@ -34,6 +34,38 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
+    // Fetch liked career paths to learn from user preferences
+    let likedPathsContext = '';
+    const { data: likedPaths } = await supabaseClient
+      .from('career_paths')
+      .select('title, description, category, key_skills, salary_range, journey_duration')
+      .eq('user_id', user.id)
+      .eq('user_feedback', 'up')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (likedPaths && likedPaths.length > 0) {
+      likedPathsContext = `
+🎯 USER'S LIKED CAREER PATHS (Learn from these preferences):
+${likedPaths.map((path, idx) => `
+${idx + 1}. ${path.title}
+   - Category: ${path.category}
+   - Description: ${path.description}
+   - Key Skills: ${path.key_skills?.join(', ')}
+   - Salary: ${path.salary_range}
+   - Timeline: ${path.journey_duration}
+`).join('')}
+
+⚠️ CRITICAL: Use these liked paths to understand what resonates with the user:
+- Notice patterns in career types, industries, work styles
+- Generate NEW paths that share similar attributes but are distinct
+- Match the experience level, salary range, and career style they prefer
+- If they liked passion-driven paths, prioritize more passion-driven careers
+- If they liked progression paths, focus on natural career growth
+`;
+      console.log(`Found ${likedPaths.length} liked paths to learn from`);
+    }
+
     // Step 1: Analyze CV if provided
     let cvAnalysis = '';
     if (cvUrl) {
@@ -172,6 +204,8 @@ Voice Interests Analysis:
 ${cvAnalysis}
 
 ${voiceInterests}
+
+${likedPathsContext}
 
 Voice Transcription: ${voiceTranscription ? `"${voiceTranscription}"` : 'Not provided'}
 
