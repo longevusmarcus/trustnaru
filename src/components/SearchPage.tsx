@@ -1,11 +1,8 @@
-import { Search, CheckCircle, X, ExternalLink, Loader2 } from "lucide-react";
+import { Search, CheckCircle, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 const profilesLibrary = [
   {
@@ -58,23 +55,10 @@ const profilesLibrary = [
   }
 ];
 
-interface PersonalizedMentor {
-  name: string;
-  title: string;
-  company: string;
-  linkedin_url: string;
-  description: string;
-  tags: string[];
-  journey: string;
-}
-
 export const SearchPage = () => {
-  const { toast } = useToast();
   const [approvedPaths, setApprovedPaths] = useState<string[]>([]);
   const [rejectedPaths, setRejectedPaths] = useState<string[]>([]);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [personalizedMentors, setPersonalizedMentors] = useState<PersonalizedMentor[]>([]);
-  const [isLoadingPersonalized, setIsLoadingPersonalized] = useState(false);
 
   const handleApprove = (id: string) => {
     setApprovedPaths([...approvedPaths, id]);
@@ -85,33 +69,6 @@ export const SearchPage = () => {
     setRejectedPaths([...rejectedPaths, id]);
     setApprovedPaths(approvedPaths.filter(aid => aid !== id));
   };
-
-  const loadPersonalizedMentors = async () => {
-    setIsLoadingPersonalized(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-personalized-mentors');
-      
-      if (error) throw error;
-      
-      if (data?.mentors) {
-        setPersonalizedMentors(data.mentors);
-        toast({
-          title: "✨ Personalized journeys loaded",
-          description: `Found ${data.mentors.length} professionals who match your interests`,
-        });
-      }
-    } catch (error) {
-      console.error('Error loading personalized mentors:', error);
-      toast({
-        title: "Could not load personalized journeys",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingPersonalized(false);
-    }
-  };
-
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
@@ -119,30 +76,17 @@ export const SearchPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Search journeys..."
+            placeholder="Search library..."
             className="pl-10 bg-card"
           />
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="featured" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 h-9">
-            <TabsTrigger value="featured" className="text-xs">Featured</TabsTrigger>
-            <TabsTrigger value="foryou" className="text-xs" onClick={() => {
-              if (personalizedMentors.length === 0 && !isLoadingPersonalized) {
-                loadPersonalizedMentors();
-              }
-            }}>For You</TabsTrigger>
-          </TabsList>
-
-          {/* Featured Tab */}
-          <TabsContent value="featured" className="mt-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                {profilesLibrary.length} Featured Journeys
-              </p>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        {/* Mentor Profiles */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mentor Profiles</p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             {profilesLibrary.map((item) => (
               <Card 
                 key={item.id}
@@ -221,91 +165,8 @@ export const SearchPage = () => {
                 </CardContent>
               </Card>
             ))}
-            </div>
-          </TabsContent>
-
-          {/* For You Tab */}
-          <TabsContent value="foryou" className="mt-4">
-            {isLoadingPersonalized ? (
-              <div className="flex flex-col items-center justify-center py-12 space-y-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Finding journeys tailored for you...</p>
-              </div>
-            ) : personalizedMentors.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 space-y-3">
-                <p className="text-sm text-muted-foreground text-center">
-                  We'll find professionals who match your career interests
-                </p>
-                <Button onClick={loadPersonalizedMentors} size="sm">
-                  Discover Personalized Journeys
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    {personalizedMentors.length} Personalized Journeys
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  {personalizedMentors.map((mentor, idx) => (
-                    <Card key={idx} className="overflow-hidden border-border/50">
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium truncate">{mentor.name}</h4>
-                            <p className="text-xs text-muted-foreground line-clamp-1">{mentor.title} at {mentor.company}</p>
-                          </div>
-                          <a 
-                            href={mentor.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-shrink-0"
-                          >
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        </div>
-
-                        {expandedCard === `personalized-${idx}` && (
-                          <div className="space-y-2 pt-2 border-t border-border">
-                            <div>
-                              <p className="text-xs text-muted-foreground">Why they match</p>
-                              <p className="text-xs">{mentor.description}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Career Journey</p>
-                              <p className="text-xs">{mentor.journey}</p>
-                            </div>
-                            <div className="flex flex-wrap gap-1">
-                              {mentor.tags.map((tag, tagIdx) => (
-                                <span key={tagIdx} className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full h-7 text-xs"
-                          onClick={() => setExpandedCard(
-                            expandedCard === `personalized-${idx}` ? null : `personalized-${idx}`
-                          )}
-                        >
-                          {expandedCard === `personalized-${idx}` ? 'Show Less' : 'Show More'}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -32,6 +32,3 @@ verify_jwt = true
 
 [functions.generate-daily-motivation]
 verify_jwt = true
-
-[functions.generate-personalized-mentors]
-verify_jwt = true

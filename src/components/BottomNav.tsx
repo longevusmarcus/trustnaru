@@ -69,7 +69,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               }`}
             >
               <Target className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Journeys</span>
+              <span className="text-[10px] font-medium">Copilot</span>
             </Button>
           </div>
         </div>
