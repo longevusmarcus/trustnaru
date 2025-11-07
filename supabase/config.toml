@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.generate-career-paths]
 verify_jwt = true
 
+[functions.generate-voice-focused-paths]
+verify_jwt = true
+
 [functions.generate-path-images]
 verify_jwt = true
 

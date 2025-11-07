@@ -18,6 +18,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [hasLoaded, setHasLoaded] = useState(false);
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   const [isDemo, setIsDemo] = useState(false);
+  const [hasVoiceTranscript, setHasVoiceTranscript] = useState(false);
   
   // Scroll to top on mount
   useEffect(() => {
@@ -36,12 +37,14 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     
     const { data: profile } = await supabase
       .from('user_profiles')
-      .select('wizard_data')
+      .select('wizard_data, voice_transcription')
       .eq('user_id', user.id)
       .maybeSingle();
     
     // Show demo badge if user has no wizard data (hasn't completed wizard)
     setIsDemo(!profile?.wizard_data);
+    // Check if user has voice transcript
+    setHasVoiceTranscript(!!profile?.voice_transcription);
   };
 
   // Update paths when careerPaths prop changes (e.g., from wizard)
@@ -118,7 +121,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     }
   };
 
-  const handleGenerateNewVersions = async () => {
+  const handleGenerateCVFocused = async () => {
     if (!user) return;
     
     setLoading(true);
@@ -139,7 +142,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         return;
       }
 
-      // Call generate-career-paths function
+      // Call generate-career-paths function (CV-focused)
       const { data: newPaths, error } = await supabase.functions.invoke('generate-career-paths', {
         body: {
           wizardData: profile.wizard_data,
@@ -160,7 +163,33 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       
       await loadCareerPaths();
     } catch (error) {
-      console.error('Error generating new versions:', error);
+      console.error('Error generating CV-focused paths:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateVoiceFocused = async () => {
+    if (!user || !hasVoiceTranscript) return;
+    
+    setLoading(true);
+    try {
+      // Call voice-focused generation function
+      const { data: newPaths, error } = await supabase.functions.invoke('generate-voice-focused-paths');
+
+      if (error) throw error;
+
+      // Clear cache and reload paths
+      try {
+        const cacheKey = `${CACHE_KEY}_${user.id}`;
+        localStorage.removeItem(cacheKey);
+      } catch (e) {
+        console.warn('Cache clear error:', e);
+      }
+      
+      await loadCareerPaths();
+    } catch (error) {
+      console.error('Error generating voice-focused paths:', error);
     } finally {
       setLoading(false);
     }
@@ -349,7 +378,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={handleGenerateNewVersions}
+            onClick={handleGenerateCVFocused}
             disabled={loading}
             className="h-auto py-1 px-2 text-xs"
           >
@@ -359,9 +388,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={handleGenerateNewVersions}
-            disabled={loading}
+            onClick={handleGenerateVoiceFocused}
+            disabled={loading || !hasVoiceTranscript}
             className="h-auto py-1 px-2 text-xs"
+            title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
             generate more versions (75% energy focus)
@@ -525,7 +555,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={handleGenerateNewVersions}
+            onClick={handleGenerateCVFocused}
             disabled={loading}
             className="h-auto py-1 px-2 text-xs"
           >
@@ -535,9 +565,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={handleGenerateNewVersions}
-            disabled={loading}
+            onClick={handleGenerateVoiceFocused}
+            disabled={loading || !hasVoiceTranscript}
             className="h-auto py-1 px-2 text-xs"
+            title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
             generate more versions (75% energy focus)
