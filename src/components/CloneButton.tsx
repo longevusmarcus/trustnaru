@@ -24,23 +24,23 @@ export const CloneButton = ({ mentorId }: { mentorId: string }) => {
     try {
       // Check if user is already in waitlist
       const { data: userEntry } = await supabase
-        .from('clone_waiting_list')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('mentor_id', mentorId)
+        .from("clone_waiting_list")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("mentor_id", mentorId)
         .maybeSingle();
 
       setIsInWaitlist(!!userEntry);
 
       // Get total count for this mentor
       const { count } = await supabase
-        .from('clone_waiting_list')
-        .select('*', { count: 'exact', head: true })
-        .eq('mentor_id', mentorId);
+        .from("clone_waiting_list")
+        .select("*", { count: "exact", head: true })
+        .eq("mentor_id", mentorId);
 
       setWaitlistCount(count || 0);
     } catch (error) {
-      console.error('Error checking waitlist:', error);
+      console.error("Error checking waitlist:", error);
     }
   };
 
@@ -49,35 +49,33 @@ export const CloneButton = ({ mentorId }: { mentorId: string }) => {
       toast({
         title: "Sign in required",
         description: "Please sign in to join the waiting list",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('clone_waiting_list')
-        .insert({
-          user_id: user.id,
-          mentor_id: mentorId
-        });
+      const { error } = await supabase.from("clone_waiting_list").insert({
+        user_id: user.id,
+        mentor_id: mentorId,
+      });
 
       if (error) throw error;
 
       setIsInWaitlist(true);
-      setWaitlistCount(prev => prev + 1);
-      
+      setWaitlistCount((prev) => prev + 1);
+
       toast({
         title: "You're on the list! 🎉",
         description: `${waitlistCount + 1} people waiting for this clone`,
       });
     } catch (error: any) {
-      console.error('Error joining waitlist:', error);
+      console.error("Error joining waitlist:", error);
       toast({
         title: "Unable to join",
         description: error.message || "Please try again later",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -87,17 +85,12 @@ export const CloneButton = ({ mentorId }: { mentorId: string }) => {
   if (isInWaitlist) {
     return (
       <div className="w-full space-y-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          disabled
-        >
+        <Button variant="outline" size="sm" className="w-full" disabled>
           <CheckCircle2 className="h-4 w-4 mr-2 text-primary" />
           On Waiting List
         </Button>
         <p className="text-[10px] text-center text-muted-foreground">
-          {waitlistCount} {waitlistCount === 1 ? 'person' : 'people'} waiting
+          {waitlistCount} {waitlistCount === 1 ? "person" : "people"} waiting
         </p>
       </div>
     );
@@ -112,11 +105,11 @@ export const CloneButton = ({ mentorId }: { mentorId: string }) => {
         onClick={handleJoinWaitlist}
         disabled={loading}
       >
-        {loading ? 'Joining...' : 'Join Clone Waiting List'}
+        {loading ? "Joining..." : "Clone Journey"}
       </Button>
       {waitlistCount > 0 && (
         <p className="text-[10px] text-center text-muted-foreground">
-          {waitlistCount} {waitlistCount === 1 ? 'person' : 'people'} waiting
+          {waitlistCount} {waitlistCount === 1 ? "person" : "people"} waiting
         </p>
       )}
     </div>
