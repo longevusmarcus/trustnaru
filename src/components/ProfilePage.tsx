@@ -385,16 +385,9 @@ export const ProfilePage = () => {
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
                 Voice Transcription
               </h3>
-              <div className="space-y-3">
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  "{userProfile.voice_transcription.substring(0, 200)}{userProfile.voice_transcription.length > 200 ? '...' : ''}"
-                </p>
-                {userProfile.voice_transcription.length > 200 && (
-                  <Button variant="ghost" size="sm" className="text-xs h-auto p-0 text-muted-foreground">
-                    Read full transcription
-                  </Button>
-                )}
-              </div>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                "{userProfile.voice_transcription.substring(0, 200)}{userProfile.voice_transcription.length > 200 ? '...' : ''}"
+              </p>
             </CardContent>
           </Card>
         )}
