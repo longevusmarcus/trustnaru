@@ -45,7 +45,7 @@ serve(async (req) => {
 
     if (pathError || !path) {
       console.error('Failed to fetch career path:', pathError);
-      throw new Error('Failed to fetch career path');
+      throw new Error('RESOURCE_NOT_FOUND');
     }
 
     console.log('Career path found:', path.title);
@@ -54,7 +54,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       console.error('LOVABLE_API_KEY not configured');
-      throw new Error('LOVABLE_API_KEY not configured');
+      throw new Error('SERVICE_UNAVAILABLE');
     }
 
     const prompt = `Based on this career path, generate 5 specific, actionable goals:
@@ -128,7 +128,7 @@ Format each goal as:
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI API error:', aiResponse.status, errorText);
-      throw new Error('Failed to generate goals with AI');
+      throw new Error('AI_GENERATION_FAILED');
     }
 
     const aiData = await aiResponse.json();
@@ -137,7 +137,7 @@ Format each goal as:
     
     if (!toolCall) {
       console.error('No tool call in AI response:', JSON.stringify(aiData));
-      throw new Error('No tool call in AI response');
+      throw new Error('AI_RESPONSE_INVALID');
     }
 
     const goalsData = JSON.parse(toolCall.function.arguments);
@@ -168,7 +168,7 @@ Format each goal as:
 
     if (insertError) {
       console.error('Failed to insert goals:', insertError);
-      throw new Error('Failed to save goals');
+      throw new Error('DATABASE_ERROR');
     }
 
     console.log(`Successfully inserted ${insertedGoals.length} goals`);
@@ -182,7 +182,7 @@ Format each goal as:
     
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Invalid input data' }),
+        JSON.stringify({ error: 'Invalid request format' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -190,8 +190,14 @@ Format each goal as:
       );
     }
     
+    const errorMessage = error instanceof Error && error.message === 'SERVICE_UNAVAILABLE'
+      ? 'Service temporarily unavailable'
+      : error instanceof Error && error.message === 'RESOURCE_NOT_FOUND'
+      ? 'Resource not found'
+      : 'Unable to generate goals';
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to generate goals' }),
+      JSON.stringify({ error: errorMessage }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

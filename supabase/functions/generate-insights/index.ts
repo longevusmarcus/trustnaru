@@ -164,7 +164,8 @@ Salary Range: ${path.salary_range || 'N/A'}
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('LOVABLE_API_KEY not configured');
+      throw new Error('SERVICE_UNAVAILABLE');
     }
 
     const userName = profile?.display_name || user.email?.split('@')[0] || 'there';
@@ -238,7 +239,7 @@ Your tone: Supportive, honest, action-oriented, focused on what you actually kno
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI API error:', response.status, errorText);
-      throw new Error('Failed to generate insight');
+      throw new Error('AI_REQUEST_FAILED');
     }
 
     const data = await response.json();
@@ -254,7 +255,7 @@ Your tone: Supportive, honest, action-oriented, focused on what you actually kno
     
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Invalid input data' }),
+        JSON.stringify({ error: 'Invalid request format' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -262,8 +263,12 @@ Your tone: Supportive, honest, action-oriented, focused on what you actually kno
       );
     }
     
+    const errorMessage = error instanceof Error && error.message === 'SERVICE_UNAVAILABLE'
+      ? 'Service temporarily unavailable'
+      : 'Unable to generate insight';
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to generate insight' }),
+      JSON.stringify({ error: errorMessage }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

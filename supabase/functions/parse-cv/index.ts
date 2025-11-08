@@ -31,7 +31,8 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+      console.error('LOVABLE_API_KEY is not configured');
+      throw new Error('SERVICE_UNAVAILABLE');
     }
 
     console.log('Calling Lovable AI to parse CV with vision...');
@@ -123,7 +124,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI parsing failed: ${response.status}`);
+      throw new Error('PARSING_FAILED');
     }
 
     const data = await response.json();
@@ -131,7 +132,7 @@ serve(async (req) => {
     
     if (!toolCall) {
       console.error('No tool call in response');
-      throw new Error('Failed to extract CV data');
+      throw new Error('EXTRACTION_FAILED');
     }
 
     const cvData = JSON.parse(toolCall.function.arguments);
@@ -148,7 +149,7 @@ serve(async (req) => {
     if (error instanceof z.ZodError) {
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid input data',
+          error: 'Invalid request format',
           current_role: null,
           years_of_experience: null,
           key_skills: [],
@@ -164,9 +165,13 @@ serve(async (req) => {
       );
     }
     
+    const errorMessage = error instanceof Error && error.message === 'SERVICE_UNAVAILABLE'
+      ? 'Service temporarily unavailable'
+      : 'Unable to process document';
+    
     return new Response(
       JSON.stringify({ 
-        error: 'Failed to parse CV',
+        error: errorMessage,
         current_role: null,
         years_of_experience: null,
         key_skills: [],

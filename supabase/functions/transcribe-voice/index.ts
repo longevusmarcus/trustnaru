@@ -26,7 +26,8 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not configured');
+      console.error('GEMINI_API_KEY is not configured');
+      throw new Error('SERVICE_UNAVAILABLE');
     }
 
     console.log('Processing audio transcription with Gemini...');
@@ -59,8 +60,8 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${response.status}`);
+      console.error('Gemini API error:', response.status, errorText);
+      throw new Error('TRANSCRIPTION_FAILED');
     }
 
     const result = await response.json();
@@ -81,7 +82,7 @@ serve(async (req) => {
     
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Invalid input data' }),
+        JSON.stringify({ error: 'Invalid request format' }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -89,8 +90,12 @@ serve(async (req) => {
       );
     }
     
+    const errorMessage = error instanceof Error && error.message === 'SERVICE_UNAVAILABLE'
+      ? 'Service temporarily unavailable'
+      : 'Unable to process audio';
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to process transcription' }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

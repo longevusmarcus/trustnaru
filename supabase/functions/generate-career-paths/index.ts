@@ -40,7 +40,8 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
+      console.error('GEMINI_API_KEY not configured');
+      throw new Error('SERVICE_UNAVAILABLE');
     }
 
     // Fetch liked career paths to learn from user preferences
@@ -162,7 +163,7 @@ DETAILED CV ANALYSIS:
             console.log('CV analysis complete');
           } else {
             const errorText = await analysisResponse.text();
-            console.error('CV analysis API error:', errorText);
+            console.error('CV analysis API error:', analysisResponse.status, errorText);
           }
         } catch (e) {
           console.error('CV analysis error:', e);
@@ -352,8 +353,8 @@ Generate exactly 7 paths following this structure.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`AI generation failed: ${response.status}`);
+      console.error('Gemini API error:', response.status, errorText);
+      throw new Error('AI_GENERATION_FAILED');
     }
 
     const data = await response.json();
@@ -386,7 +387,7 @@ Generate exactly 7 paths following this structure.`;
 
       if (error) {
         console.error('Error saving career path:', error);
-        throw error;
+        throw new Error('DATABASE_ERROR');
       }
 
       careerPaths.push(savedPath);
@@ -432,13 +433,19 @@ Generate exactly 7 paths following this structure.`;
     
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: 'Invalid input data' }),
+        JSON.stringify({ error: 'Invalid request format' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
+    const errorMessage = error instanceof Error && error.message === 'SERVICE_UNAVAILABLE'
+      ? 'Service temporarily unavailable'
+      : error instanceof Error && error.message === 'Unauthorized'
+      ? 'Authentication required'
+      : 'Unable to generate career paths';
+    
     return new Response(
-      JSON.stringify({ error: 'Failed to generate career paths' }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
