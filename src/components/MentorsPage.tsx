@@ -221,10 +221,12 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     setFilteredMentors(filtered);
   };
 
-  const loadPersonalizedMentors = async () => {
+  const loadPersonalizedMentors = async (focus: 'energy' | 'cv' | 'balanced' = 'balanced') => {
     setLoadingPersonalized(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-personalized-mentors');
+      const { data, error } = await supabase.functions.invoke('generate-personalized-mentors', {
+        body: { focus }
+      });
       
       if (error) throw error;
       
@@ -475,9 +477,29 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
               Personalized recommendations based on your career interests
             </p>
             {personalizedMentors.length === 0 && !loadingPersonalized && (
-              <Button onClick={loadPersonalizedMentors} className="w-full">
+              <Button onClick={() => loadPersonalizedMentors()} className="w-full">
                 Generate Recommendations
               </Button>
+            )}
+            {personalizedMentors.length > 0 && !loadingPersonalized && (
+              <div className="flex gap-2 mb-4">
+                <Button 
+                  onClick={() => loadPersonalizedMentors('energy')} 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 text-xs h-8"
+                >
+                  + Energy Focus
+                </Button>
+                <Button 
+                  onClick={() => loadPersonalizedMentors('cv')} 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 text-xs h-8"
+                >
+                  + CV Focus
+                </Button>
+              </div>
             )}
           </div>
 

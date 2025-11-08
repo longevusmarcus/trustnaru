@@ -34,6 +34,10 @@ serve(async (req) => {
 
     console.log('Authenticated user:', user.id);
 
+    // Get focus parameter from request body
+    const body = await req.json().catch(() => ({}));
+    const focus = body.focus || 'balanced'; // 'energy', 'cv', or 'balanced'
+
     // Get user's profile to find active path
     const { data: profile } = await supabase
       .from('user_profiles')
@@ -57,6 +61,14 @@ serve(async (req) => {
 
     // Build context from user's preferences
     let preferencesContext = '';
+    let focusInstruction = '';
+    
+    // Add focus-specific instructions
+    if (focus === 'energy') {
+      focusInstruction = 'IMPORTANT: Focus heavily on passion-driven career paths and people who followed their interests. Prioritize professionals whose journey shows they pursued what they love, made bold career pivots, or work in mission-driven roles.';
+    } else if (focus === 'cv') {
+      focusInstruction = 'IMPORTANT: Focus heavily on natural career progression and professionals with strong traditional backgrounds. Prioritize people with impressive credentials, systematic career advancement, and proven track records in established companies.';
+    }
     
     if (activePath) {
       preferencesContext += `Active Career Path: ${activePath.title}\n`;
@@ -76,7 +88,9 @@ serve(async (req) => {
       preferencesContext = 'User has not selected any career paths yet. Provide diverse recommendations.';
     }
 
-    const prompt = `Based on the following user's career interests and preferences, find 5 REAL professionals on LinkedIn who match their aspirations:
+    const prompt = `${focusInstruction}
+
+Based on the following user's career interests and preferences, find 5 REAL professionals on LinkedIn who match their aspirations:
 
 ${preferencesContext}
 
