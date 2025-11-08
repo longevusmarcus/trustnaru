@@ -29,7 +29,7 @@ const authSchema = z.object({
 type AuthFormData = z.infer<typeof authSchema>;
 
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
