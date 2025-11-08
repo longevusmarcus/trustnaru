@@ -335,7 +335,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Your Future Self</p>
           <Card 
             className="bg-card-dark text-card-dark-foreground overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => onNavigate('future')}
+            onClick={() => onNavigate('copilot')}
           >
             {firstPath ? (
               <>

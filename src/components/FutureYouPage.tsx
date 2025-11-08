@@ -423,7 +423,11 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
         <div className="space-y-4">
           {futureCards.map((card, index) => (
-            <Card key={index} className="overflow-hidden border-border/50">
+            <Card 
+              key={index} 
+              className="overflow-hidden border-border/50 cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => navigate(`/path/${index}`, { state: { card } })}
+            >
               <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
                 <img 
                   src={card.image} 
@@ -536,13 +540,21 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     variant="ghost" 
                     className="w-full justify-start" 
                     size="sm"
-                    onClick={() => navigate(`/path/${index}`, { state: { card } })}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/path/${index}`, { state: { card } });
+                    }}
                   >
                     <Target className="h-4 w-4 mr-2" />
                     View Path
                   </Button>
                   
-                  <Button variant="ghost" className="w-full justify-start" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    size="sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Share2 className="h-4 w-4 mr-2" />
                     Share
                   </Button>
@@ -553,7 +565,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFeedback(card.id, 'up')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeedback(card.id, 'up');
+                        }}
                         className={`h-auto p-1 ${card.userFeedback === 'up' ? 'text-primary' : 'text-muted-foreground/40'} hover:text-primary`}
                       >
                         <ThumbsUp className="h-3.5 w-3.5" />
@@ -561,7 +576,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleFeedback(card.id, 'down')}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFeedback(card.id, 'down');
+                        }}
                         className={`h-auto p-1 ${card.userFeedback === 'down' ? 'text-destructive' : 'text-muted-foreground/40'} hover:text-destructive`}
                       >
                         <ThumbsDown className="h-3.5 w-3.5" />
