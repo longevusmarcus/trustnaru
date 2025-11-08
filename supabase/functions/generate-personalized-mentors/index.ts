@@ -1,11 +1,16 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  focus: z.enum(['energy', 'cv', 'balanced']).optional().default('balanced'),
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -36,7 +41,16 @@ serve(async (req) => {
 
     // Get focus parameter from request body
     const body = await req.json().catch(() => ({}));
-    const focus = body.focus || 'balanced'; // 'energy', 'cv', or 'balanced'
+    const validationResult = inputSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { focus } = validationResult.data;
 
     // Get user's profile to find active path
     const { data: profile } = await supabase
