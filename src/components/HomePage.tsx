@@ -113,6 +113,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [showDailyMotivation, setShowDailyMotivation] = useState(false);
+  const [clickedDay, setClickedDay] = useState<number | null>(null);
+  const [clickedBadge, setClickedBadge] = useState<number | null>(null);
   
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -295,19 +297,35 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               const isToday = date.toDateString() === new Date().toDateString();
               const hasStreak = streaks.some(s => s.toDateString() === date.toDateString());
               const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+              const isClicked = clickedDay === i;
               
               return (
                 <div key={i} className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">{dayNames[date.getDay()]}</div>
-                  <div className={`text-sm font-medium rounded-lg py-2 transition-colors flex items-center justify-center gap-1 ${
-                    hasStreak 
-                      ? 'bg-primary text-primary-foreground' 
-                      : isToday 
-                      ? 'border-2 border-primary' 
-                      : 'bg-muted/30'
-                  }`}>
+                  <div 
+                    className={`text-sm font-medium rounded-lg py-2 transition-all duration-300 flex items-center justify-center gap-1 cursor-pointer relative ${
+                      hasStreak 
+                        ? 'bg-primary text-primary-foreground' 
+                        : isToday 
+                        ? 'border-2 border-primary' 
+                        : 'bg-muted/30'
+                    } ${isClicked ? 'fire-burst' : ''}`}
+                    onClick={() => {
+                      if (hasStreak) {
+                        setClickedDay(i);
+                        setTimeout(() => setClickedDay(null), 800);
+                      }
+                    }}
+                  >
                     {date.getDate()}
-                    {hasStreak && <Flame className="h-3 w-3 text-orange-500" />}
+                    {hasStreak && <Flame className={`h-3 w-3 text-orange-500 transition-all ${isClicked ? 'fire-icon' : ''}`} />}
+                    {isClicked && hasStreak && (
+                      <>
+                        <Flame className="absolute h-4 w-4 text-orange-500 fire-particle fire-particle-1" />
+                        <Flame className="absolute h-3 w-3 text-red-500 fire-particle fire-particle-2" />
+                        <Flame className="absolute h-3 w-3 text-yellow-500 fire-particle fire-particle-3" />
+                      </>
+                    )}
                   </div>
                 </div>
               );
@@ -321,7 +339,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Recent Badges</p>
             <div className="grid grid-cols-3 gap-3">
               {earnedBadges.map((badge: any, index: number) => (
-                <Card key={index} className="p-3 text-center">
+                <Card 
+                  key={index} 
+                  className={`p-3 text-center cursor-pointer transition-all duration-300 ${
+                    clickedBadge === index ? 'badge-pump' : ''
+                  }`}
+                  onClick={() => {
+                    setClickedBadge(index);
+                    setTimeout(() => setClickedBadge(null), 600);
+                  }}
+                >
                   <div className="text-2xl mb-1">{badge.badges.icon}</div>
                   <p className="text-xs font-medium">{badge.badges.name}</p>
                 </Card>
