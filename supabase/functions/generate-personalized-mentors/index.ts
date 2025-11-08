@@ -19,15 +19,20 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error('User not authenticated');
+    // Extract JWT token
+    const token = authHeader.replace('Bearer ', '');
+    
+    // Get user from JWT
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      throw new Error('Not authenticated');
     }
+
+    console.log('Authenticated user:', user.id);
 
     // Get user's profile to find active path
     const { data: profile } = await supabase
