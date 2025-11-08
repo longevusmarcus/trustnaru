@@ -1,10 +1,21 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  pdfBase64: z.string()
+    .min(1, "PDF data required")
+    .refine((val) => val.startsWith('data:application/pdf;base64,'), "Invalid PDF format")
+    .refine((val) => {
+      const base64Data = val.split(',')[1] || '';
+      return base64Data.length <= 10 * 1024 * 1024;
+    }, "PDF file too large (max 10MB)")
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,15 +24,10 @@ serve(async (req) => {
 
   try {
     console.log('Parse-cv function called');
-    const { pdfBase64 } = await req.json();
+    const body = await req.json();
+    const validated = inputSchema.parse(body);
+    const { pdfBase64 } = validated;
     console.log('PDF base64 received, length:', pdfBase64?.length || 0);
-    
-    if (!pdfBase64) {
-      return new Response(
-        JSON.stringify({ error: 'PDF data is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -138,9 +144,29 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in parse-cv function:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid input data',
+          current_role: null,
+          years_of_experience: null,
+          key_skills: [],
+          past_companies: [],
+          education: [],
+          certifications: [],
+          notable_achievements: []
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: 'Failed to parse CV',
         current_role: null,
         years_of_experience: null,
         key_skills: [],

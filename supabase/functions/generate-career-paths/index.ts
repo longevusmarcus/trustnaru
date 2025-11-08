@@ -1,10 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  wizardData: z.any().optional(),
+  cvUrl: z.string().max(1000).optional(),
+  voiceTranscription: z.string().max(5000, "Voice transcription too long").optional()
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -27,7 +34,9 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { wizardData, cvUrl, voiceTranscription } = await req.json();
+    const body = await req.json();
+    const validated = inputSchema.parse(body);
+    const { wizardData, cvUrl, voiceTranscription } = validated;
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
@@ -420,8 +429,16 @@ Generate exactly 7 paths following this structure.`;
     );
   } catch (error) {
     console.error('Error generating career paths:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Failed to generate career paths' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

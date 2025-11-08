@@ -1,11 +1,16 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  message: z.string().trim().min(1, "Message required").max(2000, "Message too long (max 2000 characters)")
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,7 +18,9 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    const validated = inputSchema.parse(body);
+    const { message } = validated;
     console.log('Received message:', message);
     
     // Use service role key for server-side operations
@@ -244,8 +251,19 @@ Your tone: Supportive, honest, action-oriented, focused on what you actually kno
 
   } catch (error) {
     console.error('Error in generate-insights function:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Failed to generate insight' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

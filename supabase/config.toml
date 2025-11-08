@@ -1,7 +1,7 @@
 project_id = "vpugfhmddyttrokzbsqr"
 
 [functions.transcribe-voice]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-career-paths]
 verify_jwt = true

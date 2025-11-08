@@ -1,9 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  audio: z.string().min(1, "Audio data required").max(10 * 1024 * 1024, "Audio file too large (max 10MB)")
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +16,9 @@ serve(async (req) => {
   }
 
   try {
-    const { audio } = await req.json();
+    const body = await req.json();
+    const validated = inputSchema.parse(body);
+    const { audio } = validated;
     
     if (!audio) {
       throw new Error('No audio data provided');
@@ -71,8 +78,19 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in transcribe-voice function:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Failed to process transcription' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

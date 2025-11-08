@@ -1,11 +1,17 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const inputSchema = z.object({
+  pathId: z.string().uuid("Invalid path ID format"),
+  userId: z.string().uuid("Invalid user ID format")
+});
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,12 +20,10 @@ serve(async (req) => {
 
   try {
     console.log('Generate goals function called');
-    const { pathId, userId } = await req.json();
+    const body = await req.json();
+    const validated = inputSchema.parse(body);
+    const { pathId, userId } = validated;
     console.log('Parameters:', { pathId, userId });
-    
-    if (!pathId || !userId) {
-      throw new Error('Missing required parameters');
-    }
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -175,8 +179,19 @@ Format each goal as:
 
   } catch (error) {
     console.error('Error in generate-goals function:', error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input data' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ error: 'Failed to generate goals' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
