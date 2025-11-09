@@ -10,6 +10,7 @@ import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, Grad
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
 import { CloneButton } from "@/components/CloneButton";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MentorsPageProps {
   onScrollChange?: (isScrolling: boolean) => void;
@@ -25,6 +26,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [personalizedMentors, setPersonalizedMentors] = useState<any[]>([]);
   const [loadingPersonalized, setLoadingPersonalized] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
 
@@ -56,7 +58,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
 
   useEffect(() => {
     loadMentors();
-  }, []);
+    loadPersonalizedMentorsFromCache();
+  }, [user]);
 
   useEffect(() => {
     filterMentors();
@@ -221,6 +224,29 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     setFilteredMentors(filtered);
   };
 
+  const loadPersonalizedMentorsFromCache = () => {
+    if (!user?.id) return;
+    
+    try {
+      const cacheKey = `personalized_mentors_${user.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const now = Date.now();
+        const cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (now - timestamp < cacheExpiry) {
+          setPersonalizedMentors(data);
+        } else {
+          localStorage.removeItem(cacheKey);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cached mentors:', error);
+    }
+  };
+
   const loadPersonalizedMentors = async (focus: 'energy' | 'cv' | 'balanced' = 'balanced') => {
     setLoadingPersonalized(true);
     try {
@@ -232,6 +258,15 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       
       if (data?.mentors) {
         setPersonalizedMentors(data.mentors);
+        
+        // Save to localStorage
+        if (user?.id) {
+          const cacheKey = `personalized_mentors_${user.id}`;
+          localStorage.setItem(cacheKey, JSON.stringify({
+            data: data.mentors,
+            timestamp: Date.now()
+          }));
+        }
       }
     } catch (error) {
       console.error('Error loading personalized mentors:', error);
