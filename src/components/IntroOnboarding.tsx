@@ -40,7 +40,7 @@ const slides = [
     subtitle: "Naru will evolve into the OS for Becoming:",
     items: [
       "Share what gives you energy",
-      "See your future selves",
+      "Visualize your future selves",
       "Unlock your career paths",
       "Get daily guidance/insights",
       "Track your evolution",
@@ -49,7 +49,7 @@ const slides = [
   {
     icon: Eye,
     title: "Is Naru another career coach / job copilot?",
-    content: '"Naru reveals who you`re meant to become, and guides you every step of the way. See it. Grow into it."',
+    content: '"No. No. Once you use it, you`ll understand."',
   },
   {
     icon: LineChart,
