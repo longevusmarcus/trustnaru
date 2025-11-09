@@ -91,11 +91,11 @@ export default function PathDetail() {
 
       if (error) throw error;
 
-      if (data?.images && data.images.length > 0) {
-        setPathImages(prev => [...prev, ...data.images]);
+      if (data?.allImages && data.allImages.length > 0) {
+        setPathImages(prev => [...prev, ...data.allImages]);
         toast({
           title: "Images generated!",
-          description: `${data.images.length} new images added to your visualizations.`,
+          description: `${data.allImages.length} new images added to your visualizations.`,
         });
       }
     } catch (error) {
