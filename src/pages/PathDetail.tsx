@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,15 @@ export default function PathDetail() {
   const { toast } = useToast();
   const [activating, setActivating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [pathImages, setPathImages] = useState<string[]>([]);
   const card = location.state?.card;
+
+  useEffect(() => {
+    if (card?.pathImages) {
+      setPathImages(card.pathImages);
+    }
+  }, [card]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,6 +33,36 @@ export default function PathDetail() {
     navigate("/");
     return null;
   }
+
+  const handleGenerateImages = async () => {
+    if (!card.id) return;
+    
+    setGeneratingImages(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-path-images', {
+        body: { pathId: card.id }
+      });
+
+      if (error) throw error;
+
+      if (data?.images && data.images.length > 0) {
+        setPathImages(data.images);
+        toast({
+          title: "Images generated!",
+          description: "New visualization images have been created for this path.",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating images:', error);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate new images. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingImages(false);
+    }
+  };
 
   const handleActivatePath = async () => {
     if (!user || !card.id) return;
@@ -111,16 +149,31 @@ export default function PathDetail() {
         )}
 
         {/* Path Images */}
-        <div className="grid grid-cols-3 gap-2 mb-8">
-          {card.pathImages.map((img: string, imgIndex: number) => (
-            <div 
-              key={imgIndex} 
-              className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => setSelectedImage(img)}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-muted-foreground">Visualizations</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleGenerateImages}
+              disabled={generatingImages}
+              className="h-7 text-xs"
             >
-              <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
-            </div>
-          ))}
+              <Sparkles className="h-3 w-3 mr-1" />
+              {generatingImages ? "Generating..." : "Generate More"}
+            </Button>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {pathImages.map((img: string, imgIndex: number) => (
+              <div 
+                key={imgIndex} 
+                className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setSelectedImage(img)}
+              >
+                <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Roadmap */}
