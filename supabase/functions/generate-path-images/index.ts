@@ -97,21 +97,35 @@ async function generateWithGemini(prompt: string, refImageBase64: string, maxRet
   throw new Error('Failed to generate image after all retries');
 }
 
-const constructScenePrompts = (careerPath: any): string[] => {
+const constructScenePrompts = (careerPath: any, existingImageCount: number = 0): string[] => {
   const roleTitle = careerPath.title || 'Professional';
   const keySkills = careerPath.key_skills?.slice(0, 2).join(', ') || 'professional skills';
   const lifestyle = careerPath.lifestyle_benefits?.[0] || 'successful professional lifestyle';
   
-  // Generate exactly 3 HYPER-photorealistic scene prompts - emphasize realism
+  // First set of images (initial generation)
+  if (existingImageCount === 0) {
+    return [
+      // 1) Professional Scene - working as the role
+      `HYPERREALISTIC professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic work moment. Professional environment with depth and detail.`,
+      
+      // 2) Leadership/Collaboration Scene
+      `HYPERREALISTIC candid shot of a ${roleTitle} collaborating with colleagues or presenting ideas. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. Documentary photography style. Contemporary workplace with realistic details and depth.`,
+      
+      // 3) Lifestyle Success Scene
+      `HYPERREALISTIC lifestyle photograph of a ${roleTitle} enjoying ${lifestyle}. Shot on Nikon Z9, 85mm f/1.4 lens, golden hour natural lighting. CRITICAL: IDENTICAL person from reference photo - same face, features, skin, hair, body entirely. NO changes whatsoever. Authentic moment, aspirational yet believable. Real-world setting with cinematic composition and shallow depth of field.`
+    ];
+  }
+  
+  // Alternative set of images (subsequent generations) - different contexts, same person
   return [
-    // 1) Professional Scene - working as the role
-    `HYPERREALISTIC professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic work moment. Professional environment with depth and detail.`,
+    // 1) Outdoor/Travel Scene - different environment
+    `HYPERREALISTIC environmental portrait of a ${roleTitle} in an outdoor urban or natural setting, casual professional attire. Shot on Fujifilm X-T5, 56mm f/1.2 lens, natural daylight, cinematic depth. CRITICAL: EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Different clothing style from previous images. Authentic lifestyle moment showing work-life balance.`,
     
-    // 2) Leadership/Collaboration Scene
-    `HYPERREALISTIC candid shot of a ${roleTitle} collaborating with colleagues or presenting ideas. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. Documentary photography style. Contemporary workplace with realistic details and depth.`,
+    // 2) Evening/Social Scene - different time and context
+    `HYPERREALISTIC evening photograph of a ${roleTitle} at a professional networking event or casual dinner meeting, elegant yet relaxed attire. Shot on Leica Q3, 28mm f/1.7 lens, ambient warm lighting, artistic bokeh. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. Different outfit and atmosphere from previous scenes. Natural social interaction captured authentically.`,
     
-    // 3) Lifestyle Success Scene
-    `HYPERREALISTIC lifestyle photograph of a ${roleTitle} enjoying ${lifestyle}. Shot on Nikon Z9, 85mm f/1.4 lens, golden hour natural lighting. CRITICAL: IDENTICAL person from reference photo - same face, features, skin, hair, body entirely. NO changes whatsoever. Authentic moment, aspirational yet believable. Real-world setting with cinematic composition and shallow depth of field.`
+    // 3) Home Office/Creative Scene - different workspace
+    `HYPERREALISTIC intimate shot of a ${roleTitle} working from a home office or creative studio space, comfortable modern clothing. Shot on Canon R6, 35mm f/1.4 lens, soft natural window light, shallow focus. CRITICAL: IDENTICAL person from reference photo - same face, features, skin, hair, body entirely. NO changes whatsoever. Different setting and clothing style showing versatility. Personal, authentic workspace environment with character and depth.`
   ];
 }
 
@@ -237,8 +251,12 @@ serve(async (req) => {
     
     console.log(`Using ${allRefImagesBase64.length} reference photos for hyperrealistic generation`);
 
+    // Check existing images to determine which prompts to use
+    const existingImageCount = careerPath.all_images?.length || 0;
+    console.log(`Existing images count: ${existingImageCount}`);
+
     // Generate 3 images per career path, rotating through available photos
-    const scenePrompts = constructScenePrompts(careerPath);
+    const scenePrompts = constructScenePrompts(careerPath, existingImageCount);
     console.log('Generating career images for:', careerPath.title);
 
     const allImageUrls: string[] = [];
@@ -293,10 +311,13 @@ serve(async (req) => {
       throw new Error('Failed to generate any images');
     }
 
-    // Store URLs in database - first image as main, all in array
+    // Store URLs in database - append to existing images or create new array
+    const existingImages = careerPath.all_images || [];
+    const combinedImages = [...existingImages, ...allImageUrls];
+    
     const imageData = {
-      image_url: allImageUrls[0],
-      all_images: allImageUrls
+      image_url: existingImages.length === 0 ? allImageUrls[0] : careerPath.image_url,
+      all_images: combinedImages
     };
 
     const { error: updateError } = await supabaseClient
