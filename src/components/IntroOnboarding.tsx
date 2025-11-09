@@ -21,7 +21,7 @@ const slides = [
   {
     icon: Sparkles,
     title: "The Problem",
-    content: "You don't know who you're becoming professionally, who you should become, or how to get there.",
+    content: "You don't know who you're becoming, who you should become, or how to get there.",
   },
   {
     icon: Compass,
@@ -32,7 +32,12 @@ const slides = [
     icon: Database,
     title: "Our Moat",
     content:
-      "Naru learns from your background, your energy, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
+      "Naru learns from your resume, your energy, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
+  },
+  {
+    icon: Eye,
+    title: "Is Naru another career coach / job copilot?",
+    content: "No. Naru is the world’s first database of human potential",
   },
   {
     icon: Zap,
@@ -45,11 +50,6 @@ const slides = [
       "Get daily guidance/insights",
       "Track your evolution",
     ],
-  },
-  {
-    icon: Eye,
-    title: "Is Naru another career coach / job copilot?",
-    content: "No. Naru is the world’s first database of human potential",
   },
   {
     icon: LineChart,
