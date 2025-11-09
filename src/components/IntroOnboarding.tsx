@@ -49,7 +49,7 @@ const slides = [
   {
     icon: Eye,
     title: "Is Naru another career coach / job copilot?",
-    content: "No. No. Once you use it, you'll understand.",
+    content: "No. Naru is the world’s first database of human potential",
   },
   {
     icon: LineChart,
