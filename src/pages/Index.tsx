@@ -78,9 +78,12 @@ const Index = () => {
     }
   }, [location]);
 
-  // Scroll to top when page changes
+  // Scroll to top when page changes (unless restoring scroll position)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const isRestoringScroll = sessionStorage.getItem('futurePageScrollPos');
+    if (!isRestoringScroll) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }, [currentPage]);
 
   const getHeaderTitle = () => {

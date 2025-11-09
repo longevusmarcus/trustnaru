@@ -22,9 +22,17 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [isDemo, setIsDemo] = useState(false);
   const [hasVoiceTranscript, setHasVoiceTranscript] = useState(false);
   
-  // Scroll to top on mount
+  // Restore scroll position if returning from PathDetail
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const savedScrollPos = sessionStorage.getItem('futurePageScrollPos');
+    if (savedScrollPos) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'instant' });
+        sessionStorage.removeItem('futurePageScrollPos');
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, []);
   
   useEffect(() => {
@@ -426,7 +434,10 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             <Card 
               key={index} 
               className="overflow-hidden border-border/50 cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => navigate(`/path/${index}`, { state: { card } })}
+              onClick={() => {
+                sessionStorage.setItem('futurePageScrollPos', window.scrollY.toString());
+                navigate(`/path/${index}`, { state: { card } });
+              }}
             >
               <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
                 <img 
@@ -542,6 +553,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      sessionStorage.setItem('futurePageScrollPos', window.scrollY.toString());
                       navigate(`/path/${index}`, { state: { card } });
                     }}
                   >
