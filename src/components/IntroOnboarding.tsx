@@ -31,7 +31,8 @@ const slides = [
   {
     icon: Database,
     title: "Our Moat",
-    content: "Proprietary dataset mapping human potential and career evolution.",
+    content:
+      "Naru learns from your background, your energy, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
   },
   {
     icon: Zap,
