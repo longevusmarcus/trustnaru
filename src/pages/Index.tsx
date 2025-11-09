@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { HomePage } from "@/components/HomePage";
 import { SearchPage } from "@/components/SearchPage";
 import { MentorsPage } from "@/components/MentorsPage";
+import { CommunityPage } from "@/components/CommunityPage";
 import { FutureYouPage } from "@/components/FutureYouPage";
 import { ActionPage } from "@/components/ActionPage";
 import { ProfilePage } from "@/components/ProfilePage";
@@ -92,6 +93,8 @@ const Index = () => {
         return "dashboard";
       case "mentors":
         return "journeys";
+      case "community":
+        return "community";
       case "insights":
         return "insights";
       case "future":
@@ -188,6 +191,7 @@ const Index = () => {
       <main className="pb-safe">
         {currentPage === "home" && <HomePage onNavigate={handleNavigation} />}
         {currentPage === "mentors" && <MentorsPage onScrollChange={setIsCardScrolling} />}
+        {currentPage === "community" && <CommunityPage />}
         {currentPage === "insights" && <InsightsPage key={pageRenderKey} />}
         {currentPage === "future" && <FutureYouPage careerPaths={careerPaths} />}
         {currentPage === "copilot" && <ActionPage key={pageRenderKey} />}
