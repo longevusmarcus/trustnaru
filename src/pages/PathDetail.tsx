@@ -15,8 +15,11 @@ export default function PathDetail() {
   const { toast } = useToast();
   const [activating, setActivating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [generatingImages, setGeneratingImages] = useState(false);
   const [pathImages, setPathImages] = useState<string[]>([]);
+  const [touchStart, setTouchStart] = useState<number>(0);
+  const [touchEnd, setTouchEnd] = useState<number>(0);
   const card = location.state?.card;
 
   useEffect(() => {
@@ -24,6 +27,49 @@ export default function PathDetail() {
       setPathImages(card.pathImages);
     }
   }, [card]);
+
+  const handleImageClick = (img: string, index: number) => {
+    setSelectedImage(img);
+    setSelectedImageIndex(index);
+  };
+
+  const handleNextImage = () => {
+    const allImages = [card.image, ...pathImages];
+    const nextIndex = (selectedImageIndex + 1) % allImages.length;
+    setSelectedImageIndex(nextIndex);
+    setSelectedImage(allImages[nextIndex]);
+  };
+
+  const handlePrevImage = () => {
+    const allImages = [card.image, ...pathImages];
+    const prevIndex = (selectedImageIndex - 1 + allImages.length) % allImages.length;
+    setSelectedImageIndex(prevIndex);
+    setSelectedImage(allImages[prevIndex]);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    
+    if (distance > minSwipeDistance) {
+      handleNextImage();
+    } else if (distance < -minSwipeDistance) {
+      handlePrevImage();
+    }
+    
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -131,7 +177,7 @@ export default function PathDetail() {
 
       <div className="px-4 pb-8">
         {/* Hero Image */}
-        <div className="relative h-64 -mx-4 mb-6 cursor-pointer" onClick={() => setSelectedImage(card.image)}>
+        <div className="relative h-64 -mx-4 mb-6 cursor-pointer" onClick={() => handleImageClick(card.image, 0)}>
           <img 
             src={card.image} 
             alt={card.title}
@@ -168,7 +214,7 @@ export default function PathDetail() {
               <div 
                 key={imgIndex} 
                 className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => setSelectedImage(img)}
+                onClick={() => handleImageClick(img, imgIndex + 1)}
               >
                 <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
               </div>
@@ -248,12 +294,17 @@ export default function PathDetail() {
       {/* Image Viewer Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
         <DialogContent className="max-w-full max-h-full w-screen h-screen p-0 border-0 bg-black/95">
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div 
+            className="relative w-full h-full flex items-center justify-center"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             {selectedImage && (
               <img 
                 src={selectedImage} 
                 alt="Full view" 
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-full object-contain select-none"
               />
             )}
           </div>
