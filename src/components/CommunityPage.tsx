@@ -6,13 +6,15 @@ export const CommunityPage = () => {
           Matching with lookalike professionals on the same paths and journeys
           <span className="inline-flex gap-0.5 ml-1">
             <span className="animate-pulse">.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.2s' }}>.</span>
-            <span className="animate-pulse" style={{ animationDelay: '0.4s' }}>.</span>
+            <span className="animate-pulse" style={{ animationDelay: "0.2s" }}>
+              .
+            </span>
+            <span className="animate-pulse" style={{ animationDelay: "0.4s" }}>
+              .
+            </span>
           </span>
         </h2>
-        <p className="text-sm text-muted-foreground">
-          stay tuned as we gather more data
-        </p>
+        <p className="text-sm text-muted-foreground">This feature is coming soon. Stay tuned as we gather more data.</p>
       </div>
     </div>
   );
