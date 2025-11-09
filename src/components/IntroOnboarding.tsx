@@ -48,7 +48,7 @@ const slides = [
   {
     icon: Eye,
     title: "Is Naru another career coach / job copilot?",
-    content: '"No, Naru is about who you can become, who you should become, and how to get there"',
+    content: '"Naru reveals who you`re meant to become, and guides you every step of the way. See it. Grow into it."',
   },
   {
     icon: LineChart,
