@@ -21,7 +21,7 @@ const slides = [
   {
     icon: Sparkles,
     title: "The Problem",
-    content: "People don't know who they're becoming professionally, or how to become it.",
+    content: "You don't know who you're becoming professionally, who you should become, or how to get there.",
   },
   {
     icon: Compass,
@@ -31,7 +31,7 @@ const slides = [
   {
     icon: Database,
     title: "Our Moat",
-    content: "Proprietary dataset of human potential.",
+    content: "Proprietary dataset of human potential and professional evolution.",
   },
   {
     icon: Crown,
