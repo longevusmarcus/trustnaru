@@ -231,7 +231,7 @@ const Auth = () => {
             The OS for Becoming.
           </p>
           <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto mt-1 font-light">
-            See your future self. Become them.
+            See your future self. Become it.
           </p>
         </div>
 
