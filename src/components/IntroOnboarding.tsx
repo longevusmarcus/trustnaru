@@ -21,7 +21,7 @@ const slides = [
   {
     icon: Sparkles,
     title: "The Problem",
-    content: "People don't know who they're becoming, or how to become it.",
+    content: "People don't know who they're becoming professionally, or how to become it.",
   },
   {
     icon: Compass,
