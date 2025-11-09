@@ -3,7 +3,7 @@ export const CommunityPage = () => {
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="max-w-md mx-auto text-center space-y-4 animate-fade-in">
         <h2 className="text-xl font-medium text-foreground/90">
-          Matching with lookalike professionals on the same paths and journeys
+          Matching with lookalike professionals on similar paths and journeys
           <span className="inline-flex gap-0.5 ml-1">
             <span className="animate-pulse">.</span>
             <span className="animate-pulse" style={{ animationDelay: "0.2s" }}>
