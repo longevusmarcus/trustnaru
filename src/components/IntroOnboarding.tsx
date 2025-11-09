@@ -34,12 +34,6 @@ const slides = [
     content: "Proprietary dataset mapping human potential and career evolution.",
   },
   {
-    icon: Crown,
-    title: "The Vision",
-    content:
-      "By reverse-engineering career and life success, we’re transforming career development to help people realize their full potential.",
-  },
-  {
     icon: Zap,
     title: "The OS for Becoming",
     subtitle: "Naru will evolve into the OS for Becoming:",
