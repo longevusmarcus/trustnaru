@@ -92,10 +92,10 @@ export default function PathDetail() {
       if (error) throw error;
 
       if (data?.images && data.images.length > 0) {
-        setPathImages(data.images);
+        setPathImages(prev => [...prev, ...data.images]);
         toast({
           title: "Images generated!",
-          description: "New visualization images have been created for this path.",
+          description: `${data.images.length} new images added to your visualizations.`,
         });
       }
     } catch (error) {
