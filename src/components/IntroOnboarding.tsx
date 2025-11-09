@@ -31,7 +31,7 @@ const slides = [
   {
     icon: Database,
     title: "Our Moat",
-    content: "Proprietary dataset of human potential and professional evolution.",
+    content: "Proprietary dataset mapping human potential and career evolution.",
   },
   {
     icon: Crown,
