@@ -132,6 +132,16 @@ export default function PathDetail() {
 
       if (error) throw error;
 
+      // Clear cache for this user
+      if (user?.id) {
+        try {
+          const cacheKey = `career_paths_${user.id}`;
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('Cache clear error:', e);
+        }
+      }
+
       // Update local state
       setPathImages(updatedImages);
       
