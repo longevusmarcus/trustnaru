@@ -91,11 +91,18 @@ export default function PathDetail() {
 
       if (error) throw error;
 
-      if (data?.allImages && data.allImages.length > 0) {
-        setPathImages(prev => [...prev, ...data.allImages]);
+      // Reload the path from database to get persisted images
+      const { data: updatedPath, error: fetchError } = await supabase
+        .from('career_paths')
+        .select('*')
+        .eq('id', card.id)
+        .single();
+
+      if (!fetchError && updatedPath?.all_images) {
+        setPathImages(updatedPath.all_images);
         toast({
           title: "Images generated!",
-          description: `${data.allImages.length} new images added to your visualizations.`,
+          description: `${data?.allImages?.length || 0} new images added to your visualizations.`,
         });
       }
     } catch (error) {
