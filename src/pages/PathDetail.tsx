@@ -117,6 +117,38 @@ export default function PathDetail() {
     }
   };
 
+  const handleDeleteImage = async (imageUrl: string, index: number) => {
+    if (!card.id) return;
+    
+    try {
+      // Remove image from array
+      const updatedImages = pathImages.filter((_, i) => i !== index);
+      
+      // Update database
+      const { error } = await supabase
+        .from('career_paths')
+        .update({ all_images: updatedImages })
+        .eq('id', card.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setPathImages(updatedImages);
+      
+      toast({
+        title: "Image removed",
+        description: "The visualization has been deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast({
+        title: "Delete failed",
+        description: "Failed to remove image. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleActivatePath = async () => {
     if (!user || !card.id) return;
     
@@ -220,10 +252,24 @@ export default function PathDetail() {
             {pathImages.map((img: string, imgIndex: number) => (
               <div 
                 key={imgIndex} 
-                className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => handleImageClick(img, imgIndex + 1)}
+                className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
               >
-                <img src={img} alt={`Step ${imgIndex + 1}`} className="w-full h-full object-cover" />
+                <img 
+                  src={img} 
+                  alt={`Step ${imgIndex + 1}`} 
+                  className="w-full h-full object-cover"
+                  onClick={() => handleImageClick(img, imgIndex + 1)}
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteImage(img, imgIndex);
+                  }}
+                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-background"
+                  aria-label="Remove image"
+                >
+                  <X className="h-3.5 w-3.5 text-foreground" />
+                </button>
               </div>
             ))}
           </div>
