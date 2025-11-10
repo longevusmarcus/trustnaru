@@ -135,7 +135,7 @@ export default function PathDetail() {
       // Clear cache for this user
       if (user?.id) {
         try {
-          const cacheKey = `career_paths_${user.id}`;
+          const cacheKey = `career_paths_cache_${user.id}`;
           localStorage.removeItem(cacheKey);
         } catch (e) {
           console.warn('Cache clear error:', e);
