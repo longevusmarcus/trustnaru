@@ -15,6 +15,7 @@ interface DailyMotivationProps {
 
 export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivationProps) => {
   const [motivation, setMotivation] = useState("Today is a great day to keep moving forward.");
+  const [messageType, setMessageType] = useState<'motivation' | 'affirmation'>('motivation');
   const { toast } = useToast();
   const { user } = useAuth();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
       
       if (data?.motivation) {
         setMotivation(data.motivation);
+        setMessageType(data.type || 'motivation');
       }
     } catch (error) {
       console.error('Error fetching motivation:', error);
@@ -99,7 +101,13 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-full h-screen border-none p-0 flex items-center justify-center bg-background/95 backdrop-blur-sm">
-        <div ref={contentRef} className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-16">
+        <div ref={contentRef} className="flex flex-col items-center justify-center px-8 py-16 max-w-2xl mx-auto space-y-12">
+          {!isLoading && (
+            <div className="text-xs font-medium tracking-widest uppercase opacity-50 mb-4">
+              {messageType === 'affirmation' ? 'Daily Affirmation' : 'Daily Motivation'}
+            </div>
+          )}
+          
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-center leading-tight tracking-tight">
             {isLoading ? "..." : motivation}
           </h1>

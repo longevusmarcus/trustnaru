@@ -68,21 +68,47 @@ serve(async (req) => {
       missionsCompleted: stats?.missions_completed || 0,
       keySkills: path?.key_skills || [],
       upcomingGoals: goals.map(g => g.title),
-      journeyStage: stats?.current_level < 3 ? 'beginning' : stats?.current_level < 6 ? 'developing' : 'advancing'
+      journeyStage: stats?.current_level < 3 ? 'beginning' : stats?.current_level < 6 ? 'developing' : 'advancing',
+      pathDescription: path?.description || '',
+      roadmap: path?.roadmap || []
     };
 
-    // Generate personalized motivation using Lovable AI
+    // Determine if today is a motivation or affirmation day (alternate based on day of year)
+    const today = new Date();
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+    const isAffirmationDay = dayOfYear % 2 === 0;
+
+    // Generate personalized message using Lovable AI
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
-    const prompt = `Generate a single short, personal, encouraging message (max 15 words) for someone on their ${context.pathTitle} journey.
+    let prompt: string;
+    let systemMessage: string;
+    
+    if (isAffirmationDay) {
+      prompt = `Generate a single powerful, personal affirmation (max 15 words) for someone on their ${context.pathTitle} journey.
+
+Context:
+- Path: ${context.pathDescription}
+- Level ${context.currentLevel}, ${context.streak} day streak
+- Key skills developing: ${context.keySkills.slice(0, 3).join(', ')}
+- Current goals: ${context.upcomingGoals.slice(0, 2).join(', ')}
+
+Create a practical, inspirational affirmation that reinforces their capabilities and aligns with their specific path. Use "you" or "I" statements. Make it actionable and empowering.`;
+      
+      systemMessage = 'You are a supportive career mentor creating powerful, practical affirmations that inspire action.';
+    } else {
+      prompt = `Generate a single short, personal, encouraging motivation (max 15 words) for someone on their ${context.pathTitle} journey.
 
 Context:
 - Level ${context.currentLevel}, ${context.streak} day streak
 - Skills focus: ${context.keySkills.slice(0, 3).join(', ')}
 - Next goals: ${context.upcomingGoals.slice(0, 2).join(', ')}
 
-Keep it gentle, concise, and specific to their path. Avoid clichés. Make it feel personal.`;
+Keep it gentle, concise, and specific to their path. Avoid clichés. Make it feel personal and uplifting.`;
+      
+      systemMessage = 'You are a supportive career mentor. Create brief, gentle motivations that encourage progress.';
+    }
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -93,7 +119,7 @@ Keep it gentle, concise, and specific to their path. Avoid clichés. Make it fee
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: 'You are a supportive career mentor. Create brief, gentle motivations.' },
+          { role: 'system', content: systemMessage },
           { role: 'user', content: prompt }
         ],
       }),
@@ -106,12 +132,17 @@ Keep it gentle, concise, and specific to their path. Avoid clichés. Make it fee
     }
 
     const aiData = await aiResponse.json();
-    const motivation = aiData.choices[0].message.content.trim();
+    const message = aiData.choices[0].message.content.trim();
+    const messageType = isAffirmationDay ? 'affirmation' : 'motivation';
 
-    console.log('Generated motivation:', motivation);
+    console.log(`Generated ${messageType}:`, message);
 
     return new Response(
-      JSON.stringify({ motivation, context }),
+      JSON.stringify({ 
+        motivation: message, 
+        type: messageType,
+        context 
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
