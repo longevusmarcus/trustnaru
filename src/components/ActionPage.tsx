@@ -55,6 +55,7 @@ export const ActionPage = () => {
   const [actionLog, setActionLog] = useState("");
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const guidanceLevels = [
     {
@@ -417,6 +418,8 @@ export const ActionPage = () => {
   const handleSetActivePath = async (pathId: string) => {
     if (!user || pathId === activePath?.id) return;
 
+    setIsTransitioning(true);
+
     try {
       const { error } = await supabase.from("user_profiles").update({ active_path_id: pathId }).eq("user_id", user.id);
 
@@ -478,6 +481,8 @@ export const ActionPage = () => {
         description: "Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsTransitioning(false);
     }
   };
 
@@ -693,7 +698,7 @@ export const ActionPage = () => {
 
   return (
     <div className="px-4 pb-24 pt-4">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className={`max-w-md mx-auto space-y-6 transition-opacity duration-300 ${isTransitioning ? "opacity-50" : "opacity-100"}`}>
         {/* Active Path Info */}
         {activePath ? (
           <Card className="bg-primary/5 border-primary/20">
