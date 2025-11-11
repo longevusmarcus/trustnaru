@@ -11,17 +11,26 @@ import {
   LineChart,
   MoveRight,
   ArrowRight,
+  Check,
 } from "lucide-react";
 
 interface IntroOnboardingProps {
   onComplete: () => void;
 }
 
+const reasons = [
+  "I want a better path, but I have no clue where to start",
+  "I don't know who I'm supposed to become",
+  "I want to land my dream career or lifestyle, but it feels out of reach",
+  "I'm trying to recover from burnout and find something that actually feels right",
+  "I'm just curious to meet my future self",
+];
+
 const slides = [
   {
     icon: Sparkles,
-    title: "The Problem",
-    content: "You don't know who you're becoming, who you should become, or how to get there.",
+    title: "Why are you here?",
+    isSelection: true,
   },
   {
     icon: Compass,
@@ -67,6 +76,7 @@ const slides = [
 export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visibleItems, setVisibleItems] = useState<number>(0);
+  const [selectedReasons, setSelectedReasons] = useState<number[]>([]);
   const slide = slides[currentSlide];
   const Icon = slide.icon;
   const isLast = currentSlide === slides.length - 1;
@@ -87,6 +97,12 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
       return () => timers.forEach(clearTimeout);
     }
   }, [currentSlide]);
+
+  const toggleReason = (index: number) => {
+    setSelectedReasons((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
 
   const handleNext = () => {
     if (isLast) {
@@ -109,6 +125,41 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
         {/* Content */}
         <div className="text-center space-y-6">
           <h2 className="text-2xl font-light tracking-wide">{slide.title}</h2>
+
+          {slide.isSelection && (
+            <div className="space-y-3 pt-4">
+              {reasons.map((reason, index) => (
+                <button
+                  key={index}
+                  onClick={() => toggleReason(index)}
+                  className={`w-full p-4 rounded-lg border transition-all duration-300 text-left group ${
+                    selectedReasons.includes(index)
+                      ? "border-primary bg-primary/5 shadow-sm"
+                      : "border-border/40 bg-background/50 hover:border-border hover:bg-background/80"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`flex-shrink-0 w-5 h-5 rounded border mt-0.5 transition-all duration-300 flex items-center justify-center ${
+                        selectedReasons.includes(index)
+                          ? "border-primary bg-primary"
+                          : "border-border/60 bg-background"
+                      }`}
+                    >
+                      {selectedReasons.includes(index) && <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />}
+                    </div>
+                    <span
+                      className={`text-sm leading-relaxed transition-colors ${
+                        selectedReasons.includes(index) ? "text-foreground font-medium" : "text-muted-foreground"
+                      }`}
+                    >
+                      {reason}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
 
           {slide.content && <p className="text-muted-foreground text-base leading-relaxed">{slide.content}</p>}
 
@@ -186,7 +237,11 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
           </div>
 
           {/* Button */}
-          <Button onClick={handleNext} className="w-full h-11 text-base font-medium group">
+          <Button
+            onClick={handleNext}
+            disabled={slide.isSelection && selectedReasons.length === 0}
+            className="w-full h-11 text-base font-medium group disabled:opacity-50"
+          >
             {isLast ? "Begin Your Journey" : "Continue"}
             <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
