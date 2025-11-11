@@ -31,6 +31,7 @@ export const ActionPage = () => {
   const [levelResources, setLevelResources] = useState<any[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
   const [resourcesCache, setResourcesCache] = useState<Record<number, any[]>>({});
+  const [accordionValue, setAccordionValue] = useState<string>("");
 
   const guidanceLevels = [
     {
@@ -420,6 +421,9 @@ export const ActionPage = () => {
         title: "Active path updated",
         description: "Your actions are now personalized to your new path."
       });
+      
+      // Close the accordion
+      setAccordionValue("");
     } catch (error) {
       console.error('Error updating active path:', error);
       toast({
@@ -607,7 +611,7 @@ export const ActionPage = () => {
 
         {/* Path Switcher Accordion - Show only if multiple paths */}
         {allPaths.length > 1 && (
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion type="single" collapsible className="w-full" value={accordionValue} onValueChange={setAccordionValue}>
             <AccordionItem value="paths" className="border-border/50 rounded-lg overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-2 text-sm">
