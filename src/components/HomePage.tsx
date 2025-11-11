@@ -195,15 +195,32 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           completed: false
         }));
 
-        await supabase
+        const existing = await supabase
           .from('daily_actions')
-          .upsert({
-            user_id: user.id,
-            path_id: path.id,
-            action_date: today,
-            actions: actionsToStore,
-            all_completed: false
-          });
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('action_date', today)
+          .limit(1)
+          .maybeSingle();
+
+        if (existing.error) throw existing.error;
+        if (existing.data) {
+          await supabase
+            .from('daily_actions')
+            .update({ actions: actionsToStore, all_completed: false, path_id: path.id })
+            .eq('user_id', user.id)
+            .eq('action_date', today);
+        } else {
+          await supabase
+            .from('daily_actions')
+            .insert({
+              user_id: user.id,
+              path_id: path.id,
+              action_date: today,
+              actions: actionsToStore,
+              all_completed: false
+            });
+        }
       }
     } catch (error) {
       console.error('Error generating daily missions:', error);
@@ -252,9 +269,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .limit(10),
         supabase
           .from('daily_actions')
-          .select('actions, all_completed')
+          .select('actions, all_completed, created_at')
           .eq('user_id', user.id)
           .eq('action_date', today)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
       ]);
 
@@ -447,15 +466,35 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       const allCompleted = updatedMissions.every(m => m.completed);
 
-      await supabase
+      const existing = await supabase
         .from('daily_actions')
-        .upsert({
-          user_id: user!.id,
-          path_id: activePath?.id,
-          action_date: today,
-          actions: actionsToStore,
-          all_completed: allCompleted
-        });
+        .select('id')
+        .eq('user_id', user!.id)
+        .eq('action_date', today)
+        .limit(1)
+        .maybeSingle();
+
+      if (existing.error) throw existing.error;
+      if (existing.data) {
+        await supabase
+          .from('daily_actions')
+          .update({
+            actions: actionsToStore,
+            all_completed: allCompleted
+          })
+          .eq('user_id', user!.id)
+          .eq('action_date', today);
+      } else {
+        await supabase
+          .from('daily_actions')
+          .insert({
+            user_id: user!.id,
+            path_id: activePath?.id,
+            action_date: today,
+            actions: actionsToStore,
+            all_completed: allCompleted
+          });
+      }
 
       // Update local state with completed mission
       setDailyMissions(updatedMissions);
