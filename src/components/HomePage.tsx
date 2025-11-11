@@ -26,7 +26,14 @@ const getWeekDates = () => {
   });
 };
 
-const dailyMissions = [
+const defaultMissions = [
+  {
+    icon: Video,
+    title: "Watch Tutorial Video",
+    description: "Learn key insights for your journey",
+    duration: "3 min",
+    type: "Learning"
+  },
   {
     icon: Target,
     title: "Define Your Core Values",
@@ -47,13 +54,6 @@ const dailyMissions = [
     description: "Spend time imagining your ideal future",
     duration: "15 min",
     type: "Meditation"
-  },
-  {
-    icon: Video,
-    title: "Watch Tutorial Video",
-    description: "Learn key insights for your journey",
-    duration: "3 min",
-    type: "Learning"
   }
 ];
 
@@ -128,6 +128,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [missionLog, setMissionLog] = useState("");
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
+  const [dailyMissions, setDailyMissions] = useState<any[]>(defaultMissions);
+  const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
   
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -160,15 +162,65 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     }
   }, [userStats?.current_streak]);
 
+  const generateDailyMissions = async (path: any) => {
+    if (!path || !user) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-daily-missions', {
+        body: { 
+          pathId: path.id,
+          pathTitle: path.title,
+          pathDescription: path.description,
+          category: path.category
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.missions) {
+        // Always keep video tutorial as first mission
+        const videoMission = defaultMissions[0];
+        const generatedMissions = [videoMission, ...data.missions.slice(0, 3)];
+        
+        setDailyMissions(generatedMissions);
+
+        // Store in database
+        const today = new Date().toISOString().split('T')[0];
+        const actionsToStore = generatedMissions.map((m: any) => ({
+          title: m.title,
+          description: m.description,
+          duration: m.duration,
+          type: m.type,
+          completed: false
+        }));
+
+        await supabase
+          .from('daily_actions')
+          .upsert({
+            user_id: user.id,
+            path_id: path.id,
+            action_date: today,
+            actions: actionsToStore,
+            all_completed: false
+          });
+      }
+    } catch (error) {
+      console.error('Error generating daily missions:', error);
+      // Keep default missions on error
+      setDailyMissions(defaultMissions);
+    }
+  };
+
   useEffect(() => {
     const fetchGamificationData = async () => {
       if (!user) return;
 
       const weekStart = weekDates[0].toISOString().split('T')[0];
       const weekEnd = weekDates[6].toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
 
       // Fetch only essential data in parallel - optimized queries
-      const [statsResult, streakResult, badgesResult, profileResult, pathsResult] = await Promise.all([
+      const [statsResult, streakResult, badgesResult, profileResult, pathsResult, dailyActionsResult] = await Promise.all([
         supabase
           .from('user_stats')
           .select('current_streak, longest_streak, total_points')
@@ -196,7 +248,13 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .from('career_paths')
           .select('id, title, description, image_url, journey_duration, category, key_skills, target_companies')
           .eq('user_id', user.id)
-          .limit(10)
+          .limit(10),
+        supabase
+          .from('daily_actions')
+          .select('actions, all_completed')
+          .eq('user_id', user.id)
+          .eq('action_date', today)
+          .maybeSingle()
       ]);
 
       // Process results efficiently
@@ -207,6 +265,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           const activePathData = pathsResult.data.find(p => p.id === profileResult.data.active_path_id);
           setActivePath(activePathData || null);
           setFirstPath(activePathData || null); // Show active path on dashboard
+          
+          // Generate daily missions if none exist for today
+          if (!dailyActionsResult.data?.actions && activePathData) {
+            generateDailyMissions(activePathData);
+          }
         }
       }
 
@@ -221,6 +284,32 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       setUserStats(statsResult.data || { current_streak: 0, longest_streak: 0, total_points: 0 });
       setStreaks(streakResult.data?.map(s => new Date(s.streak_date)) || []);
       setEarnedBadges(badgesResult.data || []);
+
+      // Handle daily missions
+      if (dailyActionsResult.data?.actions) {
+        const actions = dailyActionsResult.data.actions as any[];
+        if (actions.length > 0) {
+          // Map stored actions to mission format
+          const missions = actions.map((action: any) => ({
+            icon: action.completed ? Check : 
+                  action.title.includes('Video') || action.title.includes('Tutorial') ? Video :
+                  action.title.includes('Values') || action.title.includes('Reflect') ? Target :
+                  action.title.includes('Document') || action.title.includes('Progress') ? BookOpen : Compass,
+            title: action.title,
+            description: action.description,
+            duration: action.duration || "5 min",
+            type: action.type || "Task",
+            completed: action.completed || false
+          }));
+          setDailyMissions(missions);
+          
+          // Track completed missions
+          const completed = new Set(
+            actions.filter((a: any) => a.completed).map((a: any) => a.title)
+          );
+          setCompletedMissions(completed);
+        }
+      }
     };
 
     fetchGamificationData();
@@ -317,7 +406,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     return () => clearInterval(interval);
   }, [timerActive, timerSeconds]);
 
-  const handleSaveMissionLog = () => {
+  const handleSaveMissionLog = async () => {
     if (!isVideoMission(selectedMission?.title || '') && !missionLog.trim()) {
       toast({
         title: "Please add a note",
@@ -327,10 +416,49 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       return;
     }
 
-    toast({
-      title: "Mission logged! 🎉",
-      description: "Your progress has been recorded."
-    });
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Mark mission as completed
+      const updatedMissions = dailyMissions.map(m => 
+        m.title === selectedMission?.title ? { ...m, completed: true } : m
+      );
+      
+      const actionsToStore = updatedMissions.map(m => ({
+        title: m.title,
+        description: m.description,
+        duration: m.duration,
+        type: m.type,
+        completed: m.completed || false,
+        log: m.title === selectedMission?.title ? missionLog : undefined
+      }));
+
+      const allCompleted = updatedMissions.every(m => m.completed);
+
+      await supabase
+        .from('daily_actions')
+        .upsert({
+          user_id: user!.id,
+          path_id: activePath?.id,
+          action_date: today,
+          actions: actionsToStore,
+          all_completed: allCompleted
+        });
+
+      setCompletedMissions(prev => new Set([...prev, selectedMission?.title]));
+
+      toast({
+        title: "Mission logged! 🎉",
+        description: "Your progress has been recorded."
+      });
+    } catch (error) {
+      console.error('Error saving mission:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save mission. Please try again.",
+        variant: "destructive"
+      });
+    }
 
     setLogDrawerOpen(false);
     setMissionLog("");
@@ -491,18 +619,33 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           <div className="space-y-3">
             {dailyMissions.map((mission, index) => {
               const Icon = mission.icon;
+              const isCompleted = completedMissions.has(mission.title);
               return (
                 <Card 
                   key={index} 
-                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleMissionClick(mission)}
+                  className={`p-4 transition-all cursor-pointer ${
+                    isCompleted 
+                      ? 'bg-primary/5 border-primary/20' 
+                      : 'hover:shadow-md'
+                  }`}
+                  onClick={() => !isCompleted && handleMissionClick(mission)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-5 w-5 text-foreground" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      isCompleted ? 'bg-primary text-primary-foreground' : 'bg-primary/5'
+                    }`}>
+                      {isCompleted ? (
+                        <Check className="h-5 w-5" />
+                      ) : (
+                        <Icon className="h-5 w-5 text-foreground" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm mb-1">{mission.title}</h3>
+                      <h3 className={`font-semibold text-sm mb-1 ${
+                        isCompleted ? 'line-through text-muted-foreground' : ''
+                      }`}>
+                        {mission.title}
+                      </h3>
                       <p className="text-xs text-muted-foreground mb-2">
                         {mission.description}
                       </p>
@@ -512,7 +655,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                         <span>{mission.type}</span>
                       </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    {!isCompleted && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                   </div>
                 </Card>
               );
