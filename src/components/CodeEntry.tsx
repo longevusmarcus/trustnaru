@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -126,6 +128,19 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
             className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors disabled:opacity-50"
             autoFocus
           />
+          <Button type="submit" disabled={isValidating} className="w-full h-12">
+            {isValidating ? (
+              <span className="inline-flex items-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Validating...
+              </span>
+            ) : (
+              "Continue"
+            )}
+          </Button>
+          {isValidating && (
+            <p className="text-center text-sm text-muted-foreground">Validating code...</p>
+          )}
         </form>
       </div>
     </div>
