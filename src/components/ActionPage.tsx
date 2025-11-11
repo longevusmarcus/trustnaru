@@ -1347,7 +1347,7 @@ export const ActionPage = () => {
             <div className="px-6 pb-6 sticky bottom-0 bg-background">
               <Button onClick={handleSaveLog} className="w-full h-12 rounded-full text-base font-semibold">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
-                Complete Mission
+                Complete Action
               </Button>
             </div>
           </div>
