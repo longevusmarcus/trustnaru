@@ -30,9 +30,9 @@ const slides = [
   },
   {
     icon: Database,
-    title: "Our Moat",
+    title: "Our Sauce",
     content:
-      "Naru learns from your resume, your energy, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
+      "Naru learns from your resume, your voice inputs, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
   },
   {
     icon: Eye,
