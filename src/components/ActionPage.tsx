@@ -32,6 +32,11 @@ export const ActionPage = () => {
   const [loadingResources, setLoadingResources] = useState(false);
   const [resourcesCache, setResourcesCache] = useState<Record<number, any[]>>({});
   const [accordionValue, setAccordionValue] = useState<string>("");
+  const [selectedAction, setSelectedAction] = useState<any>(null);
+  const [logDrawerOpen, setLogDrawerOpen] = useState(false);
+  const [actionLog, setActionLog] = useState("");
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
 
   const guidanceLevels = [
     {
@@ -130,6 +135,27 @@ export const ActionPage = () => {
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [user]);
+
+  // Timer effect for meditation
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timerActive && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds(prev => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            toast({
+              title: "Timer Complete! 🎉",
+              description: "Great job on your meditation session."
+            });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timerSeconds]);
 
   const loadData = async () => {
     if (!user) {
@@ -568,6 +594,76 @@ export const ActionPage = () => {
     }
   };
 
+  const handleActionClick = (action: any, index: number) => {
+    if (action.done) return; // Don't open for completed actions
+    setSelectedAction({ ...action, index });
+    setActionLog("");
+    setTimerSeconds(0);
+    setTimerActive(false);
+    setLogDrawerOpen(true);
+  };
+
+  const handleSaveLog = async () => {
+    if (!user || !activePath || !selectedAction) return;
+
+    try {
+      // Mark action as complete with log
+      const updatedActions = [...todayActions];
+      updatedActions[selectedAction.index] = { 
+        ...updatedActions[selectedAction.index], 
+        done: true,
+        log: actionLog,
+        completedAt: new Date().toISOString()
+      };
+      setTodayActions(updatedActions);
+
+      // Save to database
+      const today = new Date().toISOString().split('T')[0];
+      const allCompleted = updatedActions.every(action => action.done);
+      
+      await supabase
+        .from('daily_actions')
+        .upsert({
+          user_id: user.id,
+          path_id: activePath.id,
+          action_date: today,
+          actions: updatedActions,
+          all_completed: allCompleted
+        }, {
+          onConflict: 'user_id,action_date'
+        });
+
+      toast({
+        title: "Mission logged! 🎯",
+        description: "Keep up the great work!"
+      });
+
+      setLogDrawerOpen(false);
+
+      if (allCompleted) {
+        await handleLevelComplete();
+      }
+    } catch (error) {
+      console.error('Error saving log:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save mission log",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const isMeditationAction = (task: string) => {
+    const meditationKeywords = ['meditat', 'visualiz', 'mindful', 'breath', 'relax'];
+    return meditationKeywords.some(keyword => task.toLowerCase().includes(keyword));
+  };
+
   if (loading) {
     return (
       <div className="px-4 pb-24 pt-4">
@@ -939,11 +1035,18 @@ export const ActionPage = () => {
           ) : (
             <div className="space-y-3">
               {todayActions.map((action: any, index: number) => (
-                <Card key={index} className={action.done ? "opacity-60" : ""}>
+                <Card 
+                  key={index} 
+                  className={`${action.done ? "opacity-60" : "cursor-pointer hover:border-primary/50 transition-all"}`}
+                  onClick={() => !action.done && handleActionClick(action, index)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <button
-                        onClick={() => handleToggleAction(index)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleAction(index);
+                        }}
                         className="mt-0.5 flex-shrink-0"
                       >
                         {action.done ? (
@@ -974,6 +1077,11 @@ export const ActionPage = () => {
                         <p className={`text-sm text-foreground leading-relaxed ${action.done ? 'line-through' : ''}`}>
                           {action.task}
                         </p>
+                        {!action.done && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Tap to log mission
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -1163,6 +1271,118 @@ export const ActionPage = () => {
             </div>
           </div>
       </div>
+      
+      {/* Mission Log Drawer */}
+      <Drawer open={logDrawerOpen} onOpenChange={setLogDrawerOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          <div className="relative overflow-y-auto">
+            {/* Header */}
+            <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+              <h2 className="text-2xl font-bold mb-2">Log Mission</h2>
+              <p className="text-sm text-muted-foreground">
+                {selectedAction?.task}
+              </p>
+            </div>
+            
+            {/* Close Button */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute top-4 right-4 rounded-full z-20"
+              onClick={() => setLogDrawerOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Timer for meditation */}
+              {selectedAction && isMeditationAction(selectedAction.task) && (
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6">
+                  <div className="text-center space-y-4">
+                    <div className="text-6xl font-light tracking-tight">
+                      {formatTime(timerSeconds)}
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      {!timerActive ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setTimerSeconds(300)}
+                            disabled={timerActive}
+                          >
+                            5 min
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setTimerSeconds(600)}
+                            disabled={timerActive}
+                          >
+                            10 min
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setTimerSeconds(900)}
+                            disabled={timerActive}
+                          >
+                            15 min
+                          </Button>
+                        </>
+                      ) : null}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (timerSeconds > 0) {
+                          setTimerActive(!timerActive);
+                        }
+                      }}
+                      disabled={timerSeconds === 0}
+                      className="w-full h-12 rounded-full"
+                      variant={timerActive ? "outline" : "default"}
+                    >
+                      {timerActive ? "Pause" : timerSeconds > 0 ? "Start" : "Select Duration"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Log Input */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  How did it go? <span className="text-muted-foreground">(optional)</span>
+                </label>
+                <textarea
+                  value={actionLog}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 140) {
+                      setActionLog(e.target.value);
+                    }
+                  }}
+                  placeholder="Share your thoughts, learnings, or wins..."
+                  className="w-full h-24 px-4 py-3 rounded-xl border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
+                />
+                <div className="text-xs text-right text-muted-foreground">
+                  {actionLog.length}/140
+                </div>
+              </div>
+            </div>
+
+            {/* Action Button */}
+            <div className="px-6 pb-6 sticky bottom-0 bg-background">
+              <Button 
+                onClick={handleSaveLog}
+                className="w-full h-12 rounded-full text-base font-semibold"
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Complete Mission
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
       
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
