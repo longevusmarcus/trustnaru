@@ -34,8 +34,8 @@ const slides = [
   },
   {
     icon: Compass,
-    title: "The Solution",
-    content: "Instantly see your future self, and how to become it.",
+    title: "Lowkey, we can help",
+    content: "With Naru, you can instantly see your future self, and start becoming it today.",
   },
   {
     icon: Database,
@@ -51,7 +51,7 @@ const slides = [
   {
     icon: Zap,
     title: "The OS for Becoming",
-    subtitle: "Naru will evolve into the OS for Becoming:",
+    subtitle: "This is how Naru works:",
     items: [
       "Share what gives you energy",
       "Visualize your future selves",
@@ -99,9 +99,7 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
   }, [currentSlide]);
 
   const toggleReason = (index: number) => {
-    setSelectedReasons((prev) =>
-      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
-    );
+    setSelectedReasons((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]));
   };
 
   const handleNext = () => {
@@ -141,12 +139,12 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                   <div className="flex items-start gap-3">
                     <div
                       className={`flex-shrink-0 w-5 h-5 rounded border mt-0.5 transition-all duration-300 flex items-center justify-center ${
-                        selectedReasons.includes(index)
-                          ? "border-primary bg-primary"
-                          : "border-border/60 bg-background"
+                        selectedReasons.includes(index) ? "border-primary bg-primary" : "border-border/60 bg-background"
                       }`}
                     >
-                      {selectedReasons.includes(index) && <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />}
+                      {selectedReasons.includes(index) && (
+                        <Check className="w-3 h-3 text-primary-foreground" strokeWidth={3} />
+                      )}
                     </div>
                     <span
                       className={`text-sm leading-relaxed transition-colors ${
