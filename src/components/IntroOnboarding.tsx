@@ -53,7 +53,8 @@ const slides = [
     title: "The OS for Becoming",
     subtitle: "This is how Naru works:",
     items: [
-      "Share what gives you energy",
+      "Share your resume + some photos",
+      "Record what gives you energy",
       "Visualize your future selves",
       "Unlock your career paths",
       "Get daily guidance/insights",
