@@ -9,29 +9,31 @@ interface CodeEntryProps {
 
 export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
   const [code, setCode] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!code.trim()) {
+    const trimmedCode = code.toLowerCase().trim();
+    
+    if (!trimmedCode) {
       toast({
-        title: "Code required",
-        description: "Please enter an access code",
+        title: "Enter a code",
+        description: "Please enter your access code",
         variant: "destructive"
       });
       return;
     }
 
-    setIsChecking(true);
+    setIsValidating(true);
 
     try {
       // Check if code exists and is unused
       const { data: accessCode, error: fetchError } = await supabase
         .from("access_codes")
         .select("*")
-        .eq("code", code.toLowerCase().trim())
+        .eq("code", trimmedCode)
         .eq("used", false)
         .maybeSingle();
 
@@ -39,21 +41,21 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
         console.error("Error checking code:", fetchError);
         toast({
           title: "Error",
-          description: "Failed to validate code. Please try again.",
+          description: "Something went wrong. Please try again.",
           variant: "destructive"
         });
-        setIsChecking(false);
+        setIsValidating(false);
         return;
       }
 
       if (!accessCode) {
         toast({
-          title: "Invalid code",
-          description: "This code is invalid or has already been used",
+          title: "Invalid or used code",
+          description: "This code is not valid or has already been used",
           variant: "destructive"
         });
         setCode("");
-        setIsChecking(false);
+        setIsValidating(false);
         return;
       }
 
@@ -70,14 +72,14 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
         console.error("Error marking code as used:", updateError);
         toast({
           title: "Error",
-          description: "Failed to process code. Please try again.",
+          description: "Something went wrong. Please try again.",
           variant: "destructive"
         });
-        setIsChecking(false);
+        setIsValidating(false);
         return;
       }
 
-      // Success
+      // Success!
       onSuccess();
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -86,7 +88,7 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
         description: "Something went wrong. Please try again.",
         variant: "destructive"
       });
-      setIsChecking(false);
+      setIsValidating(false);
     }
   };
 
@@ -120,13 +122,10 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="Enter code"
-            className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors"
+            disabled={isValidating}
+            className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors disabled:opacity-50"
             autoFocus
-            disabled={isChecking}
           />
-          {isChecking && (
-            <p className="text-center text-sm text-muted-foreground">Validating code...</p>
-          )}
         </form>
       </div>
     </div>
