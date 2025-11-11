@@ -457,6 +457,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           all_completed: allCompleted
         });
 
+      // Update local state with completed mission
+      setDailyMissions(updatedMissions);
       setCompletedMissions(prev => new Set([...prev, selectedMission?.title]));
 
       // Check if all missions are now completed
