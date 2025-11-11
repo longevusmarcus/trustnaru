@@ -172,9 +172,8 @@ export const ActionPage = () => {
           .order('priority', { ascending: false })
           .order('created_at', { ascending: true });
 
-        if (goalsData) {
-          setGoals(goalsData);
-        }
+        // Always set goals, even if empty, to clear old path's goals
+        setGoals(goalsData || []);
 
         // Check if we have today's actions already
         const today = new Date().toISOString().split('T')[0];
