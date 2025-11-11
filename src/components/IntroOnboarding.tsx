@@ -28,23 +28,23 @@ const reasons = [
 
 const slides = [
   {
-    icon: Sparkles,
+    icon: Compass,
     title: "Why are you here?",
     isSelection: true,
   },
   {
-    icon: Compass,
+    icon: Sparkles,
     title: "Lowkey, we can help",
     content: "With Naru, you can instantly see the future self that matters to you, and start becoming it today.",
   },
   {
-    icon: Database,
+    icon: Eye,
     title: "Our Sauce",
     content:
       "Naru learns from your resume, your voice inputs, and your growth patterns to reveal your future direction. The more you use Naru, the better it gets at guiding you.",
   },
   {
-    icon: Eye,
+    icon: Database,
     title: "Is Naru another career coach / job copilot?",
     content: "No. Naru is the world’s first database of human potential.",
   },
