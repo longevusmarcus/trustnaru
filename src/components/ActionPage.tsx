@@ -453,6 +453,9 @@ export const ActionPage = () => {
       // Check and award badges after activating path
       await checkAndAwardBadges();
 
+      // Clear level resources cache to force regeneration for new path
+      setResourcesCache({});
+
       // Reload all data to update with new active path
       await loadData();
 
