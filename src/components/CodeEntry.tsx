@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CodeEntryProps {
   onSuccess: () => void;
@@ -8,20 +9,84 @@ interface CodeEntryProps {
 
 export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
   const [code, setCode] = useState("");
+  const [isChecking, setIsChecking] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (code.toLowerCase().trim() === "become") {
-      onSuccess();
-    } else {
+    if (!code.trim()) {
       toast({
-        title: "Invalid code",
-        description: "Please enter the correct code",
+        title: "Code required",
+        description: "Please enter an access code",
         variant: "destructive"
       });
-      setCode("");
+      return;
+    }
+
+    setIsChecking(true);
+
+    try {
+      // Check if code exists and is unused
+      const { data: accessCode, error: fetchError } = await supabase
+        .from("access_codes")
+        .select("*")
+        .eq("code", code.toLowerCase().trim())
+        .eq("used", false)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("Error checking code:", fetchError);
+        toast({
+          title: "Error",
+          description: "Failed to validate code. Please try again.",
+          variant: "destructive"
+        });
+        setIsChecking(false);
+        return;
+      }
+
+      if (!accessCode) {
+        toast({
+          title: "Invalid code",
+          description: "This code is invalid or has already been used",
+          variant: "destructive"
+        });
+        setCode("");
+        setIsChecking(false);
+        return;
+      }
+
+      // Mark code as used
+      const { error: updateError } = await supabase
+        .from("access_codes")
+        .update({ 
+          used: true,
+          used_at: new Date().toISOString()
+        })
+        .eq("id", accessCode.id);
+
+      if (updateError) {
+        console.error("Error marking code as used:", updateError);
+        toast({
+          title: "Error",
+          description: "Failed to process code. Please try again.",
+          variant: "destructive"
+        });
+        setIsChecking(false);
+        return;
+      }
+
+      // Success
+      onSuccess();
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+      setIsChecking(false);
     }
   };
 
@@ -57,7 +122,11 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
             placeholder="Enter code"
             className="h-12 text-center text-lg tracking-wider bg-background/50 border-muted/40 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted/40 transition-colors"
             autoFocus
+            disabled={isChecking}
           />
+          {isChecking && (
+            <p className="text-center text-sm text-muted-foreground">Validating code...</p>
+          )}
         </form>
       </div>
     </div>
