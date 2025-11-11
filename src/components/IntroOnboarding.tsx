@@ -138,11 +138,13 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                 <div className="space-y-4">
                   <div className="text-xs font-medium tracking-wider text-muted-foreground/60 uppercase">LinkedIn</div>
                   <div className="space-y-3">
-                    {["Tracking past", "Vanity", "Static", "No guidance", "No rewards"].map((item, i) => (
-                      <div key={i} className="text-sm text-muted-foreground/50 font-light">
-                        {item}
-                      </div>
-                    ))}
+                    {["Tracking past", "Vanity", "Static", "No guidance", "No rewards", "Not AI-native"].map(
+                      (item, i) => (
+                        <div key={i} className="text-sm text-muted-foreground/50 font-light">
+                          {item}
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
 
@@ -150,13 +152,18 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
                 <div className="space-y-4">
                   <div className="text-xs font-medium tracking-wider text-primary uppercase">Naru</div>
                   <div className="space-y-3">
-                    {["Tracking future", "Value", "Dynamic predictions", "Personalized guidance", "Rewards"].map(
-                      (item, i) => (
-                        <div key={i} className="text-sm text-foreground font-light">
-                          {item}
-                        </div>
-                      ),
-                    )}
+                    {[
+                      "Tracking future",
+                      "Value",
+                      "Dynamic predictions",
+                      "Personalized guidance",
+                      "Rewards",
+                      "AI-native",
+                    ].map((item, i) => (
+                      <div key={i} className="text-sm text-foreground font-light">
+                        {item}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
