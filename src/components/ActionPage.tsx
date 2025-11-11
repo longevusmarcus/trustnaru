@@ -634,7 +634,7 @@ export const ActionPage = () => {
       );
 
       toast({
-        title: "Mission logged! 🎯",
+        title: "Action logged! 🎯",
         description: "Keep up the great work!",
       });
 
@@ -647,7 +647,7 @@ export const ActionPage = () => {
       console.error("Error saving log:", error);
       toast({
         title: "Error",
-        description: "Failed to save mission log",
+        description: "Failed to save action log",
         variant: "destructive",
       });
     }
@@ -1257,7 +1257,7 @@ export const ActionPage = () => {
           <div className="relative overflow-y-auto">
             {/* Header */}
             <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-              <h2 className="text-2xl font-bold mb-2">Log Mission</h2>
+              <h2 className="text-2xl font-bold mb-2">Log Action</h2>
               <p className="text-sm text-muted-foreground">{selectedAction?.task}</p>
             </div>
 
