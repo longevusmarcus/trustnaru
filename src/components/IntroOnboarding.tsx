@@ -35,7 +35,7 @@ const slides = [
   {
     icon: Compass,
     title: "Lowkey, we can help",
-    content: "With Naru, you can instantly see your future self, and start becoming it today.",
+    content: "With Naru, you can instantly see the future self that matters to you, and start becoming it today.",
   },
   {
     icon: Database,
