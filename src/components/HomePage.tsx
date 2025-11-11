@@ -1,4 +1,4 @@
-import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, ArrowRight } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, ArrowRight, Play, Pause, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyMotivation } from "./DailyMotivation";
+import { Textarea } from "@/components/ui/textarea";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -115,6 +116,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [showDailyMotivation, setShowDailyMotivation] = useState(false);
   const [clickedDay, setClickedDay] = useState<number | null>(null);
   const [clickedBadge, setClickedBadge] = useState<number | null>(null);
+  const [logDrawerOpen, setLogDrawerOpen] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<any>(null);
+  const [missionLog, setMissionLog] = useState("");
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
   
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -264,6 +270,61 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     } finally {
       setLoadingContent(false);
     }
+  };
+
+  const handleMissionClick = (mission: any) => {
+    setSelectedMission(mission);
+    setMissionLog("");
+    setTimerSeconds(0);
+    setTimerActive(false);
+    setLogDrawerOpen(true);
+  };
+
+  const isMeditationMission = (title: string) => {
+    return title.toLowerCase().includes('visualize') || title.toLowerCase().includes('meditation');
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timerActive && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setTimerActive(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timerSeconds]);
+
+  const handleSaveMissionLog = () => {
+    if (!missionLog.trim()) {
+      toast({
+        title: "Please add a note",
+        description: "Share what you learned or experienced.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Mission logged! 🎉",
+      description: "Your progress has been recorded."
+    });
+
+    setLogDrawerOpen(false);
+    setMissionLog("");
+    setTimerSeconds(0);
+    setTimerActive(false);
   };
 
   return (
@@ -420,7 +481,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             {dailyMissions.map((mission, index) => {
               const Icon = mission.icon;
               return (
-                <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+                <Card 
+                  key={index} 
+                  className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => handleMissionClick(mission)}
+                >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
                       <Icon className="h-5 w-5 text-foreground" />
@@ -436,6 +501,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                         <span>{mission.type}</span>
                       </div>
                     </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </Card>
               );
@@ -519,6 +585,92 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 >
                   <ArrowRight className="h-4 w-4 mr-2" />
                   Continue Your Journey
+                </Button>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Mission Log Drawer */}
+        <Drawer open={logDrawerOpen} onOpenChange={setLogDrawerOpen}>
+          <DrawerContent className="max-h-[90vh]">
+            <div className="relative overflow-y-auto">
+              <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+                <h2 className="text-2xl font-bold mb-2">{selectedMission?.title}</h2>
+                <p className="text-sm text-muted-foreground">{selectedMission?.description}</p>
+              </div>
+              
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="absolute top-4 right-4 rounded-full z-20"
+                onClick={() => setLogDrawerOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+
+              <div className="p-6 space-y-6">
+                {isMeditationMission(selectedMission?.title || '') && (
+                  <div className="bg-muted/30 rounded-2xl p-6">
+                    <div className="text-center mb-4">
+                      <div className="text-5xl font-light mb-2">{formatTime(timerSeconds)}</div>
+                      <p className="text-sm text-muted-foreground">Meditation Timer</p>
+                    </div>
+                    <div className="flex gap-2 justify-center mb-4">
+                      {[5, 10, 15].map((mins) => (
+                        <Button
+                          key={mins}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setTimerSeconds(mins * 60);
+                            setTimerActive(false);
+                          }}
+                          className="rounded-full"
+                        >
+                          {mins}m
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      className="w-full rounded-full"
+                      onClick={() => setTimerActive(!timerActive)}
+                      disabled={timerSeconds === 0}
+                    >
+                      {timerActive ? (
+                        <>
+                          <Pause className="h-4 w-4 mr-2" /> Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" /> Start
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <label className="text-sm font-medium">Reflection Note</label>
+                  <Textarea
+                    placeholder="What did you learn or experience? Share your thoughts..."
+                    value={missionLog}
+                    onChange={(e) => setMissionLog(e.target.value.slice(0, 140))}
+                    className="min-h-[120px] resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground text-right">
+                    {missionLog.length}/140
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-6 pb-8 sticky bottom-0 bg-background">
+                <Button 
+                  className="w-full h-12 rounded-full text-base font-semibold" 
+                  onClick={handleSaveMissionLog}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Complete Mission
                 </Button>
               </div>
             </div>
