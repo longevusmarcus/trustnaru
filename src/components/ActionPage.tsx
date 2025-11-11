@@ -389,6 +389,27 @@ export const ActionPage = () => {
       
       if (error) throw error;
       
+      // Check if the new path has goals
+      const { data: existingGoals } = await supabase
+        .from('goals')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('path_id', pathId);
+      
+      // If no goals exist, generate them
+      if (!existingGoals || existingGoals.length === 0) {
+        try {
+          const session = (await supabase.auth.getSession()).data.session;
+          await supabase.functions.invoke('generate-goals', {
+            body: { pathId, userId: user.id },
+            headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+          });
+        } catch (goalError) {
+          console.error('Error generating goals:', goalError);
+          // Don't fail the whole operation if goal generation fails
+        }
+      }
+      
       // Check and award badges after activating path
       await checkAndAwardBadges();
       
