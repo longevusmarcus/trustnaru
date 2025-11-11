@@ -1,4 +1,4 @@
-import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, ArrowRight, Play, Pause, Check } from "lucide-react";
+import { ChevronRight, Target, BookOpen, Compass, Flame, Award, Lightbulb, X, ArrowRight, Play, Pause, Check, Video } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +47,13 @@ const dailyMissions = [
     description: "Spend time imagining your ideal future",
     duration: "15 min",
     type: "Meditation"
+  },
+  {
+    icon: Video,
+    title: "Watch Tutorial Video",
+    description: "Learn key insights for your journey",
+    duration: "3 min",
+    type: "Learning"
   }
 ];
 
@@ -284,6 +291,10 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     return title.toLowerCase().includes('visualize') || title.toLowerCase().includes('meditation');
   };
 
+  const isVideoMission = (title: string) => {
+    return title.toLowerCase().includes('video') || title.toLowerCase().includes('tutorial');
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -307,7 +318,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   }, [timerActive, timerSeconds]);
 
   const handleSaveMissionLog = () => {
-    if (!missionLog.trim()) {
+    if (!isVideoMission(selectedMission?.title || '') && !missionLog.trim()) {
       toast({
         title: "Please add a note",
         description: "Share what you learned or experienced.",
@@ -610,6 +621,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               </Button>
 
               <div className="p-6 space-y-6">
+                {isVideoMission(selectedMission?.title || '') && (
+                  <div className="bg-muted/30 rounded-2xl p-6">
+                    <div style={{ position: "relative", paddingBottom: "140.99216710182768%", height: 0 }}>
+                      <iframe 
+                        src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433" 
+                        frameBorder="0" 
+                        allowFullScreen
+                        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", borderRadius: "12px" }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {isMeditationMission(selectedMission?.title || '') && (
                   <div className="bg-muted/30 rounded-2xl p-6">
                     <div className="text-center mb-4">
@@ -650,18 +674,35 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Reflection Note</label>
-                  <Textarea
-                    placeholder="What did you learn or experience? Share your thoughts..."
-                    value={missionLog}
-                    onChange={(e) => setMissionLog(e.target.value.slice(0, 140))}
-                    className="min-h-[120px] resize-none"
-                  />
-                  <p className="text-xs text-muted-foreground text-right">
-                    {missionLog.length}/140
-                  </p>
-                </div>
+                {!isVideoMission(selectedMission?.title || '') && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">Reflection Note</label>
+                    <Textarea
+                      placeholder="What did you learn or experience? Share your thoughts..."
+                      value={missionLog}
+                      onChange={(e) => setMissionLog(e.target.value.slice(0, 140))}
+                      className="min-h-[120px] resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {missionLog.length}/140
+                    </p>
+                  </div>
+                )}
+
+                {isVideoMission(selectedMission?.title || '') && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">Key Takeaway (Optional)</label>
+                    <Textarea
+                      placeholder="What's your main insight from this video?"
+                      value={missionLog}
+                      onChange={(e) => setMissionLog(e.target.value.slice(0, 140))}
+                      className="min-h-[80px] resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground text-right">
+                      {missionLog.length}/140
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="px-6 pb-8 sticky bottom-0 bg-background">
