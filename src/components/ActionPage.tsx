@@ -1,4 +1,22 @@
-import { Target, CheckCircle2, Circle, Sparkles, MessageSquare, Zap, Award, TrendingUp, X, Map, Briefcase, Bot, Lock, BookOpen, Users, Lightbulb, Trophy } from "lucide-react";
+import {
+  Target,
+  CheckCircle2,
+  Circle,
+  Sparkles,
+  MessageSquare,
+  Zap,
+  Award,
+  TrendingUp,
+  X,
+  Map,
+  Briefcase,
+  Bot,
+  Lock,
+  BookOpen,
+  Users,
+  Lightbulb,
+  Trophy,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -131,9 +149,9 @@ export const ActionPage = () => {
     const handleFocus = () => {
       loadData();
     };
-    
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
   }, [user]);
 
   // Timer effect for meditation
@@ -141,12 +159,12 @@ export const ActionPage = () => {
     let interval: NodeJS.Timeout;
     if (timerActive && timerSeconds > 0) {
       interval = setInterval(() => {
-        setTimerSeconds(prev => {
+        setTimerSeconds((prev) => {
           if (prev <= 1) {
             setTimerActive(false);
             toast({
               title: "Timer Complete! 🎉",
-              description: "Great job on your meditation session."
+              description: "Great job on your meditation session.",
             });
             return 0;
           }
@@ -166,15 +184,8 @@ export const ActionPage = () => {
     try {
       // Fetch all paths and profile in parallel
       const [profileResult, allPathsResult] = await Promise.all([
-        supabase
-          .from('user_profiles')
-          .select('active_path_id')
-          .eq('user_id', user.id)
-          .maybeSingle(),
-        supabase
-          .from('career_paths')
-          .select('id, title, category')
-          .eq('user_id', user.id)
+        supabase.from("user_profiles").select("active_path_id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("career_paths").select("id, title, category").eq("user_id", user.id),
       ]);
 
       const profile = profileResult.data;
@@ -183,32 +194,32 @@ export const ActionPage = () => {
       if (profile?.active_path_id) {
         // Get the career path details
         const { data: path } = await supabase
-          .from('career_paths')
-          .select('*')
-          .eq('id', profile.active_path_id)
+          .from("career_paths")
+          .select("*")
+          .eq("id", profile.active_path_id)
           .single();
 
         setActivePath(path);
 
         // Get goals for this path
         const { data: goalsData } = await supabase
-          .from('goals')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('path_id', profile.active_path_id)
-          .order('priority', { ascending: false })
-          .order('created_at', { ascending: true });
+          .from("goals")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("path_id", profile.active_path_id)
+          .order("priority", { ascending: false })
+          .order("created_at", { ascending: true });
 
         // Always set goals, even if empty, to clear old path's goals
         setGoals(goalsData || []);
 
         // Check if we have today's actions already
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
         const { data: existingActions } = await supabase
-          .from('daily_actions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('action_date', today)
+          .from("daily_actions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("action_date", today)
           .maybeSingle();
 
         if (existingActions && !existingActions.all_completed) {
@@ -223,28 +234,24 @@ export const ActionPage = () => {
         setTodayActions([{ task: "Activate a career path to get started", priority: "low", done: false }]);
       }
 
-  // Get user stats
-      let { data: stats } = await supabase
-        .from('user_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Get user stats
+      let { data: stats } = await supabase.from("user_stats").select("*").eq("user_id", user.id).maybeSingle();
 
       // Create default stats if they don't exist
       if (!stats) {
         const { data: newStats } = await supabase
-          .from('user_stats')
+          .from("user_stats")
           .insert({
             user_id: user.id,
             current_streak: 0,
             total_points: 0,
             missions_completed: 0,
             paths_explored: 0,
-            current_level: 1
+            current_level: 1,
           })
           .select()
           .single();
-        
+
         stats = newStats;
       }
 
@@ -254,7 +261,7 @@ export const ActionPage = () => {
         setCurrentLevel(stats.current_level);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
@@ -262,41 +269,41 @@ export const ActionPage = () => {
 
   const loadLevelResources = async (level: number) => {
     if (!user) return;
-    
+
     // Check cache first
     if (resourcesCache[level]) {
       console.log(`Using cached resources for Level ${level}`);
       setLevelResources(resourcesCache[level]);
       return;
     }
-    
+
     setLoadingResources(true);
     try {
       console.log(`Fetching resources for Level ${level}...`);
       const session = (await supabase.auth.getSession()).data.session;
-      const { data, error } = await supabase.functions.invoke('generate-level-resources', {
+      const { data, error } = await supabase.functions.invoke("generate-level-resources", {
         body: { level },
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       if (error) {
-        console.error('Error loading level resources:', error);
+        console.error("Error loading level resources:", error);
         throw error;
       }
 
       if (data?.resources && Array.isArray(data.resources)) {
         setLevelResources(data.resources);
         // Cache the resources
-        setResourcesCache(prev => ({ ...prev, [level]: data.resources }));
+        setResourcesCache((prev) => ({ ...prev, [level]: data.resources }));
       } else {
         setLevelResources([]);
       }
     } catch (error) {
-      console.error('Failed to load level resources:', error);
+      console.error("Failed to load level resources:", error);
       toast({
         title: "Unable to load resources",
         description: "Please try refreshing the page.",
-        variant: "destructive"
+        variant: "destructive",
       });
       setLevelResources([]);
     } finally {
@@ -311,32 +318,32 @@ export const ActionPage = () => {
     setLoadingActions(true);
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      const { data, error } = await supabase.functions.invoke('generate-personalized-guidance', {
+      const { data, error } = await supabase.functions.invoke("generate-personalized-guidance", {
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        console.error("Edge function error:", error);
         throw error;
       }
 
       if (!data?.dailyActions || data.dailyActions.length === 0) {
-        throw new Error('No actions generated');
+        throw new Error("No actions generated");
       }
 
       // Transform the AI-generated actions into the expected format
       const parsedActions = data.dailyActions.map((action: any, idx: number) => {
         let label = "Action";
         let priority = "medium";
-        
+
         if (idx === 0) {
-          label = `Morning (${action.timeNeeded || '30min'})`;
+          label = `Morning (${action.timeNeeded || "30min"})`;
           priority = "high";
         } else if (idx === 1) {
-          label = `Afternoon (${action.timeNeeded || '1hr'})`;
+          label = `Afternoon (${action.timeNeeded || "1hr"})`;
           priority = "medium";
         } else if (idx === 2) {
-          label = `Evening (${action.timeNeeded || '15min'})`;
+          label = `Evening (${action.timeNeeded || "15min"})`;
           priority = "low";
         }
 
@@ -345,46 +352,48 @@ export const ActionPage = () => {
           priority,
           done: false,
           label,
-          rationale: action.rationale
+          rationale: action.rationale,
         };
       });
 
       setTodayActions(parsedActions);
 
       // Save to database
-      const today = new Date().toISOString().split('T')[0];
-      await supabase
-        .from('daily_actions')
-        .upsert({
+      const today = new Date().toISOString().split("T")[0];
+      await supabase.from("daily_actions").upsert(
+        {
           user_id: user.id,
           path_id: activePathData.id,
           action_date: today,
           actions: parsedActions,
-          all_completed: false
-        }, {
-          onConflict: 'user_id,action_date'
-        });
-
+          all_completed: false,
+        },
+        {
+          onConflict: "user_id,action_date",
+        },
+      );
     } catch (error) {
-      console.error('Error generating actions:', error);
-      
+      console.error("Error generating actions:", error);
+
       // Check if it's a function invocation error
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.log('Error details:', errorMessage);
-      
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.log("Error details:", errorMessage);
+
       toast({
         title: "Unable to generate actions",
         description: "Our AI is having trouble right now. Please refresh the page.",
-        variant: "destructive"
+        variant: "destructive",
       });
-      
+
       // Show empty state instead of generic fallback
-      setTodayActions([{
-        task: "AI guidance temporarily unavailable - refresh to try again",
-        priority: "medium",
-        done: false,
-        label: "Status"
-      }]);
+      setTodayActions([
+        {
+          task: "AI guidance temporarily unavailable - refresh to try again",
+          priority: "medium",
+          done: false,
+          label: "Status",
+        },
+      ]);
     } finally {
       setLoadingActions(false);
     }
@@ -392,87 +401,79 @@ export const ActionPage = () => {
 
   const roadmapMilestones = activePath?.roadmap || [];
 
-  const goalsCompleted = goals.filter(g => g.completed).length;
+  const goalsCompleted = goals.filter((g) => g.completed).length;
   const totalGoals = goals.length;
 
-  const quickWinsSuggestions = activePath ? [
-    `Update LinkedIn with "${activePath.title}" as target role`,
-    `Spend 15 minutes researching ${activePath.target_companies?.[0] || 'top companies'}`,
-    `Watch one tutorial about ${activePath.key_skills?.[0] || 'key skills'}`,
-    `Connect with one person working as ${activePath.title}`,
-    `Read one article about ${activePath.category} careers`,
-  ] : [
-    "Activate a career path first",
-  ];
+  const quickWinsSuggestions = activePath
+    ? [
+        `Update LinkedIn with "${activePath.title}" as target role`,
+        `Spend 15 minutes researching ${activePath.target_companies?.[0] || "top companies"}`,
+        `Watch one tutorial about ${activePath.key_skills?.[0] || "key skills"}`,
+        `Connect with one person working as ${activePath.title}`,
+        `Read one article about ${activePath.category} careers`,
+      ]
+    : ["Activate a career path first"];
 
   const handleSetActivePath = async (pathId: string) => {
     if (!user || pathId === activePath?.id) return;
-    
+
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ active_path_id: pathId })
-        .eq('user_id', user.id);
-      
+      const { error } = await supabase.from("user_profiles").update({ active_path_id: pathId }).eq("user_id", user.id);
+
       if (error) throw error;
-      
+
       // Check if the new path has goals
       const { data: existingGoals } = await supabase
-        .from('goals')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('path_id', pathId);
-      
+        .from("goals")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("path_id", pathId);
+
       // If no goals exist, generate them
       if (!existingGoals || existingGoals.length === 0) {
         try {
           const session = (await supabase.auth.getSession()).data.session;
-          await supabase.functions.invoke('generate-goals', {
+          await supabase.functions.invoke("generate-goals", {
             body: { pathId, userId: user.id },
             headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
           });
         } catch (goalError) {
-          console.error('Error generating goals:', goalError);
+          console.error("Error generating goals:", goalError);
           // Don't fail the whole operation if goal generation fails
         }
       }
-      
+
       // Check and award badges after activating path
       await checkAndAwardBadges();
-      
+
       // Reload all data to update with new active path
       await loadData();
-      
+
       toast({
         title: "Active path updated",
-        description: "Your actions are now personalized to your new path."
+        description: "Your actions are now personalized to your new path.",
       });
-      
+
       // Close the accordion
       setAccordionValue("");
     } catch (error) {
-      console.error('Error updating active path:', error);
+      console.error("Error updating active path:", error);
       toast({
         title: "Failed to update path",
         description: "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const handleToggleGoal = async (goalId: string, completed: boolean) => {
     try {
-      const { error } = await supabase
-        .from('goals')
-        .update({ completed: !completed })
-        .eq('id', goalId);
+      const { error } = await supabase.from("goals").update({ completed: !completed }).eq("id", goalId);
 
       if (error) throw error;
 
       // Update local state
-      setGoals(goals.map(g => 
-        g.id === goalId ? { ...g, completed: !completed } : g
-      ));
+      setGoals(goals.map((g) => (g.id === goalId ? { ...g, completed: !completed } : g)));
 
       if (!completed) {
         toast({
@@ -481,7 +482,7 @@ export const ActionPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error toggling goal:', error);
+      console.error("Error toggling goal:", error);
     }
   };
 
@@ -489,7 +490,7 @@ export const ActionPage = () => {
     if (!user || !userStats) return;
 
     const nextLevel = currentLevel + 1;
-    
+
     // Check if can level up
     if (nextLevel > 10) {
       toast({
@@ -502,10 +503,7 @@ export const ActionPage = () => {
 
     try {
       // Update level in database
-      const { error } = await supabase
-        .from('user_stats')
-        .update({ current_level: nextLevel })
-        .eq('user_id', user.id);
+      const { error } = await supabase.from("user_stats").update({ current_level: nextLevel }).eq("user_id", user.id);
 
       if (error) throw error;
 
@@ -514,7 +512,7 @@ export const ActionPage = () => {
       setUserStats({ ...userStats, current_level: nextLevel });
 
       // Clear cache and generate new content
-      setResourcesCache(prev => {
+      setResourcesCache((prev) => {
         const newCache = { ...prev };
         delete newCache[nextLevel];
         return newCache;
@@ -522,7 +520,7 @@ export const ActionPage = () => {
 
       toast({
         title: `🎉 Level ${nextLevel} Unlocked!`,
-        description: `Congratulations! You've advanced to ${guidanceLevels[nextLevel - 1]?.name || 'the next level'}. New resources and actions await!`,
+        description: `Congratulations! You've advanced to ${guidanceLevels[nextLevel - 1]?.name || "the next level"}. New resources and actions await!`,
       });
 
       // Award badge
@@ -531,11 +529,11 @@ export const ActionPage = () => {
       // Generate new actions for the new level
       await generateTodaysActions();
     } catch (error) {
-      console.error('Error leveling up:', error);
+      console.error("Error leveling up:", error);
       toast({
         title: "Error",
         description: "Failed to advance level. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -550,28 +548,29 @@ export const ActionPage = () => {
       setTodayActions(updatedActions);
 
       // Check if all actions are completed
-      const allCompleted = updatedActions.every(action => action.done);
+      const allCompleted = updatedActions.every((action) => action.done);
 
       // Save to database
-      const today = new Date().toISOString().split('T')[0];
-      const { error } = await supabase
-        .from('daily_actions')
-        .upsert({
+      const today = new Date().toISOString().split("T")[0];
+      const { error } = await supabase.from("daily_actions").upsert(
+        {
           user_id: user.id,
           path_id: activePath.id,
           action_date: today,
           actions: updatedActions,
-          all_completed: allCompleted
-        }, {
-          onConflict: 'user_id,action_date'
-        });
+          all_completed: allCompleted,
+        },
+        {
+          onConflict: "user_id,action_date",
+        },
+      );
 
       if (error) throw error;
 
       if (!updatedActions[index].done) {
         toast({
           title: "Action reopened",
-          description: "Keep working on this task"
+          description: "Keep working on this task",
         });
       } else {
         // Check if level completed
@@ -580,16 +579,16 @@ export const ActionPage = () => {
         } else {
           toast({
             title: "Action completed! 🎉",
-            description: "Great progress!"
+            description: "Great progress!",
           });
         }
       }
     } catch (error) {
-      console.error('Error toggling action:', error);
+      console.error("Error toggling action:", error);
       toast({
         title: "Error",
         description: "Failed to update action",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -609,33 +608,34 @@ export const ActionPage = () => {
     try {
       // Mark action as complete with log
       const updatedActions = [...todayActions];
-      updatedActions[selectedAction.index] = { 
-        ...updatedActions[selectedAction.index], 
+      updatedActions[selectedAction.index] = {
+        ...updatedActions[selectedAction.index],
         done: true,
         log: actionLog,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
       };
       setTodayActions(updatedActions);
 
       // Save to database
-      const today = new Date().toISOString().split('T')[0];
-      const allCompleted = updatedActions.every(action => action.done);
-      
-      await supabase
-        .from('daily_actions')
-        .upsert({
+      const today = new Date().toISOString().split("T")[0];
+      const allCompleted = updatedActions.every((action) => action.done);
+
+      await supabase.from("daily_actions").upsert(
+        {
           user_id: user.id,
           path_id: activePath.id,
           action_date: today,
           actions: updatedActions,
-          all_completed: allCompleted
-        }, {
-          onConflict: 'user_id,action_date'
-        });
+          all_completed: allCompleted,
+        },
+        {
+          onConflict: "user_id,action_date",
+        },
+      );
 
       toast({
         title: "Mission logged! 🎯",
-        description: "Keep up the great work!"
+        description: "Keep up the great work!",
       });
 
       setLogDrawerOpen(false);
@@ -644,11 +644,11 @@ export const ActionPage = () => {
         await handleLevelComplete();
       }
     } catch (error) {
-      console.error('Error saving log:', error);
+      console.error("Error saving log:", error);
       toast({
         title: "Error",
         description: "Failed to save mission log",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -656,12 +656,12 @@ export const ActionPage = () => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const isMeditationAction = (task: string) => {
-    const meditationKeywords = ['meditat', 'visualiz', 'mindful', 'breath', 'relax'];
-    return meditationKeywords.some(keyword => task.toLowerCase().includes(keyword));
+    const meditationKeywords = ["meditat", "visualiz", "mindful", "breath", "relax"];
+    return meditationKeywords.some((keyword) => task.toLowerCase().includes(keyword));
   };
 
   if (loading) {
@@ -704,10 +704,15 @@ export const ActionPage = () => {
           </Card>
         )}
 
-
         {/* Path Switcher Accordion - Show only if multiple paths */}
         {allPaths.length > 1 && (
-          <Accordion type="single" collapsible className="w-full" value={accordionValue} onValueChange={setAccordionValue}>
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            value={accordionValue}
+            onValueChange={setAccordionValue}
+          >
             <AccordionItem value="paths" className="border-border/50 rounded-lg overflow-hidden">
               <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 transition-colors">
                 <div className="flex items-center gap-2 text-sm">
@@ -725,17 +730,15 @@ export const ActionPage = () => {
                         onClick={() => handleSetActivePath(path.id)}
                         disabled={isActive}
                         className={`w-full text-left px-3 py-2.5 rounded-md transition-all ${
-                          isActive 
-                            ? 'bg-primary/10 text-primary cursor-default' 
-                            : 'hover:bg-muted/50 text-foreground hover:scale-[1.01]'
+                          isActive
+                            ? "bg-primary/10 text-primary cursor-default"
+                            : "hover:bg-muted/50 text-foreground hover:scale-[1.01]"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{path.title}</p>
-                            {path.category && (
-                              <p className="text-xs text-muted-foreground mt-0.5">{path.category}</p>
-                            )}
+                            {path.category && <p className="text-xs text-muted-foreground mt-0.5">{path.category}</p>}
                           </div>
                           {isActive && (
                             <div className="ml-2 flex-shrink-0">
@@ -763,26 +766,20 @@ export const ActionPage = () => {
                 <div
                   key={level.level}
                   className={`relative aspect-square rounded-lg ${
-                    isUnlocked
-                      ? level.color + " text-white"
-                      : "bg-muted/50 text-muted-foreground"
+                    isUnlocked ? level.color + " text-white" : "bg-muted/50 text-muted-foreground"
                   } flex flex-col items-center justify-center p-2 ${
                     isUnlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
                   }`}
                   onClick={() => isUnlocked && setCurrentLevel(level.level)}
                 >
-                  {!isUnlocked && (
-                    <Lock className="h-3 w-3 absolute top-1 right-1" />
-                  )}
+                  {!isUnlocked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
                   <Icon className="h-4 w-4 mb-1" />
-                  <span className="text-[10px] font-medium text-center leading-tight">
-                    {level.level}
-                  </span>
+                  <span className="text-[10px] font-medium text-center leading-tight">{level.level}</span>
                 </div>
               );
             })}
           </div>
-          
+
           {/* Current Level Details */}
           <Card className={`${guidanceLevels[currentLevel - 1].color} text-white`}>
             <CardContent className="p-6">
@@ -794,13 +791,15 @@ export const ActionPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-lg font-bold">Level {currentLevel}</h3>
-                    <Badge variant="secondary" className="text-xs">Active</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      Active
+                    </Badge>
                   </div>
                   <p className="text-sm font-medium mb-1">{guidanceLevels[currentLevel - 1].name}</p>
                   <p className="text-xs opacity-90">{guidanceLevels[currentLevel - 1].description}</p>
                 </div>
               </div>
-              
+
               {activePath && (
                 <div className="space-y-2 pt-2 border-t border-white/20">
                   <p className="text-xs font-medium opacity-90">Current Focus:</p>
@@ -832,7 +831,9 @@ export const ActionPage = () => {
           <Card>
             <CardContent className="p-4 text-center">
               <Target className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
-              <div className="text-2xl font-bold">{goalsCompleted}/{totalGoals || '0'}</div>
+              <div className="text-2xl font-bold">
+                {goalsCompleted}/{totalGoals || "0"}
+              </div>
               <div className="text-xs text-muted-foreground">Goals</div>
             </CardContent>
           </Card>
@@ -843,17 +844,16 @@ export const ActionPage = () => {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold">Your Goals</h3>
-              <Badge variant="secondary">{goalsCompleted} of {totalGoals} completed</Badge>
+              <Badge variant="secondary">
+                {goalsCompleted} of {totalGoals} completed
+              </Badge>
             </div>
             <div className="space-y-2">
               {goals.slice(0, 3).map((goal: any) => (
                 <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <button 
-                        onClick={() => handleToggleGoal(goal.id, goal.completed)}
-                        className="mt-1 flex-shrink-0"
-                      >
+                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
                         {goal.completed ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
                         ) : (
@@ -861,13 +861,11 @@ export const ActionPage = () => {
                         )}
                       </button>
                       <div className="flex-1">
-                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? 'line-through' : ''}`}>
+                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
                           {goal.title}
                         </h4>
                         {goal.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {goal.description}
-                          </p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
                         )}
                       </div>
                       <span
@@ -875,8 +873,8 @@ export const ActionPage = () => {
                           goal.priority === "high"
                             ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
                             : goal.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                            : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
                         }`}
                       >
                         {goal.priority}
@@ -886,11 +884,7 @@ export const ActionPage = () => {
                 </Card>
               ))}
               {goals.length > 3 && (
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setGoalDialogOpen(true)}
-                >
+                <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
                   View All {goals.length} Goals
                 </Button>
               )}
@@ -914,7 +908,7 @@ export const ActionPage = () => {
             <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
             <span className="text-xs text-muted-foreground">Foundation</span>
           </div>
-          
+
           {loadingResources ? (
             <div className="space-y-3">
               <Skeleton className="h-24 w-full" />
@@ -937,11 +931,7 @@ export const ActionPage = () => {
                 <p className="text-sm text-muted-foreground mb-3">
                   Generating personalized resources based on your CV and skill gaps...
                 </p>
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => loadLevelResources(currentLevel)}
-                >
+                <Button size="sm" variant="outline" onClick={() => loadLevelResources(currentLevel)}>
                   Retry
                 </Button>
               </CardContent>
@@ -986,12 +976,12 @@ export const ActionPage = () => {
                         <h4 className="font-medium text-sm mb-1">{milestone.step}</h4>
                         <p className="text-xs text-muted-foreground">{milestone.duration}</p>
                       </div>
-                     </div>
+                    </div>
                   </CardContent>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
         )}
 
         {/* Affirmations */}
@@ -1035,8 +1025,8 @@ export const ActionPage = () => {
           ) : (
             <div className="space-y-3">
               {todayActions.map((action: any, index: number) => (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className={`${action.done ? "opacity-60" : "cursor-pointer hover:border-primary/50 transition-all"}`}
                   onClick={() => !action.done && handleActionClick(action, index)}
                 >
@@ -1058,30 +1048,24 @@ export const ActionPage = () => {
                       <div className="flex-1">
                         {action.label && (
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-semibold text-primary">
-                              {action.label}
-                            </span>
+                            <span className="text-xs font-semibold text-primary">{action.label}</span>
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
                                 action.priority === "high"
                                   ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
                                   : action.priority === "medium"
-                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                  : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                    : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
                               }`}
                             >
                               {action.priority}
                             </span>
                           </div>
                         )}
-                        <p className={`text-sm text-foreground leading-relaxed ${action.done ? 'line-through' : ''}`}>
+                        <p className={`text-sm text-foreground leading-relaxed ${action.done ? "line-through" : ""}`}>
                           {action.task}
                         </p>
-                        {!action.done && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Tap to log mission
-                          </p>
-                        )}
+                        {!action.done && <p className="text-xs text-muted-foreground mt-2">Tap to log action</p>}
                       </div>
                     </div>
                   </CardContent>
@@ -1109,10 +1093,10 @@ export const ActionPage = () => {
                     <h2 className="text-2xl font-bold mb-2">Your Goals</h2>
                     <p className="text-sm text-muted-foreground">Track your progress towards your future</p>
                   </div>
-                  
+
                   {/* Close Button */}
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4 rounded-full z-20"
                     onClick={() => setGoalDialogOpen(false)}
@@ -1125,12 +1109,9 @@ export const ActionPage = () => {
                     <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
                       {goals.length > 0 ? (
                         goals.map((goal: any) => (
-                          <div
-                            key={goal.id}
-                            className="p-4 rounded-xl bg-background/50"
-                          >
+                          <div key={goal.id} className="p-4 rounded-xl bg-background/50">
                             <div className="flex items-start gap-3">
-                              <button 
+                              <button
                                 onClick={() => handleToggleGoal(goal.id, goal.completed)}
                                 className="mt-1 flex-shrink-0"
                               >
@@ -1141,13 +1122,11 @@ export const ActionPage = () => {
                                 )}
                               </button>
                               <div className="flex-1">
-                                <h4 className={`font-medium mb-1 ${goal.completed ? 'line-through' : ''}`}>
+                                <h4 className={`font-medium mb-1 ${goal.completed ? "line-through" : ""}`}>
                                   {goal.title}
                                 </h4>
                                 {goal.description && (
-                                  <p className="text-xs text-muted-foreground mb-2">
-                                    {goal.description}
-                                  </p>
+                                  <p className="text-xs text-muted-foreground mb-2">{goal.description}</p>
                                 )}
                                 <div className="flex items-center gap-2">
                                   <span
@@ -1155,8 +1134,8 @@ export const ActionPage = () => {
                                       goal.priority === "high"
                                         ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
                                         : goal.priority === "medium"
-                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                        : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                          : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
                                     }`}
                                   >
                                     {goal.priority}
@@ -1184,7 +1163,7 @@ export const ActionPage = () => {
 
                   {/* Action Button */}
                   <div className="px-6 pb-8 sticky bottom-0 bg-background">
-                    <Button 
+                    <Button
                       onClick={() => setGoalDialogOpen(false)}
                       className="w-full h-12 rounded-full text-base font-semibold"
                     >
@@ -1210,10 +1189,10 @@ export const ActionPage = () => {
                     <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
                     <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
                   </div>
-                  
+
                   {/* Close Button */}
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4 rounded-full z-20"
                     onClick={() => setQuickWinsOpen(false)}
@@ -1247,7 +1226,7 @@ export const ActionPage = () => {
 
                   {/* Action Button */}
                   <div className="px-6 pb-6 sticky bottom-0 bg-background">
-                    <Button 
+                    <Button
                       onClick={() => setQuickWinsOpen(false)}
                       className="w-full h-12 rounded-full text-base font-semibold"
                     >
@@ -1256,22 +1235,22 @@ export const ActionPage = () => {
                     </Button>
                   </div>
                 </div>
-                </DrawerContent>
-              </Drawer>
+              </DrawerContent>
+            </Drawer>
 
-              <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
-                <Briefcase className="h-5 w-5" />
-                <span className="text-xs">Partners Jobs (soon)</span>
-              </Button>
+            <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+              <Briefcase className="h-5 w-5" />
+              <span className="text-xs">Partners Jobs (soon)</span>
+            </Button>
 
-              <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
-                <Bot className="h-5 w-5" />
-                <span className="text-xs">Automations (soon)</span>
-              </Button>
-            </div>
+            <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+              <Bot className="h-5 w-5" />
+              <span className="text-xs">Automations (soon)</span>
+            </Button>
           </div>
+        </div>
       </div>
-      
+
       {/* Mission Log Drawer */}
       <Drawer open={logDrawerOpen} onOpenChange={setLogDrawerOpen}>
         <DrawerContent className="max-h-[85vh]">
@@ -1279,14 +1258,12 @@ export const ActionPage = () => {
             {/* Header */}
             <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
               <h2 className="text-2xl font-bold mb-2">Log Mission</h2>
-              <p className="text-sm text-muted-foreground">
-                {selectedAction?.task}
-              </p>
+              <p className="text-sm text-muted-foreground">{selectedAction?.task}</p>
             </div>
-            
+
             {/* Close Button */}
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               className="absolute top-4 right-4 rounded-full z-20"
               onClick={() => setLogDrawerOpen(false)}
@@ -1300,9 +1277,7 @@ export const ActionPage = () => {
               {selectedAction && isMeditationAction(selectedAction.task) && (
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6">
                   <div className="text-center space-y-4">
-                    <div className="text-6xl font-light tracking-tight">
-                      {formatTime(timerSeconds)}
-                    </div>
+                    <div className="text-6xl font-light tracking-tight">{formatTime(timerSeconds)}</div>
                     <div className="flex gap-2 justify-center">
                       {!timerActive ? (
                         <>
@@ -1364,18 +1339,13 @@ export const ActionPage = () => {
                   placeholder="Share your thoughts, learnings, or wins..."
                   className="w-full h-24 px-4 py-3 rounded-xl border border-border bg-background/50 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                 />
-                <div className="text-xs text-right text-muted-foreground">
-                  {actionLog.length}/140
-                </div>
+                <div className="text-xs text-right text-muted-foreground">{actionLog.length}/140</div>
               </div>
             </div>
 
             {/* Action Button */}
             <div className="px-6 pb-6 sticky bottom-0 bg-background">
-              <Button 
-                onClick={handleSaveLog}
-                className="w-full h-12 rounded-full text-base font-semibold"
-              >
+              <Button onClick={handleSaveLog} className="w-full h-12 rounded-full text-base font-semibold">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Complete Mission
               </Button>
@@ -1383,7 +1353,7 @@ export const ActionPage = () => {
           </div>
         </DrawerContent>
       </Drawer>
-      
+
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
   );
