@@ -422,6 +422,13 @@ export const ActionPage = () => {
 
       if (error) throw error;
 
+      // Get the new path data
+      const { data: newPath } = await supabase
+        .from("career_paths")
+        .select("*")
+        .eq("id", pathId)
+        .single();
+
       // Check if the new path has goals
       const { data: existingGoals } = await supabase
         .from("goals")
@@ -448,6 +455,11 @@ export const ActionPage = () => {
 
       // Reload all data to update with new active path
       await loadData();
+
+      // Force regenerate actions for the new path
+      if (newPath) {
+        await generateTodaysActions(newPath);
+      }
 
       toast({
         title: "Active path updated",
