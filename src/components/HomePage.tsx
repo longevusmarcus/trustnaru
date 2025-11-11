@@ -130,6 +130,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [timerActive, setTimerActive] = useState(false);
   const [dailyMissions, setDailyMissions] = useState<any[]>(defaultMissions);
   const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
+  const [showCelebration, setShowCelebration] = useState(false);
   
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -308,6 +309,17 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             actions.filter((a: any) => a.completed).map((a: any) => a.title)
           );
           setCompletedMissions(completed);
+
+          // Check if all missions completed for celebration
+          if (actions.length > 0 && actions.every((a: any) => a.completed)) {
+            const celebrationShown = localStorage.getItem(`celebration_${today}`);
+            if (!celebrationShown) {
+              setTimeout(() => {
+                setShowCelebration(true);
+                localStorage.setItem(`celebration_${today}`, 'true');
+              }, 1000);
+            }
+          }
         }
       }
     };
@@ -447,6 +459,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       setCompletedMissions(prev => new Set([...prev, selectedMission?.title]));
 
+      // Check if all missions are now completed
+      const newCompletedCount = completedMissions.size + 1;
+      if (newCompletedCount === dailyMissions.length) {
+        setTimeout(() => setShowCelebration(true), 300);
+      }
+
       toast({
         title: "Mission logged! 🎉",
         description: "Your progress has been recorded."
@@ -473,6 +491,52 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         onOpenChange={setShowDailyMotivation}
         pathTitle={activePath?.title}
       />
+
+      {/* Celebration Animation */}
+      {showCelebration && (
+        <div 
+          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+          onClick={() => setShowCelebration(false)}
+        >
+          <div className="animate-scale-in">
+            <div className="relative">
+              {/* Central glow */}
+              <div className="absolute inset-0 animate-ping opacity-30">
+                <div className="w-32 h-32 rounded-full bg-primary/40 blur-xl" />
+              </div>
+              
+              {/* Main celebration card */}
+              <div className="relative bg-background/95 backdrop-blur-sm border-2 border-primary/20 rounded-3xl p-8 shadow-2xl animate-fade-in">
+                <div className="text-center space-y-4">
+                  <div className="text-6xl animate-bounce">🎉</div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    All Missions Complete!
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Amazing progress today
+                  </p>
+                </div>
+              </div>
+
+              {/* Particle effects */}
+              <div className="absolute -top-4 -left-4 w-3 h-3 rounded-full bg-primary animate-ping" style={{ animationDelay: '0.1s' }} />
+              <div className="absolute -top-2 -right-6 w-2 h-2 rounded-full bg-primary/60 animate-ping" style={{ animationDelay: '0.3s' }} />
+              <div className="absolute -bottom-3 left-8 w-2 h-2 rounded-full bg-primary/40 animate-ping" style={{ animationDelay: '0.5s' }} />
+              <div className="absolute -bottom-4 -right-4 w-3 h-3 rounded-full bg-primary/60 animate-ping" style={{ animationDelay: '0.2s' }} />
+              <div className="absolute top-1/2 -left-8 w-2 h-2 rounded-full bg-primary/40 animate-ping" style={{ animationDelay: '0.4s' }} />
+              <div className="absolute top-1/3 -right-8 w-2 h-2 rounded-full bg-primary/60 animate-ping" style={{ animationDelay: '0.6s' }} />
+            </div>
+          </div>
+          
+          {/* Dismiss button */}
+          <button 
+            onClick={() => setShowCelebration(false)}
+            className="absolute top-8 right-8 pointer-events-auto w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center hover:bg-muted transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
       
       <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
