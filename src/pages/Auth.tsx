@@ -134,7 +134,7 @@ const Auth = () => {
         setIsSignUp(false);
         reset();
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
@@ -155,6 +155,22 @@ const Auth = () => {
             }
           }
           throw error;
+        }
+
+        // Track access code usage after successful sign in as well
+        const accessCode = localStorage.getItem("access_code");
+        if (accessCode && accessCode !== "become" && signInData?.user) {
+          await supabase
+            .from("access_codes")
+            .update({
+              used: true,
+              used_by: signInData.user.id,
+              used_at: new Date().toISOString(),
+            })
+            .eq("code", accessCode)
+            .eq("used", false);
+
+          localStorage.removeItem("access_code");
         }
 
         setIsOffline(false);
