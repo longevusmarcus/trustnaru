@@ -12,33 +12,47 @@ serve(async (req) => {
   }
 
   try {
-    const { pathTitle, pathDescription, category } = await req.json();
+    const { pathTitle, pathDescription, category, keySkills, roadmap } = await req.json();
 
     console.log('Generating daily missions for path:', pathTitle);
 
-    const prompt = `Generate 3 personalized daily missions for someone pursuing this career path:
+    // Format key skills and roadmap for context
+    const skillsContext = keySkills?.length ? `Key Skills Needed: ${keySkills.join(', ')}` : '';
+    const roadmapContext = roadmap?.length 
+      ? `Roadmap Phases: ${roadmap.map((phase: any) => phase.title).join(', ')}` 
+      : '';
+
+    const prompt = `Generate 3 highly specific and actionable daily missions for someone pursuing this career path:
 
 Career Path: ${pathTitle}
 Description: ${pathDescription}
 Category: ${category || 'General'}
+${skillsContext}
+${roadmapContext}
 
-Create 3 specific, actionable missions that:
-1. Are directly related to this career path
-2. Can be completed in 5-15 minutes
-3. Help build relevant skills or mindset
-4. Are varied (reflection, learning, practice, networking, etc.)
+IMPORTANT: Be VERY SPECIFIC. Do not use generic placeholders.
+
+Create 3 specific missions:
+1. **Research Mission**: Provide a SPECIFIC article topic or resource name about current trends in ${category || 'this field'}. Example: "Read 'The Rise of AI Agents in 2025' article on TechCrunch" NOT "Read one article about trends"
+
+2. **Skill Practice Mission**: Identify ONE SPECIFIC skill from their path (${keySkills?.join(', ') || 'their key skills'}) and suggest a CONCRETE practice activity. Example: "Practice Python list comprehensions - solve 3 problems on LeetCode" NOT "Practice a core skill"
+
+3. **Reflection/Networking Mission**: A specific action they can take today related to their journey.
+
+Each mission must:
+- Be completable in 5-15 minutes
+- Include specific resource names, skill names, or concrete actions
+- Be directly related to ${pathTitle}
 
 Return ONLY a JSON array with this exact structure:
 [
   {
     "title": "Mission title (max 6 words)",
-    "description": "One sentence describing the mission",
+    "description": "One sentence with SPECIFIC details (resource names, skill names, concrete actions)",
     "duration": "X min",
-    "type": "Reflection/Learning/Practice/Networking/etc"
+    "type": "Learning/Practice/Reflection/Networking"
   }
-]
-
-Make the missions specific to ${category || 'this field'} and practical for today.`;
+]`;
 
     const response = await fetch('https://api.lovable.app/v1/ai/generate', {
       method: 'POST',
@@ -100,20 +114,20 @@ function generateFallbackMissions(category: string, pathTitle: string) {
   
   return [
     {
-      title: `Research ${field} Trends`,
-      description: `Read one article about current trends in ${field}`,
+      title: `Research ${field} Innovations`,
+      description: `Find and read a specific article about emerging ${field} trends on Medium or industry blogs`,
       duration: "10 min",
       type: "Learning"
     },
     {
-      title: "Reflect on Your Progress",
-      description: `Write about one skill you want to develop for ${path}`,
+      title: "Map Your Skill Gap",
+      description: `Identify one specific skill from ${path} you need to develop and write why it matters`,
       duration: "8 min",
       type: "Reflection"
     },
     {
-      title: "Practice Key Skills",
-      description: `Spend time practicing a core skill relevant to ${field}`,
+      title: "Practice Core Competency",
+      description: `Spend focused time practicing one key skill from your roadmap using online resources`,
       duration: "15 min",
       type: "Practice"
     }

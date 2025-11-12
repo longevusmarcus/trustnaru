@@ -172,7 +172,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           pathId: path.id,
           pathTitle: path.title,
           pathDescription: path.description,
-          category: path.category
+          category: path.category,
+          keySkills: path.key_skills || [],
+          roadmap: path.roadmap || []
         }
       });
 

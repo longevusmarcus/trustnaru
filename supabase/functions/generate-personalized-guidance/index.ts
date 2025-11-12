@@ -208,6 +208,11 @@ ${userContext}
 CRITICAL INSTRUCTIONS:
 Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
 
+**IMPORTANT - BE ULTRA SPECIFIC:**
+- For research/learning actions: Provide SPECIFIC article titles or resource names (e.g., "Read 'The Rise of AI in Healthcare 2025' on TechCrunch" NOT "Read an article")
+- For skill practice actions: Pick ONE SPECIFIC skill from the user's key skills list (${activePath.key_skills?.join(', ') || 'their skills'}) and suggest a CONCRETE practice activity (e.g., "Practice React hooks - build a custom useLocalStorage hook" NOT "Practice coding")
+- For networking actions: Include actual company names, teams, and ready-to-send message templates
+
 If CV structured data is present (current role, years of experience, key skills, companies, education), leverage those exact fields.
 When referencing companies, include actual teams/roles and a real point of contact where possible.
 If you are unsure, prefer credible organizations, certifications, and named communities over vague suggestions.
@@ -215,9 +220,9 @@ If you are unsure, prefer credible organizations, certifications, and named comm
 STRUCTURE (valid JSON ONLY):
 {
   "dailyActions": [
-    { "action": "...", "timeNeeded": "30 minutes", "rationale": "..." },
-    { "action": "...", "timeNeeded": "1 hour", "rationale": "..." },
-    { "action": "...", "timeNeeded": "15 minutes", "rationale": "..." }
+    { "action": "Specific action with resource/skill names", "timeNeeded": "30 minutes", "rationale": "Why this matters" },
+    { "action": "Another specific action with concrete details", "timeNeeded": "1 hour", "rationale": "Impact on career path" },
+    { "action": "Third specific action with exact names", "timeNeeded": "15 minutes", "rationale": "How it helps" }
   ],
   "smartTips": [
     { "tip": "...", "nextSteps": "...", "strategicValue": "..." },
@@ -232,7 +237,8 @@ STRUCTURE (valid JSON ONLY):
 }
 
 QUALITY RULES:
-- Do the work for the user. Never say “list”, “map”, “consider”, or “choose”. Provide the computed outputs directly.
+- Do the work for the user. Never say "list", "map", "consider", or "choose". Provide the computed outputs directly with SPECIFIC NAMES.
+- Every dailyAction must include concrete resource names (articles, books, courses), specific skill names from their key_skills, or actual company/person names.
 - Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
