@@ -30,74 +30,29 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
 
     setIsValidating(true);
 
-    try {
-      // Special handling for "become" code - always valid, infinite use
-      if (trimmedCode === "become") {
-        onSuccess();
-        return;
-      }
+    // Validate code format in frontend
+    const isValidCode = 
+      trimmedCode === "become" || 
+      /^naru(10[0-9]{2}|1100)$/.test(trimmedCode); // naru1000-naru1100
 
-      // For numbered codes (naru1000-naru1100), check if exists and unused
-      const { data: accessCode, error: fetchError } = await supabase
-        .from("access_codes")
-        .select("*")
-        .eq("code", trimmedCode)
-        .eq("used", false)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error("Error checking code:", fetchError);
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive"
-        });
-        setIsValidating(false);
-        return;
-      }
-
-      if (!accessCode) {
-        toast({
-          title: "Invalid or used code",
-          description: "This code is not valid or has already been used",
-          variant: "destructive"
-        });
-        setCode("");
-        setIsValidating(false);
-        return;
-      }
-
-      // Mark code as used
-      const { error: updateError } = await supabase
-        .from("access_codes")
-        .update({ 
-          used: true,
-          used_at: new Date().toISOString()
-        })
-        .eq("id", accessCode.id);
-
-      if (updateError) {
-        console.error("Error marking code as used:", updateError);
-        toast({
-          title: "Error",
-          description: "Something went wrong. Please try again.",
-          variant: "destructive"
-        });
-        setIsValidating(false);
-        return;
-      }
-
-      // Success!
-      onSuccess();
-    } catch (error) {
-      console.error("Unexpected error:", error);
+    if (!isValidCode) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Invalid code",
+        description: "This code is not valid",
         variant: "destructive"
       });
+      setCode("");
       setIsValidating(false);
+      return;
     }
+
+    // Store code in localStorage to track usage after signup
+    localStorage.setItem("access_code", trimmedCode);
+
+    // Success!
+    setTimeout(() => {
+      onSuccess();
+    }, 500);
   };
 
   return (

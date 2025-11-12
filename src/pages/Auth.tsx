@@ -108,6 +108,28 @@ const Auth = () => {
           throw error;
         }
 
+        // Track access code usage after successful signup
+        const accessCode = localStorage.getItem("access_code");
+        if (accessCode && accessCode !== "become") {
+          // Get the newly created user
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            // Mark code as used with user_id
+            await supabase
+              .from("access_codes")
+              .update({ 
+                used: true,
+                used_by: user.id,
+                used_at: new Date().toISOString()
+              })
+              .eq("code", accessCode)
+              .eq("used", false);
+            
+            // Clear the code from localStorage
+            localStorage.removeItem("access_code");
+          }
+        }
+
         setIsOffline(false);
         toast({
           title: "Account created successfully!",
