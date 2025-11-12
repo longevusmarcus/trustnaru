@@ -81,7 +81,7 @@ const Auth = () => {
   const attemptAuth = async (data: AuthFormData, attempt = 0): Promise<void> => {
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
           options: {
@@ -110,24 +110,20 @@ const Auth = () => {
 
         // Track access code usage after successful signup
         const accessCode = localStorage.getItem("access_code");
-        if (accessCode && accessCode !== "become") {
-          // Get the newly created user
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            // Mark code as used with user_id
-            await supabase
-              .from("access_codes")
-              .update({ 
-                used: true,
-                used_by: user.id,
-                used_at: new Date().toISOString()
-              })
-              .eq("code", accessCode)
-              .eq("used", false);
-            
-            // Clear the code from localStorage
-            localStorage.removeItem("access_code");
-          }
+        if (accessCode && accessCode !== "become" && signUpData.user) {
+          // Mark code as used with user_id from signup response
+          await supabase
+            .from("access_codes")
+            .update({ 
+              used: true,
+              used_by: signUpData.user.id,
+              used_at: new Date().toISOString()
+            })
+            .eq("code", accessCode)
+            .eq("used", false);
+          
+          // Clear the code from localStorage
+          localStorage.removeItem("access_code");
         }
 
         setIsOffline(false);
