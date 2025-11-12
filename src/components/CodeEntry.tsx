@@ -31,7 +31,13 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
     setIsValidating(true);
 
     try {
-      // Check if code exists and is unused
+      // Special handling for "become" code - always valid, infinite use
+      if (trimmedCode === "become") {
+        onSuccess();
+        return;
+      }
+
+      // For numbered codes (naru1000-naru1100), check if exists and unused
       const { data: accessCode, error: fetchError } = await supabase
         .from("access_codes")
         .select("*")
