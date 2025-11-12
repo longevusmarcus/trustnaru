@@ -120,11 +120,11 @@ const constructScenePrompts = (careerPath: any, existingImageCount: number = 0):
 
   // Alternative set of images (subsequent generations) - different contexts, same person
   return [
-    // 1) Outdoor/Travel Scene - different environment
-    `HYPERREALISTIC morning portrait of a ${roleTitle} in an outdoor urban or natural setting, casual professional attire. Shot on Fujifilm X-T5, 56mm f/1.2 lens, natural daylight, cinematic depth. CRITICAL: EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Different clothing style from previous images. Authentic lifestyle moment showing work-life balance.`,
+    // 1) Professional Scene - working as the role
+    `HYPERREALISTIC professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic work moment. Professional environment with depth and detail.`,
 
     // 2) Evening/Social Scene - different time and context
-    `HYPERREALISTIC evening shot of a ${roleTitle} at a networking event or casual dinner meeting, aligned with ${roleTitle}. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. Documentary photography style. Natural social interaction captured authentically.`,
+    `HYPERREALISTIC evening shot of a ${roleTitle} at a networking event or casual dinner meeting, aligned with ${roleTitle}, demonstrating ${keySkills}. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. NO front face. Documentary photography style. Natural social interaction captured authentically.`,
 
     // 3) Home Office/Creative Scene - different workspace
     `HYPERREALISTIC intimate shot of a ${roleTitle} working from a home office or somewhere in the world in line with ${roleTitle}, comfortable modern clothing. Shot on Canon R6, 35mm f/1.4 lens, soft natural window light, shallow focus. CRITICAL: IDENTICAL person from reference photo - same face, features, skin, hair, body entirely. NO changes whatsoever. Different setting and clothing style showing versatility. Personal, authentic workspace environment with character and depth.`,
