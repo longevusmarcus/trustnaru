@@ -118,10 +118,10 @@ const constructScenePrompts = (careerPath: any, existingImageCount: number = 0):
     ];
   }
 
-  // Alternative set of images (subsequent generations) - different contexts, same person
+  // Alternative set of images (subsequent generations)
   return [
-    // 1) Professional Scene - Family & lifestyle context
-    `HYPERREALISTIC professional photograph of a ${roleTitle}. The setting feels welcoming and authentic, blending elements of home, family, and everyday life. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic storytelling style that captures a real moment of connection and purpose in a comfortable, lived-in environment.`,
+    // 1) Professional Scene - working as the role
+    `HYPERREALISTIC professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. Shot on Canon EOS R5, 50mm f/1.4 lens, natural window lighting, shallow depth of field. CRITICAL: Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic work moment. Professional environment with depth and detail.`,
 
     // 2) Evening/Social Scene - different time and context
     `HYPERREALISTIC evening shot of a ${roleTitle} at a networking event or casual dinner meeting, aligned with ${roleTitle}, demonstrating ${keySkills}. Shot on Sony A7R IV, 35mm f/1.8 lens, professional studio lighting setup. CRITICAL: EXACT same person from reference - preserve all facial features, expressions, proportions perfectly. NO alterations. NO front face. Documentary photography style. Natural social interaction captured authentically.`,
