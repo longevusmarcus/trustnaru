@@ -114,14 +114,14 @@ const Auth = () => {
           // Mark code as used with user_id from signup response
           await supabase
             .from("access_codes")
-            .update({ 
+            .update({
               used: true,
               used_by: signUpData.user.id,
-              used_at: new Date().toISOString()
+              used_at: new Date().toISOString(),
             })
             .eq("code", accessCode)
             .eq("used", false);
-          
+
           // Clear the code from localStorage
           localStorage.removeItem("access_code");
         }
@@ -265,7 +265,7 @@ const Auth = () => {
             The OS for Becoming.
           </p>
           <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto mt-1 font-light">
-            See your future self. Become it.
+            See your future self. Land your dream career.
           </p>
         </div>
 
