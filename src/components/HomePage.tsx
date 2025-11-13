@@ -239,17 +239,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const weekEnd = weekDates[6].toISOString().split('T')[0];
       const today = new Date().toISOString().split('T')[0];
 
-      // First check for incomplete missions from previous days
-      const { data: incompleteMissions } = await supabase
-        .from('daily_actions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('all_completed', false)
-        .lt('action_date', today)
-        .order('action_date', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
       // Fetch only essential data in parallel - optimized queries
       const [statsResult, streakResult, badgesResult, profileResult, pathsResult, dailyActionsResult] = await Promise.all([
         supabase
@@ -272,20 +261,21 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           .limit(3),
         supabase
           .from('user_profiles')
-          .select('active_path_id, display_name')
+          .select('display_name, active_path_id')
           .eq('user_id', user.id)
-          .maybeSingle(),
+          .single(),
         supabase
           .from('career_paths')
-          .select('id, title, category, key_skills, roadmap')
+          .select('id, title, description, image_url, journey_duration, category, key_skills, target_companies')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        // Only fetch today's actions if no incomplete missions from previous days
-        incompleteMissions ? Promise.resolve({ data: null }) : supabase
+          .limit(10),
+        supabase
           .from('daily_actions')
-          .select('*')
+          .select('actions, all_completed, created_at')
           .eq('user_id', user.id)
           .eq('action_date', today)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
       ]);
 
@@ -317,10 +307,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       setStreaks(streakResult.data?.map(s => new Date(s.streak_date)) || []);
       setEarnedBadges(badgesResult.data || []);
 
-      // Handle daily missions - prioritize incomplete missions from previous days
-      const missionsToShow = incompleteMissions || dailyActionsResult.data;
-      if (missionsToShow?.actions) {
-        const actions = missionsToShow.actions as any[];
+      // Handle daily missions
+      if (dailyActionsResult.data?.actions) {
+        const actions = dailyActionsResult.data.actions as any[];
         if (actions.length > 0) {
           // Map stored actions to mission format
           const missions = actions.map((action: any) => ({
