@@ -50,7 +50,7 @@ const slides = [
   },
   {
     icon: Zap,
-    title: "The OS for Becoming",
+    title: "The Career OS for Becoming",
     subtitle: "This is how Naru works:",
     items: [
       "Share your resume + some photos",
