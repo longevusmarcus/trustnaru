@@ -142,9 +142,10 @@ serve(async (req) => {
       userContext += `\nCareer Aspirations (User's Own Words):\n"${profile.voice_transcription}"\n`;
     }
 
-    // Add progress stats
+    // Add progress stats including current level
     if (stats) {
       userContext += `\nCurrent Progress:\n`;
+      userContext += `- Current Level: ${stats.current_level}/10\n`;
       userContext += `- Day Streak: ${stats.current_streak}\n`;
       userContext += `- Paths Explored: ${stats.paths_explored}\n`;
       userContext += `- Missions Completed: ${stats.missions_completed}\n`;
@@ -200,6 +201,9 @@ serve(async (req) => {
     }
 
     // Create sophisticated prompt for Gemini
+    const userLevel = stats?.current_level || 1;
+    const difficultyMultiplier = (userLevel - 1) * 10;
+    
     const prompt = `You are an elite career strategist with real market awareness and access to current information.
 
 USER CONTEXT:
@@ -207,6 +211,29 @@ ${userContext}
 
 CRITICAL INSTRUCTIONS:
 Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
+
+**PROGRESSIVE DIFFICULTY SCALING - CRITICAL:**
+The user is at Level ${userLevel}/10. ALL actions, tips, and resources must be scaled to be ${difficultyMultiplier}% MORE CHALLENGING than baseline (Level 1).
+
+Level ${userLevel} characteristics:
+- Actions should require ${difficultyMultiplier}% more time/effort than basic Level 1 tasks
+- ${difficultyMultiplier}% deeper technical/conceptual understanding required
+- ${difficultyMultiplier}% more sophisticated practical application
+- ${difficultyMultiplier}% higher standards for quality and outcomes
+
+Time Investment Scaling:
+- Level 1: 15-30 min per action
+- Level 2-3: 30-45 min per action  
+- Level 4-5: 45-60 min per action
+- Level 6-7: 60-90 min per action
+- Level 8-10: 90+ min per action
+
+Complexity Scaling:
+- Level 1-2: Foundational skills, basic concepts, following tutorials
+- Level 3-4: Intermediate application, combining concepts, building projects
+- Level 5-6: Advanced techniques, optimization, performance, best practices
+- Level 7-8: Expert-level work, mentoring others, contributing to field
+- Level 9-10: Industry leadership, innovation, publishing, transformational impact
 
 **CRITICAL - ONLY USE REAL, VERIFIABLE INFORMATION:**
 - NEVER invent or hallucinate names of people, companies, resources, or organizations
@@ -218,7 +245,7 @@ Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structu
 
 **IMPORTANT - BE ULTRA SPECIFIC WITH REAL INFORMATION:**
 - For research/learning actions: Provide SPECIFIC real article titles or resource names that exist (e.g., "Read articles on TechCrunch about AI in Healthcare" NOT "Read 'The Rise of AI in Healthcare 2025'" unless you're certain it exists)
-- For skill practice actions: Pick ONE SPECIFIC skill from the user's key skills list (${activePath.key_skills?.join(', ') || 'their skills'}) and suggest a CONCRETE practice activity (e.g., "Practice React hooks - build a custom useLocalStorage hook" NOT "Practice coding")
+- For skill practice actions: Pick ONE SPECIFIC skill from the user's key skills list (${activePath.key_skills?.join(', ') || 'their skills'}) and suggest a CONCRETE practice activity appropriate to Level ${userLevel} difficulty
 - For networking actions: Include actual company names and suggest searching for real roles, NOT inventing contact names
 
 If CV structured data is present (current role, years of experience, key skills, companies, education), leverage those exact fields.
