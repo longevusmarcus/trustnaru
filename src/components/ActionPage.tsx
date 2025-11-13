@@ -1197,12 +1197,21 @@ export const ActionPage = () => {
                         {action.suggestions && action.suggestions.length > 0 && !action.done && (
                           <div className="suggestions-content hidden mt-2 p-3 rounded-lg bg-muted/50 border border-border/50">
                             <ul className="space-y-1.5">
-                              {action.suggestions.map((suggestion: string, idx: number) => (
-                                <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                                  <span className="text-primary mt-0.5">•</span>
-                                  <span>{suggestion}</span>
-                                </li>
-                              ))}
+                              {action.suggestions.map((suggestion: any, idx: number) => {
+                                // Handle both string and object suggestions
+                                const suggestionText = typeof suggestion === 'string' 
+                                  ? suggestion 
+                                  : suggestion.person 
+                                    ? `${suggestion.person} - ${suggestion.title} at ${suggestion.organization}${suggestion.message ? `: "${suggestion.message}"` : ''}`
+                                    : JSON.stringify(suggestion);
+                                
+                                return (
+                                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                    <span className="text-primary mt-0.5">•</span>
+                                    <span>{suggestionText}</span>
+                                  </li>
+                                );
+                              })}
                             </ul>
                           </div>
                         )}
