@@ -56,6 +56,8 @@ export const ActionPage = () => {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [actionHistory, setActionHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const guidanceLevels = [
     {
@@ -147,12 +149,38 @@ export const ActionPage = () => {
 
   // Also reload when page becomes visible (browser tab focus)
   useEffect(() => {
+    loadData();
+
     const handleFocus = () => {
       loadData();
     };
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
+  }, [user]);
+
+  // Auto-refresh actions when date changes
+  useEffect(() => {
+    if (!user) return;
+
+    const checkDateChange = () => {
+      const today = new Date().toISOString().split("T")[0];
+      const lastDate = localStorage.getItem("lastActionDate");
+      
+      if (lastDate && lastDate !== today) {
+        console.log("Date changed, refreshing actions...");
+        loadData();
+      }
+      
+      localStorage.setItem("lastActionDate", today);
+    };
+
+    // Check on mount
+    checkDateChange();
+
+    // Check every hour
+    const interval = setInterval(checkDateChange, 60 * 60 * 1000);
+    return () => clearInterval(interval);
   }, [user]);
 
   // Timer effect for meditation
@@ -230,6 +258,17 @@ export const ActionPage = () => {
           // Generate new actions if none exist or all previous ones completed
           await generateTodaysActions(path);
         }
+
+        // Load action history (last 7 days, excluding today)
+        const { data: historyData } = await supabase
+          .from("daily_actions")
+          .select("action_date, actions, all_completed")
+          .eq("user_id", user.id)
+          .neq("action_date", today)
+          .order("action_date", { ascending: false })
+          .limit(7);
+
+        setActionHistory(historyData || []);
       } else {
         // No active path
         setTodayActions([{ task: "Activate a career path to get started", priority: "low", done: false }]);
@@ -1024,17 +1063,29 @@ export const ActionPage = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-semibold">Today's Actions</h3>
-            {activePath && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => generateTodaysActions()}
-                disabled={loadingActions}
-                className="h-7 text-xs"
-              >
-                {loadingActions ? "Generating..." : "Refresh"}
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {actionHistory.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="h-7 text-xs"
+                >
+                  {showHistory ? "Hide History" : "History"}
+                </Button>
+              )}
+              {activePath && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => generateTodaysActions()}
+                  disabled={loadingActions}
+                  className="h-7 text-xs"
+                >
+                  {loadingActions ? "Generating..." : "Refresh"}
+                </Button>
+              )}
+            </div>
           </div>
           {loadingActions ? (
             <div className="space-y-2">
@@ -1091,6 +1142,47 @@ export const ActionPage = () => {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          )}
+
+          {/* Action History */}
+          {showHistory && actionHistory.length > 0 && (
+            <div className="mt-4 pt-4 border-t space-y-2">
+              <p className="text-xs text-muted-foreground mb-3">Previous Days</p>
+              {actionHistory.map((historyItem) => {
+                const date = new Date(historyItem.action_date);
+                const completedCount = (historyItem.actions as any[]).filter((a) => a.done).length;
+                const totalCount = (historyItem.actions as any[]).length;
+                
+                return (
+                  <Card key={historyItem.action_date} className="border-muted/30">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-medium">
+                          {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </p>
+                        <Badge variant={historyItem.all_completed ? "default" : "outline"} className="text-xs h-5">
+                          {completedCount}/{totalCount}
+                        </Badge>
+                      </div>
+                      <div className="space-y-1.5">
+                        {(historyItem.actions as any[]).map((action, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs">
+                            {action.done ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                            ) : (
+                              <Circle className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            )}
+                            <p className={`text-muted-foreground leading-relaxed ${action.done ? "line-through opacity-60" : ""}`}>
+                              {action.task}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
