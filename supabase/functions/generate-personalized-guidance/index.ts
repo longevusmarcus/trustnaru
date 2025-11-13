@@ -220,9 +220,24 @@ If you are unsure, prefer credible organizations, certifications, and named comm
 STRUCTURE (valid JSON ONLY):
 {
   "dailyActions": [
-    { "action": "Specific action with resource/skill names", "timeNeeded": "30 minutes", "rationale": "Why this matters" },
-    { "action": "Another specific action with concrete details", "timeNeeded": "1 hour", "rationale": "Impact on career path" },
-    { "action": "Third specific action with exact names", "timeNeeded": "15 minutes", "rationale": "How it helps" }
+    { 
+      "action": "Specific action with resource/skill names", 
+      "timeNeeded": "30 minutes", 
+      "rationale": "Why this matters",
+      "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
+    },
+    { 
+      "action": "Another specific action with concrete details", 
+      "timeNeeded": "1 hour", 
+      "rationale": "Impact on career path",
+      "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
+    },
+    { 
+      "action": "Third specific action with exact names", 
+      "timeNeeded": "15 minutes", 
+      "rationale": "How it helps",
+      "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
+    }
   ],
   "smartTips": [
     { "tip": "...", "nextSteps": "...", "strategicValue": "..." },
@@ -239,6 +254,12 @@ STRUCTURE (valid JSON ONLY):
 QUALITY RULES:
 - Do the work for the user. Never say "list", "map", "consider", or "choose". Provide the computed outputs directly with SPECIFIC NAMES.
 - Every dailyAction must include concrete resource names (articles, books, courses), specific skill names from their key_skills, or actual company/person names.
+- Every dailyAction MUST include a "suggestions" array with 3 specific, actionable suggestions:
+  * If the action involves people (speakers, mentors, leaders): provide 3 real names of people in the field with their titles/organizations
+  * If the action involves content (articles, books): provide 3 specific article titles or book names with sources
+  * If the action involves learning resources: provide 3 specific course names, platforms, or tools
+  * If the action involves companies/networking: provide 3 specific company names or communities with context
+  * These suggestions should make the action immediately actionable with zero research needed from the user
 - Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.

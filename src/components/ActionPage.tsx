@@ -1173,6 +1173,33 @@ export const ActionPage = () => {
                         <p className={`text-sm text-foreground leading-relaxed ${action.done ? "line-through" : ""}`}>
                           {action.task}
                         </p>
+                        {action.suggestions && action.suggestions.length > 0 && !action.done && (
+                          <div className="mt-3">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const actionElement = e.currentTarget.parentElement?.parentElement;
+                                const suggestionsDiv = actionElement?.querySelector('.suggestions-content');
+                                if (suggestionsDiv) {
+                                  suggestionsDiv.classList.toggle('hidden');
+                                }
+                              }}
+                              className="text-xs px-2 py-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                            >
+                              💡 suggestions
+                            </button>
+                            <div className="suggestions-content hidden mt-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                              <ul className="space-y-1.5">
+                                {action.suggestions.map((suggestion: string, idx: number) => (
+                                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                    <span className="text-primary mt-0.5">•</span>
+                                    <span>{suggestion}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
                         {!action.done && <p className="text-xs text-muted-foreground mt-2">Tap to log action</p>}
                       </div>
                     </div>
