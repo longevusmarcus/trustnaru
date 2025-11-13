@@ -33,7 +33,10 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
     // Validate code format in frontend
     const isValidCode = 
       trimmedCode === "become" || 
-      /^naru(10[0-9]{2}|1100)$/.test(trimmedCode); // naru1000-naru1100
+      /^naru(10[0-9]{2}|1100)$/.test(trimmedCode) || // naru1000-naru1100
+      /^naruvipgary(1[0-4][0-9]|150)$/.test(trimmedCode) || // naruvipgary100-naruvipgary150
+      /^naruvipjeff(1[0-4][0-9]|150)$/.test(trimmedCode) || // naruvipjeff100-naruvipjeff150
+      /^naruvipmarco(1[0-4][0-9]|150)$/.test(trimmedCode); // naruvipmarco100-naruvipmarco150
 
     if (!isValidCode) {
       toast({
