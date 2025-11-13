@@ -181,9 +181,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       if (error) throw error;
 
       if (data?.missions) {
-        // Always keep video tutorial as first mission
+        // Only include video tutorial for first 2 daily streaks (0 or 1)
+        const shouldIncludeVideo = !userStats || userStats.current_streak < 2;
         const videoMission = defaultMissions[0];
-        const generatedMissions = [videoMission, ...data.missions.slice(0, 3)];
+        const generatedMissions = shouldIncludeVideo 
+          ? [videoMission, ...data.missions.slice(0, 3)]
+          : data.missions.slice(0, 4);
         
         setDailyMissions(generatedMissions);
 
