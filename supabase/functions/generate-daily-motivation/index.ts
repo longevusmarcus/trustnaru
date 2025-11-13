@@ -82,7 +82,9 @@ Context:
 - Skills focus: ${context.keySkills.slice(0, 3).join(', ')}
 - Next goals: ${context.upcomingGoals.slice(0, 2).join(', ')}
 
-Keep it gentle, concise, and specific to their path. Avoid clichés. Make it feel personal.`;
+Keep it gentle, concise, and specific to their path. Avoid clichés. Make it feel personal.
+
+CRITICAL: DO NOT use any markdown formatting. NO asterisks (**), NO bold, NO italics. Output plain text only.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -91,9 +93,9 @@ Keep it gentle, concise, and specific to their path. Avoid clichés. Make it fee
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
-          { role: 'system', content: 'You are a supportive career mentor. Create brief, gentle motivations.' },
+          { role: 'system', content: 'You are a supportive career mentor. Create brief, gentle motivations. Output plain text only without any markdown formatting like asterisks or bold.' },
           { role: 'user', content: prompt }
         ],
       }),
@@ -106,7 +108,10 @@ Keep it gentle, concise, and specific to their path. Avoid clichés. Make it fee
     }
 
     const aiData = await aiResponse.json();
-    const motivation = aiData.choices[0].message.content.trim();
+    let motivation = aiData.choices[0].message.content.trim();
+    
+    // Remove any markdown formatting that might still appear
+    motivation = motivation.replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_/g, '');
 
     console.log('Generated motivation:', motivation);
 
