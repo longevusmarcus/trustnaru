@@ -396,6 +396,7 @@ export const ActionPage = () => {
           done: false,
           label,
           rationale: action.rationale,
+          suggestions: action.suggestions || [],
         };
       });
 
