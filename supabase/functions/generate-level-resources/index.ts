@@ -132,18 +132,18 @@ serve(async (req) => {
       userContext += `\nCareer Aspirations: "${profile.voice_transcription}"\n`;
     }
 
-    // Level-specific guidance descriptions
+    // Level-specific guidance descriptions with progressive 10% difficulty increase
     const levelDescriptions: Record<number, string> = {
-      1: "Foundation - Essential skills and core knowledge to get started",
-      2: "Development - Intermediate skills and practical experience building",
-      3: "Specialization - Advanced expertise in key areas",
-      4: "Leadership - Team management and strategic thinking",
-      5: "Innovation - Creative problem-solving and innovation",
-      6: "Influence - Industry impact and thought leadership",
-      7: "Mastery - Expert-level proficiency and recognition",
-      8: "Mentorship - Guide others and build community",
-      9: "Transformation - Drive industry transformation",
-      10: "Legacy - Create lasting impact and legacy"
+      1: "Foundation (Base) - Essential skills and core knowledge to get started. Entry-level content, beginner-friendly resources.",
+      2: "Development (+10%) - Intermediate skills and practical experience building. 10% more complex concepts, hands-on projects.",
+      3: "Specialization (+20%) - Advanced expertise in key areas. 20% more depth, specialized technical knowledge, professional certifications.",
+      4: "Leadership (+30%) - Team management and strategic thinking. 30% more complexity, cross-functional projects, mentoring responsibilities.",
+      5: "Innovation (+40%) - Creative problem-solving and innovation. 40% more advanced, original contributions, research-driven work.",
+      6: "Influence (+50%) - Industry impact and thought leadership. 50% more sophisticated, speaking opportunities, community building.",
+      7: "Mastery (+60%) - Expert-level proficiency and recognition. 60% more demanding, advanced publications, industry-wide influence.",
+      8: "Mentorship (+70%) - Guide others and build community. 70% more responsibility, program development, systematic knowledge transfer.",
+      9: "Transformation (+80%) - Drive industry transformation. 80% more impact, paradigm shifts, organizational change leadership.",
+      10: "Legacy (+90%) - Create lasting impact and legacy. 90% more profound, field-defining contributions, generational influence."
     };
 
     const levelDesc = levelDescriptions[level] || `Level ${level}`;
@@ -154,47 +154,64 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const prompt = `You are an expert career development strategist specializing in personalized learning paths.
+    const prompt = `You are an expert career development strategist specializing in personalized learning paths with PROGRESSIVE DIFFICULTY SCALING.
 
 USER CONTEXT:
 ${userContext}
 
 TASK: Generate exactly 3-5 HIGHLY SPECIFIC, CONCRETE resources for Level ${level}: ${levelDesc}
 
-CRITICAL REQUIREMENTS:
-1. Each resource must be REAL and SPECIFIC:
+CRITICAL - PROGRESSIVE DIFFICULTY SCALING:
+Level ${level} should be ${(level - 1) * 10}% MORE DIFFICULT than Level 1 baseline:
+${level === 1 ? '- Level 1 (Baseline): Beginner-friendly, foundational, accessible content. Free or low-cost. Basic concepts.' : ''}
+${level === 2 ? '- Level 2 (+10% difficulty): Slightly more complex. Introduces practical application. Some paid resources acceptable.' : ''}
+${level === 3 ? '- Level 3 (+20% difficulty): Notably more advanced. Specialized knowledge. Professional certifications. Deeper technical depth.' : ''}
+${level === 4 ? '- Level 4 (+30% difficulty): Significantly more complex. Leadership skills. Cross-functional knowledge. Strategic thinking required.' : ''}
+${level === 5 ? '- Level 5 (+40% difficulty): Advanced complexity. Innovation focus. Original contributions. Research-oriented work.' : ''}
+${level === 6 ? '- Level 6 (+50% difficulty): High sophistication. Industry influence. Speaking/teaching opportunities. Community leadership.' : ''}
+${level === 7 ? '- Level 7 (+60% difficulty): Expert-level demand. Publications. Advanced certifications. Industry-wide recognition.' : ''}
+${level === 8 ? '- Level 8 (+70% difficulty): Master-level responsibility. Systematic mentoring. Program development. Organizational impact.' : ''}
+${level === 9 ? '- Level 9 (+80% difficulty): Transformational impact. Paradigm shifts. Industry change leadership. Field advancement.' : ''}
+${level === 10 ? '- Level 10 (+90% difficulty): Legacy-level contribution. Field-defining work. Generational influence. Revolutionary impact.' : ''}
+
+Each level should demand:
+- ${10 * (level - 1)}% more time investment
+- ${10 * (level - 1)}% deeper technical/conceptual understanding  
+- ${10 * (level - 1)}% more practical complexity in application
+- ${10 * (level - 1)}% higher standards for outcomes/deliverables
+
+RESOURCE REQUIREMENTS:
+1. Each resource must be REAL and SPECIFIC (never invent fake courses or names):
    - Name actual courses (e.g., "Google UX Design Professional Certificate on Coursera")
    - Name actual books (e.g., "Don't Make Me Think" by Steve Krug)
    - Name actual certifications (e.g., "IAAP CPACC Certification")
    - Name actual tools/platforms (e.g., "Figma Advanced Prototyping Course by Figma")
    - Name actual conferences/events (e.g., "CSUN Assistive Technology Conference 2025")
+   - If you don't know real specific names, provide general but authentic guidance
 
 2. Focus on SKILL GAPS identified in the CV vs required skills for the career path
 
-3. Include realistic time commitments:
-   - Be specific: "8 weeks, 5 hours/week" NOT "a few weeks"
-   - Include total hours: "40 hours total" or "12 weeks, 3-4 hours/week"
+3. Include realistic time commitments scaled to level:
+   - Level 1-2: 2-5 hours/week
+   - Level 3-4: 5-10 hours/week
+   - Level 5-6: 10-15 hours/week
+   - Level 7-8: 15-20 hours/week
+   - Level 9-10: 20+ hours/week
 
-4. Explain tangible impact:
-   - What credential/artifact they'll earn
-   - How it fills specific skill gaps
-   - Why it matters for their target role at their target companies
+4. Explain tangible impact appropriate to level:
+   - Lower levels: Building foundational skills, getting certified, portfolio creation
+   - Mid levels: Advanced certifications, speaking at meetups, contributing to communities
+   - Upper levels: Publishing research, speaking at conferences, driving industry change
 
-5. Level-appropriate difficulty:
-   - Level 1-2: Beginner/foundational resources, free or low-cost options prioritized
-   - Level 3-5: Intermediate to advanced, may include paid courses/certifications
-   - Level 6-8: Advanced specialization, industry recognition, professional certifications
-   - Level 9-10: Expert-level, speaking opportunities, publication, thought leadership
-
-6. Consider the user's current experience level and make recommendations that build logically on their existing skills
+5. Consider the user's current experience level and make recommendations that build logically on their existing skills
 
 OUTPUT FORMAT (valid JSON only, no markdown):
 {
   "resources": [
     {
-      "resource": "Exact name of course/book/certification/tool",
-      "commitment": "Specific time commitment",
-      "impact": "Concrete outcome and how it fills skill gaps"
+      "resource": "Exact name of REAL course/book/certification/tool",
+      "commitment": "Specific time commitment appropriate to level ${level}",
+      "impact": "Concrete outcome scaled to ${(level - 1) * 10}% more advanced than baseline, explaining how it fills skill gaps"
     }
   ]
 }`;
@@ -211,16 +228,16 @@ OUTPUT FORMAT (valid JSON only, no markdown):
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a precise career development strategist. Output valid JSON only with real, specific resources. Never include markdown, commentary, or generic suggestions.' 
+            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Output valid JSON only with real, specific resources. Never include markdown, commentary, or generic suggestions. CRITICAL: Only reference real courses, books, certifications that actually exist.`
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.5,
-        max_tokens: 2000
+        temperature: 0.3,
+        max_tokens: 2500
       }),
       signal: controller.signal,
     });
