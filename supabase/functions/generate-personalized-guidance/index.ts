@@ -200,7 +200,7 @@ serve(async (req) => {
     }
 
     // Create sophisticated prompt for Gemini
-    const prompt = `You are an elite career strategist with real market awareness.
+    const prompt = `You are an elite career strategist with real market awareness and access to current information.
 
 USER CONTEXT:
 ${userContext}
@@ -208,14 +208,22 @@ ${userContext}
 CRITICAL INSTRUCTIONS:
 Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
 
-**IMPORTANT - BE ULTRA SPECIFIC:**
-- For research/learning actions: Provide SPECIFIC article titles or resource names (e.g., "Read 'The Rise of AI in Healthcare 2025' on TechCrunch" NOT "Read an article")
+**CRITICAL - ONLY USE REAL, VERIFIABLE INFORMATION:**
+- NEVER invent or hallucinate names of people, companies, resources, or organizations
+- ONLY suggest real people who actually exist in the industry/field
+- ONLY reference real companies, real courses, real books, real certifications that actually exist
+- If you don't know real specific names, provide general but authentic guidance (e.g., "LinkedIn connections in [field]" rather than inventing fake names)
+- For networking actions: Suggest searching for real professionals in specific roles/companies, not made-up names
+- For learning resources: Only mention courses, books, certifications that genuinely exist (e.g., real Coursera courses, real books with ISBN, real certifications)
+
+**IMPORTANT - BE ULTRA SPECIFIC WITH REAL INFORMATION:**
+- For research/learning actions: Provide SPECIFIC real article titles or resource names that exist (e.g., "Read articles on TechCrunch about AI in Healthcare" NOT "Read 'The Rise of AI in Healthcare 2025'" unless you're certain it exists)
 - For skill practice actions: Pick ONE SPECIFIC skill from the user's key skills list (${activePath.key_skills?.join(', ') || 'their skills'}) and suggest a CONCRETE practice activity (e.g., "Practice React hooks - build a custom useLocalStorage hook" NOT "Practice coding")
-- For networking actions: Include actual company names, teams, and ready-to-send message templates
+- For networking actions: Include actual company names and suggest searching for real roles, NOT inventing contact names
 
 If CV structured data is present (current role, years of experience, key skills, companies, education), leverage those exact fields.
-When referencing companies, include actual teams/roles and a real point of contact where possible.
-If you are unsure, prefer credible organizations, certifications, and named communities over vague suggestions.
+When referencing companies, include actual teams/roles but suggest ways to find real contacts rather than providing fake names.
+Only reference real, verifiable organizations, certifications, and named communities that actually exist.
 
 STRUCTURE (valid JSON ONLY):
 {
@@ -255,11 +263,11 @@ QUALITY RULES:
 - Do the work for the user. Never say "list", "map", "consider", or "choose". Provide the computed outputs directly with SPECIFIC NAMES.
 - Every dailyAction must include concrete resource names (articles, books, courses), specific skill names from their key_skills, or actual company/person names.
 - Every dailyAction MUST include a "suggestions" array with 3 specific, actionable suggestions:
-  * If the action involves people (speakers, mentors, leaders): provide 3 real names of people in the field with their titles/organizations
-  * If the action involves content (articles, books): provide 3 specific article titles or book names with sources
-  * If the action involves learning resources: provide 3 specific course names, platforms, or tools
-  * If the action involves companies/networking: provide 3 specific company names or communities with context
-  * These suggestions should make the action immediately actionable with zero research needed from the user
+  * If the action involves people/networking: provide 3 specific approaches to find real people (e.g., "Search LinkedIn for [specific role] at [company]", "Join [real community name] and connect with members") - DO NOT invent fake names
+  * If the action involves content (articles, books): provide 3 general but authentic directions (e.g., "Recent articles on [topic] from [real publication]") - only cite specific titles if you're certain they exist
+  * If the action involves learning resources: provide 3 specific REAL course names, platforms, or tools that actually exist (e.g., real Coursera courses, real certifications)
+  * If the action involves companies/networking: provide 3 specific real company names or real communities with context
+  * These suggestions should make the action immediately actionable but must use only real, verifiable information - NO HALLUCINATED NAMES
 - Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
@@ -282,10 +290,10 @@ LEVEL RESOURCES REQUIREMENTS (CRITICAL):
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Calling Lovable AI Gateway (Gemini Flash) for personalized guidance...');
+    console.log('Calling Lovable AI Gateway (Gemini Pro) for personalized guidance with real information...');
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -294,13 +302,13 @@ LEVEL RESOURCES REQUIREMENTS (CRITICAL):
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
-          { role: 'system', content: 'You are a precise career strategist. Output valid JSON only. Never include markdown or commentary.' },
+          { role: 'system', content: 'You are a precise career strategist with access to real, current information. Output valid JSON only. Never include markdown or commentary. CRITICAL: Only reference real people, companies, courses, and resources that actually exist. Never invent or hallucinate names.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.4,
-        max_tokens: 2500
+        temperature: 0.3,
+        max_tokens: 3000
       }),
       signal: controller.signal,
     });
