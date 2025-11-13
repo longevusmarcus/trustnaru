@@ -1430,6 +1430,69 @@ export const ActionPage = () => {
         </div>
       </div>
 
+      {/* All Goals Drawer */}
+      <Drawer open={goalDialogOpen} onOpenChange={setGoalDialogOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          <div className="relative overflow-y-auto">
+            {/* Header */}
+            <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+              <h2 className="text-2xl font-bold mb-2">All Your Goals</h2>
+              <p className="text-sm text-muted-foreground">
+                {goalsCompleted} of {totalGoals} completed
+              </p>
+            </div>
+
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 rounded-full z-20"
+              onClick={() => setGoalDialogOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+
+            {/* Content */}
+            <div className="p-6 space-y-2">
+              {goals.map((goal: any) => (
+                <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
+                        {goal.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
+                          {goal.title}
+                        </h4>
+                        {goal.description && (
+                          <p className="text-xs text-muted-foreground">{goal.description}</p>
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                          goal.priority === "high"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            : goal.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
+                      >
+                        {goal.priority}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* Mission Log Drawer */}
       <Drawer open={logDrawerOpen} onOpenChange={setLogDrawerOpen}>
         <DrawerContent className="max-h-[85vh]">
