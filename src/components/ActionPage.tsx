@@ -5,6 +5,7 @@ import {
   Sparkles,
   MessageSquare,
   Zap,
+  Puzzle,
   Award,
   TrendingUp,
   X,
@@ -1280,7 +1281,7 @@ export const ActionPage = () => {
             >
               <DrawerTrigger asChild>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Zap className="h-5 w-5" />
+                  <Puzzle className="h-5 w-5" />
                   <span className="text-xs">Skill Gap</span>
                 </Button>
               </DrawerTrigger>
