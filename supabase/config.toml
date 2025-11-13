@@ -35,3 +35,10 @@ verify_jwt = true
 
 [functions.generate-personalized-mentors]
 verify_jwt = true
+
+[functions.generate-skill-gap]
+verify_jwt = true
+
+[functions.generate-daily-missions]
+verify_jwt = true
+

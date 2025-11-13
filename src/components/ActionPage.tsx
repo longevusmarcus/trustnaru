@@ -58,6 +58,9 @@ export const ActionPage = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [actionHistory, setActionHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [skillGapOpen, setSkillGapOpen] = useState(false);
+  const [skillGaps, setSkillGaps] = useState<any[]>([]);
+  const [loadingSkillGap, setLoadingSkillGap] = useState(false);
 
   const guidanceLevels = [
     {
@@ -544,6 +547,40 @@ export const ActionPage = () => {
       console.error("Error toggling goal:", error);
     }
   };
+
+  const loadSkillGap = async () => {
+    if (!user || !activePath) return;
+    
+    setLoadingSkillGap(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke("generate-skill-gap", {
+        body: { 
+          level: currentLevel,
+          pathTitle: activePath.title,
+          keySkills: activePath.key_skills || [],
+          roadmap: activePath.roadmap || []
+        },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) throw error;
+
+      if (data?.skillGaps) {
+        setSkillGaps(data.skillGaps);
+      }
+    } catch (error) {
+      console.error("Error loading skill gap:", error);
+      toast({
+        title: "Unable to load skill gap",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSkillGap(false);
+    }
+  };
+
 
   const handleLevelComplete = async () => {
     if (!user || !userStats) return;
@@ -1191,19 +1228,27 @@ export const ActionPage = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Drawer open={goalDialogOpen} onOpenChange={setGoalDialogOpen}>
+            <Drawer 
+              open={skillGapOpen} 
+              onOpenChange={(open) => {
+                setSkillGapOpen(open);
+                if (open && skillGaps.length === 0) {
+                  loadSkillGap();
+                }
+              }}
+            >
               <DrawerTrigger asChild>
                 <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Target className="h-5 w-5" />
-                  <span className="text-xs">View Goals</span>
+                  <Zap className="h-5 w-5" />
+                  <span className="text-xs">Skill Gap</span>
                 </Button>
               </DrawerTrigger>
               <DrawerContent className="max-h-[80vh]">
                 <div className="relative overflow-y-auto">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <h2 className="text-2xl font-bold mb-2">Your Goals</h2>
-                    <p className="text-sm text-muted-foreground">Track your progress towards your future</p>
+                    <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
+                    <p className="text-sm text-muted-foreground">Level {currentLevel} focus areas</p>
                   </div>
 
                   {/* Close Button */}
@@ -1211,77 +1256,57 @@ export const ActionPage = () => {
                     variant="ghost"
                     size="icon"
                     className="absolute top-4 right-4 rounded-full z-20"
-                    onClick={() => setGoalDialogOpen(false)}
+                    onClick={() => setSkillGapOpen(false)}
                   >
                     <X className="h-5 w-5" />
                   </Button>
 
-                  {/* Content Card */}
+                  {/* Content */}
                   <div className="p-6">
-                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
-                      {goals.length > 0 ? (
-                        goals.map((goal: any) => (
-                          <div key={goal.id} className="p-4 rounded-xl bg-background/50">
-                            <div className="flex items-start gap-3">
-                              <button
-                                onClick={() => handleToggleGoal(goal.id, goal.completed)}
-                                className="mt-1 flex-shrink-0"
-                              >
-                                {goal.completed ? (
-                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                ) : (
-                                  <Circle className="h-5 w-5 text-muted-foreground" />
-                                )}
-                              </button>
-                              <div className="flex-1">
-                                <h4 className={`font-medium mb-1 ${goal.completed ? "line-through" : ""}`}>
-                                  {goal.title}
-                                </h4>
-                                {goal.description && (
-                                  <p className="text-xs text-muted-foreground mb-2">{goal.description}</p>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className={`text-xs px-2 py-1 rounded-full ${
-                                      goal.priority === "high"
-                                        ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                                        : goal.priority === "medium"
-                                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                          : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                                    }`}
-                                  >
-                                    {goal.priority}
-                                  </span>
-                                  {goal.target_date && (
-                                    <span className="text-xs text-muted-foreground">
-                                      Target: {new Date(goal.target_date).toLocaleDateString()}
-                                    </span>
-                                  )}
+                    {loadingSkillGap ? (
+                      <div className="space-y-3">
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                      </div>
+                    ) : skillGaps.length > 0 ? (
+                      <div className="space-y-4">
+                        {skillGaps.map((gap, idx) => (
+                          <Card key={idx} className="border-primary/20">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-start gap-2">
+                                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-xs font-bold text-primary">{idx + 1}</span>
+                                </div>
+                                <h4 className="font-semibold text-sm flex-1">{gap.skill}</h4>
+                              </div>
+                              
+                              <div className="space-y-2 text-xs">
+                                <div>
+                                  <p className="font-medium text-muted-foreground mb-1">Gap:</p>
+                                  <p className="text-foreground/90">{gap.gap}</p>
+                                </div>
+                                
+                                <div>
+                                  <p className="font-medium text-muted-foreground mb-1">How to fill it:</p>
+                                  <p className="text-foreground/90">{gap.howToFill}</p>
+                                </div>
+                                
+                                <div className="pt-2 border-t border-border/50">
+                                  <p className="text-primary/80 italic">{gap.whyItMatters}</p>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-8">
-                          <Target className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                          <p className="text-sm text-muted-foreground">
-                            Activate a career path to get personalized goals
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="px-6 pb-8 sticky bottom-0 bg-background">
-                    <Button
-                      onClick={() => setGoalDialogOpen(false)}
-                      className="w-full h-12 rounded-full text-base font-semibold"
-                    >
-                      <Target className="h-4 w-4 mr-2" />
-                      Keep Going
-                    </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-muted-foreground">
+                          Activate a path to see your skill gap analysis
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </DrawerContent>
