@@ -19,11 +19,11 @@ interface IntroOnboardingProps {
 }
 
 const reasons = [
-  "I want a better path, but I have no clue where to start",
-  "I don't know who I'm supposed to become",
-  "I want to land my dream career or lifestyle, but it feels out of reach",
+  "I want a better career path, but I have no clue where to start",
+  "I don't know who I'm supposed to become, professionally",
+  "I want to land my dream career and lifestyle, but it feels out of reach",
   "I'm trying to recover from burnout and find something that actually feels right",
-  "I'm just curious to meet my future self",
+  "I'm just curious to meet my future self and role",
 ];
 
 const slides = [
