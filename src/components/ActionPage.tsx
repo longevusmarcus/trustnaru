@@ -214,21 +214,37 @@ export const ActionPage = () => {
         // Always set goals, even if empty, to clear old path's goals
         setGoals(goalsData || []);
 
-        // Check if we have today's actions already
+        // First check if there are incomplete actions from previous days
         const today = new Date().toISOString().split("T")[0];
-        const { data: existingActions } = await supabase
+        const { data: incompleteActions } = await supabase
           .from("daily_actions")
           .select("*")
           .eq("user_id", user.id)
-          .eq("action_date", today)
+          .eq("all_completed", false)
+          .lt("action_date", today)
+          .order("action_date", { ascending: false })
+          .limit(1)
           .maybeSingle();
 
-        if (existingActions && !existingActions.all_completed) {
-          // Use existing actions if they exist and aren't all completed
-          setTodayActions(existingActions.actions as any[]);
+        if (incompleteActions) {
+          // Use incomplete actions from previous days
+          setTodayActions(incompleteActions.actions as any[]);
         } else {
-          // Generate new actions if none exist or all previous ones completed
-          await generateTodaysActions(path);
+          // Check if we have today's actions
+          const { data: existingActions } = await supabase
+            .from("daily_actions")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("action_date", today)
+            .maybeSingle();
+
+          if (existingActions && !existingActions.all_completed) {
+            // Use today's existing actions if they exist and aren't all completed
+            setTodayActions(existingActions.actions as any[]);
+          } else {
+            // Generate new actions if none exist or all previous ones completed
+            await generateTodaysActions(path);
+          }
         }
       } else {
         // No active path
