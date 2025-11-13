@@ -46,7 +46,7 @@ const slides = [
   {
     icon: Database,
     title: "Is Naru another career coach / job copilot?",
-    content: "No. Naru is the world’s first database of human potential.",
+    content: "No. Naru is the world’s first database of human potential and career evolution.",
   },
   {
     icon: Zap,
