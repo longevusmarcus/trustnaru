@@ -104,30 +104,52 @@ serve(async (req) => {
 
     const prompt = `${focusInstruction}
 
-Based on the following user's career interests and preferences, find 5 REAL professionals on LinkedIn who match their aspirations:
+CRITICAL INSTRUCTIONS FOR FINDING REAL PEOPLE:
+1. You MUST search for and verify REAL people who actually exist
+2. Search across multiple platforms: LinkedIn, Instagram, TikTok, Twitter/X, YouTube, personal websites, and Google
+3. Cross-reference information across at least 2 sources to verify the person exists
+4. If you cannot verify a person exists across multiple sources, DO NOT include them
+5. Prioritize people with active online presence and verifiable information
+6. Include the most relevant and active profile URL (could be LinkedIn, Instagram, TikTok, personal website, etc.)
+
+Based on the following user's career interests and preferences, find 5 REAL, VERIFIABLE professionals who match their aspirations:
 
 ${preferencesContext}
 
+SEARCH STRATEGY:
+- For creative/entrepreneurial fields: Prioritize Instagram, TikTok, YouTube, personal websites
+- For corporate/traditional fields: Prioritize LinkedIn
+- For tech/innovation: Check Twitter/X, GitHub, personal blogs
+- For lifestyle/influencer paths: Check Instagram, TikTok, YouTube
+
 For each person, provide:
-1. Their full name
-2. Current job title
-3. Company name
-4. LinkedIn profile URL (must be a real LinkedIn URL)
-5. Brief description (2-3 sentences) explaining why they match the user's interests
-6. 2-3 relevant tags (e.g., "Product", "Leadership", "AI")
-7. A brief career journey summary (2-3 key roles)
+1. Their full name (verified across sources)
+2. Current job title or primary role
+3. Company/Brand name (or "Independent" if self-employed)
+4. Best profile URL (LinkedIn, Instagram, TikTok, website - whichever is most active/relevant)
+5. Platform type (one of: "linkedin", "instagram", "tiktok", "twitter", "youtube", "website", "other")
+6. Brief description (2-3 sentences) explaining why they match and mentioning a recent achievement or content
+7. 2-3 relevant tags
+8. Career journey (2-3 key milestones with approximate years if available)
+
+VERIFICATION CHECKLIST for each person:
+✓ Can be found on Google with their full name + industry
+✓ Has active social media or professional presence
+✓ Information is consistent across platforms
+✓ Recent activity or content (within last 2 years)
 
 Return ONLY valid JSON in this exact format:
 {
   "mentors": [
     {
       "name": "Full Name",
-      "title": "Job Title",
-      "company": "Company Name",
-      "profile_url": "https://www.linkedin.com/in/...",
-      "description": "Why this person matches...",
+      "title": "Job Title or Role",
+      "company": "Company/Brand Name",
+      "profile_url": "https://...",
+      "platform_type": "linkedin",
+      "description": "Why this person matches and what they're known for...",
       "tags": ["Tag1", "Tag2"],
-      "career_journey": "Brief career progression summary"
+      "career_journey": "Brief career progression with years"
     }
   ]
 }`;
@@ -150,7 +172,7 @@ Return ONLY valid JSON in this exact format:
         messages: [
           { 
             role: 'system', 
-            content: 'You are a career advisor who finds real professionals on LinkedIn. Always return valid JSON only.' 
+            content: 'You are a career research expert who finds REAL, VERIFIABLE professionals across multiple platforms (LinkedIn, Instagram, TikTok, Twitter, YouTube, personal websites). You MUST verify each person exists and has an active online presence before recommending them. Cross-reference information across sources. Always return valid JSON only with accurate profile URLs.' 
           },
           { role: 'user', content: prompt }
         ],
