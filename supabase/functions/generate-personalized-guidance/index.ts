@@ -206,10 +206,34 @@ serve(async (req) => {
     
     const prompt = `You are an elite career strategist with real market awareness and access to current information.
 
-USER CONTEXT:
-${userContext}
+🎯 CONTEXT:
+You are an industry insider with deep expertise in ${activePath?.title || 'their chosen field'}.
 
-CRITICAL INSTRUCTIONS:
+USER INFORMATION:
+- Name: ${userName}
+- Active Career Path: ${activePath?.title || 'Not set'}
+- Target Role: ${activePath?.target_role || 'Not specified'}
+- Career Experience: ${profile.wizard_data?.cv_structured?.current_role || 'Not specified'}
+- Current Journey Level: ${userLevel}/10 (${difficultyMultiplier}% more challenging than baseline)
+
+CURRENT SKILLS (from CV):
+${profile.wizard_data?.cv_structured?.key_skills?.join(', ') || 'Not analyzed'}
+
+🚨 CRITICAL SKILL GAPS TO ADDRESS (PRIMARY FOCUS):
+${(() => {
+  const targetSkills = activePath?.key_skills || [];
+  const currentSkills = profile.wizard_data?.cv_structured?.key_skills || [];
+  const gaps = targetSkills.filter(
+    (skill: string) => !currentSkills.some((cs: string) => 
+      cs.toLowerCase().includes(skill.toLowerCase()) || 
+      skill.toLowerCase().includes(cs.toLowerCase())
+    )
+  );
+  return gaps.length > 0 ? gaps.join(' | ') : 'No specific gaps - focus on advanced aspects of ' + (activePath?.target_role || 'the target role');
+})()}
+
+YOUR MISSION:
+Create PREMIUM, SOPHISTICATED daily actions with content users couldn't easily find through ChatGPT. Every action must directly address skill gaps.
 Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
 
 **PROGRESSIVE DIFFICULTY SCALING - CRITICAL:**
@@ -286,23 +310,66 @@ STRUCTURE (valid JSON ONLY):
   ]
 }
 
-QUALITY RULES:
-- Do the work for the user. Never say "list", "map", "consider", or "choose". Provide the computed outputs directly with SPECIFIC NAMES.
-- Every dailyAction must include concrete resource names (articles, books, courses), specific skill names from their key_skills, or actual company/person names.
-- **CRITICAL - SUGGESTIONS MUST PROVIDE ACTUAL CONTENT, NOT RESEARCH INSTRUCTIONS:**
-  * Each action MUST include a "suggestions" array with 3 specific, pre-researched items that DO THE WORK for the user
-  * For research actions: Provide actual findings/trends/insights from the industry (e.g., "Based on recent tea industry reports: Immersive ceremonies up 40% YoY, sustainability is top priority, experiential events dominate. Next: Draft proposal for [specific event type], contact [real venues], research [specific suppliers]")
-  * For content actions: Provide actual summaries, key takeaways, or pre-written drafts (e.g., "Key insight: [actual finding]. Implementation: [specific steps 1-3]")
-  * For networking actions: Provide pre-written outreach messages ready to send (e.g., "Hi [Name], I noticed [specific detail about their work]. I'm working on [specific project] and would value your perspective on [specific question]. Would you have 15 minutes next week?")
-  * For learning actions: Provide actual course recommendations with why they matter (e.g., "[Real course name] on [platform] - covers [specific skills], takes [time], provides [certification/outcome]")
-  * NEVER tell users to "Search for X" or "Look for Y" - instead provide the actual findings, content, or ready-to-use materials
-  * Think like a research assistant who has already done the work and is presenting actionable results
-- Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
-- Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
-- Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
-- Transferable steps must include the 3 overlapping skills by name and 1 concrete artifact name with a one-sentence spec.
-- Outreach/networking items must include ready-to-send messages with NO placeholders - complete, personalized messages the user can copy-paste.
-- Output ONLY JSON. No markdown.
+PREMIUM QUALITY STANDARDS:
+
+1. SKILL GAP FOCUS (MANDATORY):
+   - EVERY dailyAction must directly address at least one identified skill gap from the user's profile
+   - Be explicit about which skill gap you're addressing
+   - If no skill gaps listed, focus on advanced/sophisticated aspects of their target role
+
+2. DO THE WORK - NO INSTRUCTIONS:
+   - Never say "Search for", "Look up", "Research", "Find", "Identify", "List", "Map", "Consider"
+   - You are a premium research assistant who has ALREADY done the work
+   - Provide actual findings, specific names, ready-to-use content
+
+3. SUGGESTIONS MUST BE PREMIUM CONTENT:
+   Each action's "suggestions" array (3 items) must contain:
+   
+   For RESEARCH actions:
+   - ✅ "Recent industry analysis reveals: [Actual finding 1], [Actual finding 2], [Actual finding 3]. Based on this, your next steps: [Specific action 1], [Specific action 2], [Specific action 3]"
+   - ❌ "Search for trends in X" or "Look for articles about Y"
+   
+   For LEARNING actions:
+   - ✅ "'Advanced React Patterns' by Kent C. Dodds (Epic React, $400, 8 weeks) - Covers compound components, render props, hooks optimization. Directly addresses your skill gap in component architecture."
+   - ❌ "Take a course on React" or "Learn about design patterns"
+   
+   For NETWORKING actions:
+   - ✅ Complete, copy-paste-ready message: "Hi Sarah, I saw your talk at ReactConf 2024 on component composition. I'm transitioning into [role] and working on [specific project]. Your approach to [specific technique] would be invaluable. Would you have 15 minutes next Thursday to chat? [Your name]"
+   - ❌ "Reach out to industry leaders" or "Message people on LinkedIn"
+   
+   For CONTENT CREATION actions:
+   - ✅ "Key frameworks to cover: 1) [Framework name + 2 sentence explanation], 2) [Framework name + 2 sentence explanation], 3) [Framework name + 2 sentence explanation]. Draft structure: Intro hook, Problem statement, Solution comparison table, Implementation guide, Conclusion with call-to-action."
+   - ❌ "Write about best practices" or "Create content about your field"
+
+4. SPECIFICITY REQUIREMENTS:
+   - Course names, book titles, article headlines, community names (real and verifiable)
+   - Platform/author/publisher (e.g., "Coursera", "O'Reilly", "CSS-Tricks", "Smashing Magazine")
+   - Time commitments (e.g., "2 hours/week for 6 weeks", not just "30 hours")
+   - Costs (exact $ or "Free" or "Freemium with $X premium tier")
+   - Why it matters for THIS user's unique situation (reference their skill gaps, background, goals)
+
+5. PREMIUM SOURCING:
+   - Insider blogs (specific Substacks, Medium publications)
+   - Niche communities (named Discord servers, Slack groups, subreddits)
+   - Expert-curated platforms (Egghead.io, Frontend Masters, Pluralsight paths)
+   - Industry publications (A List Apart, Smashing Magazine, specific newsletters)
+   - Conference talks (React Conf, An Event Apart, specific speaker names)
+   - Professional certifications (AWS, Google Cloud, PMI, specific credential names)
+
+6. CUSTOMIZATION:
+   - Reference their existing skills and build on them
+   - Connect to their specific skill gaps
+   - Tie to their target role and career path
+   - Explain why this is better than generic alternatives
+
+7. NO PLACEHOLDERS:
+   - NO [Your Name], [Project Name], [Company], [Details]
+   - Every message, template, or draft must be complete
+   - Users should be able to copy-paste directly
+
+8. OUTPUT FORMAT:
+   - Pure JSON only, no markdown, no code fences
+   - Follow the schema exactly
 
 LEVEL RESOURCES REQUIREMENTS (CRITICAL):
 - For Level 1 (Foundation): Provide REAL, SPECIFIC resources that are concrete and actionable
