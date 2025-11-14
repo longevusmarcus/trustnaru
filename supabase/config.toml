@@ -42,3 +42,6 @@ verify_jwt = true
 [functions.generate-daily-missions]
 verify_jwt = true
 
+[functions.generate-shortcuts]
+verify_jwt = true
+

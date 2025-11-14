@@ -62,6 +62,46 @@ export const ActionPage = () => {
   const [skillGapOpen, setSkillGapOpen] = useState(false);
   const [skillGaps, setSkillGaps] = useState<any[]>([]);
   const [loadingSkillGap, setLoadingSkillGap] = useState(false);
+  const [shortcutsContent, setShortcutsContent] = useState<Record<string, string>>({});
+  const [loadingShortcuts, setLoadingShortcuts] = useState<Record<string, boolean>>({});
+
+  const handleGenerateShortcuts = async (action: any) => {
+    const actionKey = `${action.title}-${action.timeframe}`;
+    setLoadingShortcuts(prev => ({ ...prev, [actionKey]: true }));
+
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      
+      const { data, error } = await supabase.functions.invoke("generate-shortcuts", {
+        body: {
+          actionTitle: action.title,
+          actionDescription: action.description,
+          suggestions: action.suggestions,
+          timeframe: action.timeframe,
+          priority: action.priority,
+        },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) throw error;
+
+      setShortcutsContent(prev => ({ ...prev, [actionKey]: data.content }));
+      
+      toast({
+        title: "Shortcuts generated!",
+        description: "Check below for the completed homework.",
+      });
+    } catch (error) {
+      console.error("Error generating shortcuts:", error);
+      toast({
+        title: "Unable to generate shortcuts",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingShortcuts(prev => ({ ...prev, [actionKey]: false }));
+    }
+  };
 
   const guidanceLevels = [
     {
@@ -1179,19 +1219,31 @@ export const ActionPage = () => {
                           <div className="flex items-center gap-2 mt-2">
                             <p className="text-xs text-muted-foreground">Tap to log action</p>
                             {action.suggestions && action.suggestions.length > 0 && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const actionElement = e.currentTarget.parentElement?.parentElement;
-                                  const suggestionsDiv = actionElement?.querySelector('.suggestions-content');
-                                  if (suggestionsDiv) {
-                                    suggestionsDiv.classList.toggle('hidden');
-                                  }
-                                }}
-                                className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
-                              >
-                                💡 suggestions
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const actionElement = e.currentTarget.parentElement?.parentElement?.parentElement;
+                                    const suggestionsDiv = actionElement?.querySelector('.suggestions-content');
+                                    if (suggestionsDiv) {
+                                      suggestionsDiv.classList.toggle('hidden');
+                                    }
+                                  }}
+                                  className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                                >
+                                  💡 suggestions
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleGenerateShortcuts(action);
+                                  }}
+                                  disabled={loadingShortcuts[`${action.title}-${action.timeframe}`]}
+                                  className="text-xs px-2 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50"
+                                >
+                                  {loadingShortcuts[`${action.title}-${action.timeframe}`] ? "⏳" : "⚡"} short cuts
+                                </button>
+                              </div>
                             )}
                           </div>
                         )}
@@ -1199,7 +1251,6 @@ export const ActionPage = () => {
                           <div className="suggestions-content hidden mt-2 p-3 rounded-lg bg-muted/50 border border-border/50">
                             <ul className="space-y-1.5">
                               {action.suggestions.map((suggestion: any, idx: number) => {
-                                // Handle both string and object suggestions
                                 const suggestionText = typeof suggestion === 'string' 
                                   ? suggestion 
                                   : suggestion.person 
@@ -1214,6 +1265,24 @@ export const ActionPage = () => {
                                 );
                               })}
                             </ul>
+                          </div>
+                        )}
+                        {shortcutsContent[`${action.title}-${action.timeframe}`] && !action.done && (
+                          <div className="mt-2 p-4 rounded-lg bg-accent/30 border border-accent">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Zap className="h-4 w-4 text-accent-foreground" />
+                              <h4 className="text-sm font-semibold text-accent-foreground">Completed Homework</h4>
+                            </div>
+                            <div 
+                              className="text-xs text-accent-foreground/90 prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ 
+                                __html: shortcutsContent[`${action.title}-${action.timeframe}`]
+                                  .replace(/\n/g, '<br />')
+                                  .replace(/##\s+(.+)/g, '<strong>$1</strong>')
+                                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                              }}
+                            />
                           </div>
                         )}
                       </div>
