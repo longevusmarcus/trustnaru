@@ -108,6 +108,11 @@ serve(async (req) => {
       userContext += `Target Salary Range: ${activePath.salary_range}\n`;
     }
 
+    // Analyze education level and relevance
+    let hasFormalEducation = false;
+    let educationLevel = '';
+    let educationDetails = '';
+    
     // Add CV context (structured first, then text fallback)
     if (profile.wizard_data?.cv_structured) {
       const cv = profile.wizard_data.cv_structured;
@@ -116,9 +121,30 @@ serve(async (req) => {
       if (cv.years_of_experience) userContext += `- Years of Experience: ${cv.years_of_experience}\n`;
       if (cv.key_skills?.length) userContext += `- Key Skills: ${cv.key_skills.join(', ')}\n`;
       if (cv.past_companies?.length) userContext += `- Companies: ${cv.past_companies.slice(0, 5).join(', ')}\n`;
+      
+      // Analyze education
       if (cv.education?.length) {
-        userContext += `- Education: ${cv.education.map((e: any) => `${e.degree} from ${e.institution}`).join('; ')}\n`;
+        educationDetails = cv.education.map((e: any) => `${e.degree} from ${e.institution}`).join('; ');
+        userContext += `- Education: ${educationDetails}\n`;
+        
+        const educationLower = educationDetails.toLowerCase();
+        if (educationLower.includes('degree') || educationLower.includes('bachelor') || 
+            educationLower.includes('master') || educationLower.includes('mba') || 
+            educationLower.includes('phd') || educationLower.includes('diploma')) {
+          hasFormalEducation = true;
+          
+          // Check if education is relevant to the career path
+          const pathCategory = activePath.category.toLowerCase();
+          const pathTitle = activePath.title.toLowerCase();
+          if (educationLower.includes(pathCategory) || educationLower.includes(pathTitle) ||
+              pathCategory.split(' ').some((word: string) => word.length > 3 && educationLower.includes(word))) {
+            educationLevel = 'HAS FORMAL DEGREE DIRECTLY IN THIS FIELD';
+          } else {
+            educationLevel = 'HAS FORMAL DEGREE BUT IN DIFFERENT FIELD';
+          }
+        }
       }
+      
       if (cv.certifications?.length) userContext += `- Certifications: ${cv.certifications.join(', ')}\n`;
       if (cv.notable_achievements?.length) {
         userContext += `- Achievements: ${cv.notable_achievements.slice(0, 3).join('; ')}\n`;
@@ -219,6 +245,28 @@ USER INFORMATION:
 CURRENT SKILLS (from CV):
 ${profile.wizard_data?.cv_structured?.key_skills?.join(', ') || 'Not analyzed'}
 
+📚 EDUCATION ANALYSIS:
+${educationLevel || 'NO FORMAL DEGREE IDENTIFIED'}
+${educationDetails ? `Details: ${educationDetails}` : ''}
+
+⚠️ EDUCATION-BASED CONTENT RULES (CRITICAL):
+${educationLevel === 'HAS FORMAL DEGREE DIRECTLY IN THIS FIELD'
+  ? `- User already has formal education in ${activePath.category}
+- SKIP ALL FOUNDATIONAL/BASIC/INTRODUCTORY content
+- NO "101" courses, NO "Basics of X", NO "Introduction to Y"
+- ONLY provide ADVANCED, SPECIALIZED, NICHE, or CUTTING-EDGE resources
+- Assume user knows core fundamentals and principles
+- Focus on skill gaps, advanced techniques, and expert-level knowledge`
+  : educationLevel === 'HAS FORMAL DEGREE BUT IN DIFFERENT FIELD'
+    ? `- User has formal education but not in ${activePath.category}
+- Can include SOME foundational content but prefer INTERMEDIATE+ resources
+- Skip the most basic concepts, assume general learning capability
+- Focus on practical application and bridging from their background`
+    : `- No formal degree identified
+- Can include foundational content BUT make it SOPHISTICATED
+- Use expert-curated sources, not generic tutorials
+- Emphasize premium, insider knowledge even for basics`}
+
 🚨 CRITICAL SKILL GAPS TO ADDRESS (PRIMARY FOCUS):
 ${(() => {
   const targetSkills = activePath?.key_skills || [];
@@ -259,22 +307,45 @@ Complexity Scaling:
 - Level 7-8: Expert-level work, mentoring others, contributing to field
 - Level 9-10: Industry leadership, innovation, publishing, transformational impact
 
-**CRITICAL - ONLY USE REAL, VERIFIABLE INFORMATION:**
-- NEVER invent or hallucinate names of people, companies, resources, or organizations
-- ONLY suggest real people who actually exist in the industry/field
-- ONLY reference real companies, real courses, real books, real certifications that actually exist
-- If you don't know real specific names, provide general but authentic guidance (e.g., "LinkedIn connections in [field]" rather than inventing fake names)
-- For networking actions: Suggest searching for real professionals in specific roles/companies, not made-up names
-- For learning resources: Only mention courses, books, certifications that genuinely exist (e.g., real Coursera courses, real books with ISBN, real certifications)
+**CRITICAL - REAL, RECENT, SPECIFIC REFERENCES REQUIRED:**
 
-**IMPORTANT - BE ULTRA SPECIFIC WITH REAL INFORMATION:**
-- For research/learning actions: Provide SPECIFIC real article titles or resource names that exist (e.g., "Read articles on TechCrunch about AI in Healthcare" NOT "Read 'The Rise of AI in Healthcare 2025'" unless you're certain it exists)
-- For skill practice actions: Pick ONE SPECIFIC skill from the user's key skills list (${activePath.key_skills?.join(', ') || 'their skills'}) and suggest a CONCRETE practice activity appropriate to Level ${userLevel} difficulty
-- For networking actions: Include actual company names and suggest searching for real roles, NOT inventing contact names
+1. PEOPLE - Use actual industry leaders with their real titles/companies:
+   - ✅ "Sarah Drasner, VP of Developer Experience at Google" (if real and current in 2024)
+   - ✅ "Search LinkedIn for 'Head of Product at Stripe' and draft personalized outreach"
+   - ❌ "John Smith, CTO at TechCorp" (invented name)
 
-If CV structured data is present (current role, years of experience, key skills, companies, education), leverage those exact fields.
-When referencing companies, include actual teams/roles but suggest ways to find real contacts rather than providing fake names.
-Only reference real, verifiable organizations, certifications, and named communities that actually exist.
+2. BRANDS & COMPANIES - Reference real organizations doing real work:
+   - ✅ "Patagonia's 2024 regenerative agriculture partnership with suppliers"
+   - ✅ "Nike's 2024 sustainability report on circular design"
+   - ❌ "Leading companies in the space" (too vague)
+
+3. ARTICLES & PUBLICATIONS - Cite real, recent sources (2024 strongly preferred, 2023 acceptable):
+   - ✅ "Harvard Business Review, March 2024: [actual article topic]"
+   - ✅ "Forbes published Q1 2024 data showing [actual trend]"
+   - ✅ "Bloomberg reported in February 2024 that [actual finding]"
+   - ❌ "Recent studies show..." (no source, no date)
+   - ❌ Articles from 2022 or earlier unless historically significant
+
+4. COURSES & CERTIFICATIONS - Only mention programs that genuinely exist:
+   - ✅ "Google UX Design Professional Certificate on Coursera"
+   - ✅ "IAAP CPACC (Certified Professional in Accessibility Core Competencies)"
+   - ❌ "Advanced Event Management Certification" (unless you can name the issuing organization)
+
+5. BOOKS & RESOURCES - Real publications with real authors:
+   - ✅ "'Don't Make Me Think' by Steve Krug"
+   - ✅ "'Atomic Habits' by James Clear"
+   - ❌ "'The Complete Guide to [Topic]'" (invented title)
+
+6. CONFERENCES & EVENTS - Real events with dates:
+   - ✅ "CSUN Assistive Technology Conference 2025 (March 17-21, Anaheim)"
+   - ✅ "ReactConf 2024 keynote by [actual speaker]"
+   - ❌ "Attend industry conferences" (no specifics)
+
+**VERIFICATION REQUIREMENT:**
+- If you don't have current 2024 information about something, use general but authentic guidance
+- Better to say "Search TechCrunch for recent articles on [topic]" than invent article titles
+- Better to say "Find accessibility leaders on LinkedIn" than invent names
+- ALWAYS prefer specificity when you have it, generality when you don't - NEVER invent
 
 STRUCTURE (valid JSON ONLY):
 {
@@ -322,22 +393,25 @@ PREMIUM QUALITY STANDARDS:
    - You are a premium research assistant who has ALREADY done the work
    - Provide actual findings, specific names, ready-to-use content
 
-3. SUGGESTIONS MUST BE PREMIUM CONTENT:
+3. SUGGESTIONS MUST BE PREMIUM CONTENT WITH REAL REFERENCES (2024 DATA):
    Each action's "suggestions" array (3 items) must contain:
    
-   For RESEARCH actions:
-   - ✅ "Recent industry analysis reveals: [Actual finding 1], [Actual finding 2], [Actual finding 3]. Based on this, your next steps: [Specific action 1], [Specific action 2], [Specific action 3]"
-   - ❌ "Search for trends in X" or "Look for articles about Y"
+   For RESEARCH actions - Provide ACTUAL FINDINGS with SOURCES and DATES:
+   - ✅ "Forbes (January 2024) reported a 45% increase in [specific metric]. McKinsey's Q4 2023 study identified 3 key drivers: [list them]. Based on this data, your next steps: 1) Analyze how [target company] implements [specific approach], 2) Document 5 specific examples from [industry leader's] 2024 work, 3) Create comparison framework based on [specific model]."
+   - ✅ "Sarah Chen, Director of Product at Figma (featured in Product Hunt podcast, Feb 2024) shared insights on [specific topic]. Key takeaway: [actual quote or finding]. Apply this by: [3 concrete actions with real references]."
+   - ❌ "Search for trends in X" or "Look for articles about Y" or "Recent studies show..."
    
-   For LEARNING actions:
-   - ✅ "'Advanced React Patterns' by Kent C. Dodds (Epic React, $400, 8 weeks) - Covers compound components, render props, hooks optimization. Directly addresses your skill gap in component architecture."
-   - ❌ "Take a course on React" or "Learn about design patterns"
+   For LEARNING actions - REAL COURSES with SPECIFICS:
+   - ✅ "'Advanced React Patterns' by Kent C. Dodds (Epic React, $400, 8 weeks) - Module 4 'Compound Components' directly addresses your component architecture skill gap. Includes 12 exercises building production-ready patterns used by Stripe and Discord."
+   - ✅ "Enroll in 'UX Research Methods' by Sarah Doody (Career Strategy Lab, starts April 15, 2024, $299) - Week 3 covers Jobs-to-be-Done framework with case study from Airbnb's 2023 redesign."
+   - ❌ "Take a course on React" or "Learn about design patterns" or invented course names
    
-   For NETWORKING actions:
-   - ✅ Complete, copy-paste-ready message: "Hi Sarah, I saw your talk at ReactConf 2024 on component composition. I'm transitioning into [role] and working on [specific project]. Your approach to [specific technique] would be invaluable. Would you have 15 minutes next Thursday to chat? [Your name]"
-   - ❌ "Reach out to industry leaders" or "Message people on LinkedIn"
+   For NETWORKING actions - COMPLETE DRAFT MESSAGES:
+   - ✅ "Draft message: 'Hi Jessica, I saw your LinkedIn post about Microsoft's 2024 accessibility initiative. I'm transitioning into accessible design and working on implementing WCAG 2.2 AA for a fintech app. Your experience with enterprise-scale accessibility at [company] would be invaluable. Would you have 15 minutes next Thursday (March 21) to chat about [specific question]? Best, [Name]'"
+   - ✅ "Contact: Search LinkedIn for 'Accessibility Lead at Spotify' + 'Accessibility Lead at Apple' - Draft: 'Hi [Name], Your team's work on [specific feature] sets the industry standard. I'm developing [specific project]. Could I get your perspective on [concrete technical question]? Happy to share my findings. Thanks, [Your name]'"
+   - ❌ "Reach out to industry leaders" or "Message people on LinkedIn" or invented names
    
-   For CONTENT CREATION actions:
+   For CONTENT CREATION actions - ACTUAL DRAFTS/OUTLINES:
    - ✅ "Key frameworks to cover: 1) [Framework name + 2 sentence explanation], 2) [Framework name + 2 sentence explanation], 3) [Framework name + 2 sentence explanation]. Draft structure: Intro hook, Problem statement, Solution comparison table, Implementation guide, Conclusion with call-to-action."
    - ❌ "Write about best practices" or "Create content about your field"
 
