@@ -332,7 +332,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             description: action.description,
             duration: action.duration || "5 min",
             type: action.type || "Task",
-            completed: action.completed || false
+            completed: action.completed || false,
+            suggestions: action.suggestions || []
           }));
           setDailyMissions(missions);
           
