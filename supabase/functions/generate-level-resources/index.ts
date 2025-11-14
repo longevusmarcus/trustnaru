@@ -1,11 +1,11 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 const inputSchema = z.object({
@@ -13,41 +13,44 @@ const inputSchema = z.object({
 });
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: req.headers.get("Authorization")! },
         },
-      }
+      },
     );
 
-    const authHeader = req.headers.get('Authorization') || '';
-    const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(jwt);
-    
+    const authHeader = req.headers.get("Authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseClient.auth.getUser(jwt);
+
     if (userError || !user) {
-      console.error('Auth error:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      console.error("Auth error:", userError);
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const body = await req.json();
     const validationResult = inputSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid input' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Invalid input" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const { level } = validationResult.data;
@@ -56,58 +59,59 @@ serve(async (req) => {
 
     // Get comprehensive user data
     const { data: profile } = await supabaseClient
-      .from('user_profiles')
-      .select('active_path_id, display_name, cv_url, voice_transcription, wizard_data')
-      .eq('user_id', user.id)
+      .from("user_profiles")
+      .select("active_path_id, display_name, cv_url, voice_transcription, wizard_data")
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (!profile?.active_path_id) {
       return new Response(
-        JSON.stringify({ 
-          error: 'No active path',
-          resources: []
+        JSON.stringify({
+          error: "No active path",
+          resources: [],
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     // Get active path details
     const { data: activePath } = await supabaseClient
-      .from('career_paths')
-      .select('*')
-      .eq('id', profile.active_path_id)
+      .from("career_paths")
+      .select("*")
+      .eq("id", profile.active_path_id)
       .single();
 
     if (!activePath) {
-      throw new Error('Active path not found');
+      throw new Error("Active path not found");
     }
 
     console.log(`Generating resources for path: ${activePath.title}, Level: ${level}`);
 
     // Build comprehensive user context with emphasis on skill gaps
-    const userName = profile.display_name || user.email?.split('@')[0] || 'there';
-    
+    const userName = profile.display_name || user.email?.split("@")[0] || "there";
+
     // Identify skill gaps first
     let skillGaps: string[] = [];
     let currentSkills: string[] = [];
-    let cvExperience = '';
-    let cvEducation = '';
-    
+    let cvExperience = "";
+    let cvEducation = "";
+
     if (profile.wizard_data?.cv_structured) {
       const cv = profile.wizard_data.cv_structured;
       currentSkills = cv.key_skills || [];
-      cvExperience = cv.current_role || '';
-      cvEducation = cv.education || '';
-      
+      cvExperience = cv.current_role || "";
+      cvEducation = cv.education || "";
+
       const targetSkills = activePath.key_skills || [];
       skillGaps = targetSkills.filter(
-        (skill: string) => !currentSkills.some((cs: string) => 
-          cs.toLowerCase().includes(skill.toLowerCase()) || 
-          skill.toLowerCase().includes(cs.toLowerCase())
-        )
+        (skill: string) =>
+          !currentSkills.some(
+            (cs: string) =>
+              cs.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(cs.toLowerCase()),
+          ),
       );
     }
-    
+
     let userContext = `
 User Profile:
 - Name: ${userName}
@@ -115,26 +119,26 @@ User Profile:
 - Target Role: ${activePath.target_role || activePath.title}
 - Category: ${activePath.category}
 - Path Description: ${activePath.description}
-- Career Experience: ${cvExperience || 'Not specified'}
-- Educational Background: ${cvEducation || 'Not specified'}
+- Career Experience: ${cvExperience || "Not specified"}
+- Educational Background: ${cvEducation || "Not specified"}
 
 Current Skills from CV:
-${currentSkills.length > 0 ? currentSkills.map(s => `- ${s}`).join('\n') : '- No CV skills identified yet'}
+${currentSkills.length > 0 ? currentSkills.map((s) => `- ${s}`).join("\n") : "- No CV skills identified yet"}
 
 🎯 CRITICAL SKILL GAPS TO ADDRESS (Primary Focus):
-${skillGaps.length > 0 ? skillGaps.map(gap => `- ${gap} (MUST ADDRESS)`).join('\n') : '- No specific skill gaps identified - recommend advanced/sophisticated resources in the target domain'}
+${skillGaps.length > 0 ? skillGaps.map((gap) => `- ${gap} (MUST ADDRESS)`).join("\n") : "- No specific skill gaps identified - recommend advanced/sophisticated resources in the target domain"}
 
 Key Requirements for ${activePath.title}:
-${activePath.key_skills?.length ? activePath.key_skills.map((s: string) => `- ${s}`).join('\n') : '- Not specified'}
+${activePath.key_skills?.length ? activePath.key_skills.map((s: string) => `- ${s}`).join("\n") : "- Not specified"}
 
-${activePath.target_companies?.length ? `Target Companies:\n${activePath.target_companies.map((c: string) => `- ${c}`).join('\n')}` : ''}
+${activePath.target_companies?.length ? `Target Companies:\n${activePath.target_companies.map((c: string) => `- ${c}`).join("\n")}` : ""}
 
-${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcription}"` : ''}
+${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcription}"` : ""}
     `.trim();
 
     // Level-specific guidance descriptions - sophisticated at every level
     const levelDescriptions: Record<number, string> = {
-      1: "Foundational Sophistication - Not 'beginner basics' but essential SOPHISTICATED frameworks and insider knowledge. Premium curated content that builds strong foundations with expert perspectives.",
+      1: "Essential - Not beginner basics, but foundational frameworks and insider-level knowledge. Curated, premium content that strengthens core understanding through expert perspectives and deep-focus tasks. Explicitly avoids material the user has already studied (as reflected in their CV) and steers clear of generic university-level content, focusing instead on richer, more advanced foundations",
       2: "Strategic Development (+10%) - Intermediate skills with industry-specific methodologies. 10% more complex, incorporating real-world case studies and professional tools.",
       3: "Specialized Expertise (+20%) - Advanced techniques with niche specializations. 20% more depth, professional certifications, specialized technical knowledge from industry leaders.",
       4: "Leadership Fundamentals (+30%) - Strategic thinking and cross-functional collaboration. 30% more complexity, mentoring capabilities, project leadership with measurable impact.",
@@ -143,15 +147,15 @@ ${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcript
       7: "Expert Mastery (+60%) - Expert-level proficiency with field recognition. 60% more demanding, advanced publications, advisory roles, industry-wide influence.",
       8: "Systematic Mentorship (+70%) - Large-scale knowledge transfer and program development. 70% more responsibility, curriculum design, building learning systems.",
       9: "Transformational Leadership (+80%) - Drive paradigm shifts and organizational change. 80% more impact, industry transformation, creating new methodologies.",
-      10: "Legacy & Impact (+90%) - Field-defining contributions with generational influence. 90% more profound, establishing new standards, shaping the future of the field."
+      10: "Legacy & Impact (+90%) - Field-defining contributions with generational influence. 90% more profound, establishing new standards, shaping the future of the field.",
     };
 
     const levelDesc = levelDescriptions[level] || `Level ${level}`;
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured');
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error("LOVABLE_API_KEY not configured");
+      throw new Error("LOVABLE_API_KEY not configured");
     }
 
     const prompt = `You are an expert career development strategist specializing in personalized learning paths with PROGRESSIVE DIFFICULTY SCALING.
@@ -163,16 +167,16 @@ TASK: Generate exactly 3-5 HIGHLY SPECIFIC, CONCRETE resources for Level ${level
 
 CRITICAL - PROGRESSIVE DIFFICULTY SCALING:
 Level ${level} should be ${(level - 1) * 10}% MORE DIFFICULT than Level 1 baseline:
-${level === 1 ? '- Level 1 (Baseline): Beginner-friendly, foundational, accessible content. Free or low-cost. Basic concepts.' : ''}
-${level === 2 ? '- Level 2 (+10% difficulty): Slightly more complex. Introduces practical application. Some paid resources acceptable.' : ''}
-${level === 3 ? '- Level 3 (+20% difficulty): Notably more advanced. Specialized knowledge. Professional certifications. Deeper technical depth.' : ''}
-${level === 4 ? '- Level 4 (+30% difficulty): Significantly more complex. Leadership skills. Cross-functional knowledge. Strategic thinking required.' : ''}
-${level === 5 ? '- Level 5 (+40% difficulty): Advanced complexity. Innovation focus. Original contributions. Research-oriented work.' : ''}
-${level === 6 ? '- Level 6 (+50% difficulty): High sophistication. Industry influence. Speaking/teaching opportunities. Community leadership.' : ''}
-${level === 7 ? '- Level 7 (+60% difficulty): Expert-level demand. Publications. Advanced certifications. Industry-wide recognition.' : ''}
-${level === 8 ? '- Level 8 (+70% difficulty): Master-level responsibility. Systematic mentoring. Program development. Organizational impact.' : ''}
-${level === 9 ? '- Level 9 (+80% difficulty): Transformational impact. Paradigm shifts. Industry change leadership. Field advancement.' : ''}
-${level === 10 ? '- Level 10 (+90% difficulty): Legacy-level contribution. Field-defining work. Generational influence. Revolutionary impact.' : ''}
+${level === 1 ? "- Level 1 (Baseline): Not beginner basics, but foundational frameworks and insider-level knowledge. Curated, premium content that strengthens core understanding through expert perspectives and deep-focus tasks. Explicitly avoids material the user has already studied (as reflected in their CV) and steers clear of generic university-level content, focusing instead on richer, more advanced foundations." : ""}
+${level === 2 ? "- Level 2 (+10% difficulty): Slightly more complex. Introduces practical application. Some paid resources acceptable." : ""}
+${level === 3 ? "- Level 3 (+20% difficulty): Notably more advanced. Specialized knowledge. Professional certifications. Deeper technical depth." : ""}
+${level === 4 ? "- Level 4 (+30% difficulty): Significantly more complex. Leadership skills. Cross-functional knowledge. Strategic thinking required." : ""}
+${level === 5 ? "- Level 5 (+40% difficulty): Advanced complexity. Innovation focus. Original contributions. Research-oriented work." : ""}
+${level === 6 ? "- Level 6 (+50% difficulty): High sophistication. Industry influence. Speaking/teaching opportunities. Community leadership." : ""}
+${level === 7 ? "- Level 7 (+60% difficulty): Expert-level demand. Publications. Advanced certifications. Industry-wide recognition." : ""}
+${level === 8 ? "- Level 8 (+70% difficulty): Master-level responsibility. Systematic mentoring. Program development. Organizational impact." : ""}
+${level === 9 ? "- Level 9 (+80% difficulty): Transformational impact. Paradigm shifts. Industry change leadership. Field advancement." : ""}
+${level === 10 ? "- Level 10 (+90% difficulty): Legacy-level contribution. Field-defining work. Generational influence. Revolutionary impact." : ""}
 
 Each level should demand:
 - ${10 * (level - 1)}% more time investment
@@ -216,58 +220,58 @@ OUTPUT FORMAT (valid JSON only, no markdown):
   ]
 }`;
 
-    console.log('Calling Lovable AI Gateway for level resources...');
+    console.log("Calling Lovable AI Gateway for level resources...");
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "google/gemini-2.5-flash",
         messages: [
-          { 
-            role: 'system', 
-            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist.`
+          {
+            role: "system",
+            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist.`,
           },
-          { role: 'user', content: prompt }
+          { role: "user", content: prompt },
         ],
         tools: [
           {
-            type: 'function',
+            type: "function",
             function: {
-              name: 'generate_level_resources',
-              description: 'Generate learning resources for a specific career level',
+              name: "generate_level_resources",
+              description: "Generate learning resources for a specific career level",
               parameters: {
-                type: 'object',
+                type: "object",
                 properties: {
                   resources: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                      type: 'object',
+                      type: "object",
                       properties: {
-                        resource: { type: 'string', description: 'Name of real course/book/certification/tool' },
-                        commitment: { type: 'string', description: 'Time commitment' },
-                        impact: { type: 'string', description: 'Concrete outcome' }
+                        resource: { type: "string", description: "Name of real course/book/certification/tool" },
+                        commitment: { type: "string", description: "Time commitment" },
+                        impact: { type: "string", description: "Concrete outcome" },
                       },
-                      required: ['resource', 'commitment', 'impact'],
-                      additionalProperties: false
-                    }
-                  }
+                      required: ["resource", "commitment", "impact"],
+                      additionalProperties: false,
+                    },
+                  },
                 },
-                required: ['resources'],
-                additionalProperties: false
-              }
-            }
-          }
+                required: ["resources"],
+                additionalProperties: false,
+              },
+            },
+          },
         ],
-        tool_choice: { type: 'function', function: { name: 'generate_level_resources' } },
+        tool_choice: { type: "function", function: { name: "generate_level_resources" } },
         temperature: 0.3,
-        max_tokens: 2500
+        max_tokens: 2500,
       }),
       signal: controller.signal,
     });
@@ -276,7 +280,7 @@ OUTPUT FORMAT (valid JSON only, no markdown):
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
+      console.error("AI Gateway error:", response.status, errorText);
       throw new Error(`AI generation failed: ${response.status}`);
     }
 
@@ -284,57 +288,56 @@ OUTPUT FORMAT (valid JSON only, no markdown):
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
     if (!toolCall?.function?.arguments) {
-      console.error('No tool call in AI response');
-      throw new Error('No structured output generated');
+      console.error("No tool call in AI response");
+      throw new Error("No structured output generated");
     }
 
     const result = JSON.parse(toolCall.function.arguments);
 
     if (!result?.resources || !Array.isArray(result.resources) || result.resources.length === 0) {
-      console.warn('AI returned empty resources, using fallback');
-      const companies = (activePath.target_companies || []).slice(0, 2).join(', ') || 'industry leaders';
-      const skills = (activePath.key_skills || []).slice(0, 3).join(', ') || 'key skills';
-      
+      console.warn("AI returned empty resources, using fallback");
+      const companies = (activePath.target_companies || []).slice(0, 2).join(", ") || "industry leaders";
+      const skills = (activePath.key_skills || []).slice(0, 3).join(", ") || "key skills";
+
       result.resources = [
         {
           resource: `Industry-recognized certification in ${activePath.category}`,
-          commitment: '10-12 weeks, 4-5 hours/week',
-          impact: `Earn credential validating ${skills} expertise`
+          commitment: "10-12 weeks, 4-5 hours/week",
+          impact: `Earn credential validating ${skills} expertise`,
         },
         {
           resource: `Comprehensive course on ${skills} with projects`,
-          commitment: '6-8 weeks, 3-4 hours/week',
-          impact: 'Build portfolio of 3-5 projects'
+          commitment: "6-8 weeks, 3-4 hours/week",
+          impact: "Build portfolio of 3-5 projects",
         },
         {
           resource: `Technical guide on ${activePath.category} best practices`,
-          commitment: '3-4 weeks to read',
-          impact: 'Understand industry standards'
-        }
+          commitment: "3-4 weeks to read",
+          impact: "Understand industry standards",
+        },
       ];
     }
 
     console.log(`Successfully generated ${result.resources.length} Level ${level} resources`);
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         level,
-        resources: result.resources 
+        resources: result.resources,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-
   } catch (error) {
-    console.error('Error in generate-level-resources function:', error);
+    console.error("Error in generate-level-resources function:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        resources: [] 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+        resources: [],
       }),
-      { 
+      {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 });
