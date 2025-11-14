@@ -76,12 +76,12 @@ export const ActionPage = () => {
       return;
     }
 
-    const actionKey = `${action.task}-${action.timeframe || 'default'}`;
-    setLoadingShortcuts(prev => ({ ...prev, [actionKey]: true }));
+    const actionKey = `${action.task}-${action.timeframe || "default"}`;
+    setLoadingShortcuts((prev) => ({ ...prev, [actionKey]: true }));
 
     try {
       const session = (await supabase.auth.getSession()).data.session;
-      
+
       const { data, error } = await supabase.functions.invoke("generate-shortcuts", {
         body: {
           actionTitle: action.task,
@@ -95,8 +95,8 @@ export const ActionPage = () => {
 
       if (error) throw error;
 
-      setShortcutsContent(prev => ({ ...prev, [actionKey]: data.content }));
-      
+      setShortcutsContent((prev) => ({ ...prev, [actionKey]: data.content }));
+
       toast({
         title: "Shortcuts generated!",
         description: "Check below for the completed homework.",
@@ -109,7 +109,7 @@ export const ActionPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoadingShortcuts(prev => ({ ...prev, [actionKey]: false }));
+      setLoadingShortcuts((prev) => ({ ...prev, [actionKey]: false }));
     }
   };
 
@@ -220,12 +220,12 @@ export const ActionPage = () => {
     const checkDateChange = () => {
       const today = new Date().toISOString().split("T")[0];
       const lastDate = localStorage.getItem("lastActionDate");
-      
+
       if (lastDate && lastDate !== today) {
         console.log("Date changed, refreshing actions...");
         loadData();
       }
-      
+
       localStorage.setItem("lastActionDate", today);
     };
 
@@ -427,7 +427,7 @@ export const ActionPage = () => {
 
       // Transform the AI-generated actions into the expected format
       const parsedActions = data.dailyActions.map((action: any, idx: number) => {
-        let label = "Action";
+        let label = "Bonus";
         let priority = "medium";
 
         if (idx === 0) {
@@ -520,11 +520,7 @@ export const ActionPage = () => {
       if (error) throw error;
 
       // Get the new path data
-      const { data: newPath } = await supabase
-        .from("career_paths")
-        .select("*")
-        .eq("id", pathId)
-        .single();
+      const { data: newPath } = await supabase.from("career_paths").select("*").eq("id", pathId).single();
 
       // Check if the new path has goals
       const { data: existingGoals } = await supabase
@@ -602,16 +598,16 @@ export const ActionPage = () => {
 
   const loadSkillGap = async () => {
     if (!user || !activePath) return;
-    
+
     setLoadingSkillGap(true);
     try {
       const session = (await supabase.auth.getSession()).data.session;
       const { data, error } = await supabase.functions.invoke("generate-skill-gap", {
-        body: { 
+        body: {
           level: currentLevel,
           pathTitle: activePath.title,
           keySkills: activePath.key_skills || [],
-          roadmap: activePath.roadmap || []
+          roadmap: activePath.roadmap || [],
         },
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
@@ -632,7 +628,6 @@ export const ActionPage = () => {
       setLoadingSkillGap(false);
     }
   };
-
 
   const handleLevelComplete = async () => {
     if (!user || !userStats) return;
@@ -826,7 +821,9 @@ export const ActionPage = () => {
 
   return (
     <div className="px-4 pb-24 pt-4">
-      <div className={`max-w-md mx-auto space-y-6 transition-opacity duration-300 ${isTransitioning ? "opacity-50" : "opacity-100"}`}>
+      <div
+        className={`max-w-md mx-auto space-y-6 transition-opacity duration-300 ${isTransitioning ? "opacity-50" : "opacity-100"}`}
+      >
         {/* Active Path Info */}
         {activePath ? (
           <Card className="bg-primary/5 border-primary/20">
@@ -1154,12 +1151,7 @@ export const ActionPage = () => {
             <h3 className="text-lg font-semibold">Today's Actions</h3>
             <div className="flex items-center gap-2">
               {actionHistory.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="h-7 text-xs"
-                >
+                <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="h-7 text-xs">
                   {showHistory ? "Hide History" : "History"}
                 </Button>
               )}
@@ -1234,9 +1226,9 @@ export const ActionPage = () => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     const actionElement = e.currentTarget.parentElement?.parentElement?.parentElement;
-                                    const suggestionsDiv = actionElement?.querySelector('.suggestions-content');
+                                    const suggestionsDiv = actionElement?.querySelector(".suggestions-content");
                                     if (suggestionsDiv) {
-                                      suggestionsDiv.classList.toggle('hidden');
+                                      suggestionsDiv.classList.toggle("hidden");
                                     }
                                   }}
                                   className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium whitespace-nowrap"
@@ -1248,10 +1240,11 @@ export const ActionPage = () => {
                                     e.stopPropagation();
                                     handleGenerateShortcuts(action);
                                   }}
-                                  disabled={loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`]}
+                                  disabled={loadingShortcuts[`${action.task}-${action.timeframe || "default"}`]}
                                   className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50 whitespace-nowrap"
                                 >
-                                  {loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`] ? "⏳" : "⚡"} short cuts
+                                  {loadingShortcuts[`${action.task}-${action.timeframe || "default"}`] ? "⏳" : "⚡"}{" "}
+                                  short cuts
                                 </button>
                               </div>
                             )}
@@ -1261,12 +1254,13 @@ export const ActionPage = () => {
                           <div className="suggestions-content hidden mt-2 p-3 rounded-lg bg-muted/50 border border-border/50">
                             <ul className="space-y-1.5">
                               {action.suggestions.map((suggestion: any, idx: number) => {
-                                const suggestionText = typeof suggestion === 'string' 
-                                  ? suggestion 
-                                  : suggestion.person 
-                                    ? `${suggestion.person} - ${suggestion.title} at ${suggestion.organization}${suggestion.message ? `: "${suggestion.message}"` : ''}`
-                                    : JSON.stringify(suggestion);
-                                
+                                const suggestionText =
+                                  typeof suggestion === "string"
+                                    ? suggestion
+                                    : suggestion.person
+                                      ? `${suggestion.person} - ${suggestion.title} at ${suggestion.organization}${suggestion.message ? `: "${suggestion.message}"` : ""}`
+                                      : JSON.stringify(suggestion);
+
                                 return (
                                   <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
                                     <span className="text-primary mt-0.5">•</span>
@@ -1277,20 +1271,20 @@ export const ActionPage = () => {
                             </ul>
                           </div>
                         )}
-                        {shortcutsContent[`${action.task}-${action.timeframe || 'default'}`] && !action.done && (
+                        {shortcutsContent[`${action.task}-${action.timeframe || "default"}`] && !action.done && (
                           <div className="mt-2 p-4 rounded-lg bg-accent/30 border border-accent">
                             <div className="flex items-center gap-2 mb-2">
                               <Zap className="h-4 w-4 text-accent-foreground" />
                               <h4 className="text-sm font-semibold text-accent-foreground">Completed Homework</h4>
                             </div>
-                            <div 
+                            <div
                               className="text-xs text-accent-foreground/90 prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{ 
-                                __html: shortcutsContent[`${action.task}-${action.timeframe || 'default'}`]
-                                  .replace(/\n/g, '<br />')
-                                  .replace(/##\s+(.+)/g, '<strong>$1</strong>')
-                                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                                  .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                              dangerouslySetInnerHTML={{
+                                __html: shortcutsContent[`${action.task}-${action.timeframe || "default"}`]
+                                  .replace(/\n/g, "<br />")
+                                  .replace(/##\s+(.+)/g, "<strong>$1</strong>")
+                                  .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                                  .replace(/\*(.+?)\*/g, "<em>$1</em>"),
                               }}
                             />
                           </div>
@@ -1311,7 +1305,7 @@ export const ActionPage = () => {
                 const date = new Date(historyItem.action_date);
                 const completedCount = (historyItem.actions as any[]).filter((a) => a.done).length;
                 const totalCount = (historyItem.actions as any[]).length;
-                
+
                 return (
                   <Card key={historyItem.action_date} className="border-muted/30">
                     <CardContent className="p-3">
@@ -1331,7 +1325,9 @@ export const ActionPage = () => {
                             ) : (
                               <Circle className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
                             )}
-                            <p className={`text-muted-foreground leading-relaxed ${action.done ? "line-through opacity-60" : ""}`}>
+                            <p
+                              className={`text-muted-foreground leading-relaxed ${action.done ? "line-through opacity-60" : ""}`}
+                            >
                               {action.task}
                             </p>
                           </div>
@@ -1349,8 +1345,8 @@ export const ActionPage = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
-            <Drawer 
-              open={skillGapOpen} 
+            <Drawer
+              open={skillGapOpen}
               onOpenChange={(open) => {
                 setSkillGapOpen(open);
                 if (open && skillGaps.length === 0) {
@@ -1401,18 +1397,18 @@ export const ActionPage = () => {
                                 </div>
                                 <h4 className="font-semibold text-sm flex-1">{gap.skill}</h4>
                               </div>
-                              
+
                               <div className="space-y-2 text-xs">
                                 <div>
                                   <p className="font-medium text-muted-foreground mb-1">Gap:</p>
                                   <p className="text-foreground/90">{gap.gap}</p>
                                 </div>
-                                
+
                                 <div>
                                   <p className="font-medium text-muted-foreground mb-1">How to fill it:</p>
                                   <p className="text-foreground/90">{gap.howToFill}</p>
                                 </div>
-                                
+
                                 <div className="pt-2 border-t border-border/50">
                                   <p className="text-primary/80 italic">{gap.whyItMatters}</p>
                                 </div>
@@ -1423,9 +1419,7 @@ export const ActionPage = () => {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <p className="text-sm text-muted-foreground">
-                          Activate a path to see your skill gap analysis
-                        </p>
+                        <p className="text-sm text-muted-foreground">Activate a path to see your skill gap analysis</p>
                       </div>
                     )}
                   </div>
@@ -1548,9 +1542,7 @@ export const ActionPage = () => {
                         <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
                           {goal.title}
                         </h4>
-                        {goal.description && (
-                          <p className="text-xs text-muted-foreground">{goal.description}</p>
-                        )}
+                        {goal.description && <p className="text-xs text-muted-foreground">{goal.description}</p>}
                       </div>
                       <span
                         className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
