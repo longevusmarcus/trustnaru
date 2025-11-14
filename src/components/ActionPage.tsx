@@ -1226,10 +1226,10 @@ export const ActionPage = () => {
                           {action.task}
                         </p>
                         {!action.done && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <p className="text-xs text-muted-foreground">Tap to log action</p>
+                          <div className="flex items-center gap-1.5 mt-2">
+                            <p className="text-[10px] text-muted-foreground whitespace-nowrap">Tap to log action</p>
                             {action.suggestions && action.suggestions.length > 0 && (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -1239,7 +1239,7 @@ export const ActionPage = () => {
                                       suggestionsDiv.classList.toggle('hidden');
                                     }
                                   }}
-                                  className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+                                  className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium whitespace-nowrap"
                                 >
                                   💡 suggestions
                                 </button>
@@ -1249,7 +1249,7 @@ export const ActionPage = () => {
                                     handleGenerateShortcuts(action);
                                   }}
                                   disabled={loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`]}
-                                  className="text-xs px-2 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50"
+                                  className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50 whitespace-nowrap"
                                 >
                                   {loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`] ? "⏳" : "⚡"} short cuts
                                 </button>
