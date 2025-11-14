@@ -84,66 +84,66 @@ serve(async (req) => {
 
     console.log(`Generating resources for path: ${activePath.title}, Level: ${level}`);
 
-    // Build context
+    // Build comprehensive user context with emphasis on skill gaps
     const userName = profile.display_name || user.email?.split('@')[0] || 'there';
-    let userContext = `User: ${userName}\n`;
-    userContext += `Career Path: ${activePath.title}\n`;
-    userContext += `Category: ${activePath.category}\n`;
-    userContext += `Description: ${activePath.description}\n`;
     
-    if (activePath.key_skills?.length) {
-      userContext += `Required Skills: ${activePath.key_skills.join(', ')}\n`;
-    }
+    // Identify skill gaps first
+    let skillGaps: string[] = [];
+    let currentSkills: string[] = [];
+    let cvExperience = '';
+    let cvEducation = '';
     
-    if (activePath.target_companies?.length) {
-      userContext += `Target Companies: ${activePath.target_companies.join(', ')}\n`;
-    }
-
-    // Add CV analysis to identify skill gaps
     if (profile.wizard_data?.cv_structured) {
       const cv = profile.wizard_data.cv_structured;
-      userContext += `\nCurrent Profile:\n`;
-      if (cv.current_role) userContext += `- Current Role: ${cv.current_role}\n`;
-      if (cv.years_of_experience) userContext += `- Experience: ${cv.years_of_experience} years\n`;
-      if (cv.key_skills?.length) {
-        userContext += `- Current Skills: ${cv.key_skills.join(', ')}\n`;
-        // Identify skill gaps
-        const targetSkills = activePath.key_skills || [];
-        const currentSkills = cv.key_skills || [];
-        const skillGaps = targetSkills.filter(
-          (skill: string) => !currentSkills.some((cs: string) => 
-            cs.toLowerCase().includes(skill.toLowerCase()) || 
-            skill.toLowerCase().includes(cs.toLowerCase())
-          )
-        );
-        if (skillGaps.length > 0) {
-          userContext += `- Skills to Develop: ${skillGaps.join(', ')}\n`;
-        }
-      }
-      if (cv.certifications?.length) {
-        userContext += `- Current Certifications: ${cv.certifications.join(', ')}\n`;
-      }
-    } else if (profile.wizard_data?.cv_text) {
-      const snippet = String(profile.wizard_data.cv_text).slice(0, 1500);
-      userContext += `\nCV Summary:\n${snippet}\n`;
+      currentSkills = cv.key_skills || [];
+      cvExperience = cv.current_role || '';
+      cvEducation = cv.education || '';
+      
+      const targetSkills = activePath.key_skills || [];
+      skillGaps = targetSkills.filter(
+        (skill: string) => !currentSkills.some((cs: string) => 
+          cs.toLowerCase().includes(skill.toLowerCase()) || 
+          skill.toLowerCase().includes(cs.toLowerCase())
+        )
+      );
     }
+    
+    let userContext = `
+User Profile:
+- Name: ${userName}
+- Active Career Path: ${activePath.title}
+- Target Role: ${activePath.target_role || activePath.title}
+- Category: ${activePath.category}
+- Path Description: ${activePath.description}
+- Career Experience: ${cvExperience || 'Not specified'}
+- Educational Background: ${cvEducation || 'Not specified'}
 
-    if (profile.voice_transcription) {
-      userContext += `\nCareer Aspirations: "${profile.voice_transcription}"\n`;
-    }
+Current Skills from CV:
+${currentSkills.length > 0 ? currentSkills.map(s => `- ${s}`).join('\n') : '- No CV skills identified yet'}
 
-    // Level-specific guidance descriptions with progressive 10% difficulty increase
+🎯 CRITICAL SKILL GAPS TO ADDRESS (Primary Focus):
+${skillGaps.length > 0 ? skillGaps.map(gap => `- ${gap} (MUST ADDRESS)`).join('\n') : '- No specific skill gaps identified - recommend advanced/sophisticated resources in the target domain'}
+
+Key Requirements for ${activePath.title}:
+${activePath.key_skills?.length ? activePath.key_skills.map((s: string) => `- ${s}`).join('\n') : '- Not specified'}
+
+${activePath.target_companies?.length ? `Target Companies:\n${activePath.target_companies.map((c: string) => `- ${c}`).join('\n')}` : ''}
+
+${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcription}"` : ''}
+    `.trim();
+
+    // Level-specific guidance descriptions - sophisticated at every level
     const levelDescriptions: Record<number, string> = {
-      1: "Foundation (Base) - Essential skills and core knowledge to get started. Entry-level content, beginner-friendly resources.",
-      2: "Development (+10%) - Intermediate skills and practical experience building. 10% more complex concepts, hands-on projects.",
-      3: "Specialization (+20%) - Advanced expertise in key areas. 20% more depth, specialized technical knowledge, professional certifications.",
-      4: "Leadership (+30%) - Team management and strategic thinking. 30% more complexity, cross-functional projects, mentoring responsibilities.",
-      5: "Innovation (+40%) - Creative problem-solving and innovation. 40% more advanced, original contributions, research-driven work.",
-      6: "Influence (+50%) - Industry impact and thought leadership. 50% more sophisticated, speaking opportunities, community building.",
-      7: "Mastery (+60%) - Expert-level proficiency and recognition. 60% more demanding, advanced publications, industry-wide influence.",
-      8: "Mentorship (+70%) - Guide others and build community. 70% more responsibility, program development, systematic knowledge transfer.",
-      9: "Transformation (+80%) - Drive industry transformation. 80% more impact, paradigm shifts, organizational change leadership.",
-      10: "Legacy (+90%) - Create lasting impact and legacy. 90% more profound, field-defining contributions, generational influence."
+      1: "Foundational Sophistication - Not 'beginner basics' but essential SOPHISTICATED frameworks and insider knowledge. Premium curated content that builds strong foundations with expert perspectives.",
+      2: "Strategic Development (+10%) - Intermediate skills with industry-specific methodologies. 10% more complex, incorporating real-world case studies and professional tools.",
+      3: "Specialized Expertise (+20%) - Advanced techniques with niche specializations. 20% more depth, professional certifications, specialized technical knowledge from industry leaders.",
+      4: "Leadership Fundamentals (+30%) - Strategic thinking and cross-functional collaboration. 30% more complexity, mentoring capabilities, project leadership with measurable impact.",
+      5: "Innovation & Research (+40%) - Original contributions and research-driven work. 40% more advanced, creative problem-solving, published insights, conference talks.",
+      6: "Industry Influence (+50%) - Thought leadership and community building. 50% more sophisticated, speaking opportunities, building personal brand, industry recognition.",
+      7: "Expert Mastery (+60%) - Expert-level proficiency with field recognition. 60% more demanding, advanced publications, advisory roles, industry-wide influence.",
+      8: "Systematic Mentorship (+70%) - Large-scale knowledge transfer and program development. 70% more responsibility, curriculum design, building learning systems.",
+      9: "Transformational Leadership (+80%) - Drive paradigm shifts and organizational change. 80% more impact, industry transformation, creating new methodologies.",
+      10: "Legacy & Impact (+90%) - Field-defining contributions with generational influence. 90% more profound, establishing new standards, shaping the future of the field."
     };
 
     const levelDesc = levelDescriptions[level] || `Level ${level}`;
