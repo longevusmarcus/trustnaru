@@ -110,15 +110,17 @@ CRITICAL INSTRUCTIONS FOR FINDING REAL PEOPLE:
 3. Cross-reference information across at least 2 sources to verify the person exists
 4. If you cannot verify a person exists across multiple sources, DO NOT include them
 5. Prioritize people with active online presence and verifiable information
-6. Include the most relevant and active profile URL (could be LinkedIn, Instagram, TikTok, personal website, etc.)
+6. Include the most relevant and active profile URL (could be LinkedIn, Instagram, TikTok, website, etc.)
+7. Absolutely avoid fabricated or placeholder URLs. Only include links you have verified open successfully.
+8. Prefer non-LinkedIn links (Instagram, TikTok, YouTube, Twitter/X, personal website). Use LinkedIn only if the person ALSO has an active, verifiable non‑LinkedIn source.
 
-Based on the following user's career interests and preferences, find 5 REAL, VERIFIABLE professionals who match their aspirations:
+Based on the following user's career interests and preferences, find 5 REAL, VERIFIABLE professionals who match their aspirations and are coherent with the user's journey focus:
 
 ${preferencesContext}
 
 SEARCH STRATEGY:
 - For creative/entrepreneurial fields: Prioritize Instagram, TikTok, YouTube, personal websites
-- For corporate/traditional fields: Prioritize LinkedIn
+- For corporate/traditional fields: Prioritize LinkedIn (but still provide a non‑LinkedIn source)
 - For tech/innovation: Check Twitter/X, GitHub, personal blogs
 - For lifestyle/influencer paths: Check Instagram, TikTok, YouTube
 
@@ -126,17 +128,19 @@ For each person, provide:
 1. Their full name (verified across sources)
 2. Current job title or primary role
 3. Company/Brand name (or "Independent" if self-employed)
-4. Best profile URL (LinkedIn, Instagram, TikTok, website - whichever is most active/relevant)
+4. Best profile URL (the most active/relevant platform)
 5. Platform type (one of: "linkedin", "instagram", "tiktok", "twitter", "youtube", "website", "other")
-6. Brief description (2-3 sentences) explaining why they match and mentioning a recent achievement or content
+6. Brief description (2-3 sentences) explaining why they match and a recent achievement/content
 7. 2-3 relevant tags
 8. Career journey (2-3 key milestones with approximate years if available)
+9. Optional but preferred: a second verification URL on a different platform (support_url) and its support_platform
 
 VERIFICATION CHECKLIST for each person:
 ✓ Can be found on Google with their full name + industry
 ✓ Has active social media or professional presence
 ✓ Information is consistent across platforms
 ✓ Recent activity or content (within last 2 years)
+✓ At least one non‑LinkedIn source (instagram/tiktok/twitter/youtube/website) that is active
 
 Return ONLY valid JSON in this exact format:
 {
@@ -146,10 +150,12 @@ Return ONLY valid JSON in this exact format:
       "title": "Job Title or Role",
       "company": "Company/Brand Name",
       "profile_url": "https://...",
-      "platform_type": "linkedin",
+      "platform_type": "instagram",
       "description": "Why this person matches and what they're known for...",
       "tags": ["Tag1", "Tag2"],
-      "career_journey": "Brief career progression with years"
+      "career_journey": "Brief career progression with years",
+      "support_url": "https://...",
+      "support_platform": "website"
     }
   ]
 }`;
@@ -225,12 +231,44 @@ Return ONLY valid JSON in this exact format:
       }
     };
 
-    const looksLikeLinkedInProfile = (url: string): boolean => {
+    const isValidSocialUrl = (url: string, platform: string): boolean => {
       try {
         const u = new URL(url);
-        return u.hostname.includes('linkedin.') && u.pathname.includes('/in/');
+        const p = u.pathname;
+        const host = u.hostname.toLowerCase();
+        switch (platform) {
+          case 'instagram':
+            return host.includes('instagram.') && /^\/[a-zA-Z0-9._]{2,30}\/??$/.test(p);
+          case 'tiktok':
+            return (host.includes('tiktok.') && /^\/@[\w.]{2,24}/.test(p));
+          case 'twitter':
+            return ((host.includes('twitter.') || host.includes('x.com')) && /^\/[A-Za-z0-9_]{1,15}$/.test(p));
+          case 'youtube':
+            return (host.includes('youtube.') || host.includes('youtu.be')) && (/^\/@[\w.-]{2,}/.test(p) || /\/channel\//.test(p) || /\/c\//.test(p));
+          case 'linkedin':
+            return host.includes('linkedin.') && p.includes('/in/');
+          case 'website':
+          default:
+            return true;
+        }
       } catch {
         return false;
+      }
+    };
+
+    const fetchTitle = async (url: string, timeoutMs = 8000): Promise<string | null> => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { method: 'GET', redirect: 'follow', signal: controller.signal });
+        if (!res.ok) return null;
+        const text = await res.text();
+        const m = text.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        return m ? m[1].trim() : null;
+      } catch {
+        return null;
+      } finally {
+        clearTimeout(id);
       }
     };
 
@@ -247,7 +285,6 @@ Return ONLY valid JSON in this exact format:
           clearTimeout(id);
         }
       };
-      // Try HEAD first, then GET as fallback (some platforms block HEAD)
       return (await tryFetch('HEAD')) || (await tryFetch('GET'));
     };
 
@@ -261,38 +298,60 @@ Return ONLY valid JSON in this exact format:
           continue;
         }
         let platform = (m.platform_type as string) || inferPlatformFromUrl(m.profile_url);
-        // Normalize X/Twitter naming
         if (platform === 'x') platform = 'twitter';
 
-        // Skip network check for LinkedIn due to bot protection; use pattern heuristic
+        // Hard rule: avoid LinkedIn-only entries to reduce hallucinations
         if (platform === 'linkedin') {
-          if (looksLikeLinkedInProfile(m.profile_url)) {
-            valid.push({ ...m, platform_type: 'linkedin' });
-          } else {
-            invalid.push({ item: m, reason: 'linkedin_profile_pattern_invalid' });
-          }
+          invalid.push({ item: m, reason: 'linkedin_not_allowed_without_non_link_source' });
           continue;
         }
 
+        // Platform-specific URL structure check
+        if (!isValidSocialUrl(m.profile_url, platform)) {
+          invalid.push({ item: m, reason: 'platform_url_pattern_invalid' });
+          continue;
+        }
+
+        // Reachability check
         const reachable = await urlReachable(m.profile_url);
         if (!reachable) {
           invalid.push({ item: m, reason: 'url_unreachable' });
           continue;
         }
 
+        // For non-LinkedIn sources, try to ensure page title mentions the name (best-effort)
+        const title = await fetchTitle(m.profile_url);
+        if (title) {
+          const nameTokens = String(m.name).toLowerCase().split(/\s+/).filter(Boolean);
+          const tLower = title.toLowerCase();
+          const hasNameToken = nameTokens.some(tok => tLower.includes(tok));
+          if (!hasNameToken && (platform === 'website' || platform === 'youtube')) {
+            // Be stricter on generic websites/youtube
+            invalid.push({ item: m, reason: 'title_mismatch_no_name' });
+            continue;
+          }
+        }
+
         valid.push({ ...m, platform_type: platform });
       }
 
-      return { valid, invalid };
+      // De-duplicate by name + profile_url
+      const deduped: any[] = [];
+      const seen = new Set<string>();
+      for (const v of valid) {
+        const key = `${v.name}__${v.profile_url}`.toLowerCase();
+        if (!seen.has(key)) { seen.add(key); deduped.push(v); }
+      }
+
+      return { valid: deduped, invalid };
     };
 
     let { valid: verifiedMentors, invalid: invalidMentors } = await validateMentors(mentors);
 
-    // If we lost some due to verification, ask AI ONCE to replace invalid ones with real, verified people
     if (invalidMentors.length > 0 && verifiedMentors.length < 5) {
       try {
         const missing = Math.max(0, 5 - verifiedMentors.length);
-        const replacementPrompt = `You previously suggested some mentors but their links were invalid or unverifiable. Replace them with REAL, VERIFIABLE people that match the user's career interests below.\n\nUser preferences:\n${preferencesContext}\n\nInvalid entries to replace (reasons included):\n${invalidMentors.map((i, idx) => `${idx + 1}. ${i.item?.name || 'Unknown'} - ${i.reason} - ${i.item?.profile_url || 'no url'}`).join('\n')}\n\nCRITICAL REQUIREMENTS:\n- Each replacement MUST have an accurate, working URL (Instagram/TikTok/Twitter/X/YouTube/Website/LinkedIn).\n- Prefer non-LinkedIn if that platform is more active for the person.\n- If LinkedIn is used, ensure the URL follows /in/ pattern.\n- Do not fabricate. Only include people you can verify exist.\n- Return ONLY JSON with exactly ${missing} mentors in the 'mentors' array, same schema as before.`;
+        const replacementPrompt = `Some suggested mentors were invalid or unverifiable. Replace them with REAL, VERIFIED people (avoid LinkedIn-only).\n\nUser preferences:\n${preferencesContext}\n\nInvalid entries to replace (reasons included):\n${invalidMentors.map((i, idx) => `${idx + 1}. ${i.item?.name || 'Unknown'} - ${i.reason} - ${i.item?.profile_url || 'no url'}`).join('\n')}\n\nCRITICAL REQUIREMENTS:\n- Each replacement MUST have an accurate, working non-LinkedIn URL (Instagram/TikTok/Twitter/X/YouTube/Website).\n- Do not fabricate. Only include people you can verify exist.\n- Return ONLY JSON with exactly ${missing} mentors in the 'mentors' array, same schema as before.`;
 
         const replaceResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
           method: 'POST',
@@ -303,7 +362,7 @@ Return ONLY valid JSON in this exact format:
           body: JSON.stringify({
             model: 'google/gemini-2.5-flash',
             messages: [
-              { role: 'system', content: 'You suggest REAL, VERIFIED professionals with accurate, working profile URLs across multiple platforms. Output valid JSON only.' },
+              { role: 'system', content: 'You suggest REAL, VERIFIED professionals with accurate, working non-LinkedIn profile URLs when possible. Output valid JSON only.' },
               { role: 'user', content: replacementPrompt },
             ],
           }),
@@ -331,7 +390,13 @@ Return ONLY valid JSON in this exact format:
       }
     }
 
-    // Ensure we return something useful even if <5
+    if (verifiedMentors.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Could not verify real mentors. Please try again.' }),
+        { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ mentors: verifiedMentors }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
