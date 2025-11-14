@@ -66,7 +66,17 @@ export const ActionPage = () => {
   const [loadingShortcuts, setLoadingShortcuts] = useState<Record<string, boolean>>({});
 
   const handleGenerateShortcuts = async (action: any) => {
-    const actionKey = `${action.title}-${action.timeframe}`;
+    // Validate required fields
+    if (!action.task || !action.suggestions || action.suggestions.length === 0) {
+      toast({
+        title: "Cannot generate shortcuts",
+        description: "This action needs suggestions first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const actionKey = `${action.task}-${action.timeframe || 'default'}`;
     setLoadingShortcuts(prev => ({ ...prev, [actionKey]: true }));
 
     try {
@@ -74,11 +84,11 @@ export const ActionPage = () => {
       
       const { data, error } = await supabase.functions.invoke("generate-shortcuts", {
         body: {
-          actionTitle: action.title,
-          actionDescription: action.description,
+          actionTitle: action.task,
+          actionDescription: action.label || action.task,
           suggestions: action.suggestions,
-          timeframe: action.timeframe,
-          priority: action.priority,
+          timeframe: action.timeframe || "Not specified",
+          priority: action.priority || "medium",
         },
         headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
@@ -95,7 +105,7 @@ export const ActionPage = () => {
       console.error("Error generating shortcuts:", error);
       toast({
         title: "Unable to generate shortcuts",
-        description: "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -1238,10 +1248,10 @@ export const ActionPage = () => {
                                     e.stopPropagation();
                                     handleGenerateShortcuts(action);
                                   }}
-                                  disabled={loadingShortcuts[`${action.title}-${action.timeframe}`]}
+                                  disabled={loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`]}
                                   className="text-xs px-2 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50"
                                 >
-                                  {loadingShortcuts[`${action.title}-${action.timeframe}`] ? "⏳" : "⚡"} short cuts
+                                  {loadingShortcuts[`${action.task}-${action.timeframe || 'default'}`] ? "⏳" : "⚡"} short cuts
                                 </button>
                               </div>
                             )}
@@ -1267,7 +1277,7 @@ export const ActionPage = () => {
                             </ul>
                           </div>
                         )}
-                        {shortcutsContent[`${action.title}-${action.timeframe}`] && !action.done && (
+                        {shortcutsContent[`${action.task}-${action.timeframe || 'default'}`] && !action.done && (
                           <div className="mt-2 p-4 rounded-lg bg-accent/30 border border-accent">
                             <div className="flex items-center gap-2 mb-2">
                               <Zap className="h-4 w-4 text-accent-foreground" />
@@ -1276,7 +1286,7 @@ export const ActionPage = () => {
                             <div 
                               className="text-xs text-accent-foreground/90 prose prose-sm max-w-none"
                               dangerouslySetInnerHTML={{ 
-                                __html: shortcutsContent[`${action.title}-${action.timeframe}`]
+                                __html: shortcutsContent[`${action.task}-${action.timeframe || 'default'}`]
                                   .replace(/\n/g, '<br />')
                                   .replace(/##\s+(.+)/g, '<strong>$1</strong>')
                                   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
