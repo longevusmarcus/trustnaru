@@ -93,11 +93,13 @@ CRITICAL: DO NOT use any markdown formatting. NO asterisks (**), NO bold, NO ita
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are a supportive career mentor. Create brief, gentle motivations. Output plain text only without any markdown formatting like asterisks or bold.' },
           { role: 'user', content: prompt }
         ],
+        max_tokens: 100,
+        temperature: 0.7
       }),
     });
 
