@@ -300,11 +300,16 @@ Return ONLY valid JSON in this exact format:
         let platform = (m.platform_type as string) || inferPlatformFromUrl(m.profile_url);
         if (platform === 'x') platform = 'twitter';
 
-        // Hard rule: avoid LinkedIn-only entries to reduce hallucinations
+        // LinkedIn: allow if URL matches profile pattern; skip network check due to bot protection
         if (platform === 'linkedin') {
-          invalid.push({ item: m, reason: 'linkedin_not_allowed_without_non_link_source' });
+          if (isValidSocialUrl(m.profile_url, 'linkedin')) {
+            valid.push({ ...m, platform_type: 'linkedin' });
+          } else {
+            invalid.push({ item: m, reason: 'linkedin_profile_pattern_invalid' });
+          }
           continue;
         }
+
 
         // Platform-specific URL structure check
         if (!isValidSocialUrl(m.profile_url, platform)) {
@@ -319,18 +324,10 @@ Return ONLY valid JSON in this exact format:
           continue;
         }
 
-        // For non-LinkedIn sources, try to ensure page title mentions the name (best-effort)
-        const title = await fetchTitle(m.profile_url);
-        if (title) {
-          const nameTokens = String(m.name).toLowerCase().split(/\s+/).filter(Boolean);
-          const tLower = title.toLowerCase();
-          const hasNameToken = nameTokens.some(tok => tLower.includes(tok));
-          if (!hasNameToken && (platform === 'website' || platform === 'youtube')) {
-            // Be stricter on generic websites/youtube
-            invalid.push({ item: m, reason: 'title_mismatch_no_name' });
-            continue;
-          }
-        }
+        // Title check removed to avoid false negatives on About pages; rely on reachability and URL patterns
+        // Previously we attempted to match the person's name in the page title for websites/YouTube, which
+        // rejected legitimate About pages. We now trust reachability + pattern checks.
+
 
         valid.push({ ...m, platform_type: platform });
       }
