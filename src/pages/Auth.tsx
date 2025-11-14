@@ -262,10 +262,10 @@ const Auth = () => {
             Welcome to Naru
           </h1>
           <p className="text-sm text-muted-foreground/90 max-w-xs mx-auto leading-relaxed font-light">
-            The Career OS for Becoming.
+            The Career Dreamer & Copilot for your next era.
           </p>
           <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto mt-1 font-light">
-            See your future self. Land your dream career.
+            See your future self. Become it.
           </p>
         </div>
 
