@@ -587,23 +587,6 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                       </div>
                     )}
 
-                    {mentor.profile_url && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => window.open(mentor.profile_url, '_blank')}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-2" />
-                        {mentor.platform_type === 'instagram' && 'View Instagram'}
-                        {mentor.platform_type === 'tiktok' && 'View TikTok'}
-                        {mentor.platform_type === 'twitter' && 'View Twitter/X'}
-                        {mentor.platform_type === 'youtube' && 'View YouTube'}
-                        {mentor.platform_type === 'website' && 'Visit Website'}
-                        {mentor.platform_type === 'linkedin' && 'View LinkedIn'}
-                        {(!mentor.platform_type || mentor.platform_type === 'other') && 'View Profile'}
-                      </Button>
-                    )}
                   </CardContent>
                 </Card>
               ))}
