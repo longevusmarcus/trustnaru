@@ -195,7 +195,7 @@ Return ONLY valid JSON in this exact format:
     console.log('AI Response:', content);
 
     // Parse the JSON response
-    let mentors;
+    let mentors: any[] = [];
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -209,8 +209,131 @@ Return ONLY valid JSON in this exact format:
       throw new Error('Failed to parse AI response');
     }
 
+    // Post-validation to ensure links are real and platform types match
+    const inferPlatformFromUrl = (url: string): string => {
+      try {
+        const u = new URL(url);
+        const h = u.hostname.replace('www.', '').toLowerCase();
+        if (h.includes('linkedin.')) return 'linkedin';
+        if (h.includes('instagram.')) return 'instagram';
+        if (h.includes('tiktok.')) return 'tiktok';
+        if (h.includes('twitter.') || h.includes('x.com')) return 'twitter';
+        if (h.includes('youtube.') || h.includes('youtu.be')) return 'youtube';
+        return 'website';
+      } catch {
+        return 'other';
+      }
+    };
+
+    const looksLikeLinkedInProfile = (url: string): boolean => {
+      try {
+        const u = new URL(url);
+        return u.hostname.includes('linkedin.') && u.pathname.includes('/in/');
+      } catch {
+        return false;
+      }
+    };
+
+    const urlReachable = async (url: string, timeoutMs = 7000): Promise<boolean> => {
+      const tryFetch = async (method: 'HEAD' | 'GET') => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const res = await fetch(url, { method, redirect: 'follow', signal: controller.signal });
+          return res.ok || (res.status >= 200 && res.status < 400);
+        } catch (_e) {
+          return false;
+        } finally {
+          clearTimeout(id);
+        }
+      };
+      // Try HEAD first, then GET as fallback (some platforms block HEAD)
+      return (await tryFetch('HEAD')) || (await tryFetch('GET'));
+    };
+
+    const validateMentors = async (items: any[]) => {
+      const valid: any[] = [];
+      const invalid: Array<{ item: any; reason: string }> = [];
+
+      for (const m of items) {
+        if (!m?.name || !m?.profile_url) {
+          invalid.push({ item: m, reason: 'missing_name_or_url' });
+          continue;
+        }
+        let platform = (m.platform_type as string) || inferPlatformFromUrl(m.profile_url);
+        // Normalize X/Twitter naming
+        if (platform === 'x') platform = 'twitter';
+
+        // Skip network check for LinkedIn due to bot protection; use pattern heuristic
+        if (platform === 'linkedin') {
+          if (looksLikeLinkedInProfile(m.profile_url)) {
+            valid.push({ ...m, platform_type: 'linkedin' });
+          } else {
+            invalid.push({ item: m, reason: 'linkedin_profile_pattern_invalid' });
+          }
+          continue;
+        }
+
+        const reachable = await urlReachable(m.profile_url);
+        if (!reachable) {
+          invalid.push({ item: m, reason: 'url_unreachable' });
+          continue;
+        }
+
+        valid.push({ ...m, platform_type: platform });
+      }
+
+      return { valid, invalid };
+    };
+
+    let { valid: verifiedMentors, invalid: invalidMentors } = await validateMentors(mentors);
+
+    // If we lost some due to verification, ask AI ONCE to replace invalid ones with real, verified people
+    if (invalidMentors.length > 0 && verifiedMentors.length < 5) {
+      try {
+        const missing = Math.max(0, 5 - verifiedMentors.length);
+        const replacementPrompt = `You previously suggested some mentors but their links were invalid or unverifiable. Replace them with REAL, VERIFIABLE people that match the user's career interests below.\n\nUser preferences:\n${preferencesContext}\n\nInvalid entries to replace (reasons included):\n${invalidMentors.map((i, idx) => `${idx + 1}. ${i.item?.name || 'Unknown'} - ${i.reason} - ${i.item?.profile_url || 'no url'}`).join('\n')}\n\nCRITICAL REQUIREMENTS:\n- Each replacement MUST have an accurate, working URL (Instagram/TikTok/Twitter/X/YouTube/Website/LinkedIn).\n- Prefer non-LinkedIn if that platform is more active for the person.\n- If LinkedIn is used, ensure the URL follows /in/ pattern.\n- Do not fabricate. Only include people you can verify exist.\n- Return ONLY JSON with exactly ${missing} mentors in the 'mentors' array, same schema as before.`;
+
+        const replaceResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: [
+              { role: 'system', content: 'You suggest REAL, VERIFIED professionals with accurate, working profile URLs across multiple platforms. Output valid JSON only.' },
+              { role: 'user', content: replacementPrompt },
+            ],
+          }),
+        });
+
+        if (replaceResp.ok) {
+          const replaceData = await replaceResp.json();
+          const replaceContent = replaceData.choices?.[0]?.message?.content as string | undefined;
+          if (replaceContent) {
+            const match = replaceContent.match(/\{[\s\S]*\}/);
+            if (match) {
+              const parsed = JSON.parse(match[0]);
+              const replacements = Array.isArray(parsed?.mentors) ? parsed.mentors : [];
+              const { valid: verifiedReplacements } = await validateMentors(replacements);
+              for (const r of verifiedReplacements) {
+                if (verifiedMentors.length < 5) verifiedMentors.push(r);
+              }
+            }
+          }
+        } else {
+          console.error('Replacement AI call failed:', await replaceResp.text());
+        }
+      } catch (e) {
+        console.error('Error during replacements:', e);
+      }
+    }
+
+    // Ensure we return something useful even if <5
     return new Response(
-      JSON.stringify({ mentors }),
+      JSON.stringify({ mentors: verifiedMentors }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
