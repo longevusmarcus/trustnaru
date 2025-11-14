@@ -289,17 +289,19 @@ STRUCTURE (valid JSON ONLY):
 QUALITY RULES:
 - Do the work for the user. Never say "list", "map", "consider", or "choose". Provide the computed outputs directly with SPECIFIC NAMES.
 - Every dailyAction must include concrete resource names (articles, books, courses), specific skill names from their key_skills, or actual company/person names.
-- Every dailyAction MUST include a "suggestions" array with 3 specific, actionable suggestions:
-  * If the action involves people/networking: provide 3 specific approaches to find real people (e.g., "Search LinkedIn for [specific role] at [company]", "Join [real community name] and connect with members") - DO NOT invent fake names
-  * If the action involves content (articles, books): provide 3 general but authentic directions (e.g., "Recent articles on [topic] from [real publication]") - only cite specific titles if you're certain they exist
-  * If the action involves learning resources: provide 3 specific REAL course names, platforms, or tools that actually exist (e.g., real Coursera courses, real certifications)
-  * If the action involves companies/networking: provide 3 specific real company names or real communities with context
-  * These suggestions should make the action immediately actionable but must use only real, verifiable information - NO HALLUCINATED NAMES
+- **CRITICAL - SUGGESTIONS MUST PROVIDE ACTUAL CONTENT, NOT RESEARCH INSTRUCTIONS:**
+  * Each action MUST include a "suggestions" array with 3 specific, pre-researched items that DO THE WORK for the user
+  * For research actions: Provide actual findings/trends/insights from the industry (e.g., "Based on recent tea industry reports: Immersive ceremonies up 40% YoY, sustainability is top priority, experiential events dominate. Next: Draft proposal for [specific event type], contact [real venues], research [specific suppliers]")
+  * For content actions: Provide actual summaries, key takeaways, or pre-written drafts (e.g., "Key insight: [actual finding]. Implementation: [specific steps 1-3]")
+  * For networking actions: Provide pre-written outreach messages ready to send (e.g., "Hi [Name], I noticed [specific detail about their work]. I'm working on [specific project] and would value your perspective on [specific question]. Would you have 15 minutes next week?")
+  * For learning actions: Provide actual course recommendations with why they matter (e.g., "[Real course name] on [platform] - covers [specific skills], takes [time], provides [certification/outcome]")
+  * NEVER tell users to "Search for X" or "Look for Y" - instead provide the actual findings, content, or ready-to-use materials
+  * Think like a research assistant who has already done the work and is presenting actionable results
 - Every item must include concrete names (people/teams/orgs), dates (if events), costs/duration (if courses), and why it matters for the active path.
 - Prefer accessibility leaders, A11y conferences, and inclusive design communities for accessibility roles.
 - Consider FUTURE PATHS when recommending transferable steps that help across multiple directions.
 - Transferable steps must include the 3 overlapping skills by name and 1 concrete artifact name with a one-sentence spec.
-- Outreach/networking items must include a ready-to-send message (no placeholders).
+- Outreach/networking items must include ready-to-send messages with NO placeholders - complete, personalized messages the user can copy-paste.
 - Output ONLY JSON. No markdown.
 
 LEVEL RESOURCES REQUIREMENTS (CRITICAL):
