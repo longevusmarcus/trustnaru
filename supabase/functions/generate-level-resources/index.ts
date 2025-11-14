@@ -228,14 +228,44 @@ OUTPUT FORMAT (valid JSON only, no markdown):
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
-            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Output valid JSON only with real, specific resources. Never include markdown, commentary, or generic suggestions. CRITICAL: Only reference real courses, books, certifications that actually exist.`
+            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist.`
           },
           { role: 'user', content: prompt }
         ],
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'generate_level_resources',
+              description: 'Generate learning resources for a specific career level',
+              parameters: {
+                type: 'object',
+                properties: {
+                  resources: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        resource: { type: 'string', description: 'Name of real course/book/certification/tool' },
+                        commitment: { type: 'string', description: 'Time commitment' },
+                        impact: { type: 'string', description: 'Concrete outcome' }
+                      },
+                      required: ['resource', 'commitment', 'impact'],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ['resources'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'generate_level_resources' } },
         temperature: 0.3,
         max_tokens: 2500
       }),
@@ -251,61 +281,37 @@ OUTPUT FORMAT (valid JSON only, no markdown):
     }
 
     const data = await response.json();
-    const generatedText = data.choices?.[0]?.message?.content;
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!generatedText) {
-      console.error('No content generated from AI Gateway');
-      throw new Error('No content generated');
+    if (!toolCall?.function?.arguments) {
+      console.error('No tool call in AI response');
+      throw new Error('No structured output generated');
     }
 
-    console.log('AI response length:', generatedText.length, 'chars');
+    const result = JSON.parse(toolCall.function.arguments);
 
-    // Parse JSON response
-    let jsonText = String(generatedText).trim();
-    if (jsonText.startsWith('```json')) {
-      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    } else if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/```\n?/g, '').trim();
-    }
-
-    let result: any = null;
-    try {
-      result = JSON.parse(jsonText);
-    } catch (_) {
-      try {
-        const match = jsonText.match(/\{[\s\S]*\}/);
-        if (match) result = JSON.parse(match[0]);
-      } catch (_) {
-        console.error('Failed to parse AI response as JSON');
-      }
-    }
-
-    if (!result || !Array.isArray(result.resources) || result.resources.length === 0) {
-      console.warn('AI returned invalid/empty resources, using fallback');
-      
-      // Fallback based on path
+    if (!result?.resources || !Array.isArray(result.resources) || result.resources.length === 0) {
+      console.warn('AI returned empty resources, using fallback');
       const companies = (activePath.target_companies || []).slice(0, 2).join(', ') || 'industry leaders';
       const skills = (activePath.key_skills || []).slice(0, 3).join(', ') || 'key skills';
       
-      result = {
-        resources: [
-          {
-            resource: `Industry-recognized certification in ${activePath.category} (e.g., relevant professional credential)`,
-            commitment: '10-12 weeks, 4-5 hours/week',
-            impact: `Earn credential that validates ${skills} expertise for roles at ${companies}`
-          },
-          {
-            resource: `Comprehensive course on ${skills} with hands-on projects`,
-            commitment: '6-8 weeks, 3-4 hours/week',
-            impact: 'Build portfolio of 3-5 projects demonstrating practical application'
-          },
-          {
-            resource: `Technical book/guide on ${activePath.category} best practices with real-world case studies`,
-            commitment: '3-4 weeks to read and implement key concepts',
-            impact: 'Understand industry standards and patterns used at leading companies'
-          }
-        ]
-      };
+      result.resources = [
+        {
+          resource: `Industry-recognized certification in ${activePath.category}`,
+          commitment: '10-12 weeks, 4-5 hours/week',
+          impact: `Earn credential validating ${skills} expertise`
+        },
+        {
+          resource: `Comprehensive course on ${skills} with projects`,
+          commitment: '6-8 weeks, 3-4 hours/week',
+          impact: 'Build portfolio of 3-5 projects'
+        },
+        {
+          resource: `Technical guide on ${activePath.category} best practices`,
+          commitment: '3-4 weeks to read',
+          impact: 'Understand industry standards'
+        }
+      ];
     }
 
     console.log(`Successfully generated ${result.resources.length} Level ${level} resources`);

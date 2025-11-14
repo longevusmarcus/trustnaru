@@ -329,11 +329,57 @@ LEVEL RESOURCES REQUIREMENTS (CRITICAL):
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-pro',
+        model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: 'You are a precise career strategist with access to real, current information. Output valid JSON only. Never include markdown or commentary. CRITICAL: Only reference real people, companies, courses, and resources that actually exist. Never invent or hallucinate names.' },
+          { 
+            role: 'system', 
+            content: `You are an elite career strategist. Generate specific guidance with real resources. Scale to Level ${userLevel} (${difficultyMultiplier}% more challenging than baseline).`
+          },
           { role: 'user', content: prompt }
         ],
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'generate_guidance',
+              description: 'Generate personalized career guidance',
+              parameters: {
+                type: 'object',
+                properties: {
+                  dailyActions: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        action: { type: 'string' },
+                        timeNeeded: { type: 'string' },
+                        rationale: { type: 'string' },
+                        suggestions: { type: 'array', items: { type: 'string' } }
+                      },
+                      required: ['action', 'timeNeeded', 'rationale', 'suggestions'],
+                      additionalProperties: false
+                    }
+                  },
+                  smartTips: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        tip: { type: 'string' },
+                        context: { type: 'string' }
+                      },
+                      required: ['tip', 'context'],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ['dailyActions', 'smartTips'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'generate_guidance' } },
         temperature: 0.3,
         max_tokens: 3000
       }),
@@ -349,39 +395,27 @@ LEVEL RESOURCES REQUIREMENTS (CRITICAL):
     }
 
     const data = await response.json();
-    const generatedText = data.choices?.[0]?.message?.content;
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-    if (!generatedText) {
-      console.error('No content generated from AI Gateway');
-      throw new Error('No content generated');
+    if (!toolCall?.function?.arguments) {
+      console.error('No tool call in AI response');
+      return new Response(
+        JSON.stringify(buildFallbackGuidance()),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    console.log('AI response length:', generatedText.length, 'chars');
+    const guidance = JSON.parse(toolCall.function.arguments);
 
-    // Extract/parse JSON from response defensively
-    let jsonText = String(generatedText).trim();
-    if (jsonText.startsWith('```json')) {
-      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    } else if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/```\n?/g, '').trim();
+    if (!guidance?.dailyActions || !Array.isArray(guidance.dailyActions) || guidance.dailyActions.length === 0) {
+      console.warn('AI returned empty guidance');
+      return new Response(
+        JSON.stringify(buildFallbackGuidance()),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    let guidance: any = null;
-    try {
-      guidance = JSON.parse(jsonText);
-    } catch (_) {
-      try {
-        const match = jsonText.match(/\{[\s\S]*\}/);
-        if (match) guidance = JSON.parse(match[0]);
-      } catch (_) { /* ignore */ }
-    }
-
-    if (!guidance || !Array.isArray(guidance.smartTips)) {
-      console.warn('AI JSON parse failed or empty guidance, using fallback');
-      guidance = buildFallbackGuidance();
-    }
-
-    console.log('Successfully generated personalized guidance (parsed or fallback)');
+    console.log('Successfully generated personalized guidance');
 
     return new Response(
       JSON.stringify(guidance),
