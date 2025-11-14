@@ -32,12 +32,10 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
-import { useNavigate } from "react-router-dom";
 
 export const ActionPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useBadgeAwarding();
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
@@ -1209,20 +1207,9 @@ export const ActionPage = () => {
                                     : JSON.stringify(suggestion);
                                 
                                 return (
-                                  <li key={idx} className="text-xs text-muted-foreground flex items-start justify-between gap-2 group">
-                                    <div className="flex items-start gap-2 flex-1">
-                                      <span className="text-primary mt-0.5">•</span>
-                                      <span className="flex-1">{suggestionText}</span>
-                                    </div>
-                                    <button
-                                      onClick={() => {
-                                        navigate('/insights', { state: { preFillMessage: suggestionText, autoSend: true } });
-                                      }}
-                                      className="flex-shrink-0 p-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-0 group-hover:opacity-100"
-                                      title="Ask AI about this"
-                                    >
-                                      <MessageSquare className="h-3.5 w-3.5" />
-                                    </button>
+                                  <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                                    <span className="text-primary mt-0.5">•</span>
+                                    <span>{suggestionText}</span>
                                   </li>
                                 );
                               })}

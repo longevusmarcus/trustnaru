@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
-import { useLocation } from "react-router-dom";
 
 // Format message content: properly parse markdown and create natural formatting
 const formatMessageContent = (content: string) => {
@@ -110,7 +109,6 @@ const formatMessageContent = (content: string) => {
 export const InsightsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
@@ -124,30 +122,6 @@ export const InsightsPage = () => {
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
   const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatInputRef = useRef<HTMLInputElement>(null);
-  const [shouldAutoSend, setShouldAutoSend] = useState(false);
-
-  // Handle pre-filled message from navigation
-  useEffect(() => {
-    const state = location.state as { preFillMessage?: string; autoSend?: boolean } | null;
-    if (state?.preFillMessage) {
-      setInputMessage(state.preFillMessage);
-      // Clear the state to prevent re-filling on re-render
-      window.history.replaceState({}, document.title);
-      
-      if (state.autoSend) {
-        // Trigger auto-send after a short delay
-        setTimeout(() => {
-          setShouldAutoSend(true);
-        }, 300);
-      } else {
-        // Just focus the input
-        setTimeout(() => {
-          chatInputRef.current?.focus();
-        }, 100);
-      }
-    }
-  }, [location]);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -383,9 +357,6 @@ export const InsightsPage = () => {
       return;
     }
 
-    // Reset auto-send flag
-    setShouldAutoSend(false);
-
     setInputMessage('');
     setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
     setIsGenerating(true);
@@ -422,13 +393,6 @@ export const InsightsPage = () => {
       setIsGenerating(false);
     }
   };
-
-  // Auto-send effect
-  useEffect(() => {
-    if (shouldAutoSend && inputMessage.trim() && !isGenerating) {
-      handleSendMessage();
-    }
-  }, [shouldAutoSend]);
 
   // Memoize calculated insights
   const pathCategories = useMemo(
@@ -735,7 +699,6 @@ export const InsightsPage = () => {
               <div className="border-t border-border/50 px-3 py-2.5">
                 <div className="flex gap-2">
                   <Input
-                    ref={chatInputRef}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
