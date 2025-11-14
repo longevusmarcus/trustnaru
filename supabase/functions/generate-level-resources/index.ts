@@ -158,7 +158,7 @@ ${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcript
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const prompt = `You are an expert career development strategist specializing in personalized learning paths with PROGRESSIVE DIFFICULTY SCALING.
+    const prompt = `You are an expert career development strategist specializing in personalized learning paths with PROGRESSIVE DIFFICULTY SCALING
 
 USER CONTEXT:
 ${userContext}
@@ -207,7 +207,7 @@ RESOURCE REQUIREMENTS:
    - Mid levels: Advanced certifications, speaking at meetups, contributing to communities
    - Upper levels: Publishing research, speaking at conferences, driving industry change
 
-5. Consider the user's current experience level and make recommendations that build logically on their existing skills
+5. Consider the user's current experience level (as shown in their CV) and recommend content that builds logically on their existing skills—never repeating what they already know, and always guiding them to the next level.
 
 OUTPUT FORMAT (valid JSON only, no markdown):
 {
@@ -236,7 +236,7 @@ OUTPUT FORMAT (valid JSON only, no markdown):
         messages: [
           {
             role: "system",
-            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist.`,
+            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist and focus on skill gaps of the user`,
           },
           { role: "user", content: prompt },
         ],
