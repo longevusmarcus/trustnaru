@@ -1216,7 +1216,7 @@ export const ActionPage = () => {
                                     </div>
                                     <button
                                       onClick={() => {
-                                        navigate('/insights', { state: { preFillMessage: suggestionText } });
+                                        navigate('/insights', { state: { preFillMessage: suggestionText, autoSend: true } });
                                       }}
                                       className="flex-shrink-0 p-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors opacity-0 group-hover:opacity-100"
                                       title="Ask AI about this"

@@ -125,18 +125,27 @@ export const InsightsPage = () => {
   const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
+  const [shouldAutoSend, setShouldAutoSend] = useState(false);
 
   // Handle pre-filled message from navigation
   useEffect(() => {
-    const state = location.state as { preFillMessage?: string } | null;
+    const state = location.state as { preFillMessage?: string; autoSend?: boolean } | null;
     if (state?.preFillMessage) {
       setInputMessage(state.preFillMessage);
       // Clear the state to prevent re-filling on re-render
       window.history.replaceState({}, document.title);
-      // Focus the input after a short delay
-      setTimeout(() => {
-        chatInputRef.current?.focus();
-      }, 100);
+      
+      if (state.autoSend) {
+        // Trigger auto-send after a short delay
+        setTimeout(() => {
+          setShouldAutoSend(true);
+        }, 300);
+      } else {
+        // Just focus the input
+        setTimeout(() => {
+          chatInputRef.current?.focus();
+        }, 100);
+      }
     }
   }, [location]);
 
@@ -374,6 +383,9 @@ export const InsightsPage = () => {
       return;
     }
 
+    // Reset auto-send flag
+    setShouldAutoSend(false);
+
     setInputMessage('');
     setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
     setIsGenerating(true);
@@ -410,6 +422,13 @@ export const InsightsPage = () => {
       setIsGenerating(false);
     }
   };
+
+  // Auto-send effect
+  useEffect(() => {
+    if (shouldAutoSend && inputMessage.trim() && !isGenerating) {
+      handleSendMessage();
+    }
+  }, [shouldAutoSend]);
 
   // Memoize calculated insights
   const pathCategories = useMemo(
