@@ -1113,12 +1113,12 @@ export const ActionPage = () => {
                     <div className="flex items-start gap-3">
                       <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm mb-1">{resource.title}</h4>
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{resource.description}</p>
+                        <h4 className="font-medium text-sm mb-1">{resource.resource}</h4>
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{resource.impact}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Award className="h-3 w-3" />
-                            {resource.type}
+                            {resource.commitment}
                           </span>
                         </div>
                       </div>
