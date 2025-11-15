@@ -984,6 +984,30 @@ export const ActionPage = () => {
           </Card>
         </div>
 
+        {/* Roadmap */}
+        {activePath && roadmapMilestones.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Your Roadmap</h3>
+            <div className="space-y-2">
+              {roadmapMilestones.map((milestone: any, index: number) => (
+                <Card key={index} className="hover:shadow-sm transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-0.5">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm mb-1">{milestone.step}</h4>
+                        <p className="text-xs text-muted-foreground">{milestone.duration}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Goals Section - Make it prominent */}
         {goals.length > 0 ? (
           <div>
@@ -1083,19 +1107,20 @@ export const ActionPage = () => {
             </Card>
           ) : (
             <div className="space-y-3">
-              {levelResources.map((resource: any, idx: number) => (
-                <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors">
+              {levelResources.map((resource: any, index: number) => (
+                <Card key={index} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-1.5">
-                        <p className="text-sm font-medium leading-relaxed">{resource.resource}</p>
+                      <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm mb-1">{resource.title}</h4>
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{resource.description}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>⏱️ {resource.commitment}</span>
+                          <span className="flex items-center gap-1">
+                            <Award className="h-3 w-3" />
+                            {resource.type}
+                          </span>
                         </div>
-                        <p className="text-xs text-primary/80 italic">{resource.impact}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -1104,30 +1129,6 @@ export const ActionPage = () => {
             </div>
           )}
         </div>
-
-        {/* Roadmap */}
-        {activePath && roadmapMilestones.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Your Roadmap</h3>
-            <div className="space-y-2">
-              {roadmapMilestones.map((milestone: any, index: number) => (
-                <Card key={index} className="hover:shadow-sm transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-0.5">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm mb-1">{milestone.step}</h4>
-                        <p className="text-xs text-muted-foreground">{milestone.duration}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Affirmations */}
         {activePath && activePath.affirmations?.length > 0 && (
