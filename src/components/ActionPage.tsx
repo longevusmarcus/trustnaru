@@ -1075,7 +1075,27 @@ export const ActionPage = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
-            <span className="text-xs text-muted-foreground">Foundation</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Foundation</span>
+              {activePath && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setResourcesCache((prev) => {
+                      const newCache = { ...prev };
+                      delete newCache[currentLevel];
+                      return newCache;
+                    });
+                    loadLevelResources(currentLevel);
+                  }}
+                  disabled={loadingResources}
+                  className="h-7 text-xs"
+                >
+                  {loadingResources ? "Refreshing..." : "Refresh"}
+                </Button>
+              )}
+            </div>
           </div>
 
           {loadingResources ? (
@@ -1114,7 +1134,7 @@ export const ActionPage = () => {
                       <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm mb-1">{resource.resource}</h4>
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{resource.impact}</p>
+                        <p className="text-xs text-muted-foreground mb-2">{resource.impact}</p>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Award className="h-3 w-3" />
@@ -1133,7 +1153,42 @@ export const ActionPage = () => {
         {/* Affirmations */}
         {activePath && activePath.affirmations?.length > 0 && (
           <div>
-            <h3 className="text-lg font-semibold mb-3">Daily Affirmations</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const session = (await supabase.auth.getSession()).data.session;
+                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
+                      body: { pathId: activePath.id },
+                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+                    });
+
+                    if (error) throw error;
+
+                    if (data?.affirmations) {
+                      setActivePath({ ...activePath, affirmations: data.affirmations });
+                      toast({
+                        title: "Affirmations refreshed",
+                        description: "Your daily affirmations have been updated.",
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Error refreshing affirmations:", error);
+                    toast({
+                      title: "Failed to refresh",
+                      description: "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="h-7 text-xs"
+              >
+                Refresh
+              </Button>
+            </div>
             <Card>
               <CardContent className="p-4 space-y-3">
                 {activePath.affirmations.map((affirmation: string, index: number) => (
