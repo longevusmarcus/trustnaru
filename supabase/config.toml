@@ -45,3 +45,6 @@ verify_jwt = true
 [functions.generate-shortcuts]
 verify_jwt = true
 
+[functions.generate-affirmations]
+verify_jwt = true
+
