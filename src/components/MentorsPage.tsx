@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb } from "lucide-react";
+import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
 import { CloneButton } from "@/components/CloneButton";
@@ -25,6 +25,9 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [personalizedMentors, setPersonalizedMentors] = useState<any[]>([]);
   const [loadingPersonalized, setLoadingPersonalized] = useState(false);
+  const [happenstanceResults, setHappenstanceResults] = useState<any[]>([]);
+  const [loadingHappenstance, setLoadingHappenstance] = useState(false);
+  const [happenstanceQuery, setHappenstanceQuery] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
@@ -280,6 +283,51 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     }
   };
 
+  const searchHappenstance = async () => {
+    if (!happenstanceQuery.trim()) {
+      toast({
+        title: "Enter a question",
+        description: "Ask who you should meet, e.g., 'Who can help me build a tech startup in Europe?'",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoadingHappenstance(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke('happenstance-search', {
+        body: { 
+          search_intent: happenstanceQuery,
+          max_results: 5
+        },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+      
+      if (error) throw error;
+      
+      if (data?.results) {
+        setHappenstanceResults(data.results);
+        // Clear personalized mentors when showing happenstance results
+        setPersonalizedMentors([]);
+        
+        toast({
+          title: "Found matches!",
+          description: `Discovered ${data.results.length} people who can help with your path.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error in happenstance search:', error);
+      toast({
+        title: "Search failed",
+        description: "Unable to search right now. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingHappenstance(false);
+    }
+  };
+
   if (loading || importing) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -507,11 +555,199 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
         </TabsContent>
 
         <TabsContent value="foryou" className="mt-0">
+          {/* Happenstance Search */}
+          <div className="mb-6 space-y-3">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-primary" />
+                Who should you meet?
+              </h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Ask a natural language question about who can help with your career path
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g., Who can help me build a longevity startup in Europe?"
+                  value={happenstanceQuery}
+                  onChange={(e) => setHappenstanceQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && searchHappenstance()}
+                  className="flex-1"
+                  disabled={loadingHappenstance}
+                />
+                <Button 
+                  onClick={searchHappenstance}
+                  disabled={loadingHappenstance}
+                  size="sm"
+                >
+                  {loadingHappenstance ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Quick example queries */}
+            {!happenstanceResults.length && !personalizedMentors.length && !loadingHappenstance && !loadingPersonalized && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Try asking:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "Who can help me raise funding?",
+                    "Find mentors in AI and sustainability",
+                    "Who should I talk to about career transitions?"
+                  ].map((example, idx) => (
+                    <Button
+                      key={idx}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => {
+                        setHappenstanceQuery(example);
+                      }}
+                    >
+                      {example}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Happenstance Results */}
+          {loadingHappenstance && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground">Finding the perfect matches for your path...</p>
+              </div>
+            </div>
+          )}
+
+          {happenstanceResults.length > 0 && (
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Matches for your path</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setHappenstanceResults([]);
+                    setHappenstanceQuery("");
+                  }}
+                  className="text-xs h-7"
+                >
+                  Clear
+                </Button>
+              </div>
+              {happenstanceResults.map((result, idx) => (
+                <Card key={idx} className="overflow-hidden hover:shadow-lg transition-shadow border-primary/20">
+                  <CardContent className="p-4">
+                    {/* Mentor Info */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <Avatar className="h-12 w-12 flex-shrink-0">
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                          {result.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base mb-0.5">{result.name}</h3>
+                        <p className="text-xs text-muted-foreground mb-1">{result.title}</p>
+                        {result.company && (
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Building className="h-3 w-3" />
+                            <span>{result.company}</span>
+                          </div>
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="text-[10px]">
+                        {Math.round(result.relevance_score * 100)}% match
+                      </Badge>
+                    </div>
+
+                    {/* AI Explanation */}
+                    {result.explanation && (
+                      <div className="mb-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                        <h4 className="text-xs font-semibold mb-1 flex items-center gap-1">
+                          <Lightbulb className="h-3 w-3 text-primary" />
+                          Why this match?
+                        </h4>
+                        <p className="text-xs text-muted-foreground">{result.explanation}</p>
+                      </div>
+                    )}
+
+                    {/* Key Synergies */}
+                    {result.key_synergies && result.key_synergies.length > 0 && (
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold mb-1.5">Key Synergies</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {result.key_synergies.map((synergy: string, synIdx: number) => (
+                            <Badge key={synIdx} variant="outline" className="text-[10px] px-2 py-0.5">
+                              {synergy}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Conversation Starters */}
+                    {result.conversation_starters && result.conversation_starters.length > 0 && (
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold mb-1.5 flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          How to start the conversation
+                        </h4>
+                        <ul className="space-y-1">
+                          {result.conversation_starters.map((starter: string, startIdx: number) => (
+                            <li key={startIdx} className="text-[10px] text-muted-foreground flex items-start gap-1.5">
+                              <span className="text-primary mt-0.5">•</span>
+                              <span>"{starter}"</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Location & Industry */}
+                    <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground mb-3">
+                      {result.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          <span>{result.location}</span>
+                        </div>
+                      )}
+                      {result.industry && (
+                        <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                          {result.industry}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Action Button */}
+                    {result.profile_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs h-8"
+                        onClick={() => window.open(result.profile_url, '_blank')}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1.5" />
+                        View Profile
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Original Personalized Mentors Section */}
           <div className="mb-4">
             <p className="text-sm text-muted-foreground mb-4">
-              Personalized recommendations based on your career interests
+              Or get personalized recommendations based on your profile
             </p>
-            {personalizedMentors.length === 0 && !loadingPersonalized && (
+            {personalizedMentors.length === 0 && !loadingPersonalized && !happenstanceResults.length && (
               <Button onClick={() => loadPersonalizedMentors()} className="w-full">
                 Generate Recommendations
               </Button>
