@@ -26,17 +26,11 @@ const getWeekDates = () => {
   });
 };
 
-const defaultMissions = [
-  {
-    icon: Video,
-    title: "Watch Tutorial Video",
-    description: "Learn key insights for your journey",
-    duration: "3 min",
-    type: "Learning"
-  },
+// Core missions that should always be present every day
+const coreMissions = [
   {
     icon: Target,
-    title: "Define Your Core Values",
+    title: "Think About Your Core Values",
     description: "Reflect on what truly matters to you",
     duration: "10 min",
     type: "Reflection"
@@ -53,8 +47,19 @@ const defaultMissions = [
     title: "Visualize Your Path",
     description: "Spend time imagining your ideal future",
     duration: "15 min",
-    type: "Meditation"
+    type: "Journaling"
   }
+];
+
+const defaultMissions = [
+  {
+    icon: Video,
+    title: "Watch Tutorial Video",
+    description: "Learn key insights for your journey",
+    duration: "3 min",
+    type: "Learning"
+  },
+  ...coreMissions
 ];
 
 const getFeaturedTopicForUser = (activePath: any, stats: any, allPaths: any[]) => {
@@ -181,18 +186,20 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       if (error) throw error;
 
       if (data?.missions) {
-        // Only include video tutorial for first 2 daily streaks (0 or 1)
+        // Always include core missions + optionally one generated mission
         const shouldIncludeVideo = !userStats || userStats.current_streak < 2;
         const videoMission = defaultMissions[0];
-        const generatedMissions = shouldIncludeVideo 
-          ? [videoMission, ...data.missions.slice(0, 3)]
-          : data.missions.slice(0, 4);
+        const generatedMission = data.missions[0]; // Take first AI-generated mission
         
-        setDailyMissions(generatedMissions);
+        const dailyMissionsList = shouldIncludeVideo 
+          ? [videoMission, ...coreMissions, generatedMission].filter(Boolean)
+          : [...coreMissions, generatedMission].filter(Boolean);
+        
+        setDailyMissions(dailyMissionsList);
 
         // Store in database
         const today = new Date().toISOString().split('T')[0];
-        const actionsToStore = generatedMissions.map((m: any) => ({
+        const actionsToStore = dailyMissionsList.map((m: any) => ({
           title: m.title,
           description: m.description,
           duration: m.duration,
