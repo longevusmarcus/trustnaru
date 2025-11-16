@@ -356,7 +356,8 @@ export default function PathDetail() {
 
       {/* Image Viewer Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-full max-h-full w-screen h-screen p-0 border-0 bg-black/95">
+        <DialogContent className="max-w-full max-h-full w-screen h-screen p-0 border-0 bg-black/95" aria-describedby={undefined}>
+          <span className="sr-only">Image viewer</span>
           <div 
             className="relative w-full h-full flex items-center justify-center"
             onTouchStart={handleTouchStart}
