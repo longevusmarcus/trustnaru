@@ -333,8 +333,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       
       if (data?.limit_reached) {
         toast({
-          title: "Search limit reached",
-          description: data.error || "You've used all 3 weekly searches. Try again next week!",
+          title: data.capacity_full ? "Feature at capacity" : "Search limit reached",
+          description: data.error || "You've used all 3 monthly searches. Try again next month!",
           variant: "destructive"
         });
         setSearchesRemaining(0);
@@ -349,7 +349,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
         
         toast({
           title: "Found real people!",
-          description: `Discovered ${data.results.length} people who can help. ${data.searches_remaining ?? 0} searches left this week.`,
+          description: `Discovered ${data.results.length} people who can help. ${data.searches_remaining ?? 0} searches left this month.`,
         });
       }
     } catch (error: any) {
@@ -600,11 +600,11 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                   Who should you meet?
                 </h3>
                 <Badge variant="secondary" className="text-xs">
-                  {searchesRemaining} searches left this week
+                  {searchesRemaining} searches left this month
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Find real people on LinkedIn who can help with your career (max 3 searches/week)
+                Find real people on LinkedIn who can help with your career (max 3 searches/month)
               </p>
               <div className="flex gap-2">
                 <Input
