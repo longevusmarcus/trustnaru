@@ -48,3 +48,9 @@ verify_jwt = true
 [functions.generate-affirmations]
 verify_jwt = true
 
+[functions.happenstance-search]
+verify_jwt = true
+
+[functions.generate-mentor-embeddings]
+verify_jwt = false
+
