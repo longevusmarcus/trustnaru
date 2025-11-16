@@ -23,106 +23,21 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    console.log("Starting mentor embeddings generation...");
+    console.log("Note: Embedding generation is no longer needed - the happenstance search now uses AI-based matching instead of vector embeddings");
 
-    // Get all mentors without embeddings
+    // Get all mentors
     const { data: mentors, error: fetchError } = await supabaseClient
       .from("mentors")
-      .select("*")
-      .is("mentor_embedding", null);
+      .select("id, name");
 
     if (fetchError) {
       throw fetchError;
     }
 
-    console.log(`Found ${mentors?.length || 0} mentors without embeddings`);
-
-    if (!mentors || mentors.length === 0) {
-      return new Response(
-        JSON.stringify({ 
-          message: "No mentors need embeddings", 
-          processed: 0 
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    let processed = 0;
-    let failed = 0;
-
-    // Process mentors in batches
-    for (const mentor of mentors) {
-      try {
-        // Build mentor text representation
-        const mentorText = `
-Name: ${mentor.name}
-Title: ${mentor.title || ""}
-Company: ${mentor.company || ""}
-Headline: ${mentor.headline || ""}
-Location: ${mentor.location || ""}
-Industry: ${mentor.industry || ""}
-Category: ${mentor.category || ""}
-Key Skills: ${mentor.key_skills?.join(", ") || ""}
-Achievements: ${mentor.achievements?.join(", ") || ""}
-Leadership Philosophy: ${mentor.leadership_philosophy?.join(", ") || ""}
-        `.trim();
-
-        console.log(`Generating embedding for mentor: ${mentor.name}`);
-
-        // Generate embedding
-        const embeddingResponse = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "text-embedding-004",
-            input: mentorText,
-          }),
-        });
-
-        if (!embeddingResponse.ok) {
-          console.error(`Failed to generate embedding for ${mentor.name}`);
-          failed++;
-          continue;
-        }
-
-        const embeddingData = await embeddingResponse.json();
-        const embedding = embeddingData.data[0].embedding;
-
-        // Update mentor with embedding
-        const { error: updateError } = await supabaseClient
-          .from("mentors")
-          .update({ mentor_embedding: embedding })
-          .eq("id", mentor.id);
-
-        if (updateError) {
-          console.error(`Failed to update ${mentor.name}:`, updateError);
-          failed++;
-        } else {
-          processed++;
-          console.log(`✓ Processed ${mentor.name}`);
-        }
-
-        // Small delay to avoid rate limits
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        console.error(`Error processing mentor ${mentor.name}:`, error);
-        failed++;
-      }
-    }
-
-    console.log(`Completed: ${processed} successful, ${failed} failed`);
-
     return new Response(
       JSON.stringify({
-        message: "Mentor embeddings generated",
-        processed,
-        failed,
-        total: mentors.length,
+        message: "Embedding generation is no longer needed. The system now uses AI-based matching.",
+        total: mentors?.length || 0,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
