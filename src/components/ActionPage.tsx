@@ -1548,7 +1548,7 @@ export const ActionPage = () => {
 
             <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
               <Briefcase className="h-5 w-5" />
-              <span className="text-xs">Partners Jobs (soon)</span>
+              <span className="text-xs">Jobs For You (soon)</span>
             </Button>
 
             <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
