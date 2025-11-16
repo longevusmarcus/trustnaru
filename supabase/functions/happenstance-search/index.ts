@@ -438,13 +438,14 @@ Return analysis for each person.`;
       };
     });
 
-    // Log the search
+    // Log the search with results
     await supabaseClient
       .from("happenstance_searches")
       .insert({
         user_id: user.id,
         search_intent,
         results_count: enrichedResults.length,
+        results: enrichedResults,
       });
 
     return new Response(
