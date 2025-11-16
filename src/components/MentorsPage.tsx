@@ -661,13 +661,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
               {happenstanceResults.map((result, idx) => (
                 <Card key={idx} className="overflow-hidden hover:shadow-lg transition-shadow border-primary/20">
                   <CardContent className="p-4">
-                    {/* Mentor Info */}
+                     {/* Mentor Info - No Avatar */}
                     <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-12 w-12 flex-shrink-0">
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {result.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-base mb-0.5">{result.name}</h3>
                         <p className="text-xs text-muted-foreground mb-1">{result.title}</p>
