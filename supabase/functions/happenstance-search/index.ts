@@ -124,21 +124,31 @@ Current Search Request: ${search_intent}
       throw new Error("RapidAPI key not configured");
     }
 
-    // Step 1: Use AI to generate targeted LinkedIn search queries
+    // Step 1: Use AI to generate simple, natural search queries
     const searchQueryPrompt = `You are Naru's Happenstance Engine, finding REAL people for career guidance.
 
 User Context:
 ${searchContext}
 
-Generate ${max_results} diverse LinkedIn search queries to find real professionals who could help this person.
+Generate ${max_results} SIMPLE, natural search queries to find real professionals.
 
-Requirements:
-1. Each query should target different angles (industry leaders, recent career changers, location-based, etc.)
-2. Use specific job titles, companies, and keywords
-3. Focus on people who have made similar transitions or work in target roles
-4. Include location keywords when relevant
+CRITICAL Requirements:
+1. Use NATURAL language - like typing in Google or LinkedIn search
+2. Include specific job titles + industry OR location
+3. NO Boolean operators (AND, OR, NOT, quotes) - just natural phrases
+4. Each query should be SHORT (3-6 words) and different
+5. Use keywords the user mentioned in their search intent
 
-Return as JSON array of search queries.`;
+Example GOOD queries:
+- "community director beverage industry"
+- "tea entrepreneur social impact"
+- "brand manager sustainable food"
+
+Example BAD queries (too complex):
+- "Director OR Manager AND Community"
+- "LinkedIn search: 'Tea' AND 'Founder'"
+
+Return ${max_results} simple, keyword-based search queries as JSON array.`;
 
     const queryResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -209,106 +219,56 @@ Return as JSON array of search queries.`;
 
     console.log(`Generated ${searchQueries.length} search queries`);
 
-    // Step 2: Search for real people using RapidAPI LinkedIn + Web Search
+    // Step 2: Search for real people using RapidAPI LinkedIn
     const allResults: any[] = [];
     
     for (const query of searchQueries.slice(0, max_results)) {
       try {
-        console.log(`Searching for: ${query.search_query}`);
+        console.log(`Searching LinkedIn for: ${query.search_query}`);
         
-        // Try RapidAPI LinkedIn Data API first
-        try {
-          const linkedinResponse = await fetch(
-            `https://linkedin-data-api.p.rapidapi.com/search-people?keywords=${encodeURIComponent(query.search_query)}&start=0`,
-            {
-              headers: {
-                "x-rapidapi-key": RAPIDAPI_KEY,
-                "x-rapidapi-host": "linkedin-data-api.p.rapidapi.com",
-              },
-            }
-          );
-
-          if (linkedinResponse.ok) {
-            const linkedinData = await linkedinResponse.json();
-            console.log(`LinkedIn API response:`, JSON.stringify(linkedinData).slice(0, 200));
-            
-            // Process RapidAPI results
-            if (linkedinData.data && Array.isArray(linkedinData.data) && linkedinData.data.length > 0) {
-              const person = linkedinData.data[0];
-              allResults.push({
-                source: "linkedin",
-                firstName: person.firstName || "",
-                lastName: person.lastName || "",
-                headline: person.headline || "",
-                companyName: person.company || "",
-                location: person.location || "",
-                publicProfileUrl: person.url || "",
-                profilePicture: person.photoUrl || "",
-                search_reasoning: query.reasoning,
-              });
-              continue;
-            }
-          } else {
-            console.error(`LinkedIn API error: ${linkedinResponse.status}`, await linkedinResponse.text());
+        const linkedinResponse = await fetch(
+          `https://linkedin-data-api.p.rapidapi.com/search-people?keywords=${encodeURIComponent(query.search_query)}&start=0`,
+          {
+            headers: {
+              "x-rapidapi-key": RAPIDAPI_KEY,
+              "x-rapidapi-host": "linkedin-data-api.p.rapidapi.com",
+            },
           }
-        } catch (linkedinError) {
-          console.error(`LinkedIn search error:`, linkedinError);
-        }
+        );
 
-        // Fallback to web search to find real people
-        const webSearchPrompt = `Find a real person on LinkedIn who matches: ${query.search_query}. Include their LinkedIn profile URL if possible.`;
-        
-        const webSearchResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
-            messages: [
-              {
-                role: "system",
-                content: "You are a web search expert. When asked to find a person, provide their name, title, company, and LinkedIn URL if available.",
-              },
-              { role: "user", content: webSearchPrompt },
-            ],
-          }),
-        });
-
-        if (webSearchResponse.ok) {
-          const webData = await webSearchResponse.json();
-          const content = webData.choices?.[0]?.message?.content || "";
-          console.log(`Web search result:`, content.slice(0, 200));
+        if (linkedinResponse.ok) {
+          const linkedinData = await linkedinResponse.json();
+          console.log(`LinkedIn API returned:`, JSON.stringify(linkedinData).slice(0, 300));
           
-          // Extract info from web search result
-          if (content.includes("linkedin.com")) {
-            const urlMatch = content.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9-]+/);
-            const nameMatch = content.match(/(?:Name|Person):\s*([^\n]+)/i);
-            const titleMatch = content.match(/(?:Title|Role|Position):\s*([^\n]+)/i);
-            const companyMatch = content.match(/(?:Company|Organization):\s*([^\n]+)/i);
-            
-            if (urlMatch || nameMatch) {
-              allResults.push({
-                source: "web_search",
-                firstName: nameMatch?.[1]?.split(" ")[0] || "Professional",
-                lastName: nameMatch?.[1]?.split(" ").slice(1).join(" ") || "",
-                headline: titleMatch?.[1] || "Found via web search",
-                companyName: companyMatch?.[1] || "",
-                location: "",
-                publicProfileUrl: urlMatch?.[0] || "",
-                profilePicture: "",
-                search_reasoning: query.reasoning,
-              });
+          // Process RapidAPI results - get top 2 most relevant
+          if (linkedinData.data && Array.isArray(linkedinData.data)) {
+            for (const person of linkedinData.data.slice(0, 2)) {
+              // Only include if we have real data
+              if (person.firstName && person.lastName && person.headline) {
+                allResults.push({
+                  source: "linkedin",
+                  firstName: person.firstName,
+                  lastName: person.lastName,
+                  headline: person.headline,
+                  companyName: person.company || "",
+                  location: person.location || "",
+                  publicProfileUrl: person.url || "",
+                  profilePicture: person.photoUrl || "",
+                  search_reasoning: query.reasoning,
+                });
+              }
             }
           }
+        } else {
+          const errorText = await linkedinResponse.text();
+          console.error(`LinkedIn API error: ${linkedinResponse.status}`, errorText);
         }
       } catch (error) {
         console.error(`Error searching for "${query.search_query}":`, error);
       }
     }
 
-    console.log(`Found ${allResults.length} total results`);
+    console.log(`Found ${allResults.length} specific LinkedIn profiles`);
 
     if (allResults.length === 0) {
       return new Response(
@@ -414,24 +374,27 @@ Return analysis for each person.`;
 
     console.log(`Generated ${analyses.length} AI analyses`);
 
-    // Merge results with AI analysis
+    // Merge results with AI analysis and clean up formatting
     const enrichedResults = allResults.map((person, index) => {
       const analysis = analyses.find((a: any) => a.person_index === index);
-      const fullName = `${person.firstName} ${person.lastName}`.trim() || "Professional";
+      const fullName = `${person.firstName} ${person.lastName}`.trim();
+      
+      // Clean up markdown formatting (remove **, *, etc.)
+      const cleanText = (text: string) => text.replace(/\*\*/g, '').replace(/\*/g, '').trim();
       
       return {
-        name: fullName,
-        title: person.headline || "Professional",
-        company: person.companyName || "Unknown",
-        location: person.location || "Unknown",
+        name: cleanText(fullName),
+        title: cleanText(person.headline || ""),
+        company: cleanText(person.companyName || ""),
+        location: person.location || "",
         profile_url: person.publicProfileUrl || "",
         profile_image_url: person.profilePicture || "",
-        source: person.source || "unknown",
+        source: person.source || "linkedin",
         matched_signals: [person.search_reasoning],
         relevance_score: 0.95 - (index * 0.1),
-        explanation: analysis?.explanation || "Great potential match for your career goals",
-        conversation_starters: analysis?.conversation_starters || ["I'd love to learn about your career journey"],
-        key_synergies: analysis?.key_synergies || ["Shared career interests"],
+        explanation: cleanText(analysis?.explanation || "Great potential match for your career goals"),
+        conversation_starters: (analysis?.conversation_starters || []).map(cleanText),
+        key_synergies: (analysis?.key_synergies || []).map(cleanText),
       };
     });
 
