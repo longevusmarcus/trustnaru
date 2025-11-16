@@ -86,53 +86,148 @@ ${search_intent}
 
     console.log("Search context:", searchContext);
 
-    // 4. Generate embedding using Gemini
+    // 4. Use AI to find relevant mentors based on search context
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    // Use Gemini's embedding endpoint
-    const embeddingResponse = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+    // 5. Get all mentors from database
+    const { data: allMentors, error: mentorsError } = await supabaseClient
+      .from("mentors")
+      .select("*")
+      .limit(100);
+
+    if (mentorsError) {
+      console.error("Error fetching mentors:", mentorsError);
+      throw new Error("Failed to fetch mentors");
+    }
+
+    console.log(`Found ${allMentors?.length || 0} total mentors`);
+
+    // 6. Use AI to select and rank the most relevant mentors
+    const selectionPrompt = `You are Naru's Happenstance Engine.
+
+User's context:
+${searchContext}
+
+Here are available mentors:
+${JSON.stringify(allMentors?.map(m => ({
+  id: m.id,
+  name: m.name,
+  title: m.title,
+  company: m.company,
+  headline: m.headline,
+  location: m.location,
+  industry: m.industry,
+  category: m.category,
+  key_skills: m.key_skills,
+})) || [], null, 2)}
+
+Select the ${max_results} MOST relevant mentors for this user's FUTURE path and search intent.
+Consider:
+1. Skills alignment with their target role
+2. Industry relevance
+3. Impact area matches
+4. Non-obvious synergies (values, experiences, growth paths)
+5. People who've made similar transitions
+
+Return the mentor IDs in order of relevance with brief reasoning.`;
+
+    const selectionResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "text-embedding-004",
-        input: searchContext,
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: "You are a career matchmaking expert. Return structured data about mentor matches.",
+          },
+          { role: "user", content: selectionPrompt },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "select_mentors",
+              description: "Select the most relevant mentors",
+              parameters: {
+                type: "object",
+                properties: {
+                  selections: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        mentor_id: { type: "string" },
+                        relevance_score: { type: "number" },
+                        matched_signals: {
+                          type: "array",
+                          items: { type: "string" },
+                        },
+                      },
+                      required: ["mentor_id", "relevance_score", "matched_signals"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["selections"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "select_mentors" } },
       }),
     });
 
-    if (!embeddingResponse.ok) {
-      const errorText = await embeddingResponse.text();
-      console.error("Embedding error:", embeddingResponse.status, errorText);
-      throw new Error("Failed to generate embedding");
+    if (!selectionResponse.ok) {
+      const errorText = await selectionResponse.text();
+      console.error("Selection error:", selectionResponse.status, errorText);
+      throw new Error("Failed to select mentors");
     }
 
-    const embeddingData = await embeddingResponse.json();
-    const queryEmbedding = embeddingData.data[0].embedding;
-
-    console.log("Generated embedding, vector length:", queryEmbedding.length);
-
-    // 5. Search for matching mentors using the RPC function
-    const { data: matches, error: matchError } = await supabaseClient.rpc(
-      "happenstance_search_mentors",
-      {
-        p_user_id: user.id,
-        p_query_embedding: queryEmbedding,
-        p_limit: max_results,
-      },
-    );
-
-    if (matchError) {
-      console.error("Search error:", matchError);
-      return new Response(JSON.stringify({ error: "Search failed", details: matchError }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const selectionData = await selectionResponse.json();
+    const selectionCall = selectionData.choices?.[0]?.message?.tool_calls?.[0];
+    
+    let selections: any[] = [];
+    if (selectionCall?.function?.arguments) {
+      try {
+        const parsedArgs = JSON.parse(selectionCall.function.arguments);
+        selections = parsedArgs.selections || [];
+      } catch (e) {
+        console.error("Failed to parse selection:", e);
+      }
     }
+
+    console.log(`AI selected ${selections.length} mentors`);
+
+    // Match selections with full mentor data
+    const matches = selections
+      .map((sel: any) => {
+        const mentor = allMentors?.find(m => m.id === sel.mentor_id);
+        if (!mentor) return null;
+        return {
+          mentor_id: mentor.id,
+          name: mentor.name,
+          title: mentor.title,
+          company: mentor.company,
+          headline: mentor.headline,
+          location: mentor.location,
+          industry: mentor.industry,
+          key_skills: mentor.key_skills || [],
+          profile_url: mentor.profile_url,
+          profile_image_url: mentor.profile_image_url,
+          matched_signals: sel.matched_signals || [],
+          relevance_score: sel.relevance_score || 0,
+        };
+      })
+      .filter(Boolean)
+      .slice(0, max_results);
 
     console.log(`Found ${matches?.length || 0} mentor matches`);
 
