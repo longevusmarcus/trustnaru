@@ -48,15 +48,48 @@ serve(async (req) => {
 
     console.log(`Happenstance search for user ${user.id} with intent: ${search_intent}`);
 
-    // Check weekly search limit (3 searches per week)
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    // Check global user limit (max 100 users can use this feature)
+    const { count: totalUsersCount, error: totalUsersError } = await supabaseClient
+      .from("happenstance_searches")
+      .select("user_id", { count: "exact", head: false })
+      .limit(1000);
+
+    if (totalUsersError) {
+      console.error("Error checking total users:", totalUsersError);
+    }
+
+    // Get unique user count
+    const { data: uniqueUsers, error: uniqueError } = await supabaseClient
+      .from("happenstance_searches")
+      .select("user_id")
+      .limit(1000);
+
+    const uniqueUserIds = new Set(uniqueUsers?.map(s => s.user_id) || []);
+    const hasSearchedBefore = uniqueUserIds.has(user.id);
+
+    if (!hasSearchedBefore && uniqueUserIds.size >= 100) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Feature capacity reached. This beta feature is limited to 100 users.",
+          limit_reached: true,
+          capacity_full: true
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // Check monthly search limit (3 searches per month)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const { data: recentSearches, error: searchCountError } = await supabaseClient
       .from("happenstance_searches")
       .select("id")
       .eq("user_id", user.id)
-      .gte("search_date", oneWeekAgo.toISOString());
+      .gte("search_date", startOfMonth.toISOString());
 
     if (searchCountError) {
       console.error("Error checking search count:", searchCountError);
@@ -66,7 +99,7 @@ serve(async (req) => {
     if (recentSearches && recentSearches.length >= 3) {
       return new Response(
         JSON.stringify({ 
-          error: "Weekly search limit reached. You can make 3 searches per week.",
+          error: "Monthly search limit reached. You can make 3 searches per month.",
           limit_reached: true,
           searches_used: recentSearches.length,
           searches_remaining: 0
