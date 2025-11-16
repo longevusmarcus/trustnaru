@@ -268,6 +268,33 @@ export type Database = {
         }
         Relationships: []
       }
+      happenstance_searches: {
+        Row: {
+          created_at: string
+          id: string
+          results_count: number
+          search_date: string
+          search_intent: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          results_count?: number
+          search_date?: string
+          search_intent: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          results_count?: number
+          search_date?: string
+          search_intent?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentors: {
         Row: {
           achievements: string[] | null

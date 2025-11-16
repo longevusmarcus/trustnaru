@@ -28,6 +28,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [happenstanceResults, setHappenstanceResults] = useState<any[]>([]);
   const [loadingHappenstance, setLoadingHappenstance] = useState(false);
   const [happenstanceQuery, setHappenstanceQuery] = useState("");
+  const [searchesRemaining, setSearchesRemaining] = useState<number>(3);
   const { toast } = useToast();
   const { user } = useAuth();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
@@ -306,21 +307,32 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       
       if (error) throw error;
       
+      if (data?.limit_reached) {
+        toast({
+          title: "Search limit reached",
+          description: data.error || "You've used all 3 weekly searches. Try again next week!",
+          variant: "destructive"
+        });
+        setSearchesRemaining(0);
+        return;
+      }
+      
       if (data?.results) {
         setHappenstanceResults(data.results);
+        setSearchesRemaining(data.searches_remaining ?? 3);
         // Clear personalized mentors when showing happenstance results
         setPersonalizedMentors([]);
         
         toast({
-          title: "Found matches!",
-          description: `Discovered ${data.results.length} people who can help with your path.`,
+          title: "Found real people!",
+          description: `Discovered ${data.results.length} people who can help. ${data.searches_remaining ?? 0} searches left this week.`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in happenstance search:', error);
       toast({
         title: "Search failed",
-        description: "Unable to search right now. Please try again.",
+        description: error?.message || "Unable to search right now. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -558,12 +570,17 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
           {/* Happenstance Search */}
           <div className="mb-6 space-y-3">
             <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-primary" />
-                Who should you meet?
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                  Who should you meet?
+                </h3>
+                <Badge variant="secondary" className="text-xs">
+                  {searchesRemaining} searches left this week
+                </Badge>
+              </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Ask a natural language question about who can help with your career path
+                Find real people on LinkedIn who can help with your career (max 3 searches/week)
               </p>
               <div className="flex gap-2">
                 <Input
