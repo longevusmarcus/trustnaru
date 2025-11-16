@@ -114,14 +114,14 @@ Current Search Request: ${search_intent}
     console.log("Search context:", searchContext);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const RAPIDAPI_KEY = Deno.env.get("linkedin_API_key");
+    const SERPER_API_KEY = Deno.env.get("SERPER_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    if (!RAPIDAPI_KEY) {
-      throw new Error("RapidAPI key not configured");
+    if (!SERPER_API_KEY) {
+      throw new Error("SERPER_API_KEY not configured");
     }
 
     // Step 1: Use AI to generate simple, natural search queries
@@ -219,56 +219,71 @@ Return ${max_results} simple, keyword-based search queries as JSON array.`;
 
     console.log(`Generated ${searchQueries.length} search queries`);
 
-    // Step 2: Search for real people using RapidAPI LinkedIn
+    // Step 2: Search Google for LinkedIn profiles using Serper.dev
     const allResults: any[] = [];
     
     for (const query of searchQueries.slice(0, max_results)) {
       try {
-        console.log(`Searching LinkedIn for: ${query.search_query}`);
+        const searchQuery = `${query.search_query} site:linkedin.com/in`;
+        console.log(`Searching Google: ${searchQuery}`);
         
-        const linkedinResponse = await fetch(
-          `https://linkedin-data-api.p.rapidapi.com/search-people?keywords=${encodeURIComponent(query.search_query)}&start=0`,
-          {
-            headers: {
-              "x-rapidapi-key": RAPIDAPI_KEY,
-              "x-rapidapi-host": "linkedin-data-api.p.rapidapi.com",
-            },
-          }
-        );
+        const serperResponse = await fetch("https://google.serper.dev/search", {
+          method: "POST",
+          headers: {
+            "X-API-KEY": SERPER_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            q: searchQuery,
+            num: 3,
+          }),
+        });
 
-        if (linkedinResponse.ok) {
-          const linkedinData = await linkedinResponse.json();
-          console.log(`LinkedIn API returned:`, JSON.stringify(linkedinData).slice(0, 300));
+        if (serperResponse.ok) {
+          const serperData = await serperResponse.json();
+          console.log(`Serper returned ${serperData.organic?.length || 0} results`);
           
-          // Process RapidAPI results - get top 2 most relevant
-          if (linkedinData.data && Array.isArray(linkedinData.data)) {
-            for (const person of linkedinData.data.slice(0, 2)) {
-              // Only include if we have real data
-              if (person.firstName && person.lastName && person.headline) {
+          // Extract LinkedIn profile info from search results
+          if (serperData.organic && Array.isArray(serperData.organic)) {
+            for (const result of serperData.organic.slice(0, 2)) {
+              const url = result.link;
+              const title = result.title;
+              
+              // Extract name from title (usually "FirstName LastName - Title at Company | LinkedIn")
+              const nameMatch = title.match(/^([^-|]+)/);
+              const fullName = nameMatch ? nameMatch[1].trim() : "";
+              const names = fullName.split(" ");
+              
+              // Extract title and company from snippet
+              const snippet = result.snippet || "";
+              const titleMatch = snippet.match(/^([^·•]+)/);
+              const companyMatch = snippet.match(/(?:at|@)\s+([^·•\n]+)/);
+              
+              if (fullName && names.length >= 2) {
                 allResults.push({
-                  source: "linkedin",
-                  firstName: person.firstName,
-                  lastName: person.lastName,
-                  headline: person.headline,
-                  companyName: person.company || "",
-                  location: person.location || "",
-                  publicProfileUrl: person.url || "",
-                  profilePicture: person.photoUrl || "",
+                  source: "google_search",
+                  firstName: names[0],
+                  lastName: names.slice(1).join(" "),
+                  headline: titleMatch ? titleMatch[1].trim() : snippet.substring(0, 100),
+                  companyName: companyMatch ? companyMatch[1].trim() : "",
+                  location: "",
+                  publicProfileUrl: url,
+                  profilePicture: "",
                   search_reasoning: query.reasoning,
                 });
               }
             }
           }
         } else {
-          const errorText = await linkedinResponse.text();
-          console.error(`LinkedIn API error: ${linkedinResponse.status}`, errorText);
+          const errorText = await serperResponse.text();
+          console.error(`Serper API error:`, errorText);
         }
       } catch (error) {
         console.error(`Error searching for "${query.search_query}":`, error);
       }
     }
 
-    console.log(`Found ${allResults.length} specific LinkedIn profiles`);
+    console.log(`Found ${allResults.length} LinkedIn profiles via Google`);
 
     if (allResults.length === 0) {
       return new Response(
