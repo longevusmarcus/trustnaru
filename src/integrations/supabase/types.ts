@@ -285,6 +285,7 @@ export type Database = {
           key_skills: string[] | null
           leadership_philosophy: string[] | null
           location: string | null
+          mentor_embedding: string | null
           name: string
           profile_image_url: string | null
           profile_url: string | null
@@ -309,6 +310,7 @@ export type Database = {
           key_skills?: string[] | null
           leadership_philosophy?: string[] | null
           location?: string | null
+          mentor_embedding?: string | null
           name: string
           profile_image_url?: string | null
           profile_url?: string | null
@@ -333,6 +335,7 @@ export type Database = {
           key_skills?: string[] | null
           leadership_philosophy?: string[] | null
           location?: string | null
+          mentor_embedding?: string | null
           name?: string
           profile_image_url?: string | null
           profile_url?: string | null
@@ -404,6 +407,7 @@ export type Database = {
           display_name: string | null
           id: string
           onboarding_completed: boolean | null
+          profile_embedding: string | null
           updated_at: string
           user_id: string
           voice_transcription: string | null
@@ -416,6 +420,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           onboarding_completed?: boolean | null
+          profile_embedding?: string | null
           updated_at?: string
           user_id: string
           voice_transcription?: string | null
@@ -428,6 +433,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           onboarding_completed?: boolean | null
+          profile_embedding?: string | null
           updated_at?: string
           user_id?: string
           voice_transcription?: string | null
@@ -487,7 +493,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      happenstance_search_mentors: {
+        Args: { p_limit?: number; p_query_embedding: string; p_user_id: string }
+        Returns: {
+          company: string
+          headline: string
+          industry: string
+          key_skills: string[]
+          location: string
+          matched_signals: string[]
+          mentor_id: string
+          name: string
+          profile_image_url: string
+          profile_url: string
+          relevance_score: number
+          title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
