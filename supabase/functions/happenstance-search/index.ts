@@ -115,13 +115,14 @@ Current Search Request: ${search_intent}
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SERPER_API_KEY = Deno.env.get("SERPER_API_KEY");
+    const SERPAPI_API_KEY = Deno.env.get("SERPAPI_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    if (!SERPER_API_KEY) {
-      throw new Error("SERPER_API_KEY not configured");
+    if (!SERPER_API_KEY && !SERPAPI_API_KEY) {
+      throw new Error("No search provider configured: set SERPER_API_KEY or SERPAPI_API_KEY");
     }
 
     // Step 1: Use AI to generate simple, natural search queries
@@ -227,56 +228,80 @@ Return ${max_results} simple, keyword-based search queries as JSON array.`;
         const searchQuery = `${query.search_query} site:linkedin.com/in`;
         console.log(`Searching Google: ${searchQuery}`);
         
-        const serperResponse = await fetch("https://google.serper.dev/search", {
-          method: "POST",
-          headers: {
-            "X-API-KEY": SERPER_API_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            q: searchQuery,
-            num: 3,
-          }),
-        });
+        let organic: any[] = [];
+        let providerUsed = '';
 
-        if (serperResponse.ok) {
-          const serperData = await serperResponse.json();
-          console.log(`Serper returned ${serperData.organic?.length || 0} results`);
-          
-          // Extract LinkedIn profile info from search results
-          if (serperData.organic && Array.isArray(serperData.organic)) {
-            for (const result of serperData.organic.slice(0, 2)) {
-              const url = result.link;
-              const title = result.title;
-              
-              // Extract name from title (usually "FirstName LastName - Title at Company | LinkedIn")
-              const nameMatch = title.match(/^([^-|]+)/);
-              const fullName = nameMatch ? nameMatch[1].trim() : "";
-              const names = fullName.split(" ");
-              
-              // Extract title and company from snippet
-              const snippet = result.snippet || "";
-              const titleMatch = snippet.match(/^([^·•]+)/);
-              const companyMatch = snippet.match(/(?:at|@)\s+([^·•\n]+)/);
-              
-              if (fullName && names.length >= 2) {
-                allResults.push({
-                  source: "google_search",
-                  firstName: names[0],
-                  lastName: names.slice(1).join(" "),
-                  headline: titleMatch ? titleMatch[1].trim() : snippet.substring(0, 100),
-                  companyName: companyMatch ? companyMatch[1].trim() : "",
-                  location: "",
-                  publicProfileUrl: url,
-                  profilePicture: "",
-                  search_reasoning: query.reasoning,
-                });
-              }
+        // Try Serper.dev first if configured
+        if (SERPER_API_KEY) {
+          const resp = await fetch("https://google.serper.dev/search", {
+            method: "POST",
+            headers: {
+              "X-API-KEY": SERPER_API_KEY,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ q: searchQuery, num: 3 }),
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            organic = Array.isArray(data.organic) ? data.organic : [];
+            providerUsed = 'serper';
+            console.log(`Serper returned ${organic.length} results`);
+          } else {
+            const t = await resp.text();
+            console.error('Serper API error:', t);
+          }
+        }
+
+        // Fallback to SerpApi if available and no results yet
+        if ((!organic || organic.length === 0) && SERPAPI_API_KEY) {
+          const url = new URL('https://serpapi.com/search.json');
+          url.searchParams.set('engine', 'google');
+          url.searchParams.set('q', searchQuery);
+          url.searchParams.set('num', '3');
+          url.searchParams.set('hl', 'en');
+          url.searchParams.set('gl', 'us');
+          url.searchParams.set('api_key', SERPAPI_API_KEY);
+
+          const resp2 = await fetch(url.toString());
+          if (resp2.ok) {
+            const data2 = await resp2.json();
+            organic = Array.isArray(data2.organic_results) ? data2.organic_results : [];
+            providerUsed = 'serpapi';
+            console.log(`SerpApi returned ${organic.length} results`);
+          } else {
+            const t2 = await resp2.text();
+            console.error('SerpApi error:', t2);
+          }
+        }
+
+        // Extract LinkedIn profile info from normalized results
+        if (organic && Array.isArray(organic)) {
+          for (const result of organic.slice(0, 2)) {
+            const url = result.link;
+            const title = result.title || '';
+            const snippet = result.snippet || '';
+
+            const nameMatch = title.match(/^([^-|]+)/);
+            const fullName = nameMatch ? nameMatch[1].trim() : '';
+            const names = fullName.split(' ');
+
+            const titleMatch = snippet.match(/^([^·•]+)/);
+            const companyMatch = snippet.match(/(?:at|@)\s+([^·•\n]+)/);
+
+            if (fullName && names.length >= 2) {
+              allResults.push({
+                source: providerUsed || 'google_search',
+                firstName: names[0],
+                lastName: names.slice(1).join(' '),
+                headline: titleMatch ? titleMatch[1].trim() : snippet.substring(0, 100),
+                companyName: companyMatch ? companyMatch[1].trim() : '',
+                location: '',
+                publicProfileUrl: url,
+                profilePicture: '',
+                search_reasoning: query.reasoning,
+              });
             }
           }
-        } else {
-          const errorText = await serperResponse.text();
-          console.error(`Serper API error:`, errorText);
         }
       } catch (error) {
         console.error(`Error searching for "${query.search_query}":`, error);
