@@ -517,7 +517,27 @@ export const InsightsPage = () => {
 
         {/* Personalized Tips */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <h3 className="text-lg font-semibold mb-3">Quick Tips</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Quick Tips</h3>
+            {personalizedTips.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setGuidanceCache((prev) => {
+                    const newCache = { ...prev };
+                    delete newCache[userStats?.current_level || 1];
+                    return newCache;
+                  });
+                  loadPersonalizedGuidance();
+                }}
+                disabled={loadingGuidance}
+                className="h-7 text-xs"
+              >
+                {loadingGuidance ? "Refreshing..." : "Refresh"}
+              </Button>
+            )}
+          </div>
           {loadingGuidance ? (
             <div className="space-y-3">
               <Skeleton className="h-24 w-full" />
