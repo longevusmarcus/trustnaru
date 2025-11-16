@@ -272,6 +272,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          results: Json | null
           results_count: number
           search_date: string
           search_intent: string
@@ -280,6 +281,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          results?: Json | null
           results_count?: number
           search_date?: string
           search_intent: string
@@ -288,6 +290,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          results?: Json | null
           results_count?: number
           search_date?: string
           search_intent?: string

@@ -63,6 +63,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   useEffect(() => {
     loadMentors();
     loadPersonalizedMentorsFromCache();
+    loadPreviousHappenstanceResults();
   }, [user]);
 
   useEffect(() => {
@@ -248,6 +249,29 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
       }
     } catch (error) {
       console.error('Error loading cached mentors:', error);
+    }
+  };
+
+  const loadPreviousHappenstanceResults = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('happenstance_searches')
+        .select('results, search_intent')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      
+      if (data?.results && Array.isArray(data.results) && data.results.length > 0) {
+        setHappenstanceResults(data.results);
+        setHappenstanceQuery(data.search_intent || '');
+      }
+    } catch (error) {
+      console.error('Error loading previous happenstance results:', error);
     }
   };
 
@@ -649,9 +673,22 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => {
-                    setHappenstanceResults([]);
-                    setHappenstanceQuery("");
+                  onClick={async () => {
+                    try {
+                      // Clear from UI
+                      setHappenstanceResults([]);
+                      setHappenstanceQuery("");
+                      
+                      // Clear from database
+                      if (user?.id) {
+                        await supabase
+                          .from('happenstance_searches')
+                          .delete()
+                          .eq('user_id', user.id);
+                      }
+                    } catch (error) {
+                      console.error('Error clearing results:', error);
+                    }
                   }}
                   className="text-xs h-7"
                 >
