@@ -253,12 +253,13 @@ serve(async (req) => {
 
     const allImageUrls: string[] = [];
 
-    // Generate all 3 images, using the SAME reference photo for identity consistency
+    // Generate all 3 images, using different reference photos when available
     for (let i = 0; i < scenePrompts.length; i++) {
       const prompt = scenePrompts[i];
-      // Always use the first reference photo to maintain identity consistency
-      const selectedRefPhoto = allRefImagesBase64[0];
-      console.log(`Generating image ${i + 1}/3 using reference photo 1...`);
+      // Rotate through available reference photos for variety
+      const refPhotoIndex = i % allRefImagesBase64.length;
+      const selectedRefPhoto = allRefImagesBase64[refPhotoIndex];
+      console.log(`Generating image ${i + 1}/3 using reference photo ${refPhotoIndex + 1}...`);
 
       try {
         const imageBytes = await generateWithGemini(prompt, selectedRefPhoto);
