@@ -148,6 +148,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [timerActive, setTimerActive] = useState(false);
   const [dailyMissions, setDailyMissions] = useState<any[]>(defaultMissions);
   const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
+  const [tutorialCompleted, setTutorialCompleted] = useState<boolean>(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
   // Memoize week dates (only changes when date changes)
@@ -181,7 +182,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     }
   }, [userStats?.current_streak]);
 
-  const generateDailyMissions = async (path: any) => {
+  const generateDailyMissions = async (path: any, tutorialDone?: boolean) => {
     if (!path || !user) return;
 
     try {
@@ -200,7 +201,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       if (data?.missions) {
         // Always include core missions + optionally one generated mission
-        const shouldIncludeVideo = !userStats || userStats.current_streak < 2;
+        const shouldIncludeVideo = !(tutorialDone ?? tutorialCompleted);
         const videoMission = defaultMissions[0];
         const generatedMission = data.missions[0]; // Take first AI-generated mission
 
@@ -248,7 +249,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     } catch (error) {
       console.error("Error generating daily missions:", error);
       // Keep default missions on error
-      setDailyMissions(defaultMissions);
+      setDailyMissions(tutorialCompleted ? coreMissions : defaultMissions);
     }
   };
 
@@ -281,7 +282,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             .eq("user_id", user.id)
             .order("earned_at", { ascending: false })
             .limit(3),
-          supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
+          supabase.from("user_profiles").select("display_name, active_path_id, wizard_data").eq("user_id", user.id).single(),
           supabase
             .from("career_paths")
             .select("id, title, description, image_url, journey_duration, category, key_skills, target_companies")
@@ -300,6 +301,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       // Process results efficiently
       if (profileResult.data) {
         setDisplayName(profileResult.data.display_name || user.email?.split("@")[0] || "there");
+        // Persist tutorial completion flag from profile wizard_data
+        setTutorialCompleted(Boolean((profileResult.data as any).wizard_data?.tutorialCompleted));
 
         if (profileResult.data.active_path_id && pathsResult.data) {
           const activePathData = pathsResult.data.find((p) => p.id === profileResult.data.active_path_id);
@@ -308,7 +311,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
           // Generate daily missions if none exist for today
           if (!dailyActionsResult.data?.actions && activePathData) {
-            generateDailyMissions(activePathData);
+            const tutorialDone = Boolean((profileResult.data as any).wizard_data?.tutorialCompleted);
+            generateDailyMissions(activePathData, tutorialDone);
           }
         }
       }
@@ -330,20 +334,20 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         const actions = dailyActionsResult.data.actions as any[];
         if (actions.length > 0) {
           // Filter out video tutorial if streak >= 2
-          const shouldIncludeVideo = !statsResult.data || statsResult.data.current_streak < 2;
+          const shouldIncludeVideo = !tutorialCompleted;
           const filteredActions = shouldIncludeVideo
             ? actions
-            : actions.filter((action: any) => !action.title.includes("Video") && !action.title.includes("Tutorial"));
+            : actions.filter((action: any) => !((action.title || "").includes("Video") || (action.title || "").includes("Tutorial")));
 
           // Map stored actions to mission format
           const missions = filteredActions.map((action: any) => ({
             icon: action.completed
               ? Check
-              : action.title.includes("Video") || action.title.includes("Tutorial")
+              : (action.title || "").includes("Video") || (action.title || "").includes("Tutorial")
                 ? Video
-                : action.title.includes("Values") || action.title.includes("Reflect")
+                : (action.title || "").includes("Values") || (action.title || "").includes("Reflect")
                   ? Target
-                  : action.title.includes("Document") || action.title.includes("Progress")
+                  : (action.title || "").includes("Document") || (action.title || "").includes("Progress")
                     ? BookOpen
                     : Compass,
             title: action.title,
@@ -526,6 +530,22 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           actions: actionsToStore,
           all_completed: allCompleted,
         });
+      }
+
+      // If tutorial video mission completed, persist flag
+      if (isVideoMission(selectedMission?.title || "")) {
+        try {
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("wizard_data")
+            .eq("user_id", user!.id)
+            .maybeSingle();
+          const newWizard = { ...((profile?.wizard_data as any) || {}), tutorialCompleted: true };
+          await supabase.from("user_profiles").update({ wizard_data: newWizard }).eq("user_id", user!.id);
+          setTutorialCompleted(true);
+        } catch (e) {
+          console.error("Failed to persist tutorialCompleted flag:", e);
+        }
       }
 
       // Update local state with completed mission
