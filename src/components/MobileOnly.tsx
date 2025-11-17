@@ -1,5 +1,5 @@
 import { Smartphone } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import qrCode from "@/assets/qr-code.png";
 
 export const MobileOnly = () => {
   return (
@@ -53,11 +53,10 @@ export const MobileOnly = () => {
             </p>
             <div className="flex justify-center">
               <div className="bg-white p-3 rounded-xl shadow-lg">
-                <QRCodeSVG 
-                  value={window.location.origin}
-                  size={120}
-                  level="M"
-                  includeMargin={false}
+                <img 
+                  src={qrCode}
+                  alt="QR Code to open Naru on mobile"
+                  className="w-[120px] h-[120px]"
                 />
               </div>
             </div>
