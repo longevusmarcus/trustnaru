@@ -269,20 +269,57 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     if (!user) return;
     
     try {
-      const { error } = await supabase
-        .from('career_paths')
-        .update({ user_feedback: feedback })
-        .eq('id', pathId)
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setPaths(paths.map(p => 
-        p.id === pathId ? { ...p, user_feedback: feedback } : p
-      ));
+      if (feedback === 'down') {
+        // Delete the path when thumbs down is clicked
+        const { error } = await supabase
+          .from('career_paths')
+          .delete()
+          .eq('id', pathId)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        
+        // Remove from local state
+        const updatedPaths = paths.filter(p => p.id !== pathId);
+        setPaths(updatedPaths);
+        
+        // Update cache
+        try {
+          const cacheKey = `${CACHE_KEY}_${user.id}`;
+          localStorage.setItem(cacheKey, JSON.stringify({
+            data: updatedPaths,
+            timestamp: Date.now()
+          }));
+        } catch (e) {
+          console.warn('Cache update error:', e);
+        }
+        
+        toast({
+          title: "Path removed",
+          description: "Career path has been removed from your collection.",
+        });
+      } else {
+        // Save thumbs up feedback
+        const { error } = await supabase
+          .from('career_paths')
+          .update({ user_feedback: feedback })
+          .eq('id', pathId)
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setPaths(paths.map(p => 
+          p.id === pathId ? { ...p, user_feedback: feedback } : p
+        ));
+      }
     } catch (error) {
       console.error('Error saving feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save feedback. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
