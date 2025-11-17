@@ -235,7 +235,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="dark min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-muted/10 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-muted/10 p-4">
       <div className="w-full max-w-md">
         <AuthStatusBanner isOffline={isOffline} />
 
