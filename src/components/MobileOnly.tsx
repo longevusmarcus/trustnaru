@@ -1,22 +1,7 @@
-import { useEffect } from "react";
 import { Smartphone } from "lucide-react";
 import qrCode from "@/assets/qr-code.png";
 
 export const MobileOnly = () => {
-  useEffect(() => {
-    // Force dark mode on desktop blocker
-    const root = window.document.documentElement;
-    const currentTheme = root.classList.contains('light') ? 'light' : 'dark';
-    root.classList.remove('light', 'dark');
-    root.classList.add('dark');
-
-    return () => {
-      // Restore previous theme on unmount
-      root.classList.remove('dark');
-      root.classList.add(currentTheme);
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/10 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-4 animate-fade-in">
