@@ -65,16 +65,7 @@ const coreMissions = [
   },
 ];
 
-const defaultMissions = [
-  {
-    icon: Video,
-    title: "Watch Tutorial Video",
-    description: "Learn key insights for your journey",
-    duration: "3 min",
-    type: "Learning",
-  },
-  ...coreMissions,
-];
+const defaultMissions = coreMissions;
 
 const getFeaturedTopicForUser = (activePath: any, stats: any, allPaths: any[]) => {
   const topics = [
@@ -200,13 +191,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       if (data?.missions) {
         // Always include core missions + optionally one generated mission
-        const shouldIncludeVideo = !userStats || userStats.current_streak < 2;
-        const videoMission = defaultMissions[0];
         const generatedMission = data.missions[0]; // Take first AI-generated mission
-
-        const dailyMissionsList = shouldIncludeVideo
-          ? [videoMission, ...coreMissions, generatedMission].filter(Boolean)
-          : [...coreMissions, generatedMission].filter(Boolean);
+        const dailyMissionsList = [...coreMissions, generatedMission].filter(Boolean);
 
         setDailyMissions(dailyMissionsList);
 
