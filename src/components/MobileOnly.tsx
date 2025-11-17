@@ -1,4 +1,5 @@
 import { Smartphone } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 export const MobileOnly = () => {
   return (
@@ -44,9 +45,26 @@ export const MobileOnly = () => {
           </h2>
 
           {/* Description */}
-          <p className="text-center text-muted-foreground leading-relaxed">
+          <p className="text-center text-muted-foreground leading-relaxed mb-6">
             Naru is designed for your mobile device. Please visit this app on your smartphone for the best experience.
           </p>
+
+          {/* QR Code Section */}
+          <div className="pt-6 border-t border-muted/30">
+            <p className="text-center text-sm text-muted-foreground mb-4">
+              Scan to open on mobile
+            </p>
+            <div className="flex justify-center">
+              <div className="bg-white p-4 rounded-2xl shadow-lg">
+                <QRCodeSVG 
+                  value={window.location.origin}
+                  size={160}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
