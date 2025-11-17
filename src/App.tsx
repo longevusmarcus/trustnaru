@@ -37,7 +37,7 @@ const App = () => {
 
   if (!isMobile) {
     return (
-      <ThemeProvider defaultTheme="system" storageKey="copilot-ui-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
         <MobileOnly />
       </ThemeProvider>
     );
@@ -46,7 +46,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider defaultTheme="system" storageKey="copilot-ui-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
           <TooltipProvider>
             <Toaster />
             <Sonner />
