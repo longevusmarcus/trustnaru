@@ -98,9 +98,8 @@ export const SearchPage = () => {
                 >
                   <img 
                     src={item.image} 
-                    alt={`${item.name} - Career mentor profile and journey`}
+                    alt={item.name}
                     className="w-full h-full object-cover opacity-80"
-                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>

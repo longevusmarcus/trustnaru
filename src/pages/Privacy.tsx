@@ -1,13 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 
 const Privacy = () => {
-  useEffect(() => {
-    document.title = "Privacy Policy | Naru - How We Protect Your Data";
-  }, []);
-
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto">

@@ -479,9 +479,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
               <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
                 <img 
                   src={card.image} 
-                  alt={`${card.title} - Visualize your future career path`}
+                  alt={card.title}
                   className="w-full h-full object-cover opacity-80"
-                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 
@@ -505,9 +504,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                       <div key={idx} className="aspect-square rounded-lg overflow-hidden border border-border/50">
                         <img 
                           src={imgUrl} 
-                          alt={`${card.title} career journey scene ${idx + 1}`}
+                          alt={`${card.title} scene ${idx + 1}`}
                           className="w-full h-full object-cover"
-                          loading="lazy"
                         />
                       </div>
                     ))}

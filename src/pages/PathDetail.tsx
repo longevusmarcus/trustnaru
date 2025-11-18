@@ -229,9 +229,8 @@ export default function PathDetail() {
         <div className="relative h-64 -mx-4 mb-6 cursor-pointer" onClick={() => handleImageClick(card.image, 0)}>
           <img 
             src={card.image} 
-            alt={`${card.title} - Career path visualization showing future self`}
+            alt={card.title}
             className="w-full h-full object-cover"
-            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         </div>
@@ -267,10 +266,9 @@ export default function PathDetail() {
               >
                 <img 
                   src={img} 
-                  alt={`${card.title} career path visualization step ${imgIndex + 1}`} 
+                  alt={`Step ${imgIndex + 1}`} 
                   className="w-full h-full object-cover"
                   onClick={() => handleImageClick(img, imgIndex + 1)}
-                  loading="lazy"
                 />
                 <button
                   onClick={(e) => {
@@ -369,7 +367,7 @@ export default function PathDetail() {
             {selectedImage && (
               <img 
                 src={selectedImage} 
-                alt={`${card.title} career path visualization - expanded view`} 
+                alt="Full view" 
                 className="max-w-full max-h-full object-contain select-none"
               />
             )}
