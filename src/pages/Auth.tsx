@@ -49,6 +49,13 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Set page title for SEO
+  useEffect(() => {
+    document.title = isSignUp 
+      ? "Sign Up - Naru | Visualize Your Future Career Path" 
+      : "Login - Naru | Access Your Career Journey";
+  }, [isSignUp]);
+
   const {
     register,
     handleSubmit,

@@ -119,7 +119,12 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
       <div className="grid grid-cols-3 gap-3">
         {photos.map((photo, i) => (
           <div key={i} className="relative aspect-square">
-            <img src={photo} alt={`Upload ${i + 1}`} className="w-full h-full object-cover rounded-lg" />
+                <img 
+                  src={photo} 
+                  alt={`User reference photo ${i + 1} for career path visualization`} 
+                  className="w-full h-full object-cover rounded-lg" 
+                  loading="lazy"
+                />
             <button
               onClick={() => removePhoto(i)}
               className="absolute top-1 right-1 bg-background/80 rounded-full p-1 hover:bg-background"
