@@ -1,8 +1,13 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 const Cookies = () => {
+  useEffect(() => {
+    document.title = "Cookie Policy | Naru - How We Use Cookies";
+  }, []);
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto">

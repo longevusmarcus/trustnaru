@@ -689,8 +689,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                         firstPath.image_url ||
                         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop"
                       }
-                      alt={firstPath.title}
+                      alt={`${firstPath.title} - Your active career path visualization`}
                       className="w-full h-full object-cover opacity-80"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6">
