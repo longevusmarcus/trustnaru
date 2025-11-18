@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MobileOnly } from "@/components/MobileOnly";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState, useEffect } from "react";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -34,11 +35,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const isMobile = useIsMobile();
+  const [bypassMobileCheck, setBypassMobileCheck] = useState(false);
 
-  if (!isMobile) {
+  useEffect(() => {
+    const bypass = localStorage.getItem("bypass-mobile-check") === "true";
+    setBypassMobileCheck(bypass);
+  }, []);
+
+  const handleBypassMobileCheck = () => {
+    localStorage.setItem("bypass-mobile-check", "true");
+    setBypassMobileCheck(true);
+  };
+
+  if (!isMobile && !bypassMobileCheck) {
     return (
       <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
-        <MobileOnly />
+        <MobileOnly onContinueDesktop={handleBypassMobileCheck} />
       </ThemeProvider>
     );
   }

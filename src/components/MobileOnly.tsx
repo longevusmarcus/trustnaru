@@ -1,7 +1,12 @@
 import { Smartphone } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import qrCode from "@/assets/qr-code.png";
 
-export const MobileOnly = () => {
+interface MobileOnlyProps {
+  onContinueDesktop: () => void;
+}
+
+export const MobileOnly = ({ onContinueDesktop }: MobileOnlyProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/10 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-4 animate-fade-in">
@@ -51,7 +56,7 @@ export const MobileOnly = () => {
             <p className="text-center text-xs text-muted-foreground mb-3">
               Scan to open on mobile
             </p>
-            <div className="flex justify-center">
+            <div className="flex justify-center mb-4">
               <div className="bg-white p-3 rounded-xl shadow-lg">
                 <img 
                   src={qrCode}
@@ -60,6 +65,14 @@ export const MobileOnly = () => {
                 />
               </div>
             </div>
+            <Button
+              onClick={onContinueDesktop}
+              variant="ghost"
+              size="sm"
+              className="w-full text-xs text-muted-foreground hover:text-foreground"
+            >
+              Continue via Desktop
+            </Button>
           </div>
         </div>
       </div>
