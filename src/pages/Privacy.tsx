@@ -6,12 +6,14 @@ const Privacy = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <Link to="/auth">
-          <Button variant="ghost" size="sm" className="mb-6">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </Link>
+        <nav className="flex gap-2 mb-6">
+          <Link to="/">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+          </Link>
+        </nav>
 
         <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
           <h1 className="text-3xl font-light mb-2">Privacy Policy</h1>

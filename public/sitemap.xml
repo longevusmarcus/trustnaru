@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yoursite.lovable.app/</loc>
+    <loc>https://trustnaru.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://yoursite.lovable.app/auth</loc>
+    <loc>https://trustnaru.com/auth</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yoursite.lovable.app/settings</loc>
+    <loc>https://trustnaru.com/settings</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://yoursite.lovable.app/terms</loc>
+    <loc>https://trustnaru.com/terms</loc>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://yoursite.lovable.app/privacy</loc>
+    <loc>https://trustnaru.com/privacy</loc>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://yoursite.lovable.app/cookies</loc>
+    <loc>https://trustnaru.com/cookies</loc>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
 </urlset>
