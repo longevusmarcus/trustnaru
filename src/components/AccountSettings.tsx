@@ -1,12 +1,16 @@
-import { ArrowLeft, Moon } from "lucide-react";
+import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface AccountSettingsProps {
   onBack: () => void;
 }
 
 export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
+  const { theme, setTheme } = useTheme();
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -38,19 +42,45 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
                   <div>
                     <h3 className="text-base font-semibold mb-1">Theme</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Dark mode is currently enabled for all users
+                      Choose your preferred theme
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-3 rounded-lg border border-border p-4 bg-accent/5">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Moon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium">Dark Mode</div>
-                      <div className="text-xs text-muted-foreground">
-                        Active for all users
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between rounded-lg border border-border p-4 bg-accent/5">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                          <Sun className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">Light Mode</div>
+                          <div className="text-xs text-muted-foreground">
+                            Bright and clear
+                          </div>
+                        </div>
                       </div>
+                      <Switch
+                        checked={theme === "light"}
+                        onCheckedChange={(checked) => setTheme(checked ? "light" : "dark")}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg border border-border p-4 bg-accent/5">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                          <Moon className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">Dark Mode</div>
+                          <div className="text-xs text-muted-foreground">
+                            Easy on the eyes
+                          </div>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={theme === "dark"}
+                        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                      />
                     </div>
                   </div>
                 </div>

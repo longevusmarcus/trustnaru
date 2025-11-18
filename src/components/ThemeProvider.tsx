@@ -26,19 +26,33 @@ export function ThemeProvider({
   storageKey = "copilot-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  // Force dark mode - light mode disabled
-  const [theme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  );
 
   useEffect(() => {
     const root = window.document.documentElement;
+
     root.classList.remove("light", "dark");
-    root.classList.add("dark");
-  }, []);
+
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+
+      root.classList.add(systemTheme);
+      return;
+    }
+
+    root.classList.add(theme);
+  }, [theme]);
 
   const value = {
-    theme: "dark" as Theme,
-    setTheme: () => {
-      // Light mode disabled - do nothing
+    theme,
+    setTheme: (theme: Theme) => {
+      localStorage.setItem(storageKey, theme);
+      setTheme(theme);
     },
   };
 
