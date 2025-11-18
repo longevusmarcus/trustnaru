@@ -30,6 +30,7 @@ export const ProfilePage = () => {
   const [editName, setEditName] = useState<string>("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [uploadingCV, setUploadingCV] = useState(false);
+  const [actionsCompleted, setActionsCompleted] = useState(0);
   const cvInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export const ProfilePage = () => {
         setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
         // Load all data in parallel
-        const [profileResult, statsResult, badgesResult, allBadgesResult] = await Promise.all([
+        const [profileResult, statsResult, badgesResult, allBadgesResult, actionsResult] = await Promise.all([
           supabase
             .from('user_profiles')
             .select('display_name, cv_url, voice_transcription')
@@ -59,7 +60,11 @@ export const ProfilePage = () => {
           supabase
             .from('badges')
             .select('*')
-            .order('display_order', { ascending: true })
+            .order('display_order', { ascending: true }),
+          supabase
+            .from('daily_actions')
+            .select('actions')
+            .eq('user_id', user.id)
         ]);
 
         if (profileResult.data) {
@@ -88,6 +93,17 @@ export const ProfilePage = () => {
 
         if (allBadgesResult.data) {
           setAllBadges(allBadgesResult.data);
+        }
+
+        // Count completed actions
+        if (actionsResult.data) {
+          let completedCount = 0;
+          actionsResult.data.forEach((dayActions: any) => {
+            if (dayActions.actions && Array.isArray(dayActions.actions)) {
+              completedCount += dayActions.actions.filter((action: any) => action.completed).length;
+            }
+          });
+          setActionsCompleted(completedCount);
         }
       }
     };
@@ -305,9 +321,9 @@ export const ProfilePage = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Target className="h-4 w-4 text-foreground/60" />
-                <span className="text-sm">Missions Completed</span>
+                <span className="text-sm">Actions Completed</span>
               </div>
-              <span className="font-semibold">{userStats?.missions_completed || 0}</span>
+              <span className="font-semibold">{actionsCompleted}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
