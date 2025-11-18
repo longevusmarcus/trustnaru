@@ -110,17 +110,25 @@ const Auth = () => {
 
         // Track access code usage after successful signup
         const accessCode = localStorage.getItem("access_code");
-        if (accessCode && accessCode !== "become" && signUpData.user) {
-          // Mark code as used with user_id from signup response
-          await supabase
-            .from("access_codes")
-            .update({
-              used: true,
-              used_by: signUpData.user.id,
-              used_at: new Date().toISOString(),
-            })
-            .eq("code", accessCode)
-            .eq("used", false);
+        if (accessCode && signUpData.user) {
+          // Log code usage for analytics
+          await supabase.from("code_usage_log").insert({
+            code: accessCode,
+            user_id: signUpData.user.id,
+          });
+
+          // Mark non-"become" codes as used
+          if (accessCode !== "become") {
+            await supabase
+              .from("access_codes")
+              .update({
+                used: true,
+                used_by: signUpData.user.id,
+                used_at: new Date().toISOString(),
+              })
+              .eq("code", accessCode)
+              .eq("used", false);
+          }
 
           // Clear the code from localStorage
           localStorage.removeItem("access_code");
@@ -159,16 +167,25 @@ const Auth = () => {
 
         // Track access code usage after successful sign in as well
         const accessCode = localStorage.getItem("access_code");
-        if (accessCode && accessCode !== "become" && signInData?.user) {
-          await supabase
-            .from("access_codes")
-            .update({
-              used: true,
-              used_by: signInData.user.id,
-              used_at: new Date().toISOString(),
-            })
-            .eq("code", accessCode)
-            .eq("used", false);
+        if (accessCode && signInData?.user) {
+          // Log code usage for analytics
+          await supabase.from("code_usage_log").insert({
+            code: accessCode,
+            user_id: signInData.user.id,
+          });
+
+          // Mark non-"become" codes as used
+          if (accessCode !== "become") {
+            await supabase
+              .from("access_codes")
+              .update({
+                used: true,
+                used_by: signInData.user.id,
+                used_at: new Date().toISOString(),
+              })
+              .eq("code", accessCode)
+              .eq("used", false);
+          }
 
           localStorage.removeItem("access_code");
         }
