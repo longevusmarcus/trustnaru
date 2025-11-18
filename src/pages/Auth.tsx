@@ -117,6 +117,7 @@ const Auth = () => {
             .insert({
               code: accessCode,
               user_id: signUpData.user.id,
+              email: signUpData.user.email,
               used_at: new Date().toISOString(),
             });
 
@@ -177,6 +178,7 @@ const Auth = () => {
             .insert({
               code: accessCode,
               user_id: signInData.user.id,
+              email: signInData.user.email,
               used_at: new Date().toISOString(),
             });
 

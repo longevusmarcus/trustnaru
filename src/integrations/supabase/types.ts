@@ -175,18 +175,21 @@ export type Database = {
       code_usage_log: {
         Row: {
           code: string
+          email: string | null
           id: string
           used_at: string
           user_id: string | null
         }
         Insert: {
           code: string
+          email?: string | null
           id?: string
           used_at?: string
           user_id?: string | null
         }
         Update: {
           code?: string
+          email?: string | null
           id?: string
           used_at?: string
           user_id?: string | null
