@@ -15,7 +15,7 @@ export const MobileOnly = ({ onContinueDesktop }: MobileOnlyProps) => {
           <div className="w-20 h-20 relative">
             {/* Outer glow with elegant pulse */}
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/30 to-emerald-600/20 rounded-full blur-2xl animate-[pulse_4s_ease-in-out_infinite]" />
-            
+
             {/* Crystal ball container */}
             <div className="relative w-full h-full rounded-full bg-gradient-to-br from-emerald-400/20 via-emerald-300/15 to-emerald-500/25 backdrop-blur-sm flex items-center justify-center border border-emerald-400/20 shadow-2xl animate-[pulse_3.5s_ease-in-out_infinite]">
               {/* Inner sphere with light reflection */}
@@ -37,14 +37,10 @@ export const MobileOnly = ({ onContinueDesktop }: MobileOnlyProps) => {
           </div>
 
           {/* Title */}
-          <h1 className="text-center text-2xl font-light tracking-wide mb-2">
-            Naru
-          </h1>
+          <h1 className="text-center text-2xl font-light tracking-wide mb-2">Naru</h1>
 
           {/* Heading */}
-          <h2 className="text-center text-lg font-semibold mb-3">
-            Mobile experience only
-          </h2>
+          <h2 className="text-center text-lg font-semibold mb-3">Mobile experience only</h2>
 
           {/* Description */}
           <p className="text-center text-sm text-muted-foreground leading-relaxed mb-4">
@@ -53,16 +49,10 @@ export const MobileOnly = ({ onContinueDesktop }: MobileOnlyProps) => {
 
           {/* QR Code Section */}
           <div className="pt-4 border-t border-muted/30">
-            <p className="text-center text-xs text-muted-foreground mb-3">
-              Scan to open on mobile
-            </p>
+            <p className="text-center text-xs text-muted-foreground mb-3">Scan to open on mobile</p>
             <div className="flex justify-center mb-4">
               <div className="bg-white p-3 rounded-xl shadow-lg">
-                <img 
-                  src={qrCode}
-                  alt="QR Code to open Naru on mobile"
-                  className="w-[120px] h-[120px]"
-                />
+                <img src={qrCode} alt="QR Code to open Naru on mobile" className="w-[120px] h-[120px]" />
               </div>
             </div>
             <Button
@@ -71,7 +61,7 @@ export const MobileOnly = ({ onContinueDesktop }: MobileOnlyProps) => {
               size="sm"
               className="w-full text-xs text-muted-foreground hover:text-foreground"
             >
-              Continue via Desktop
+              Or continue via desktop
             </Button>
           </div>
         </div>
