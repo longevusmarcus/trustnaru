@@ -110,17 +110,28 @@ const Auth = () => {
 
         // Track access code usage after successful signup
         const accessCode = localStorage.getItem("access_code");
-        if (accessCode && accessCode !== "become" && signUpData.user) {
-          // Mark code as used with user_id from signup response
+        if (accessCode && signUpData.user) {
+          // Log code usage for analytics
           await supabase
-            .from("access_codes")
-            .update({
-              used: true,
-              used_by: signUpData.user.id,
+            .from("code_usage_log")
+            .insert({
+              code: accessCode,
+              user_id: signUpData.user.id,
               used_at: new Date().toISOString(),
-            })
-            .eq("code", accessCode)
-            .eq("used", false);
+            });
+
+          // Mark VIP codes as used (non-"become" codes)
+          if (accessCode !== "become") {
+            await supabase
+              .from("access_codes")
+              .update({
+                used: true,
+                used_by: signUpData.user.id,
+                used_at: new Date().toISOString(),
+              })
+              .eq("code", accessCode)
+              .eq("used", false);
+          }
 
           // Clear the code from localStorage
           localStorage.removeItem("access_code");
@@ -159,16 +170,28 @@ const Auth = () => {
 
         // Track access code usage after successful sign in as well
         const accessCode = localStorage.getItem("access_code");
-        if (accessCode && accessCode !== "become" && signInData?.user) {
+        if (accessCode && signInData?.user) {
+          // Log code usage for analytics
           await supabase
-            .from("access_codes")
-            .update({
-              used: true,
-              used_by: signInData.user.id,
+            .from("code_usage_log")
+            .insert({
+              code: accessCode,
+              user_id: signInData.user.id,
               used_at: new Date().toISOString(),
-            })
-            .eq("code", accessCode)
-            .eq("used", false);
+            });
+
+          // Mark VIP codes as used (non-"become" codes)
+          if (accessCode !== "become") {
+            await supabase
+              .from("access_codes")
+              .update({
+                used: true,
+                used_by: signInData.user.id,
+                used_at: new Date().toISOString(),
+              })
+              .eq("code", accessCode)
+              .eq("used", false);
+          }
 
           localStorage.removeItem("access_code");
         }
