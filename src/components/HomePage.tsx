@@ -298,11 +298,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       if (dailyActionsResult.data?.actions) {
         const actions = dailyActionsResult.data.actions as any[];
         if (actions.length > 0) {
-          // Filter out video tutorial if streak >= 2
-          const shouldIncludeVideo = !statsResult.data || statsResult.data.current_streak < 2;
-          const filteredActions = shouldIncludeVideo
-            ? actions
-            : actions.filter((action: any) => !action.title.includes("Video") && !action.title.includes("Tutorial"));
+          // Only take the first 3 core missions
+          const filteredActions = actions.slice(0, 3);
 
           // Map stored actions to mission format
           const missions = filteredActions.map((action: any) => ({
