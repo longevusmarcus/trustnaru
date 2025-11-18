@@ -176,63 +176,46 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     if (!path || !user) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke("generate-daily-missions", {
-        body: {
-          pathId: path.id,
-          pathTitle: path.title,
-          pathDescription: path.description,
-          category: path.category,
-          keySkills: path.key_skills || [],
-          roadmap: path.roadmap || [],
-        },
-      });
+      // Only use core missions
+      const dailyMissionsList = coreMissions;
+      setDailyMissions(dailyMissionsList);
 
-      if (error) throw error;
+      // Store in database
+      const today = new Date().toISOString().split("T")[0];
+      const actionsToStore = dailyMissionsList.map((m: any) => ({
+        title: m.title,
+        description: m.description,
+        duration: m.duration,
+        type: m.type,
+        completed: false,
+      }));
 
-      if (data?.missions) {
-        // Always include core missions + optionally one generated mission
-        const generatedMission = data.missions[0]; // Take first AI-generated mission
-        const dailyMissionsList = [...coreMissions, generatedMission].filter(Boolean);
+      const existing = await supabase
+        .from("daily_actions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("action_date", today)
+        .limit(1)
+        .maybeSingle();
 
-        setDailyMissions(dailyMissionsList);
-
-        // Store in database
-        const today = new Date().toISOString().split("T")[0];
-        const actionsToStore = dailyMissionsList.map((m: any) => ({
-          title: m.title,
-          description: m.description,
-          duration: m.duration,
-          type: m.type,
-          completed: false,
-        }));
-
-        const existing = await supabase
+      if (existing.error) throw existing.error;
+      if (existing.data) {
+        await supabase
           .from("daily_actions")
-          .select("id")
+          .update({ actions: actionsToStore, all_completed: false, path_id: path.id })
           .eq("user_id", user.id)
-          .eq("action_date", today)
-          .limit(1)
-          .maybeSingle();
-
-        if (existing.error) throw existing.error;
-        if (existing.data) {
-          await supabase
-            .from("daily_actions")
-            .update({ actions: actionsToStore, all_completed: false, path_id: path.id })
-            .eq("user_id", user.id)
-            .eq("action_date", today);
-        } else {
-          await supabase.from("daily_actions").insert({
-            user_id: user.id,
-            path_id: path.id,
-            action_date: today,
-            actions: actionsToStore,
-            all_completed: false,
-          });
-        }
+          .eq("action_date", today);
+      } else {
+        await supabase.from("daily_actions").insert({
+          user_id: user.id,
+          path_id: path.id,
+          action_date: today,
+          actions: actionsToStore,
+          all_completed: false,
+        });
       }
     } catch (error) {
-      console.error("Error generating daily missions:", error);
+      console.error("Error storing daily missions:", error);
       // Keep default missions on error
       setDailyMissions(defaultMissions);
     }
