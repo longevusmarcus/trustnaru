@@ -13,6 +13,11 @@ const Cookies = () => {
               Home
             </Button>
           </Link>
+          <Link to="/faq">
+            <Button variant="ghost" size="sm">
+              Check our FAQs
+            </Button>
+          </Link>
         </nav>
 
         <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
