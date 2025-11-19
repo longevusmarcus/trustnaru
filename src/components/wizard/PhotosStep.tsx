@@ -25,7 +25,7 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
       toast({
         title: "Too many photos",
         description: "Please upload exactly 10 photos",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -33,18 +33,20 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
     setUploading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
       const previewUrls: string[] = [];
 
       for (const file of files) {
         // Validate file type
-        if (!file.type.startsWith('image/')) {
+        if (!file.type.startsWith("image/")) {
           toast({
             title: "Invalid file",
             description: `${file.name} is not an image`,
-            variant: "destructive"
+            variant: "destructive",
           });
           continue;
         }
@@ -54,28 +56,24 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
           toast({
             title: "File too large",
             description: `${file.name} is larger than 5MB`,
-            variant: "destructive"
+            variant: "destructive",
           });
           continue;
         }
 
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('user-photos')
-          .upload(fileName, file);
+        const { error: uploadError } = await supabase.storage.from("user-photos").upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
         // Save storage path in DB (safer than public URL)
-        const { error: dbError } = await supabase
-          .from('user_photos')
-          .insert({
-            user_id: user.id,
-            photo_url: fileName,
-            is_reference: true
-          });
+        const { error: dbError } = await supabase.from("user_photos").insert({
+          user_id: user.id,
+          photo_url: fileName,
+          is_reference: true,
+        });
 
         if (dbError) throw dbError;
 
@@ -87,14 +85,14 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
       setPhotos([...photos, ...previewUrls]);
       toast({
         title: "Photos uploaded",
-        description: `${previewUrls.length} photo(s) uploaded successfully`
+        description: `${previewUrls.length} photo(s) uploaded successfully`,
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       toast({
         title: "Upload failed",
         description: "Failed to upload photos. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploading(false);
@@ -110,9 +108,9 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Show Your Best Self</h2>
         <p className="text-muted-foreground">
-          {hasExistingPhotos 
-            ? 'Update your photos or continue with existing ones' 
-            : 'Upload exactly 10 photos — we\'ll use these to generate your personalized career images'}
+          {hasExistingPhotos
+            ? "Update your photos or continue with existing ones"
+            : "Upload 6-10 photos of you — the more you add, the better the model can learn your features and generate realistic images of you in your future career path."}
         </p>
       </div>
 
@@ -152,7 +150,8 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
           <div className="flex-1 text-sm">
             <p className="font-medium">Tip</p>
             <p className="text-muted-foreground">
-              Upload clear photos of yourself. We'll use these to generate realistic images of you in your future career paths!
+              Upload clear photos of yourself. We'll use these to generate realistic images of you in your future career
+              paths!
             </p>
           </div>
         </div>
@@ -162,8 +161,18 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button onClick={onNext} disabled={(photos.length !== 10 && !hasExistingPhotos) || uploading} className="flex-1">
-          {uploading ? 'Uploading...' : photos.length !== 10 ? (hasExistingPhotos ? 'Use existing photos' : `Add ${10 - photos.length} more`) : 'Continue'}
+        <Button
+          onClick={onNext}
+          disabled={(photos.length !== 10 && !hasExistingPhotos) || uploading}
+          className="flex-1"
+        >
+          {uploading
+            ? "Uploading..."
+            : photos.length !== 10
+              ? hasExistingPhotos
+                ? "Use existing photos"
+                : `Add ${10 - photos.length} more`
+              : "Continue"}
         </Button>
       </div>
     </div>
