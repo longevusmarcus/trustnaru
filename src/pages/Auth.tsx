@@ -444,6 +444,15 @@ const Auth = () => {
           >
             Cookie Policy
           </a>
+          .{" "}
+          <a
+            href="/faq"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            Check our FAQs
+          </a>
         </p>
       </div>
     </div>
