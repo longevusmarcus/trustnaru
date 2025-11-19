@@ -110,7 +110,7 @@ export const PhotosStep = ({ onNext, onBack, hasExistingPhotos }: PhotosStepProp
         <p className="text-muted-foreground">
           {hasExistingPhotos
             ? "Update your photos or continue with existing ones"
-            : "Upload 6-10 photos of you — the more you add, the better the model can learn your features and generate professional shots of you in your future career path."}
+            : "Upload 6-10 photos of you — the more you add the the better the model can learn and the better you can see yourself in your future career path."}
         </p>
       </div>
 
