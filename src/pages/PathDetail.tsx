@@ -343,15 +343,20 @@ export default function PathDetail() {
           </div>
         )}
 
-        {/* Action Button */}
-        <Button 
-          className="w-full" 
-          size="lg" 
-          onClick={handleActivatePath}
-          disabled={activating}
-        >
-          {activating ? "Activating..." : "Activate This Path"}
-        </Button>
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 left-0 right-0 px-4 z-20">
+        <div className="max-w-md mx-auto">
+          <Button 
+            className="w-full shadow-lg" 
+            size="lg" 
+            onClick={handleActivatePath}
+            disabled={activating}
+          >
+            {activating ? "Activating..." : "Activate This Path"}
+          </Button>
+        </div>
       </div>
 
       {/* Image Viewer Dialog */}
