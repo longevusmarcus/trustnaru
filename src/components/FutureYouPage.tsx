@@ -498,7 +498,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-            generate more versions (passion mode)
+            generate more versions (lifestyle mode)
           </Button>
         </div>
 
@@ -694,7 +694,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
             title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
             <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
-            generate more versions (passion mode)
+            generate more versions (lifestyle mode)
           </Button>
         </div>
       </div>
