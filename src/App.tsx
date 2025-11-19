@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MobileOnly } from "@/components/MobileOnly";
@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -33,9 +34,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return session ? <>{children}</> : <Navigate to="/auth" replace />;
 };
 
-const App = () => {
+const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
   const [bypassMobileCheck, setBypassMobileCheck] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const bypass = localStorage.getItem("bypass-mobile-check") === "true";
@@ -47,14 +49,18 @@ const App = () => {
     setBypassMobileCheck(true);
   };
 
-  if (!isMobile && !bypassMobileCheck) {
-    return (
-      <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
-        <MobileOnly onContinueDesktop={handleBypassMobileCheck} />
-      </ThemeProvider>
-    );
+  // Pages that should NOT show the desktop blocker
+  const excludedPaths = ["/terms", "/privacy", "/cookies", "/faq"];
+  const isExcludedPath = excludedPaths.includes(location.pathname);
+
+  if (!isMobile && !bypassMobileCheck && !isExcludedPath) {
+    return <MobileOnly onContinueDesktop={handleBypassMobileCheck} />;
   }
 
+  return <>{children}</>;
+};
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -63,17 +69,20 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/cookies" element={<Cookies />} />
-                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <MobileCheckWrapper>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/cookies" element={<Cookies />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                  <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </MobileCheckWrapper>
             </BrowserRouter>
           </TooltipProvider>
         </ThemeProvider>
