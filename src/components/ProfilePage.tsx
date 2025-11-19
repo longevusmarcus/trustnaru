@@ -12,9 +12,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
 
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from "pdfjs-dist";
 // @ts-ignore - worker URL import for pdfjs
-import pdfWorker from 'pdfjs-dist/build/pdf.worker?url';
+import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export const ProfilePage = () => {
@@ -35,36 +35,25 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
-
       if (user) {
         const date = new Date(user.created_at);
-        setJoinDate(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+        setJoinDate(date.toLocaleDateString("en-US", { month: "long", year: "numeric" }));
 
         // Load all data in parallel
         const [profileResult, statsResult, badgesResult, allBadgesResult, actionsResult] = await Promise.all([
           supabase
-            .from('user_profiles')
-            .select('display_name, cv_url, voice_transcription')
-            .eq('user_id', user.id)
+            .from("user_profiles")
+            .select("display_name, cv_url, voice_transcription")
+            .eq("user_id", user.id)
             .maybeSingle(),
+          supabase.from("user_stats").select("*").eq("user_id", user.id).maybeSingle(),
           supabase
-            .from('user_stats')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle(),
-          supabase
-            .from('user_badges')
-            .select('*, badges (name, icon, description)')
-            .eq('user_id', user.id)
-            .order('earned_at', { ascending: false }),
-          supabase
-            .from('badges')
-            .select('*')
-            .order('display_order', { ascending: true }),
-          supabase
-            .from('daily_actions')
-            .select('actions')
-            .eq('user_id', user.id)
+            .from("user_badges")
+            .select("*, badges (name, icon, description)")
+            .eq("user_id", user.id)
+            .order("earned_at", { ascending: false }),
+          supabase.from("badges").select("*").order("display_order", { ascending: true }),
+          supabase.from("daily_actions").select("actions").eq("user_id", user.id),
         ]);
 
         if (profileResult.data) {
@@ -73,12 +62,12 @@ export const ProfilePage = () => {
             setDisplayName(profileResult.data.display_name);
             setEditName(profileResult.data.display_name);
           } else {
-            const defaultName = user.email?.split('@')[0] || 'User';
+            const defaultName = user.email?.split("@")[0] || "User";
             setDisplayName(defaultName);
             setEditName(defaultName);
           }
         } else {
-          const defaultName = user.email?.split('@')[0] || 'User';
+          const defaultName = user.email?.split("@")[0] || "User";
           setDisplayName(defaultName);
           setEditName(defaultName);
         }
@@ -114,27 +103,28 @@ export const ProfilePage = () => {
   const handleSaveName = async () => {
     if (!user || !editName.trim()) return;
 
-    const { error } = await supabase
-      .from('user_profiles')
-      .upsert({ 
-        user_id: user.id, 
-        display_name: editName.trim() 
-      }, {
-        onConflict: 'user_id'
-      });
+    const { error } = await supabase.from("user_profiles").upsert(
+      {
+        user_id: user.id,
+        display_name: editName.trim(),
+      },
+      {
+        onConflict: "user_id",
+      },
+    );
 
     if (error) {
       toast({
         title: "Error",
         description: "Could not update name",
-        variant: "destructive"
+        variant: "destructive",
       });
     } else {
       setDisplayName(editName.trim());
       setIsEditDialogOpen(false);
       toast({
         title: "Success",
-        description: "Name updated"
+        description: "Name updated",
       });
     }
   };
@@ -152,18 +142,18 @@ export const ProfilePage = () => {
     try {
       const buf = await file.arrayBuffer();
       const pdf = await (pdfjsLib as any).getDocument({ data: buf }).promise;
-      let text = '';
+      let text = "";
       const maxPages = Math.min(pdf.numPages, 30);
       for (let i = 1; i <= maxPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const strings = content.items.map((it: any) => it.str).join(' ');
-        text += strings + '\n';
+        const strings = content.items.map((it: any) => it.str).join(" ");
+        text += strings + "\n";
       }
       return text.trim();
     } catch (e) {
-      console.error('PDF parse failed:', e);
-      return '';
+      console.error("PDF parse failed:", e);
+      return "";
     }
   };
 
@@ -171,7 +161,11 @@ export const ProfilePage = () => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const validTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
     if (!validTypes.includes(file.type)) {
       toast({ title: "Invalid file type", description: "Upload a PDF or Word document", variant: "destructive" });
       return;
@@ -186,80 +180,82 @@ export const ProfilePage = () => {
     try {
       // Remove previous CV if present
       if (userProfile?.cv_url) {
-        const parts = userProfile.cv_url.split('/');
+        const parts = userProfile.cv_url.split("/");
         const oldName = parts[parts.length - 1];
-        if (oldName) await supabase.storage.from('cvs').remove([`${user.id}/${oldName}`]);
+        if (oldName) await supabase.storage.from("cvs").remove([`${user.id}/${oldName}`]);
       }
 
-      const fileName = `cv-${Date.now()}.${file.name.split('.').pop()}`;
+      const fileName = `cv-${Date.now()}.${file.name.split(".").pop()}`;
       const { error: uploadError } = await supabase.storage
-        .from('cvs')
-        .upload(`${user.id}/${fileName}`, file, { cacheControl: '3600' });
+        .from("cvs")
+        .upload(`${user.id}/${fileName}`, file, { cacheControl: "3600" });
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('cvs').getPublicUrl(`${user.id}/${fileName}`);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("cvs").getPublicUrl(`${user.id}/${fileName}`);
 
       // Merge wizard_data with extracted cv_text (PDF only)
-      let cv_text = '';
+      let cv_text = "";
       let cv_structured = null;
-      if (file.type === 'application/pdf') {
+      if (file.type === "application/pdf") {
         cv_text = await extractTextFromPdf(file);
-        
+
         // Vision-based parsing for structured data
         try {
-          console.log('Starting CV vision parsing...');
+          console.log("Starting CV vision parsing...");
           const arrayBuffer = await file.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
           const pdfBase64 = `data:application/pdf;base64,${base64}`;
-          
-          console.log('Calling parse-cv edge function...');
-          const { data: structuredData, error: parseError } = await supabase.functions.invoke('parse-cv', {
-            body: { pdfBase64 }
+
+          console.log("Calling parse-cv edge function...");
+          const { data: structuredData, error: parseError } = await supabase.functions.invoke("parse-cv", {
+            body: { pdfBase64 },
           });
-          
+
           if (parseError) {
-            console.error('Parse-cv error:', parseError);
+            console.error("Parse-cv error:", parseError);
           } else if (structuredData?.error) {
-            console.error('Parse-cv returned error:', structuredData.error);
+            console.error("Parse-cv returned error:", structuredData.error);
           } else if (structuredData) {
             cv_structured = structuredData;
-            console.log('CV structured data extracted:', cv_structured);
+            console.log("CV structured data extracted:", cv_structured);
           } else {
-            console.warn('Parse-cv returned empty data');
+            console.warn("Parse-cv returned empty data");
           }
         } catch (err) {
-          console.error('Vision parsing exception:', err);
+          console.error("Vision parsing exception:", err);
         }
       }
       const { data: existing } = await supabase
-        .from('user_profiles')
-        .select('wizard_data')
-        .eq('user_id', user.id)
+        .from("user_profiles")
+        .select("wizard_data")
+        .eq("user_id", user.id)
         .maybeSingle();
-      const mergedWizard = { 
-        ...((existing?.wizard_data as Record<string, any>) || {}), 
+      const mergedWizard = {
+        ...((existing?.wizard_data as Record<string, any>) || {}),
         ...(cv_text ? { cv_text } : {}),
-        ...(cv_structured ? { cv_structured } : {})
+        ...(cv_structured ? { cv_structured } : {}),
       };
 
       const { error: updateError } = await supabase
-        .from('user_profiles')
-        .upsert({ user_id: user.id, cv_url: publicUrl, wizard_data: mergedWizard }, { onConflict: 'user_id' });
+        .from("user_profiles")
+        .upsert({ user_id: user.id, cv_url: publicUrl, wizard_data: mergedWizard }, { onConflict: "user_id" });
       if (updateError) throw updateError;
 
       setUserProfile({ ...userProfile, cv_url: publicUrl });
-      const desc = cv_structured 
-        ? "Structured data extracted for personalized tips" 
-        : cv_text 
-          ? "Text extracted for smarter tips" 
+      const desc = cv_structured
+        ? "Structured data extracted for personalized tips"
+        : cv_text
+          ? "Text extracted for smarter tips"
           : "Uploaded successfully";
       toast({ title: "CV updated", description: desc });
     } catch (error) {
-      console.error('Error uploading CV:', error);
+      console.error("Error uploading CV:", error);
       toast({ title: "Upload failed", description: "Please try again", variant: "destructive" });
     } finally {
       setUploadingCV(false);
-      if (cvInputRef.current) cvInputRef.current.value = '';
+      if (cvInputRef.current) cvInputRef.current.value = "";
     }
   };
 
@@ -294,9 +290,7 @@ export const ProfilePage = () => {
                     <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleSaveName}>
-                      Save
-                    </Button>
+                    <Button onClick={handleSaveName}>Save</Button>
                   </div>
                 </div>
               </DialogContent>
@@ -402,7 +396,8 @@ export const ProfilePage = () => {
                 Voice Transcription
               </h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                "{userProfile.voice_transcription.substring(0, 200)}{userProfile.voice_transcription.length > 200 ? '...' : ''}"
+                "{userProfile.voice_transcription.substring(0, 200)}
+                {userProfile.voice_transcription.length > 200 ? "..." : ""}"
               </p>
             </CardContent>
           </Card>
@@ -412,9 +407,7 @@ export const ProfilePage = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">
-                Collection
-              </h3>
+              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Badges</h3>
               <Badge variant="outline" className="text-xs font-normal">
                 {badges.length}/{allBadges.length}
               </Badge>
@@ -423,20 +416,18 @@ export const ProfilePage = () => {
               {allBadges.map((badge: any) => {
                 const isEarned = badges.some((userBadge: any) => userBadge.badges?.name === badge.name);
                 return (
-                  <div 
-                    key={badge.id} 
+                  <div
+                    key={badge.id}
                     className={`flex flex-col items-center gap-2.5 p-3 rounded-lg border transition-all ${
-                      isEarned 
-                        ? 'border-border bg-card hover:bg-accent' 
-                        : 'border-border/50 bg-card/50 opacity-40 grayscale'
+                      isEarned
+                        ? "border-border bg-card hover:bg-accent"
+                        : "border-border/50 bg-card/50 opacity-40 grayscale"
                     }`}
                   >
                     <div className="text-3xl">{badge.icon}</div>
                     <div className="text-center space-y-1">
                       <p className="text-xs font-medium">{badge.name}</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">
-                        {badge.description}
-                      </p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{badge.description}</p>
                     </div>
                   </div>
                 );
@@ -447,18 +438,18 @@ export const ProfilePage = () => {
 
         {/* Account Actions */}
         <div className="space-y-2 pt-4">
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start" 
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
             size="lg"
-            onClick={() => window.location.href = '/settings'}
+            onClick={() => (window.location.href = "/settings")}
           >
             <Settings className="h-4 w-4 mr-3" />
             Account Settings
           </Button>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-muted-foreground hover:text-destructive" 
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-destructive"
             size="lg"
             onClick={handleSignOut}
           >
@@ -467,7 +458,7 @@ export const ProfilePage = () => {
           </Button>
         </div>
       </div>
-      
+
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
     </div>
   );
