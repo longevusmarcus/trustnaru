@@ -58,7 +58,7 @@ export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) 
         <div className="text-sm space-y-1">
           <p className="font-medium">Example prompts:</p>
           <ul className="text-muted-foreground space-y-1 ml-4">
-            <li>• how much are you looking to deviate or explore from industry or skill path?</li>
+            <li>• How much are you looking to deviate or explore from industry or skill path?</li>
             <li>• What activities make you lose track of time?</li>
             <li>• What kind of problems do you love solving?</li>
             <li>• What brings you joy and fulfillment?</li>
