@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Share2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target, ThumbsUp, ThumbsDown } from "lucide-react";
+import { CheckCircle2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
 const CACHE_KEY = 'career_paths_cache';
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
@@ -21,6 +22,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   const [isDemo, setIsDemo] = useState(false);
   const [hasVoiceTranscript, setHasVoiceTranscript] = useState(false);
+  const [activating, setActivating] = useState<string | null>(null);
   
   // Restore scroll position if returning from PathDetail
   useEffect(() => {
@@ -266,60 +268,88 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   }, [pathIds]); // Only re-run if path IDs change
 
   const handleFeedback = async (pathId: string, feedback: 'up' | 'down') => {
-    if (!user) return;
-    
-    try {
-      if (feedback === 'down') {
-        // Delete the path when thumbs down is clicked
-        const { error } = await supabase
-          .from('career_paths')
-          .delete()
-          .eq('id', pathId)
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-        
+    if (feedback === 'down') {
+      // Remove path from database if thumbs down
+      const { error: deleteError } = await supabase
+        .from('career_paths')
+        .delete()
+        .eq('id', pathId);
+      
+      if (!deleteError) {
         // Remove from local state
-        const updatedPaths = paths.filter(p => p.id !== pathId);
-        setPaths(updatedPaths);
-        
-        // Update cache
-        try {
+        setPaths(prevPaths => prevPaths.filter(p => p.id !== pathId));
+        // Clear cache
+        if (user) {
           const cacheKey = `${CACHE_KEY}_${user.id}`;
-          localStorage.setItem(cacheKey, JSON.stringify({
-            data: updatedPaths,
-            timestamp: Date.now()
-          }));
-        } catch (e) {
-          console.warn('Cache update error:', e);
+          localStorage.removeItem(cacheKey);
         }
-        
+      }
+      return;
+    }
+    
+    // Handle thumbs up
+    try {
+      await supabase
+        .from('career_paths')
+        .update({ user_feedback: 'up' })
+        .eq('id', pathId);
+    } catch (error) {
+      console.error('Error updating feedback:', error);
+    }
+  };
+
+  const handleActivatePath = async (pathId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user || !pathId) return;
+    
+    setActivating(pathId);
+    try {
+      // Update user profile with active path
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          active_path_id: pathId
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (profileError) throw profileError;
+
+      // Generate goals for this path
+      const { error: goalsError } = await supabase.functions.invoke('generate-goals', {
+        body: { pathId: pathId, userId: user.id }
+      });
+
+      if (goalsError) {
+        console.error('Error generating goals:', goalsError);
         toast({
-          title: "Path removed",
-          description: "Career path has been removed from your collection.",
+          title: "Path activated",
+          description: "Path activated successfully, but goal generation is taking longer than expected.",
         });
       } else {
-        // Save thumbs up feedback
-        const { error } = await supabase
-          .from('career_paths')
-          .update({ user_feedback: feedback })
-          .eq('id', pathId)
-          .eq('user_id', user.id);
-        
-        if (error) throw error;
-        
-        // Update local state
-        setPaths(paths.map(p => 
-          p.id === pathId ? { ...p, user_feedback: feedback } : p
-        ));
+        toast({
+          title: "Path activated!",
+          description: "Your personalized goals are ready.",
+        });
       }
+
+      // Check and award badges after activating path
+      await checkAndAwardBadges(user.id);
+
+      // Navigate to copilot page with a slight delay to ensure state is updated
+      setTimeout(() => {
+        navigate("/", { state: { navigateTo: "copilot" } });
+      }, 500);
     } catch (error) {
-      console.error('Error saving feedback:', error);
+      console.error('Error activating path:', error);
       toast({
-        title: "Error",
-        description: "Failed to save feedback. Please try again.",
+        title: "Activation failed",
+        description: "Failed to activate this path. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setActivating(null);
     }
   };
 
@@ -602,10 +632,11 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     variant="ghost" 
                     className="w-full justify-start" 
                     size="sm"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => handleActivatePath(card.id, e)}
+                    disabled={activating === card.id}
                   >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    {activating === card.id ? "Activating..." : "Activate"}
                   </Button>
                   
                   {/* Feedback buttons */}
