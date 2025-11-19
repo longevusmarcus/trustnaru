@@ -1,5 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
-import { CheckCircle2, RefreshCw, MapPin, Briefcase, Clock, DollarSign, Target, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  CheckCircle2,
+  RefreshCw,
+  MapPin,
+  Briefcase,
+  Clock,
+  DollarSign,
+  Target,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
 
-const CACHE_KEY = 'career_paths_cache';
+const CACHE_KEY = "career_paths_cache";
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => {
@@ -23,20 +33,20 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   const [isDemo, setIsDemo] = useState(false);
   const [hasVoiceTranscript, setHasVoiceTranscript] = useState(false);
   const [activating, setActivating] = useState<string | null>(null);
-  
+
   // Restore scroll position if returning from PathDetail
   useEffect(() => {
-    const savedScrollPos = sessionStorage.getItem('futurePageScrollPos');
+    const savedScrollPos = sessionStorage.getItem("futurePageScrollPos");
     if (savedScrollPos) {
       setTimeout(() => {
-        window.scrollTo({ top: parseInt(savedScrollPos), behavior: 'instant' });
-        sessionStorage.removeItem('futurePageScrollPos');
+        window.scrollTo({ top: parseInt(savedScrollPos), behavior: "instant" });
+        sessionStorage.removeItem("futurePageScrollPos");
       }, 100);
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, []);
-  
+
   useEffect(() => {
     if (user && !hasLoaded) {
       loadCareerPathsWithCache();
@@ -46,13 +56,13 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
   const checkIfDemo = async () => {
     if (!user) return;
-    
+
     const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('wizard_data, voice_transcription')
-      .eq('user_id', user.id)
+      .from("user_profiles")
+      .select("wizard_data, voice_transcription")
+      .eq("user_id", user.id)
       .maybeSingle();
-    
+
     // Show demo badge if user has no wizard data (hasn't completed wizard)
     setIsDemo(!profile?.wizard_data);
     // Check if user has voice transcript
@@ -69,11 +79,11 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     try {
       const cacheKey = `${CACHE_KEY}_${user.id}`;
       const cached = localStorage.getItem(cacheKey);
-      
+
       if (cached) {
         const { data, timestamp } = JSON.parse(cached);
         const age = Date.now() - timestamp;
-        
+
         // Use cache if less than 10 minutes old
         if (age < CACHE_DURATION && data && data.length > 0) {
           setPaths(data);
@@ -82,7 +92,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         }
       }
     } catch (e) {
-      console.warn('Cache read error:', e);
+      console.warn("Cache read error:", e);
     }
 
     // Load from database if no valid cache
@@ -98,31 +108,34 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('career_paths')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("career_paths")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (!error && data) {
         setPaths(data);
         setHasLoaded(true);
-        
+
         // Update cache
         try {
           const cacheKey = `${CACHE_KEY}_${user.id}`;
-          localStorage.setItem(cacheKey, JSON.stringify({
-            data,
-            timestamp: Date.now()
-          }));
+          localStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              data,
+              timestamp: Date.now(),
+            }),
+          );
         } catch (e) {
-          console.warn('Cache write error:', e);
+          console.warn("Cache write error:", e);
         }
-        
+
         // Recheck voice transcript status
         checkIfDemo();
       }
     } catch (error) {
-      console.error('Error loading career paths:', error);
+      console.error("Error loading career paths:", error);
     } finally {
       setLoading(false);
     }
@@ -130,33 +143,29 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
   const handleGenerateCVFocused = async () => {
     if (!user) return;
-    
+
     const previousCount = paths.length;
     setLoading(true);
     try {
       // Get user profile data
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data: profile } = await supabase.from("user_profiles").select("*").eq("user_id", user.id).single();
 
       if (!profile) return;
 
       // Check if user has completed the wizard (has CV, photos, and voice)
       if (!profile.cv_url || !profile.voice_transcription || !profile.wizard_data) {
         setLoading(false);
-        navigate('/', { state: { showWizard: true } });
+        navigate("/", { state: { showWizard: true } });
         return;
       }
 
       // Call generate-career-paths function (CV-focused)
-      const { data: result, error } = await supabase.functions.invoke('generate-career-paths', {
+      const { data: result, error } = await supabase.functions.invoke("generate-career-paths", {
         body: {
           wizardData: profile.wizard_data,
           cvUrl: profile.cv_url,
-          voiceTranscription: profile.voice_transcription
-        }
+          voiceTranscription: profile.voice_transcription,
+        },
       });
 
       if (error) throw error;
@@ -168,9 +177,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         const cacheKey = `${CACHE_KEY}_${user.id}`;
         localStorage.removeItem(cacheKey);
       } catch (e) {
-        console.warn('Cache clear error:', e);
+        console.warn("Cache clear error:", e);
       }
-      
+
       await loadCareerPaths();
 
       toast({
@@ -178,11 +187,11 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         description: `${newPathsCount} CV-focused career paths added to your collection. Your previous ${previousCount} paths are still here.`,
       });
     } catch (error) {
-      console.error('Error generating CV-focused paths:', error);
+      console.error("Error generating CV-focused paths:", error);
       toast({
         title: "Generation failed",
         description: "Failed to generate new paths. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -191,12 +200,12 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
   const handleGenerateVoiceFocused = async () => {
     if (!user || !hasVoiceTranscript) return;
-    
+
     const previousCount = paths.length;
     setLoading(true);
     try {
       // Call voice-focused generation function
-      const { data: result, error } = await supabase.functions.invoke('generate-voice-focused-paths');
+      const { data: result, error } = await supabase.functions.invoke("generate-voice-focused-paths");
 
       if (error) throw error;
 
@@ -207,9 +216,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         const cacheKey = `${CACHE_KEY}_${user.id}`;
         localStorage.removeItem(cacheKey);
       } catch (e) {
-        console.warn('Cache clear error:', e);
+        console.warn("Cache clear error:", e);
       }
-      
+
       await loadCareerPaths();
 
       toast({
@@ -217,35 +226,35 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         description: `${newPathsCount} passion-driven career paths added to your collection. Your previous ${previousCount} paths are still here.`,
       });
     } catch (error) {
-      console.error('Error generating voice-focused paths:', error);
+      console.error("Error generating voice-focused paths:", error);
       toast({
         title: "Generation failed",
         description: "Failed to generate new paths. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
-  
+
   const generateImages = async (pathId: string) => {
     if (generatingImages.has(pathId)) return;
-    
-    setGeneratingImages(prev => new Set(prev).add(pathId));
-    
+
+    setGeneratingImages((prev) => new Set(prev).add(pathId));
+
     try {
-      const { error } = await supabase.functions.invoke('generate-path-images', {
-        body: { pathId }
+      const { error } = await supabase.functions.invoke("generate-path-images", {
+        body: { pathId },
       });
-      
+
       if (error) throw error;
-      
+
       // Reload paths to get updated images
       await loadCareerPaths();
     } catch (error) {
-      console.error('Error generating images:', error);
+      console.error("Error generating images:", error);
     } finally {
-      setGeneratingImages(prev => {
+      setGeneratingImages((prev) => {
         const next = new Set(prev);
         next.delete(pathId);
         return next;
@@ -254,30 +263,27 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   };
 
   // Memoize path IDs to prevent unnecessary re-renders
-  const pathIds = useMemo(() => paths.map(p => p.id).join(','), [paths]);
-  
+  const pathIds = useMemo(() => paths.map((p) => p.id).join(","), [paths]);
+
   useEffect(() => {
     // Auto-generate images for paths that don't have them (only once per path)
     if (paths.length === 0) return;
-    
-    paths.forEach(path => {
+
+    paths.forEach((path) => {
       if ((!path.all_images || path.all_images.length === 0) && !generatingImages.has(path.id)) {
         generateImages(path.id);
       }
     });
   }, [pathIds]); // Only re-run if path IDs change
 
-  const handleFeedback = async (pathId: string, feedback: 'up' | 'down') => {
-    if (feedback === 'down') {
+  const handleFeedback = async (pathId: string, feedback: "up" | "down") => {
+    if (feedback === "down") {
       // Remove path from database if thumbs down
-      const { error: deleteError } = await supabase
-        .from('career_paths')
-        .delete()
-        .eq('id', pathId);
-      
+      const { error: deleteError } = await supabase.from("career_paths").delete().eq("id", pathId);
+
       if (!deleteError) {
         // Remove from local state
-        setPaths(prevPaths => prevPaths.filter(p => p.id !== pathId));
+        setPaths((prevPaths) => prevPaths.filter((p) => p.id !== pathId));
         // Clear cache
         if (user) {
           const cacheKey = `${CACHE_KEY}_${user.id}`;
@@ -286,43 +292,41 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       }
       return;
     }
-    
+
     // Handle thumbs up
     try {
-      await supabase
-        .from('career_paths')
-        .update({ user_feedback: 'up' })
-        .eq('id', pathId);
+      await supabase.from("career_paths").update({ user_feedback: "up" }).eq("id", pathId);
     } catch (error) {
-      console.error('Error updating feedback:', error);
+      console.error("Error updating feedback:", error);
     }
   };
 
   const handleActivatePath = async (pathId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user || !pathId) return;
-    
+
     setActivating(pathId);
     try {
       // Update user profile with active path
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .upsert({
+      const { error: profileError } = await supabase.from("user_profiles").upsert(
+        {
           user_id: user.id,
-          active_path_id: pathId
-        }, {
-          onConflict: 'user_id'
-        });
+          active_path_id: pathId,
+        },
+        {
+          onConflict: "user_id",
+        },
+      );
 
       if (profileError) throw profileError;
 
       // Generate goals for this path
-      const { error: goalsError } = await supabase.functions.invoke('generate-goals', {
-        body: { pathId: pathId, userId: user.id }
+      const { error: goalsError } = await supabase.functions.invoke("generate-goals", {
+        body: { pathId: pathId, userId: user.id },
       });
 
       if (goalsError) {
-        console.error('Error generating goals:', goalsError);
+        console.error("Error generating goals:", goalsError);
         toast({
           title: "Path activated",
           description: "Path activated successfully, but goal generation is taking longer than expected.",
@@ -342,107 +346,110 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         navigate("/", { state: { navigateTo: "copilot" } });
       }, 500);
     } catch (error) {
-      console.error('Error activating path:', error);
+      console.error("Error activating path:", error);
       toast({
         title: "Activation failed",
         description: "Failed to activate this path. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setActivating(null);
     }
   };
 
-  const futureCards = paths.length > 0 ? paths.map(path => ({
-    id: path.id,
-    title: path.title,
-    location: "Remote / Hybrid",
-    role: path.description,
-    schedule: path.journey_duration,
-    income: path.salary_range,
-    image: path.image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
-    pathImages: path.all_images || [],
-    category: path.category,
-    keySkills: path.key_skills || [],
-    lifestyleBenefits: path.lifestyle_benefits || [],
-    roadmap: path.roadmap || [],
-    affirmations: path.affirmations || [],
-    typicalDayRoutine: path.typical_day_routine || [],
-    userFeedback: path.user_feedback
-  })) : [
-    {
-      title: "Creative Strategist",
-      location: "Milan & Lisbon",
-      role: "Leading wellness ventures",
-      schedule: "Works 4 days/week with deep purpose",
-      income: "$100K per year",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
-      pathImages: [
-        "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=300&fit=crop"
-      ],
-      roadmap: [
-        { step: "Master brand storytelling", duration: "3 months" },
-        { step: "Launch wellness side project", duration: "6 months" },
-        { step: "Build European network", duration: "12 months" },
-        { step: "Transition to hybrid leadership role", duration: "18 months" }
-      ],
-      affirmations: [
-        "You create work that makes people feel alive",
-        "Your creativity flows when you trust your intuition",
-        "Balance and purpose drive your success"
-      ]
-    },
-    {
-      title: "Tech Entrepreneur",
-      location: "San Francisco",
-      role: "Building AI-powered platforms",
-      schedule: "Flexible remote work",
-      income: "$150K per year",
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop",
-      pathImages: [
-        "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop"
-      ],
-      roadmap: [
-        { step: "Complete AI/ML certification", duration: "4 months" },
-        { step: "Build MVP and get first users", duration: "8 months" },
-        { step: "Raise seed funding", duration: "14 months" },
-        { step: "Scale to 10K users", duration: "24 months" }
-      ],
-      affirmations: [
-        "You solve problems that matter to millions",
-        "Your technical vision shapes the future",
-        "Innovation comes naturally when you stay curious"
-      ]
-    },
-    {
-      title: "Design Director",
-      location: "Amsterdam",
-      role: "Leading creative teams",
-      schedule: "Hybrid work model",
-      income: "$120K per year",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop",
-      pathImages: [
-        "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop",
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop"
-      ],
-      roadmap: [
-        { step: "Lead 3 major design projects", duration: "5 months" },
-        { step: "Build and mentor design team", duration: "10 months" },
-        { step: "Establish design system practice", duration: "16 months" },
-        { step: "Secure director-level position", duration: "22 months" }
-      ],
-      affirmations: [
-        "Your designs create experiences people love",
-        "Leadership amplifies your creative impact",
-        "You inspire teams to do their best work"
-      ]
-    }
-  ];
+  const futureCards =
+    paths.length > 0
+      ? paths.map((path) => ({
+          id: path.id,
+          title: path.title,
+          location: "Remote / Hybrid",
+          role: path.description,
+          schedule: path.journey_duration,
+          income: path.salary_range,
+          image: path.image_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
+          pathImages: path.all_images || [],
+          category: path.category,
+          keySkills: path.key_skills || [],
+          lifestyleBenefits: path.lifestyle_benefits || [],
+          roadmap: path.roadmap || [],
+          affirmations: path.affirmations || [],
+          typicalDayRoutine: path.typical_day_routine || [],
+          userFeedback: path.user_feedback,
+        }))
+      : [
+          {
+            title: "Creative Strategist",
+            location: "Milan & Lisbon",
+            role: "Leading wellness ventures",
+            schedule: "Works 4 days/week with deep purpose",
+            income: "$100K per year",
+            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop",
+            pathImages: [
+              "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=300&fit=crop",
+            ],
+            roadmap: [
+              { step: "Master brand storytelling", duration: "3 months" },
+              { step: "Launch wellness side project", duration: "6 months" },
+              { step: "Build European network", duration: "12 months" },
+              { step: "Transition to hybrid leadership role", duration: "18 months" },
+            ],
+            affirmations: [
+              "You create work that makes people feel alive",
+              "Your creativity flows when you trust your intuition",
+              "Balance and purpose drive your success",
+            ],
+          },
+          {
+            title: "Tech Entrepreneur",
+            location: "San Francisco",
+            role: "Building AI-powered platforms",
+            schedule: "Flexible remote work",
+            income: "$150K per year",
+            image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop",
+            pathImages: [
+              "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop",
+            ],
+            roadmap: [
+              { step: "Complete AI/ML certification", duration: "4 months" },
+              { step: "Build MVP and get first users", duration: "8 months" },
+              { step: "Raise seed funding", duration: "14 months" },
+              { step: "Scale to 10K users", duration: "24 months" },
+            ],
+            affirmations: [
+              "You solve problems that matter to millions",
+              "Your technical vision shapes the future",
+              "Innovation comes naturally when you stay curious",
+            ],
+          },
+          {
+            title: "Design Director",
+            location: "Amsterdam",
+            role: "Leading creative teams",
+            schedule: "Hybrid work model",
+            income: "$120K per year",
+            image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop",
+            pathImages: [
+              "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop",
+              "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop",
+            ],
+            roadmap: [
+              { step: "Lead 3 major design projects", duration: "5 months" },
+              { step: "Build and mentor design team", duration: "10 months" },
+              { step: "Establish design system practice", duration: "16 months" },
+              { step: "Secure director-level position", duration: "22 months" },
+            ],
+            affirmations: [
+              "Your designs create experiences people love",
+              "Leadership amplifies your creative impact",
+              "You inspire teams to do their best work",
+            ],
+          },
+        ];
 
   if (loading) {
     return (
@@ -471,69 +478,64 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
-
         <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleGenerateCVFocused}
             disabled={loading}
             className="h-auto py-1 px-2 text-xs"
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate more versions (75% CV focus)
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            generate more versions (career climber mode)
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleGenerateVoiceFocused}
             disabled={loading || !hasVoiceTranscript}
             className="h-auto py-1 px-2 text-xs"
             title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate more versions (75% energy focus)
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            generate more versions (passion mode)
           </Button>
         </div>
 
         <div className="space-y-4">
           {futureCards.map((card, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="overflow-hidden border-border/50 cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => {
-                sessionStorage.setItem('futurePageScrollPos', window.scrollY.toString());
+                sessionStorage.setItem("futurePageScrollPos", window.scrollY.toString());
                 navigate(`/path/${index}`, { state: { card } });
               }}
             >
               <div className="relative h-64 bg-gradient-to-br from-muted to-muted/50">
-                <img 
-                  src={card.image} 
-                  alt={card.title}
-                  className="w-full h-full object-cover opacity-80"
-                />
+                <img src={card.image} alt={card.title} className="w-full h-full object-cover opacity-80" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                
+
                 {/* Demo Badge */}
                 {isDemo && (
                   <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm border border-border/50">
                     <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase">demo</span>
                   </div>
                 )}
-                
+
                 <div className="absolute bottom-4 left-4 right-4 text-white">
                   <h3 className="text-xl font-bold mb-2">{card.title}</h3>
                 </div>
               </div>
-              
+
               <CardContent className="p-6 space-y-4">
                 {/* Show 3 generated images if available */}
                 {card.pathImages && card.pathImages.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     {card.pathImages.slice(0, 3).map((imgUrl: string, idx: number) => (
                       <div key={idx} className="aspect-square rounded-lg overflow-hidden border border-border/50">
-                        <img 
-                          src={imgUrl} 
+                        <img
+                          src={imgUrl}
                           alt={`${card.title} scene ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
@@ -541,7 +543,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     ))}
                   </div>
                 )}
-                
+
                 <div className="text-sm text-muted-foreground">
                   <p className="line-clamp-3">{card.role}</p>
                 </div>
@@ -596,7 +598,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     ))}
                   </div>
                 )}
-                
+
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
                   <span>{card.schedule}</span>
@@ -606,7 +608,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                   <DollarSign className="h-4 w-4" />
                   <span>{card.income}</span>
                 </div>
-                
+
                 {card.category && (
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                     {card.category}
@@ -615,22 +617,22 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
                 <div className="space-y-2 pt-4 border-t border-border/50">
                   <Button
-                    variant="ghost" 
-                    className="w-full justify-start" 
+                    variant="ghost"
+                    className="w-full justify-start"
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      sessionStorage.setItem('futurePageScrollPos', window.scrollY.toString());
+                      sessionStorage.setItem("futurePageScrollPos", window.scrollY.toString());
                       navigate(`/path/${index}`, { state: { card } });
                     }}
                   >
                     <Target className="h-4 w-4 mr-2" />
                     View Path
                   </Button>
-                  
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
+
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
                     size="sm"
                     onClick={(e) => handleActivatePath(card.id, e)}
                     disabled={activating === card.id}
@@ -638,7 +640,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                     <CheckCircle2 className="h-4 w-4 mr-2" />
                     {activating === card.id ? "Activating..." : "Activate"}
                   </Button>
-                  
+
                   {/* Feedback buttons */}
                   {card.id && (
                     <div className="flex gap-1 justify-end pt-2">
@@ -647,9 +649,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleFeedback(card.id, 'up');
+                          handleFeedback(card.id, "up");
                         }}
-                        className={`h-auto p-1 ${card.userFeedback === 'up' ? 'text-primary' : 'text-muted-foreground/40'} hover:text-primary`}
+                        className={`h-auto p-1 ${card.userFeedback === "up" ? "text-primary" : "text-muted-foreground/40"} hover:text-primary`}
                       >
                         <ThumbsUp className="h-3.5 w-3.5" />
                       </Button>
@@ -658,9 +660,9 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleFeedback(card.id, 'down');
+                          handleFeedback(card.id, "down");
                         }}
-                        className={`h-auto p-1 ${card.userFeedback === 'down' ? 'text-destructive' : 'text-muted-foreground/40'} hover:text-destructive`}
+                        className={`h-auto p-1 ${card.userFeedback === "down" ? "text-destructive" : "text-muted-foreground/40"} hover:text-destructive`}
                       >
                         <ThumbsDown className="h-3.5 w-3.5" />
                       </Button>
@@ -673,26 +675,26 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
         </div>
 
         <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleGenerateCVFocused}
             disabled={loading}
             className="h-auto py-1 px-2 text-xs"
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate more versions (75% CV focus)
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            generate more versions (career climber mode)
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={handleGenerateVoiceFocused}
             disabled={loading || !hasVoiceTranscript}
             className="h-auto py-1 px-2 text-xs"
             title={!hasVoiceTranscript ? "Complete voice recording first" : ""}
           >
-            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-            generate more versions (75% energy focus)
+            <RefreshCw className={`h-3 w-3 mr-1 ${loading ? "animate-spin" : ""}`} />
+            generate more versions (passion mode)
           </Button>
         </div>
       </div>
