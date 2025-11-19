@@ -33,18 +33,16 @@ export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) 
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold">Share Your Energy</h2>
         <p className="text-muted-foreground">
-          {hasExistingVoice 
-            ? 'Update your energy recording or continue with the existing one'
-            : 'Record 15-30 seconds about what gives you energy lately'}
+          {hasExistingVoice
+            ? "Update your energy recording or continue with the existing one"
+            : "Record 15-30 seconds about what gives you energy lately"}
         </p>
       </div>
 
       <Card className="p-12 flex flex-col items-center space-y-6 min-h-[300px]">
         <div className="text-center space-y-2">
           <p className="font-medium">Tap the bubble below to record</p>
-          <p className="text-sm text-muted-foreground">
-            Speak naturally about what excites and energizes you
-          </p>
+          <p className="text-sm text-muted-foreground">Speak naturally about what excites and energizes you</p>
         </div>
 
         {transcription && (
@@ -60,6 +58,7 @@ export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) 
         <div className="text-sm space-y-1">
           <p className="font-medium">Example prompts:</p>
           <ul className="text-muted-foreground space-y-1 ml-4">
+            <li>• how much are you looking to deviate or explore from industry or skill path?</li>
             <li>• What activities make you lose track of time?</li>
             <li>• What kind of problems do you love solving?</li>
             <li>• What brings you joy and fulfillment?</li>
@@ -71,12 +70,8 @@ export const VoiceStep = ({ onNext, onBack, hasExistingVoice }: VoiceStepProps) 
         <Button variant="ghost" onClick={onBack} className="flex-1">
           Back
         </Button>
-        <Button 
-          onClick={handleContinue}
-          className="flex-1" 
-          disabled={!transcription && !hasExistingVoice}
-        >
-          {transcription ? 'Continue' : hasExistingVoice ? 'Use existing voice' : 'Continue'}
+        <Button onClick={handleContinue} className="flex-1" disabled={!transcription && !hasExistingVoice}>
+          {transcription ? "Continue" : hasExistingVoice ? "Use existing voice" : "Continue"}
         </Button>
       </div>
     </div>
