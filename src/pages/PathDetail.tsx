@@ -176,6 +176,16 @@ export default function PathDetail() {
 
       if (profileError) throw profileError;
 
+      // Clear cache to ensure dashboard shows updated path
+      if (user?.id) {
+        try {
+          const cacheKey = `career_paths_cache_${user.id}`;
+          localStorage.removeItem(cacheKey);
+        } catch (e) {
+          console.warn('Cache clear error:', e);
+        }
+      }
+
       // Generate goals for this path
       const { error: goalsError } = await supabase.functions.invoke('generate-goals', {
         body: { pathId: card.id, userId: user.id }
