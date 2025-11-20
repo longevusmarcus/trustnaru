@@ -144,10 +144,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
 
-  // Dynamic topic based on user context - memoized
+  // Dynamic topic based on user context - memoized with daily rotation
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
   const dailyTopic = useMemo(
     () => getFeaturedTopicForUser(activePath, userStats, allPaths),
-    [activePath, userStats?.current_streak, allPaths.length],
+    [activePath, userStats?.current_streak, allPaths.length, today],
   );
 
   // Scroll to top on mount
