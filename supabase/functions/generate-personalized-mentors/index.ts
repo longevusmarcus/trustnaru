@@ -114,7 +114,16 @@ CRITICAL INSTRUCTIONS FOR FINDING REAL PEOPLE:
 7. Absolutely avoid fabricated or placeholder URLs. Only include links you have verified open successfully.
 8. Prefer non-LinkedIn links (Instagram, TikTok, YouTube, Twitter/X, personal website). Use LinkedIn only if the person ALSO has an active, verifiable non‑LinkedIn source.
 
-Based on the following user's career interests and preferences, find 5 REAL, VERIFIABLE professionals who match their aspirations and are coherent with the user's journey focus:
+DIVERSITY REQUIREMENTS - CRITICAL:
+- Ensure each suggested person has DISTINCT characteristics from the others
+- Vary the companies/organizations (no more than 1 person from the same company)
+- Vary the specific roles/titles (avoid similar job titles like "CEO" multiple times)
+- Vary the industries and specializations
+- Vary the career stages (mix of early career, mid-level, senior, executive)
+- Vary the platforms and content types (don't suggest 5 Instagram influencers or 5 corporate executives)
+- Each profile should offer a UNIQUE perspective or approach to the career path
+
+Based on the following user's career interests and preferences, find 5 REAL, VERIFIABLE, and DIVERSE professionals who match their aspirations and are coherent with the user's journey focus:
 
 ${preferencesContext}
 
@@ -343,7 +352,43 @@ Return ONLY valid JSON in this exact format:
       return { valid: deduped, invalid };
     };
 
+    // Filter for diversity to avoid redundant profiles
+    const ensureDiversity = (profiles: any[]): any[] => {
+      const diverse: any[] = [];
+      const usedCompanies = new Set<string>();
+      const usedTitles = new Set<string>();
+      
+      for (const profile of profiles) {
+        const company = profile.company?.toLowerCase().trim() || '';
+        const title = profile.title?.toLowerCase().trim() || '';
+        
+        // Extract key title words to detect similarity (e.g., "CEO", "Founder", "Director")
+        const titleKeywords = title.split(/[\s,]+/).filter((w: string) => w.length > 3);
+        const hasSimilarTitle = titleKeywords.some((keyword: string) => 
+          Array.from(usedTitles).some((used: string) => used.includes(keyword) || keyword.includes(used))
+        );
+        
+        // Skip if company or title is too similar to already selected profiles
+        if (usedCompanies.has(company) || hasSimilarTitle) {
+          continue;
+        }
+        
+        diverse.push(profile);
+        if (company) usedCompanies.add(company);
+        if (titleKeywords.length > 0) {
+          titleKeywords.forEach((kw: string) => usedTitles.add(kw));
+        }
+        
+        if (diverse.length >= 5) break;
+      }
+      
+      return diverse;
+    };
+
     let { valid: verifiedMentors, invalid: invalidMentors } = await validateMentors(mentors);
+    
+    // Apply diversity filter
+    verifiedMentors = ensureDiversity(verifiedMentors);
 
     if (invalidMentors.length > 0 && verifiedMentors.length < 5) {
       try {
