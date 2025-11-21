@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,27 +91,87 @@ serve(async (req) => {
     // Build comprehensive user context with emphasis on skill gaps
     const userName = profile.display_name || user.email?.split("@")[0] || "there";
 
-    // Identify skill gaps first
+    // Analyze CV with Gemini vision if available
+    let cvAnalysis = null;
+    if (profile.cv_url) {
+      try {
+        console.log("Downloading and analyzing CV with Gemini vision...");
+        const cvResponse = await supabaseClient.storage.from("user_files").download(profile.cv_url);
+        if (cvResponse.data) {
+          const cvBuffer = await cvResponse.data.arrayBuffer();
+          const cvBase64 = encodeBase64(new Uint8Array(cvBuffer));
+
+          const cvAnalysisResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "Analyze this CV/resume and extract: current_role, years_of_experience, experience_level, key_skills (array), technical_skills (array), soft_skills (array), certifications (array), education, industries (array). Return as JSON.",
+                    },
+                    {
+                      type: "image_url",
+                      image_url: { url: `data:application/pdf;base64,${cvBase64}` },
+                    },
+                  ],
+                },
+              ],
+            }),
+          });
+
+          if (cvAnalysisResponse.ok) {
+            const cvData = await cvAnalysisResponse.json();
+            const content = cvData.choices?.[0]?.message?.content;
+            if (content) {
+              const jsonMatch = content.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                cvAnalysis = JSON.parse(jsonMatch[0]);
+                console.log("CV analysis successful:", cvAnalysis);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error analyzing CV:", error);
+      }
+    }
+
+    // Identify skill gaps using CV analysis or fallback to wizard_data
     let skillGaps: string[] = [];
     let currentSkills: string[] = [];
     let cvExperience = "";
     let cvEducation = "";
 
-    if (profile.wizard_data?.cv_structured) {
+    if (cvAnalysis) {
+      currentSkills = [
+        ...(cvAnalysis.key_skills || []),
+        ...(cvAnalysis.technical_skills || []),
+      ];
+      cvExperience = cvAnalysis.current_role || "";
+      cvEducation = cvAnalysis.education || "";
+    } else if (profile.wizard_data?.cv_structured) {
       const cv = profile.wizard_data.cv_structured;
       currentSkills = cv.key_skills || [];
       cvExperience = cv.current_role || "";
       cvEducation = cv.education || "";
-
-      const targetSkills = activePath.key_skills || [];
-      skillGaps = targetSkills.filter(
-        (skill: string) =>
-          !currentSkills.some(
-            (cs: string) =>
-              cs.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(cs.toLowerCase()),
-          ),
-      );
     }
+
+    const targetSkills = activePath.key_skills || [];
+    skillGaps = targetSkills.filter(
+      (skill: string) =>
+        !currentSkills.some(
+          (cs: string) =>
+            cs.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(cs.toLowerCase()),
+        ),
+    );
 
     let userContext = `
 User Profile:
@@ -160,10 +221,19 @@ ${profile.voice_transcription ? `Career Aspirations: "${profile.voice_transcript
 
     const prompt = `You are an expert career development strategist specializing in personalized learning paths with PROGRESSIVE DIFFICULTY SCALING
 
+GENERATION ID: ${Date.now()}-${Math.random().toString(36).substring(7)}
+
 USER CONTEXT:
 ${userContext}
 
-TASK: Generate exactly 3-5 HIGHLY SPECIFIC, CONCRETE resources for Level ${level}: ${levelDesc}
+TASK: Generate exactly 3-5 HIGHLY SPECIFIC, CONCRETE, and DIVERSE resources for Level ${level}: ${levelDesc}
+
+CRITICAL REQUIREMENT - AVOID REDUNDANCY:
+- DO NOT suggest multiple resources in the same narrow category (e.g., don't suggest 3 marketing courses)
+- ENSURE VARIETY across resource types: mix books, courses, certifications, tools, communities, events
+- ENSURE VARIETY across skills: cover different aspects of the career path, not just one skill area
+- BALANCE theory (books/courses) with practice (tools/projects) and community (networking/events)
+- If ${userName}'s CV shows expertise in an area, don't recommend beginner resources in that area
 
 CRITICAL - PROGRESSIVE DIFFICULTY SCALING:
 Level ${level} should be ${(level - 1) * 10}% MORE DIFFICULT than Level 1 baseline:
@@ -236,7 +306,17 @@ OUTPUT FORMAT (valid JSON only, no markdown):
         messages: [
           {
             role: "system",
-            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist and focus on skill gaps of the user`,
+            content: `You are a precise career development strategist specializing in PROGRESSIVE DIFFICULTY SCALING. Each level must be exactly ${(level - 1) * 10}% more challenging than the baseline. Only reference real courses, books, certifications that actually exist and focus on skill gaps of ${userName}.
+            
+${cvAnalysis ? `IMPORTANT CV CONTEXT: ${userName}'s actual background and experience from their CV analysis:
+- Current Role: ${cvAnalysis.current_role || "Not specified"}
+- Experience Level: ${cvAnalysis.experience_level || "Not specified"}
+- Years of Experience: ${cvAnalysis.years_of_experience || "Not specified"}
+- Key Skills: ${currentSkills.join(", ") || "Not specified"}
+- Education: ${cvAnalysis.education || "Not specified"}
+- Certifications: ${cvAnalysis.certifications?.join(", ") || "None listed"}
+
+Use this information to ensure resources are coherent with ${userName}'s actual experience and avoid redundant or irrelevant suggestions. Don't recommend resources that cover what ${userName} already knows or has studied.` : ""}`,
           },
           { role: "user", content: prompt },
         ],
