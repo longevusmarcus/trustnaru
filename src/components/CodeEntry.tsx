@@ -98,7 +98,7 @@ export const CodeEntry = ({ onSuccess }: CodeEntryProps) => {
                 Validating...
               </span>
             ) : (
-              "Continue"
+              "Join Private Beta (Founder Status)"
             )}
           </Button>
           {isValidating && (
