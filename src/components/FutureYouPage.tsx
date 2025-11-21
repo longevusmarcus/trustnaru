@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import {
   CheckCircle2,
   RefreshCw,
@@ -674,9 +675,16 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                           e.stopPropagation();
                           handleFeedback(card.id, "up");
                         }}
-                        className={`h-auto p-1 ${card.userFeedback === "up" ? "text-primary" : "text-muted-foreground/40"} hover:text-primary`}
+                        className={`h-auto p-1 ${card.userFeedback === "up" ? "text-primary" : "text-muted-foreground/40"} hover:text-primary transition-colors`}
                       >
-                        <ThumbsUp className="h-3.5 w-3.5" />
+                        <motion.div
+                          key={card.userFeedback === "up" ? "liked" : "unliked"}
+                          initial={{ scale: 1 }}
+                          animate={{ scale: [1, 1.3, 1] }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          <ThumbsUp className="h-3.5 w-3.5" />
+                        </motion.div>
                       </Button>
                       <Button
                         variant="ghost"
@@ -685,7 +693,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
                           e.stopPropagation();
                           handleFeedback(card.id, "down");
                         }}
-                        className={`h-auto p-1 ${card.userFeedback === "down" ? "text-destructive" : "text-muted-foreground/40"} hover:text-destructive`}
+                        className={`h-auto p-1 ${card.userFeedback === "down" ? "text-destructive" : "text-muted-foreground/40"} hover:text-destructive transition-colors`}
                       >
                         <ThumbsDown className="h-3.5 w-3.5" />
                       </Button>
