@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { encodeBase64 } from "https://deno.land/std@0.224.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,10 +51,20 @@ serve(async (req) => {
       try {
         console.log(`Processing CV for user: ${profile.user_id}`);
 
+        // Extract file path from cv_url (could be full URL or just path)
+        let filePath = profile.cv_url;
+        if (filePath.includes('supabase.co')) {
+          // Extract path from full URL
+          const urlParts = filePath.split('/cvs/');
+          filePath = urlParts[urlParts.length - 1];
+        }
+        
+        console.log(`Downloading CV from path: ${filePath}`);
+
         // Download CV from storage
         const { data: fileData, error: downloadError } = await supabase.storage
           .from("cvs")
-          .download(profile.cv_url);
+          .download(filePath);
 
         if (downloadError) {
           console.error(`Error downloading CV for ${profile.user_id}:`, downloadError);
@@ -61,9 +72,9 @@ serve(async (req) => {
           continue;
         }
 
-        // Convert to base64
+        // Convert to base64 using Deno's standard library (more memory efficient)
         const arrayBuffer = await fileData.arrayBuffer();
-        const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        const base64 = encodeBase64(new Uint8Array(arrayBuffer));
         const pdfBase64 = `data:application/pdf;base64,${base64}`;
 
         // Call parse-cv function
