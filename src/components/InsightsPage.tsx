@@ -705,7 +705,7 @@ export const InsightsPage = () => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                     placeholder="Ask about your journey, skills, market..."
-                    className="flex-1 h-9 text-[13px] border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 placeholder:text-muted-foreground/60"
+                    className="flex-1 h-9 text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-2 placeholder:text-muted-foreground/60"
                     disabled={isGenerating}
                   />
                   <Button
