@@ -1067,7 +1067,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                     <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                     <span className="text-xs font-medium text-primary">Welcome</span>
                   </div>
-                  <h3 className="text-2xl font-bold tracking-tight">Hey {displayName}, Welcome to Naru</h3>
+                  <h3 className="text-2xl font-bold tracking-tight">Hey {displayName}, welcome to Naru</h3>
                 </div>
                 <Button
                   variant="ghost"
