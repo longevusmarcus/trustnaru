@@ -1300,7 +1300,7 @@ export const ActionPage = () => {
                                   className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-colors font-medium disabled:opacity-50 whitespace-nowrap"
                                 >
                                   {loadingShortcuts[`${action.task}-${action.timeframe || "default"}`] ? "⏳" : "⚡"}{" "}
-                                  short cuts
+                                  cliffs notes
                                 </button>
                               </div>
                             )}
