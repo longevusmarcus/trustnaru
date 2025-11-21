@@ -637,7 +637,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         <div className="max-w-md mx-auto space-y-6">
           {/* Greeting */}
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-light tracking-wide">Hey, {displayName || "there"}</h2>
+            <h2 className="text-3xl font-light tracking-wide">Hey, {displayName ? displayName.charAt(0).toUpperCase() + displayName.slice(1) : "there"}</h2>
             <div className="flex items-center gap-2">
               <Popover open={explorationPopoverOpen} onOpenChange={setExplorationPopoverOpen}>
                 <PopoverTrigger asChild>
