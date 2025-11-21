@@ -57,7 +57,7 @@ const slides = [
       "Record what gives you energy",
       "Visualize your future selves",
       "Unlock your career paths",
-      "Get daily guidance/insights",
+      "Access daily guidance/insights",
       "Track your evolution",
     ],
   },
