@@ -1106,7 +1106,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Insights & Journeys</p>
                     <p className="text-xs text-muted-foreground">
-                      Access analyis, standout profiles, and personalized guidance for your journey
+                      Access analyses, standout profiles, and personalized guidance for your journey
                     </p>
                   </div>
                 </div>
