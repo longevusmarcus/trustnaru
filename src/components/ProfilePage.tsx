@@ -31,6 +31,7 @@ export const ProfilePage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [uploadingCV, setUploadingCV] = useState(false);
   const [actionsCompleted, setActionsCompleted] = useState(0);
+  const [showParsePrompt, setShowParsePrompt] = useState(false);
   const cvInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export const ProfilePage = () => {
         const [profileResult, statsResult, badgesResult, allBadgesResult, actionsResult] = await Promise.all([
           supabase
             .from("user_profiles")
-            .select("display_name, cv_url, voice_transcription")
+            .select("display_name, cv_url, voice_transcription, wizard_data")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase.from("user_stats").select("*").eq("user_id", user.id).maybeSingle(),
@@ -66,6 +67,12 @@ export const ProfilePage = () => {
             setDisplayName(defaultName);
             setEditName(defaultName);
           }
+
+          // Check if CV needs parsing (has CV but no structured data)
+          const wizardData = profileResult.data.wizard_data as any;
+          const hasCV = Boolean(profileResult.data.cv_url);
+          const hasStructuredData = wizardData?.cv_structured && Object.keys(wizardData.cv_structured).length > 0;
+          setShowParsePrompt(hasCV && !hasStructuredData);
         } else {
           const defaultName = user.email?.split("@")[0] || "User";
           setDisplayName(defaultName);
@@ -293,6 +300,11 @@ export const ProfilePage = () => {
           ? "Text extracted for smarter tips"
           : "Uploaded successfully";
       toast({ title: "CV updated", description: desc });
+      
+      // Hide parse prompt after successful upload with structured data
+      if (cv_structured) {
+        setShowParsePrompt(false);
+      }
     } catch (error) {
       console.error("Error uploading CV:", error);
       toast({ title: "Upload failed", description: "Please try again", variant: "destructive" });
@@ -305,6 +317,47 @@ export const ProfilePage = () => {
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
+        {/* CV Re-upload Prompt Banner */}
+        {showParsePrompt && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex gap-3">
+                <div className="flex-shrink-0">
+                  <Upload className="h-5 w-5 text-primary mt-0.5" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-sm">Enhanced CV Analysis Available</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Re-upload your CV to unlock AI-powered structured insights for more personalized career guidance
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 -mt-1 -mr-1"
+                      onClick={() => setShowParsePrompt(false)}
+                    >
+                      <span className="text-lg leading-none">×</span>
+                    </Button>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-8 text-xs"
+                    onClick={() => cvInputRef.current?.click()}
+                    disabled={uploadingCV}
+                  >
+                    <Upload className="h-3 w-3 mr-1.5" />
+                    {uploadingCV ? "Uploading..." : "Re-upload Now"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Profile Header */}
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
