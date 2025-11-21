@@ -277,6 +277,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   }, [pathIds]); // Only re-run if path IDs change
 
   const handleFeedback = async (pathId: string, feedback: "up" | "down") => {
+    const currentPath = paths.find((p) => p.id === pathId);
+    
     if (feedback === "down") {
       // Remove path from database if thumbs down
       const { error: deleteError } = await supabase.from("career_paths").delete().eq("id", pathId);
@@ -293,11 +295,32 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       return;
     }
 
-    // Handle thumbs up
+    // Handle thumbs up toggle (like/unlike)
+    const newFeedback = currentPath?.user_feedback === "up" ? null : "up";
+    
+    // Optimistic UI update - update immediately
+    setPaths((prevPaths) =>
+      prevPaths.map((p) =>
+        p.id === pathId ? { ...p, user_feedback: newFeedback } : p
+      )
+    );
+
     try {
-      await supabase.from("career_paths").update({ user_feedback: "up" }).eq("id", pathId);
+      await supabase.from("career_paths").update({ user_feedback: newFeedback }).eq("id", pathId);
+      
+      // Clear cache to ensure fresh data on next load
+      if (user) {
+        const cacheKey = `${CACHE_KEY}_${user.id}`;
+        localStorage.removeItem(cacheKey);
+      }
     } catch (error) {
       console.error("Error updating feedback:", error);
+      // Revert optimistic update on error
+      setPaths((prevPaths) =>
+        prevPaths.map((p) =>
+          p.id === pathId ? { ...p, user_feedback: currentPath?.user_feedback } : p
+        )
+      );
     }
   };
 
