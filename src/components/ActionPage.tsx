@@ -1289,7 +1289,7 @@ export const ActionPage = () => {
                                   }}
                                   className="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium whitespace-nowrap"
                                 >
-                                  💡 suggestions
+                                  💡 what to do
                                 </button>
                                 <button
                                   onClick={(e) => {
