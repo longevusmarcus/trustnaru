@@ -112,10 +112,13 @@ const Index = () => {
     if (page === "add") {
       setShowWizard(true);
       // Track wizard as explored
-      const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
-      if (!explored.includes("add")) {
-        const updated = [...explored, "add"];
-        localStorage.setItem("explored_sections", JSON.stringify(updated));
+      if (user?.id) {
+        const storageKey = `explored_sections_${user.id}`;
+        const explored = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        if (!explored.includes("add")) {
+          const updated = [...explored, "add"];
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+        }
       }
     } else {
       setCurrentPage(page);
@@ -125,10 +128,13 @@ const Index = () => {
       }
 
       // Track explored sections
-      const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
-      if (!explored.includes(page)) {
-        const updated = [...explored, page];
-        localStorage.setItem("explored_sections", JSON.stringify(updated));
+      if (user?.id) {
+        const storageKey = `explored_sections_${user.id}`;
+        const explored = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        if (!explored.includes(page)) {
+          const updated = [...explored, page];
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+        }
       }
     }
   };

@@ -186,16 +186,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
   // Track explored sections
   useEffect(() => {
-    const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
+    if (!user?.id) return;
+    
+    const storageKey = `explored_sections_${user.id}`;
+    const explored = JSON.parse(localStorage.getItem(storageKey) || "[]");
     setExploredSections(explored);
 
     // Mark dashboard as explored
     if (!explored.includes("home")) {
       const updated = [...explored, "home"];
       setExploredSections(updated);
-      localStorage.setItem("explored_sections", JSON.stringify(updated));
+      localStorage.setItem(storageKey, JSON.stringify(updated));
     }
-  }, []);
+  }, [user?.id]);
 
   // Show daily motivation every time streak increases
   useEffect(() => {
