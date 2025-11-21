@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MobileOnly } from "@/components/MobileOnly";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
 import Index from "./pages/Index";
@@ -69,6 +70,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <MobileCheckWrapper>
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
