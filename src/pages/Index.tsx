@@ -111,6 +111,12 @@ const Index = () => {
   const handleNavigation = (page: string) => {
     if (page === "add") {
       setShowWizard(true);
+      // Track wizard as explored
+      const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
+      if (!explored.includes("add")) {
+        const updated = [...explored, "add"];
+        localStorage.setItem("explored_sections", JSON.stringify(updated));
+      }
     } else {
       setCurrentPage(page);
       // Increment key to force remount of insights/copilot pages

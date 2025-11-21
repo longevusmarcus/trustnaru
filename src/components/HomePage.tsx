@@ -156,6 +156,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     { id: "insights", label: "Insights" },
     { id: "mentors", label: "Journeys" },
     { id: "community", label: "Community" },
+    { id: "add", label: "Create Path" },
     { id: "profile", label: "Profile" },
   ];
 
@@ -635,10 +636,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-light tracking-wide">Hey, {displayName || "there"}</h2>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/5">
-                <Flame className="h-4 w-4 text-orange-500" />
-                <span className="font-semibold text-sm">{userStats?.current_streak || 0}</span>
-              </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="relative flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/30 hover:bg-muted/50 transition-colors">
@@ -665,6 +662,10 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   </div>
                 </PopoverContent>
               </Popover>
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/5">
+                <Flame className="h-4 w-4 text-orange-500" />
+                <span className="font-semibold text-sm">{userStats?.current_streak || 0}</span>
+              </div>
             </div>
           </div>
 
