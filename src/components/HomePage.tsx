@@ -12,6 +12,7 @@ import {
   Pause,
   Check,
   Video,
+  CheckCircle2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,6 +26,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyMotivation } from "./DailyMotivation";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -141,6 +147,17 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [exploredSections, setExploredSections] = useState<string[]>([]);
+
+  const sections = [
+    { id: "home", label: "Dashboard" },
+    { id: "future", label: "Futures" },
+    { id: "copilot", label: "Copilot" },
+    { id: "insights", label: "Insights" },
+    { id: "mentors", label: "Journeys" },
+    { id: "community", label: "Community" },
+    { id: "profile", label: "Profile" },
+  ];
 
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -164,6 +181,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       setShowWelcome(true);
     }
   }, [userStats]);
+
+  // Track explored sections
+  useEffect(() => {
+    const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
+    setExploredSections(explored);
+
+    // Mark dashboard as explored
+    if (!explored.includes("home")) {
+      const updated = [...explored, "home"];
+      setExploredSections(updated);
+      localStorage.setItem("explored_sections", JSON.stringify(updated));
+    }
+  }, []);
 
   // Show daily motivation every time streak increases
   useEffect(() => {
@@ -609,6 +639,32 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 <Flame className="h-4 w-4 text-orange-500" />
                 <span className="font-semibold text-sm">{userStats?.current_streak || 0}</span>
               </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="relative flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span className="font-semibold text-sm">{exploredSections.length}</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-3" align="end">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium">Exploration</p>
+                      <p className="text-xs text-muted-foreground">{exploredSections.length}/{sections.length}</p>
+                    </div>
+                    <div className="space-y-1">
+                      {sections.map((section) => (
+                        <div key={section.id} className="flex items-center gap-2 text-xs">
+                          <div className={`w-1 h-1 rounded-full ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                          <span className={exploredSections.includes(section.id) ? "text-foreground" : "text-muted-foreground"}>
+                            {section.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
