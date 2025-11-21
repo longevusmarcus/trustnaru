@@ -370,11 +370,11 @@ export const ActionPage = () => {
     }
   };
 
-  const loadLevelResources = async (level: number) => {
+  const loadLevelResources = async (level: number, forceRefresh = false) => {
     if (!user) return;
 
-    // Check cache first
-    if (resourcesCache[level]) {
+    // Check cache first (unless forcing refresh)
+    if (!forceRefresh && resourcesCache[level]) {
       console.log(`Using cached resources for Level ${level}`);
       setLevelResources(resourcesCache[level]);
       return;
@@ -1096,7 +1096,8 @@ export const ActionPage = () => {
                       delete newCache[currentLevel];
                       return newCache;
                     });
-                    loadLevelResources(currentLevel);
+                    // Force refresh to generate new resources
+                    loadLevelResources(currentLevel, true);
                   }}
                   disabled={loadingResources}
                   className="h-7 text-xs"
