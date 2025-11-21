@@ -178,11 +178,14 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
   // Check if first time on dashboard
   useEffect(() => {
-    const hasSeenWelcome = localStorage.getItem("dashboard_welcome_seen");
+    if (!user?.id) return;
+    
+    const storageKey = `dashboard_welcome_seen_${user.id}`;
+    const hasSeenWelcome = localStorage.getItem(storageKey);
     if (!hasSeenWelcome && userStats) {
       setShowWelcome(true);
     }
-  }, [userStats]);
+  }, [userStats, user?.id]);
 
   // Track explored sections
   useEffect(() => {
@@ -1105,15 +1108,20 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 className="w-full h-11 rounded-full font-semibold"
                 onClick={() => {
                   setShowWelcome(false);
-                  localStorage.setItem("dashboard_welcome_seen", "true");
+                  if (user?.id) {
+                    localStorage.setItem(`dashboard_welcome_seen_${user.id}`, "true");
+                  }
                   
                   // Auto-open exploration popover after welcome
-                  const hasSeenExploration = localStorage.getItem("exploration_intro_shown");
-                  if (!hasSeenExploration) {
-                    setTimeout(() => {
-                      setExplorationPopoverOpen(true);
-                      localStorage.setItem("exploration_intro_shown", "true");
-                    }, 300);
+                  if (user?.id) {
+                    const explorationStorageKey = `exploration_intro_shown_${user.id}`;
+                    const hasSeenExploration = localStorage.getItem(explorationStorageKey);
+                    if (!hasSeenExploration) {
+                      setTimeout(() => {
+                        setExplorationPopoverOpen(true);
+                        localStorage.setItem(explorationStorageKey, "true");
+                      }, 300);
+                    }
                   }
                 }}
               >
