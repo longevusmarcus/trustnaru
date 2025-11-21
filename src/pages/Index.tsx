@@ -79,10 +79,10 @@ const Index = () => {
     }
   }, [location]);
 
-  // Scroll to top when page changes (unless restoring scroll position)
+  // Scroll to top when page changes
   useEffect(() => {
-    const isRestoringScroll = sessionStorage.getItem('futurePageScrollPos');
-    if (!isRestoringScroll) {
+    // Let FutureYouPage handle its own scroll restoration
+    if (currentPage !== "future") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentPage]);

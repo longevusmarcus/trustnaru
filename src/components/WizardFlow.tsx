@@ -32,6 +32,9 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   });
 
   useEffect(() => {
+    // Scroll to top when wizard opens
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
     const checkExistingData = async () => {
       if (!user) return;
 
