@@ -41,6 +41,7 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .maybeSingle();
 
+    const userName = profile?.display_name || user.email?.split('@')[0] || 'you';
     let cvAnalysis = '';
     
     // Analyze CV with Gemini vision if available
@@ -114,6 +115,12 @@ USER'S CURRENT PROFILE (FROM CV):
 - Industries: ${cv.industries?.join(', ') || 'Not specified'}
 
 IMPORTANT: Base your skill gap analysis on THIS actual experience. Identify gaps between their CURRENT skills and what's needed for "${pathTitle}" at Level ${level}.
+
+CRITICAL LANGUAGE RULE: Always address the person as "${userName}" or use "you/your". NEVER say "The user" or "They/Their". 
+Examples: 
+- "${userName} has strong experience in..." or "You have strong experience in..."
+- "Your background shows..." NOT "The user's background shows..."
+- "${userName} should focus on..." or "You should focus on..." NOT "They should focus on..."
 `;
               console.log('CV analyzed successfully for skill gap');
             }
@@ -137,7 +144,12 @@ Generate a clear, actionable skill gap analysis with 3-5 skill areas. For each s
 3. How to fill it (practical steps tailored to their background)
 4. Why it matters for this level
 
-${cvAnalysis ? 'CRITICAL: Your analysis MUST be personalized based on their actual CV. Reference their current skills, experience level, and background. Identify SPECIFIC gaps between what they have and what they need.' : 'Keep it simple, practical, and motivating. Focus on actionable steps.'}`;
+${cvAnalysis ? `CRITICAL: Your analysis MUST be personalized based on their actual CV. Reference their current skills, experience level, and background. Identify SPECIFIC gaps between what they have and what they need.
+
+LANGUAGE REQUIREMENTS:
+- Always use "${userName}" or "you/your" when referring to the person
+- NEVER use "The user", "They/Their", or "The individual"
+- Examples: "${userName} has experience in..." or "You have experience in..." or "Your background includes..."` : `Keep it simple, practical, and motivating. Focus on actionable steps. Always use "you/your" language, never "the user".`}`;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -157,7 +169,9 @@ ${cvAnalysis ? 'CRITICAL: Your analysis MUST be personalized based on their actu
             role: 'system', 
             content: `You are a career development expert who helps people identify and close skill gaps. 
             
-${cvAnalysis ? 'CRITICAL: You have access to this person\'s actual CV and professional background. Your skill gap analysis MUST be personalized and specific to their current experience level, existing skills, and background. Compare what they HAVE vs what they NEED for the target role.' : 'Provide clear, actionable skill gap analysis based on the career path requirements.'}` 
+${cvAnalysis ? `CRITICAL: You have access to this person's actual CV and professional background. Your skill gap analysis MUST be personalized and specific to their current experience level, existing skills, and background. Compare what they HAVE vs what they NEED for the target role.
+
+LANGUAGE: Always refer to them as "${userName}" or use "you/your". NEVER say "The user" or "They/Their".` : `Provide clear, actionable skill gap analysis based on the career path requirements. Always use "you/your" language to address the person directly.`}` 
           },
           { role: 'user', content: prompt }
         ],
