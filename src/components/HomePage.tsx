@@ -26,11 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyMotivation } from "./DailyMotivation";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -179,7 +175,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   // Check if first time on dashboard
   useEffect(() => {
     if (!user?.id) return;
-    
+
     const storageKey = `dashboard_welcome_seen_${user.id}`;
     const hasSeenWelcome = localStorage.getItem(storageKey);
     if (!hasSeenWelcome && userStats) {
@@ -190,7 +186,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   // Track explored sections
   useEffect(() => {
     if (!user?.id) return;
-    
+
     const storageKey = `explored_sections_${user.id}`;
     const explored = JSON.parse(localStorage.getItem(storageKey) || "[]");
     setExploredSections(explored);
@@ -654,7 +650,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-medium">Exploration</p>
-                      <p className="text-xs text-muted-foreground">{exploredSections.length}/{sections.length}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {exploredSections.length}/{sections.length}
+                      </p>
                     </div>
                     <div className="space-y-1">
                       {sections.map((section) => (
@@ -666,8 +664,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                           }}
                           className="w-full flex items-center gap-2 text-xs hover:bg-muted/50 rounded px-2 py-1 transition-colors"
                         >
-                          <div className={`w-1 h-1 rounded-full flex-shrink-0 ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`} />
-                          <span className={`text-left ${exploredSections.includes(section.id) ? "text-foreground" : "text-muted-foreground"}`}>
+                          <div
+                            className={`w-1 h-1 rounded-full flex-shrink-0 ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`}
+                          />
+                          <span
+                            className={`text-left ${exploredSections.includes(section.id) ? "text-foreground" : "text-muted-foreground"}`}
+                          >
                             {section.label}
                           </span>
                         </button>
@@ -1085,21 +1087,27 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <Compass className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Your Futures</p>
-                    <p className="text-xs text-muted-foreground">Explore visualized career paths and activate the one that resonates</p>
+                    <p className="text-xs text-muted-foreground">
+                      Generate and Explore visualized career paths. Activate the one that resonates
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Copilot</p>
-                    <p className="text-xs text-muted-foreground">Get daily actions, track progress, and level up through your learning path</p>
+                    <p className="text-xs text-muted-foreground">
+                      Get daily actions, track progress, and level up through your career path
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">Insights</p>
-                    <p className="text-xs text-muted-foreground">Discover opportunities, mentors, and personalized guidance for your journey</p>
+                    <p className="font-medium text-foreground">Insights & Journeys</p>
+                    <p className="text-xs text-muted-foreground">
+                      Access analyis, standout profiles, and personalized guidance for your journey
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1111,7 +1119,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   if (user?.id) {
                     localStorage.setItem(`dashboard_welcome_seen_${user.id}`, "true");
                   }
-                  
+
                   // Auto-open exploration popover after welcome
                   if (user?.id) {
                     const explorationStorageKey = `exploration_intro_shown_${user.id}`;
