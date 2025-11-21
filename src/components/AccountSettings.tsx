@@ -1,8 +1,11 @@
-import { ArrowLeft, Moon, Sun } from "lucide-react";
+import { ArrowLeft, Moon, Sun, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/ThemeProvider";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AccountSettingsProps {
   onBack: () => void;
@@ -10,6 +13,35 @@ interface AccountSettingsProps {
 
 export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleBatchProcessCVs = async () => {
+    setIsProcessing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-parse-cvs", {
+        body: {},
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Batch Processing Complete",
+        description: `Processed ${data.processed} CV(s). Check logs for details.`,
+      });
+    } catch (error) {
+      console.error("Batch processing error:", error);
+      toast({
+        title: "Processing Failed",
+        description: error instanceof Error ? error.message : "Failed to process CVs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -110,6 +142,35 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Card</span>
                   <div className="w-16 h-4 bg-card border border-border rounded" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Admin Tools Section */}
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              Admin Tools
+            </h2>
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-base font-semibold mb-1">Batch CV Processing</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Manually trigger batch processing of unparsed CVs
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleBatchProcessCVs}
+                    disabled={isProcessing}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Database className="h-4 w-4 mr-2" />
+                    {isProcessing ? "Processing CVs..." : "Process All Unparsed CVs"}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
