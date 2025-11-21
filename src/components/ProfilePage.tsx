@@ -218,7 +218,7 @@ export const ProfilePage = () => {
           // Retry logic: 3 attempts with exponential backoff (1s, 2s, 4s)
           const maxRetries = 3;
           let lastError = null;
-          
+
           for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
               console.log(`Calling parse-cv edge function (attempt ${attempt}/${maxRetries})...`);
@@ -229,17 +229,17 @@ export const ProfilePage = () => {
               if (parseError) {
                 lastError = parseError;
                 console.error(`Parse-cv error on attempt ${attempt}:`, parseError);
-                
+
                 // Don't retry on client errors (4xx)
-                if (parseError.message?.includes('400') || parseError.message?.includes('Invalid')) {
+                if (parseError.message?.includes("400") || parseError.message?.includes("Invalid")) {
                   break;
                 }
-                
+
                 // Retry on server errors or network issues
                 if (attempt < maxRetries) {
                   const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
                   console.log(`Retrying in ${delay}ms...`);
-                  await new Promise(resolve => setTimeout(resolve, delay));
+                  await new Promise((resolve) => setTimeout(resolve, delay));
                   continue;
                 }
               } else if (structuredData?.error) {
@@ -254,7 +254,7 @@ export const ProfilePage = () => {
                 console.warn(`Parse-cv returned empty data on attempt ${attempt}`);
                 if (attempt < maxRetries) {
                   const delay = Math.pow(2, attempt - 1) * 1000;
-                  await new Promise(resolve => setTimeout(resolve, delay));
+                  await new Promise((resolve) => setTimeout(resolve, delay));
                   continue;
                 }
               }
@@ -265,7 +265,7 @@ export const ProfilePage = () => {
               if (attempt < maxRetries) {
                 const delay = Math.pow(2, attempt - 1) * 1000;
                 console.log(`Retrying in ${delay}ms...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await new Promise((resolve) => setTimeout(resolve, delay));
               }
             }
           }
@@ -300,7 +300,7 @@ export const ProfilePage = () => {
           ? "Text extracted for smarter tips"
           : "Uploaded successfully";
       toast({ title: "CV updated", description: desc });
-      
+
       // Hide parse prompt after successful upload with structured data
       if (cv_structured) {
         setShowParsePrompt(false);
@@ -328,9 +328,9 @@ export const ProfilePage = () => {
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium text-sm">Enhanced CV Analysis Available</p>
+                      <p className="font-medium text-sm">CV Analysis 2.0 Available</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Re-upload your CV to unlock AI-powered structured insights for more personalized career guidance
+                        Re-upload your CV to activate new upgrades for more personalized career guidance
                       </p>
                     </div>
                     <Button
