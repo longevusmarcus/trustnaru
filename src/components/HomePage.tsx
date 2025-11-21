@@ -151,12 +151,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
   const sections = [
     { id: "home", label: "Dashboard" },
+    { id: "add", label: "Create Path" },
     { id: "future", label: "Futures" },
     { id: "copilot", label: "Copilot" },
     { id: "insights", label: "Insights" },
     { id: "mentors", label: "Journeys" },
     { id: "community", label: "Community" },
-    { id: "add", label: "Create Path" },
     { id: "profile", label: "Profile" },
   ];
 
@@ -651,12 +651,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                     </div>
                     <div className="space-y-1">
                       {sections.map((section) => (
-                        <div key={section.id} className="flex items-center gap-2 text-xs">
-                          <div className={`w-1 h-1 rounded-full ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`} />
-                          <span className={exploredSections.includes(section.id) ? "text-foreground" : "text-muted-foreground"}>
+                        <button
+                          key={section.id}
+                          onClick={() => onNavigate(section.id)}
+                          className="w-full flex items-center gap-2 text-xs hover:bg-muted/50 rounded px-2 py-1 transition-colors"
+                        >
+                          <div className={`w-1 h-1 rounded-full flex-shrink-0 ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                          <span className={`text-left ${exploredSections.includes(section.id) ? "text-foreground" : "text-muted-foreground"}`}>
                             {section.label}
                           </span>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
