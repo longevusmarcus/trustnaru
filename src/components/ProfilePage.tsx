@@ -201,27 +201,70 @@ export const ProfilePage = () => {
       if (file.type === "application/pdf") {
         cv_text = await extractTextFromPdf(file);
 
-        // Vision-based parsing for structured data
+        // Vision-based parsing for structured data with retry logic
         try {
           console.log("Starting CV vision parsing...");
           const arrayBuffer = await file.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
           const pdfBase64 = `data:application/pdf;base64,${base64}`;
 
-          console.log("Calling parse-cv edge function...");
-          const { data: structuredData, error: parseError } = await supabase.functions.invoke("parse-cv", {
-            body: { pdfBase64 },
-          });
+          // Retry logic: 3 attempts with exponential backoff (1s, 2s, 4s)
+          const maxRetries = 3;
+          let lastError = null;
+          
+          for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+              console.log(`Calling parse-cv edge function (attempt ${attempt}/${maxRetries})...`);
+              const { data: structuredData, error: parseError } = await supabase.functions.invoke("parse-cv", {
+                body: { pdfBase64 },
+              });
 
-          if (parseError) {
-            console.error("Parse-cv error:", parseError);
-          } else if (structuredData?.error) {
-            console.error("Parse-cv returned error:", structuredData.error);
-          } else if (structuredData) {
-            cv_structured = structuredData;
-            console.log("CV structured data extracted:", cv_structured);
-          } else {
-            console.warn("Parse-cv returned empty data");
+              if (parseError) {
+                lastError = parseError;
+                console.error(`Parse-cv error on attempt ${attempt}:`, parseError);
+                
+                // Don't retry on client errors (4xx)
+                if (parseError.message?.includes('400') || parseError.message?.includes('Invalid')) {
+                  break;
+                }
+                
+                // Retry on server errors or network issues
+                if (attempt < maxRetries) {
+                  const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+                  console.log(`Retrying in ${delay}ms...`);
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                  continue;
+                }
+              } else if (structuredData?.error) {
+                lastError = structuredData.error;
+                console.error(`Parse-cv returned error on attempt ${attempt}:`, structuredData.error);
+                break; // Don't retry on application-level errors
+              } else if (structuredData) {
+                cv_structured = structuredData;
+                console.log("CV structured data extracted successfully:", cv_structured);
+                break; // Success - exit retry loop
+              } else {
+                console.warn(`Parse-cv returned empty data on attempt ${attempt}`);
+                if (attempt < maxRetries) {
+                  const delay = Math.pow(2, attempt - 1) * 1000;
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                  continue;
+                }
+              }
+              break;
+            } catch (invokeError) {
+              lastError = invokeError;
+              console.error(`Exception during parse-cv attempt ${attempt}:`, invokeError);
+              if (attempt < maxRetries) {
+                const delay = Math.pow(2, attempt - 1) * 1000;
+                console.log(`Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+            }
+          }
+
+          if (!cv_structured && lastError) {
+            console.error("All parse-cv retry attempts failed:", lastError);
           }
         } catch (err) {
           console.error("Vision parsing exception:", err);
