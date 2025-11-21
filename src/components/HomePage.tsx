@@ -148,6 +148,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [showCelebration, setShowCelebration] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [exploredSections, setExploredSections] = useState<string[]>([]);
+  const [explorationPopoverOpen, setExplorationPopoverOpen] = useState(false);
 
   const sections = [
     { id: "home", label: "Dashboard" },
@@ -636,7 +637,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-light tracking-wide">Hey, {displayName || "there"}</h2>
             <div className="flex items-center gap-2">
-              <Popover>
+              <Popover open={explorationPopoverOpen} onOpenChange={setExplorationPopoverOpen}>
                 <PopoverTrigger asChild>
                   <button className="relative flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/30 hover:bg-muted/50 transition-colors">
                     <CheckCircle2 className="h-4 w-4" />
@@ -653,7 +654,10 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                       {sections.map((section) => (
                         <button
                           key={section.id}
-                          onClick={() => onNavigate(section.id)}
+                          onClick={() => {
+                            onNavigate(section.id);
+                            setExplorationPopoverOpen(false);
+                          }}
                           className="w-full flex items-center gap-2 text-xs hover:bg-muted/50 rounded px-2 py-1 transition-colors"
                         >
                           <div className={`w-1 h-1 rounded-full flex-shrink-0 ${exploredSections.includes(section.id) ? "bg-primary" : "bg-muted-foreground/30"}`} />
@@ -1099,6 +1103,15 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 onClick={() => {
                   setShowWelcome(false);
                   localStorage.setItem("dashboard_welcome_seen", "true");
+                  
+                  // Auto-open exploration popover after welcome
+                  const hasSeenExploration = localStorage.getItem("exploration_intro_shown");
+                  if (!hasSeenExploration) {
+                    setTimeout(() => {
+                      setExplorationPopoverOpen(true);
+                      localStorage.setItem("exploration_intro_shown", "true");
+                    }, 300);
+                  }
                 }}
               >
                 Explore Naru
