@@ -81,6 +81,7 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
 
       // 1) Try to extract text client-side for PDFs
       let extractedText: string | null = null;
+      let cv_structured: any = null;
       if (file.type === 'application/pdf') {
         try {
           const ab = await file.arrayBuffer();
@@ -97,6 +98,28 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
             extractedText = extractedText.slice(0, 60000);
           }
           console.log('Extracted CV text length:', extractedText?.length);
+
+          // Vision-based parsing for structured data
+          try {
+            console.log('Starting vision-based CV parsing...');
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
+            const pdfBase64 = `data:application/pdf;base64,${base64}`;
+
+            const { data: structuredData, error: parseError } = await supabase.functions.invoke("parse-cv", {
+              body: { pdfBase64 },
+            });
+
+            if (parseError) {
+              console.error('Parse-cv error:', parseError);
+            } else if (structuredData?.error) {
+              console.error('Parse-cv returned error:', structuredData.error);
+            } else if (structuredData) {
+              cv_structured = structuredData;
+              console.log('CV structured data extracted successfully');
+            }
+          } catch (visionError) {
+            console.error('Vision parsing exception:', visionError);
+          }
         } catch (e) {
           console.warn('PDF text extraction failed:', e);
         }
@@ -126,7 +149,11 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
         .maybeSingle();
 
       const baseWizard: any = (existingProfile?.wizard_data as any) || {};
-      const mergedWizard = { ...baseWizard, ...(extractedText ? { cv_text: extractedText } : {}) };
+      const mergedWizard = { 
+        ...baseWizard, 
+        ...(extractedText ? { cv_text: extractedText } : {}),
+        ...(cv_structured ? { cv_structured } : {})
+      };
 
       const { error: profileError } = await supabase
         .from('user_profiles')
@@ -134,7 +161,12 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
       if (profileError) { console.error('Profile update error:', profileError); throw profileError; }
 
       console.log('Profile updated successfully');
-      toast({ title: "CV uploaded successfully", description: extractedText ? "Your CV text was captured for AI insights" : "Your CV has been uploaded" });
+      const description = cv_structured 
+        ? "Structured data extracted for personalized tips" 
+        : extractedText 
+          ? "Text extracted for smarter tips" 
+          : "Your CV has been uploaded";
+      toast({ title: "CV uploaded successfully", description });
     } catch (error) {
       console.error('Upload error:', error);
       setUploadedFile(null);
