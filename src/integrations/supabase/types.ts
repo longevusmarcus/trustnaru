@@ -400,6 +400,48 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_mentors: {
+        Row: {
+          id: string
+          mentor_career_journey: string | null
+          mentor_company: string | null
+          mentor_description: string | null
+          mentor_name: string
+          mentor_platform_type: string | null
+          mentor_profile_url: string | null
+          mentor_tags: string[] | null
+          mentor_title: string | null
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          mentor_career_journey?: string | null
+          mentor_company?: string | null
+          mentor_description?: string | null
+          mentor_name: string
+          mentor_platform_type?: string | null
+          mentor_profile_url?: string | null
+          mentor_tags?: string[] | null
+          mentor_title?: string | null
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          mentor_career_journey?: string | null
+          mentor_company?: string | null
+          mentor_description?: string | null
+          mentor_name?: string
+          mentor_platform_type?: string | null
+          mentor_profile_url?: string | null
+          mentor_tags?: string[] | null
+          mentor_title?: string | null
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_badges: {
         Row: {
           badge_id: string
