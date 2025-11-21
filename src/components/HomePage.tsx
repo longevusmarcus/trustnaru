@@ -637,7 +637,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
         <div className="max-w-md mx-auto space-y-6">
           {/* Greeting */}
           <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-light tracking-wide">Hey, {displayName ? displayName.charAt(0).toUpperCase() + displayName.slice(1) : "there"}</h2>
+            <h2 className="text-3xl font-light tracking-wide">
+              Hey, {displayName ? displayName.charAt(0).toUpperCase() + displayName.slice(1) : "there"}
+            </h2>
             <div className="flex items-center gap-2">
               <Popover open={explorationPopoverOpen} onOpenChange={setExplorationPopoverOpen}>
                 <PopoverTrigger asChild>
@@ -1065,9 +1067,11 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 <div className="space-y-2">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                    <span className="text-xs font-medium text-primary">Welcome</span>
+                    <span className="text-xs font-medium text-primary">Founder status unlocked</span>
                   </div>
-                  <h3 className="text-2xl font-bold tracking-tight">Hey {displayName.charAt(0).toUpperCase() + displayName.slice(1)}, welcome to Naru</h3>
+                  <h3 className="text-2xl font-bold tracking-tight">
+                    Welcome to Naru, {displayName.charAt(0).toUpperCase() + displayName.slice(1)}
+                  </h3>
                 </div>
                 <Button
                   variant="ghost"
