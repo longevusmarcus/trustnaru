@@ -1067,7 +1067,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                     <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                     <span className="text-xs font-medium text-primary">Welcome</span>
                   </div>
-                  <h3 className="text-2xl font-bold tracking-tight">Welcome to Naru</h3>
+                  <h3 className="text-2xl font-bold tracking-tight">Hey {displayName}, Welcome to Naru</h3>
                 </div>
                 <Button
                   variant="ghost"
@@ -1075,7 +1075,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   className="h-8 w-8 rounded-full"
                   onClick={() => {
                     setShowWelcome(false);
-                    localStorage.setItem("dashboard_welcome_seen", "true");
+                    localStorage.setItem(`dashboard_welcome_seen_${user?.id}`, "true");
                   }}
                 >
                   <X className="h-4 w-4" />
