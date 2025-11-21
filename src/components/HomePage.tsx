@@ -140,6 +140,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [dailyMissions, setDailyMissions] = useState<any[]>(defaultMissions);
   const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // Memoize week dates (only changes when date changes)
   const weekDates = useMemo(() => getWeekDates(), []);
@@ -154,6 +155,14 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   // Scroll to top on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Check if first time on dashboard
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem("dashboard_welcome_seen");
+    if (!hasSeenWelcome) {
+      setTimeout(() => setShowWelcome(true), 800);
+    }
   }, []);
 
   // Show daily motivation every time streak increases
@@ -972,6 +981,59 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           </Drawer>
         </div>
       </div>
+
+      {/* Welcome Message for First-Time Users */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-background/80 backdrop-blur-sm animate-in fade-in duration-500">
+          <div className="relative max-w-md w-full bg-gradient-to-br from-background via-background to-muted/20 border border-border/50 rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl pointer-events-none" />
+            <div className="relative space-y-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-xs font-medium text-primary">Welcome</span>
+                  </div>
+                  <h3 className="text-2xl font-bold tracking-tight">Your journey begins</h3>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => {
+                    setShowWelcome(false);
+                    localStorage.setItem("dashboard_welcome_seen", "true");
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-4 text-sm text-muted-foreground">
+                <p className="leading-relaxed">
+                  Your dashboard tracks your progress through missions, streaks, and badges as you work toward your activated path.
+                </p>
+                <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                  <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-xs leading-relaxed">
+                    Complete daily missions to build your streak and unlock achievements on your journey.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                className="w-full h-11 rounded-full font-semibold"
+                onClick={() => {
+                  setShowWelcome(false);
+                  localStorage.setItem("dashboard_welcome_seen", "true");
+                }}
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
