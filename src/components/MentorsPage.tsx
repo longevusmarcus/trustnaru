@@ -674,7 +674,35 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                   )}
 
                   {/* Clone Profile Button */}
-                  <CloneButton mentorId={mentor.id} />
+                  <div className="flex gap-2">
+                    <CloneButton mentorId={mentor.id} />
+                    {mentor.profile_url && (
+                      <Button
+                        variant={isMentorSaved(mentor.profile_url) ? "default" : "outline"}
+                        size="sm"
+                        className="text-xs h-9 px-3"
+                        onClick={() => isMentorSaved(mentor.profile_url) ? unsaveMentor(mentor.profile_url) : saveMentor({
+                          name: mentor.name,
+                          title: mentor.title,
+                          company: mentor.company,
+                          profile_url: mentor.profile_url,
+                          platform_type: 'linkedin',
+                          description: mentor.headline,
+                          tags: mentor.key_skills?.slice(0, 3) || [],
+                          career_journey: mentor.career_path?.[0]?.title || ''
+                        })}
+                        disabled={savingMentorId === mentor.profile_url}
+                      >
+                        {savingMentorId === mentor.profile_url ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : isMentorSaved(mentor.profile_url) ? (
+                          <BookmarkCheck className="h-3 w-3" />
+                        ) : (
+                          <Bookmark className="h-3 w-3" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
         ))}
