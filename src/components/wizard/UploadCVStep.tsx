@@ -1,7 +1,7 @@
 import { Upload, FileText, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
@@ -19,8 +19,20 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
   const [uploading, setUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
+  const [tutorialWatched, setTutorialWatched] = useState(false);
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const watched = localStorage.getItem('tutorial-watched') === 'true';
+    setTutorialWatched(watched);
+  }, []);
+
+  const handleTutorialWatched = () => {
+    localStorage.setItem('tutorial-watched', 'true');
+    setTutorialWatched(true);
+    toast({ title: "Great!", description: "Thanks for watching the tutorial!" });
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -209,39 +221,41 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
         </Button>
       </div>
 
-      {/* Tutorial Video Card */}
-      <Card className="p-6 border-2 mt-6">
-        <div className="space-y-4">
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-semibold">Watch Tutorial Video</h3>
-            <p className="text-sm text-muted-foreground">Learn key insights for your journey (3 min)</p>
-          </div>
-          <div className="bg-muted/30 rounded-2xl p-4">
-            <div style={{ position: "relative", paddingBottom: "140.99216710182768%", height: 0 }}>
-              <iframe
-                src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
-                frameBorder="0"
-                allowFullScreen
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "12px",
-                }}
-              />
+      {/* Tutorial Video Card - Only show if not watched */}
+      {!tutorialWatched && (
+        <Card className="p-6 border-2 mt-6">
+          <div className="space-y-4">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">Watch Tutorial Video</h3>
+              <p className="text-sm text-muted-foreground">Learn key insights for your journey (3 min)</p>
             </div>
+            <div className="bg-muted/30 rounded-2xl p-4">
+              <div style={{ position: "relative", paddingBottom: "140.99216710182768%", height: 0 }}>
+                <iframe
+                  src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
+                  frameBorder="0"
+                  allowFullScreen
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "12px",
+                  }}
+                />
+              </div>
+            </div>
+            <Button
+              onClick={handleTutorialWatched}
+              className="w-full h-12 rounded-full font-medium"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Watched it
+            </Button>
           </div>
-          <Button
-            onClick={() => toast({ title: "Great!", description: "Thanks for watching the tutorial!" })}
-            className="w-full h-12 rounded-full font-medium"
-          >
-            <Check className="h-4 w-4 mr-2" />
-            Watched it
-          </Button>
-        </div>
-      </Card>
+        </Card>
+      )}
     </div>
   );
 };
