@@ -1088,7 +1088,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Your Futures</p>
                     <p className="text-xs text-muted-foreground">
-                      Generate and Explore visualized career paths. Activate the one that resonates
+                      Generate and explore visualized career paths. Activate the one that resonates
                     </p>
                   </div>
                 </div>
