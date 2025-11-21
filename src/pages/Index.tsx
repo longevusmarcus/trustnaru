@@ -117,6 +117,13 @@ const Index = () => {
       if (page === "insights" || page === "copilot") {
         setPageRenderKey((prev) => prev + 1);
       }
+
+      // Track explored sections
+      const explored = JSON.parse(localStorage.getItem("explored_sections") || "[]");
+      if (!explored.includes(page)) {
+        const updated = [...explored, page];
+        localStorage.setItem("explored_sections", JSON.stringify(updated));
+      }
     }
   };
 
