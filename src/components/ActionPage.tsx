@@ -201,6 +201,15 @@ export const ActionPage = () => {
     }
   }, [currentLevel, activePath, user]);
 
+  // Clear resource cache when active path changes to force regeneration
+  useEffect(() => {
+    if (activePath?.id) {
+      console.log('Active path changed, clearing resource cache');
+      setResourcesCache({});
+      setLevelResources([]);
+    }
+  }, [activePath?.id]);
+
   // Also reload when page becomes visible (browser tab focus)
   useEffect(() => {
     loadData();
