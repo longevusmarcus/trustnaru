@@ -152,7 +152,7 @@ const Index = () => {
 
   const handleCodeSuccess = async () => {
     setShowCodeEntry(false);
-    setCurrentPage("future");
+    setCurrentPage("home");
 
     // Mark onboarding as completed
     if (user) {
