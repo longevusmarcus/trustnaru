@@ -160,10 +160,10 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   // Check if first time on dashboard
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem("dashboard_welcome_seen");
-    if (!hasSeenWelcome) {
-      setTimeout(() => setShowWelcome(true), 800);
+    if (!hasSeenWelcome && userStats) {
+      setShowWelcome(true);
     }
-  }, []);
+  }, [userStats]);
 
   // Show daily motivation every time streak increases
   useEffect(() => {
