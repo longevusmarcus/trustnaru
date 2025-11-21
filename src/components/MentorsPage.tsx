@@ -898,17 +898,43 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                       )}
                     </div>
 
-                    {/* Action Button */}
+                    {/* Action Buttons */}
                     {result.profile_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs h-8"
-                        onClick={() => window.open(result.profile_url, '_blank')}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1.5" />
-                        View Profile
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-8"
+                          onClick={() => window.open(result.profile_url, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1.5" />
+                          View Profile
+                        </Button>
+                        <Button
+                          variant={isMentorSaved(result.profile_url) ? "default" : "outline"}
+                          size="sm"
+                          className="text-xs h-8 px-3"
+                          onClick={() => isMentorSaved(result.profile_url) ? unsaveMentor(result.profile_url) : saveMentor({
+                            name: result.name,
+                            title: result.title,
+                            company: result.company,
+                            profile_url: result.profile_url,
+                            platform_type: 'search',
+                            description: result.explanation || '',
+                            tags: result.key_synergies || [],
+                            career_journey: result.title || ''
+                          })}
+                          disabled={savingMentorId === result.profile_url}
+                        >
+                          {savingMentorId === result.profile_url ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : isMentorSaved(result.profile_url) ? (
+                            <BookmarkCheck className="h-3 w-3" />
+                          ) : (
+                            <Bookmark className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
