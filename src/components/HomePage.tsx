@@ -148,7 +148,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
   const sections = [
     { id: "home", label: "Dashboard" },
-    { id: "add", label: "Create Path" },
+    { id: "add", label: "Generate Paths" },
     { id: "future", label: "Futures" },
     { id: "copilot", label: "Copilot" },
     { id: "insights", label: "Insights" },
