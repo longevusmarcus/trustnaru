@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb, MessageSquare } from "lucide-react";
+import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb, MessageSquare, Bookmark, BookmarkCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
 import { CloneButton } from "@/components/CloneButton";
@@ -29,6 +29,9 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [loadingHappenstance, setLoadingHappenstance] = useState(false);
   const [happenstanceQuery, setHappenstanceQuery] = useState("");
   const [searchesRemaining, setSearchesRemaining] = useState<number>(3);
+  const [savedMentors, setSavedMentors] = useState<any[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
+  const [savingMentorId, setSavingMentorId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
@@ -64,6 +67,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     loadMentors();
     loadPersonalizedMentorsFromCache();
     loadPreviousHappenstanceResults();
+    loadSavedMentors();
   }, [user]);
 
   useEffect(() => {
@@ -364,6 +368,98 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
     }
   };
 
+  const loadSavedMentors = async () => {
+    if (!user) return;
+    
+    setLoadingSaved(true);
+    try {
+      const { data, error } = await supabase
+        .from('saved_mentors')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('saved_at', { ascending: false });
+
+      if (error) throw error;
+      setSavedMentors(data || []);
+    } catch (error) {
+      console.error('Error loading saved mentors:', error);
+    } finally {
+      setLoadingSaved(false);
+    }
+  };
+
+  const isMentorSaved = (profileUrl: string): boolean => {
+    return savedMentors.some(saved => saved.mentor_profile_url === profileUrl);
+  };
+
+  const saveMentor = async (mentor: any) => {
+    if (!user) return;
+
+    setSavingMentorId(mentor.profile_url);
+    try {
+      const { error } = await supabase
+        .from('saved_mentors')
+        .insert({
+          user_id: user.id,
+          mentor_name: mentor.name,
+          mentor_title: mentor.title,
+          mentor_company: mentor.company,
+          mentor_profile_url: mentor.profile_url,
+          mentor_platform_type: mentor.platform_type,
+          mentor_description: mentor.description,
+          mentor_tags: mentor.tags,
+          mentor_career_journey: mentor.career_journey
+        });
+
+      if (error) throw error;
+
+      await loadSavedMentors();
+      toast({
+        title: "Saved",
+        description: "Profile added to your collection"
+      });
+    } catch (error: any) {
+      console.error('Error saving mentor:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save profile",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingMentorId(null);
+    }
+  };
+
+  const unsaveMentor = async (profileUrl: string) => {
+    if (!user) return;
+
+    setSavingMentorId(profileUrl);
+    try {
+      const { error } = await supabase
+        .from('saved_mentors')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('mentor_profile_url', profileUrl);
+
+      if (error) throw error;
+
+      await loadSavedMentors();
+      toast({
+        title: "Removed",
+        description: "Profile removed from your collection"
+      });
+    } catch (error: any) {
+      console.error('Error removing mentor:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove profile",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingMentorId(null);
+    }
+  };
+
   if (loading || importing) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -383,6 +479,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
         <TabsList className="w-full mb-4 h-9">
           <TabsTrigger value="featured" className="flex-1 text-xs">Featured</TabsTrigger>
           <TabsTrigger value="foryou" className="flex-1 text-xs">For You</TabsTrigger>
+          <TabsTrigger value="collection" className="flex-1 text-xs">Collection</TabsTrigger>
         </TabsList>
 
         <TabsContent value="featured" className="mt-0">
@@ -862,7 +959,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                       </div>
                     )}
 
-                    {mentor.career_journey && (
+                     {mentor.career_journey && (
                       <div className="mb-3">
                         <h4 className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
                           <Briefcase className="h-3.5 w-3.5" />
@@ -872,6 +969,133 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                       </div>
                     )}
 
+                    {/* Save Button */}
+                    {mentor.profile_url && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-8"
+                          onClick={() => window.open(mentor.profile_url, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1.5" />
+                          View
+                        </Button>
+                        <Button
+                          variant={isMentorSaved(mentor.profile_url) ? "default" : "outline"}
+                          size="sm"
+                          className="text-xs h-8 px-3"
+                          onClick={() => isMentorSaved(mentor.profile_url) ? unsaveMentor(mentor.profile_url) : saveMentor(mentor)}
+                          disabled={savingMentorId === mentor.profile_url}
+                        >
+                          {savingMentorId === mentor.profile_url ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : isMentorSaved(mentor.profile_url) ? (
+                            <BookmarkCheck className="h-3 w-3" />
+                          ) : (
+                            <Bookmark className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
+
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="collection" className="mt-0">
+          {loadingSaved && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm text-muted-foreground">Loading your collection...</p>
+              </div>
+            </div>
+          )}
+
+          {!loadingSaved && savedMentors.length === 0 && (
+            <div className="text-center py-12 space-y-3">
+              <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/30" />
+              <div>
+                <h3 className="font-semibold mb-1">No saved profiles yet</h3>
+                <p className="text-sm text-muted-foreground">Save profiles from "For You" to build your collection</p>
+              </div>
+            </div>
+          )}
+
+          {!loadingSaved && savedMentors.length > 0 && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                {savedMentors.length} {savedMentors.length === 1 ? 'profile' : 'profiles'} saved
+              </p>
+              {savedMentors.map((saved) => (
+                <Card key={saved.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <h3 className="font-semibold text-base mb-1">{saved.mentor_name}</h3>
+                      <p className="text-xs text-muted-foreground mb-0.5">{saved.mentor_title}</p>
+                      {saved.mentor_company && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                          <Building className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span>{saved.mentor_company}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {saved.mentor_description && (
+                      <p className="text-xs text-muted-foreground mb-3">{saved.mentor_description}</p>
+                    )}
+
+                    {saved.mentor_tags && saved.mentor_tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {saved.mentor_tags.map((tag: string, tagIdx: number) => (
+                          <Badge key={tagIdx} variant="secondary" className="text-[10px] px-2 py-0.5">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {saved.mentor_career_journey && (
+                      <div className="mb-3">
+                        <h4 className="text-xs font-semibold mb-1.5 flex items-center gap-1.5">
+                          <Briefcase className="h-3.5 w-3.5" />
+                          Career Journey
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground">{saved.mentor_career_journey}</p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {saved.mentor_profile_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-8"
+                          onClick={() => window.open(saved.mentor_profile_url, '_blank')}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1.5" />
+                          View Profile
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-xs h-8 px-3"
+                        onClick={() => unsaveMentor(saved.mentor_profile_url)}
+                        disabled={savingMentorId === saved.mentor_profile_url}
+                      >
+                        {savingMentorId === saved.mentor_profile_url ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <BookmarkCheck className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
