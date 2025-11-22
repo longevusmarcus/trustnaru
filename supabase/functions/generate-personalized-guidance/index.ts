@@ -203,9 +203,34 @@ serve(async (req) => {
 
       return {
         dailyActions: [
-          { action: `Review WCAG checklist focusing on ${cvSkills || 'key skills'}`, timeNeeded: '30 minutes', rationale: `Foundational work for ${activePath.title}` },
-          { action: `Identify 1 contact at ${companies || 'target companies'} on LinkedIn and craft a message`, timeNeeded: '45 minutes', rationale: 'Network aligned with your target path' },
-          { action: `Read 1 case study from ${(companies || 'leading orgs').split(',')[0]}`, timeNeeded: '20 minutes', rationale: 'Build market awareness with concrete examples' }
+          { 
+            action: `MORNING: Review ${activePath.title} best practices focusing on ${cvSkills || 'key skills'}`, 
+            timeNeeded: '45 minutes', 
+            rationale: `Foundational knowledge for ${activePath.title}`,
+            timeframe: 'morning',
+            suggestions: ['Resource 1', 'Resource 2', 'Resource 3']
+          },
+          { 
+            action: `AFTERNOON: Build a practical project applying ${skills || 'core skills'}`, 
+            timeNeeded: '60 minutes', 
+            rationale: 'Hands-on experience with real-world application',
+            timeframe: 'afternoon',
+            suggestions: ['Project idea 1', 'Project idea 2', 'Project idea 3']
+          },
+          { 
+            action: `EVENING: Connect with 1 professional at ${companies || 'target companies'} on LinkedIn`, 
+            timeNeeded: '30 minutes', 
+            rationale: 'Build network aligned with your career path',
+            timeframe: 'evening',
+            suggestions: ['Networking tip 1', 'Networking tip 2', 'Networking tip 3']
+          },
+          { 
+            action: `BONUS: Prepare talking points for your next 1-on-1 with your manager about career growth in ${activePath.title}`, 
+            timeNeeded: '20 minutes', 
+            rationale: 'Position yourself for advancement and visibility',
+            timeframe: 'bonus',
+            suggestions: ['Talking point 1', 'Talking point 2', 'Talking point 3']
+          }
         ],
         smartTips: [
           { tip: `Follow ${(companies || 'leading companies').split(',')[0]} accessibility updates`, nextSteps: 'Subscribe to engineering/design blogs and a11y channels', strategicValue: 'Keeps your portfolio aligned with current practices' },
@@ -241,6 +266,15 @@ USER INFORMATION:
 - Target Role: ${activePath?.target_role || 'Not specified'}
 - Career Experience: ${profile.wizard_data?.cv_structured?.current_role || 'Not specified'}
 - Current Journey Level: ${userLevel}/10 (${difficultyMultiplier}% more challenging than baseline)
+
+🔑 KEY REQUIREMENT - DAILY ACTION STRUCTURE:
+Generate EXACTLY 4 daily actions structured as:
+1. MORNING action (6am-12pm): Focus on learning, research, or skill development
+2. AFTERNOON action (12pm-6pm): Focus on practical work, projects, or hands-on tasks
+3. EVENING action (6pm-10pm): Focus on networking, community engagement, or reflection
+4. BONUS action (flexible): Focus on career advancement, people management, or professional growth
+
+Each action MUST include a "timeframe" field: "morning", "afternoon", "evening", or "bonus".
 
 CURRENT SKILLS (from CV):
 ${profile.wizard_data?.cv_structured?.key_skills?.join(', ') || 'Not analyzed'}
@@ -281,8 +315,21 @@ ${(() => {
 })()}
 
 YOUR MISSION:
-Create PREMIUM, SOPHISTICATED daily actions with content users couldn't easily find through ChatGPT. Every action must directly address skill gaps.
-Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, and future (explored) paths. NO GENERIC ADVICE.
+Create PREMIUM, SOPHISTICATED daily actions with content users couldn't easily find through ChatGPT. Every action must directly address skill gaps AND include people/team management aspects.
+
+🤝 MANDATORY PEOPLE & TEAM MANAGEMENT INTEGRATION:
+EVERY set of daily actions MUST include guidance on:
+- How to communicate with seniors, managers, or leadership
+- Career advancement strategies (promotions, visibility, positioning)
+- Team collaboration and influence skills
+- Professional relationship building
+- Navigating workplace politics and dynamics
+- Learning from others and seeking mentorship
+- Building your professional reputation
+
+AT LEAST ONE action (preferably the BONUS) must DIRECTLY focus on people/team management or career advancement.
+
+Generate HIGHLY SPECIFIC, ACTIONABLE guidance grounded in the user's CV (structured fields when available, otherwise text), active path, level, and skill gaps. Include PRACTICAL/TECHNICAL depth with REAL-WORLD application. NO GENERIC ADVICE.
 
 **PROGRESSIVE DIFFICULTY SCALING - CRITICAL:**
 The user is at Level ${userLevel}/10. ALL actions, tips, and resources must be scaled to be ${difficultyMultiplier}% MORE CHALLENGING than baseline (Level 1).
@@ -347,25 +394,35 @@ Complexity Scaling:
 - Better to say "Find accessibility leaders on LinkedIn" than invent names
 - ALWAYS prefer specificity when you have it, generality when you don't - NEVER invent
 
-STRUCTURE (valid JSON ONLY):
+STRUCTURE (valid JSON ONLY - EXACTLY 4 ACTIONS):
 {
   "dailyActions": [
     { 
-      "action": "Specific action with resource/skill names", 
-      "timeNeeded": "30 minutes", 
-      "rationale": "Why this matters",
+      "action": "MORNING: Specific learning/research action with resource/skill names", 
+      "timeNeeded": "30-60 minutes", 
+      "rationale": "Why this matters for your path and level",
+      "timeframe": "morning",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     },
     { 
-      "action": "Another specific action with concrete details", 
-      "timeNeeded": "1 hour", 
-      "rationale": "Impact on career path",
+      "action": "AFTERNOON: Practical/technical hands-on action with concrete details", 
+      "timeNeeded": "45-90 minutes", 
+      "rationale": "Impact on career path and skill development",
+      "timeframe": "afternoon",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     },
     { 
-      "action": "Third specific action with exact names", 
-      "timeNeeded": "15 minutes", 
-      "rationale": "How it helps",
+      "action": "EVENING: Networking/community engagement action with exact names", 
+      "timeNeeded": "20-45 minutes", 
+      "rationale": "How it builds your network and reputation",
+      "timeframe": "evening",
+      "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
+    },
+    { 
+      "action": "BONUS: Career advancement/people management action focusing on communication with seniors, team dynamics, or professional growth", 
+      "timeNeeded": "15-30 minutes", 
+      "rationale": "How this advances your career and strengthens professional relationships",
+      "timeframe": "bonus",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     }
   ],
@@ -497,9 +554,10 @@ LEVEL RESOURCES REQUIREMENTS (CRITICAL):
                         action: { type: 'string' },
                         timeNeeded: { type: 'string' },
                         rationale: { type: 'string' },
+                        timeframe: { type: 'string', enum: ['morning', 'afternoon', 'evening', 'bonus'] },
                         suggestions: { type: 'array', items: { type: 'string' } }
                       },
-                      required: ['action', 'timeNeeded', 'rationale', 'suggestions'],
+                      required: ['action', 'timeNeeded', 'rationale', 'timeframe', 'suggestions'],
                       additionalProperties: false
                     }
                   },
