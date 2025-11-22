@@ -204,28 +204,28 @@ serve(async (req) => {
       return {
         dailyActions: [
           { 
-            action: `MORNING: Review ${activePath.title} best practices focusing on ${cvSkills || 'key skills'}`, 
+            action: `Review ${activePath.title} best practices focusing on ${cvSkills || 'key skills'}`, 
             timeNeeded: '45 minutes', 
             rationale: `Foundational knowledge for ${activePath.title}`,
             timeframe: 'morning',
             suggestions: ['Resource 1', 'Resource 2', 'Resource 3']
           },
           { 
-            action: `AFTERNOON: Build a practical project applying ${skills || 'core skills'}`, 
+            action: `Build a practical project applying ${skills || 'core skills'}`, 
             timeNeeded: '60 minutes', 
             rationale: 'Hands-on experience with real-world application',
             timeframe: 'afternoon',
             suggestions: ['Project idea 1', 'Project idea 2', 'Project idea 3']
           },
           { 
-            action: `EVENING: Connect with 1 professional at ${companies || 'target companies'} on LinkedIn`, 
+            action: `Connect with 1 professional at ${companies || 'target companies'} on LinkedIn`, 
             timeNeeded: '30 minutes', 
             rationale: 'Build network aligned with your career path',
             timeframe: 'evening',
             suggestions: ['Networking tip 1', 'Networking tip 2', 'Networking tip 3']
           },
           { 
-            action: `BONUS: Prepare talking points for your next 1-on-1 with your manager about career growth in ${activePath.title}`, 
+            action: `Prepare talking points for your next 1-on-1 with your manager about career growth in ${activePath.title}`, 
             timeNeeded: '20 minutes', 
             rationale: 'Position yourself for advancement and visibility',
             timeframe: 'bonus',
@@ -398,28 +398,28 @@ STRUCTURE (valid JSON ONLY - EXACTLY 4 ACTIONS):
 {
   "dailyActions": [
     { 
-      "action": "MORNING: Specific learning/research action with resource/skill names", 
+      "action": "Specific learning/research action with resource/skill names (do NOT include 'MORNING:' prefix)", 
       "timeNeeded": "30-60 minutes", 
       "rationale": "Why this matters for your path and level",
       "timeframe": "morning",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     },
     { 
-      "action": "AFTERNOON: Practical/technical hands-on action with concrete details", 
+      "action": "Practical/technical hands-on action with concrete details (do NOT include 'AFTERNOON:' prefix)", 
       "timeNeeded": "45-90 minutes", 
       "rationale": "Impact on career path and skill development",
       "timeframe": "afternoon",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     },
     { 
-      "action": "EVENING: Networking/community engagement action with exact names", 
+      "action": "Networking/community engagement action with exact names (do NOT include 'EVENING:' prefix)", 
       "timeNeeded": "20-45 minutes", 
       "rationale": "How it builds your network and reputation",
       "timeframe": "evening",
       "suggestions": ["Specific person/resource 1", "Specific person/resource 2", "Specific person/resource 3"]
     },
     { 
-      "action": "BONUS: Career advancement/people management action focusing on communication with seniors, team dynamics, or professional growth", 
+      "action": "Career advancement/people management action focusing on communication with seniors, team dynamics, or professional growth (do NOT include 'BONUS:' prefix)", 
       "timeNeeded": "15-30 minutes", 
       "rationale": "How this advances your career and strengthens professional relationships",
       "timeframe": "bonus",
