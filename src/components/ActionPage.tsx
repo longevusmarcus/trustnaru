@@ -557,6 +557,9 @@ export const ActionPage = () => {
 
       // Clear level resources cache to force regeneration for new path
       setResourcesCache({});
+      
+      // Clear skill gaps to force regeneration for new path
+      setSkillGaps([]);
 
       // Reload all data to update with new active path
       await loadData();
