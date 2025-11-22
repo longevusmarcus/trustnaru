@@ -1441,23 +1441,26 @@ export const ActionPage = () => {
                   <span className="text-xs">Skill Gap</span>
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh]">
-                <div className="relative overflow-y-auto">
+              <DrawerContent className="max-h-[80vh] fixed">
+                {/* Close Button - Fixed position outside scroll container */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSkillGapOpen(false);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+
+                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
                     <p className="text-sm text-muted-foreground">Level {currentLevel} focus areas</p>
                   </div>
-
-                  {/* Close Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4 rounded-full z-20"
-                    onClick={() => setSkillGapOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
 
                   {/* Content */}
                   <div className="p-6">
@@ -1515,23 +1518,26 @@ export const ActionPage = () => {
                   <span className="text-xs">Quick Wins</span>
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh]">
-                <div className="relative overflow-y-auto">
+              <DrawerContent className="max-h-[80vh] fixed">
+                {/* Close Button - Fixed position outside scroll container */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickWinsOpen(false);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+
+                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
                     <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
                   </div>
-
-                  {/* Close Button */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4 rounded-full z-20"
-                    onClick={() => setQuickWinsOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
 
                   {/* Content Card */}
                   <div className="p-6">
