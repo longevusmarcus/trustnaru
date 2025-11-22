@@ -947,7 +947,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
             <p className="text-sm text-muted-foreground mb-4">
               Or get personalized recommendations based on your profile
             </p>
-            {personalizedMentors.length === 0 && !loadingPersonalized && !happenstanceResults.length && (
+            {personalizedMentors.length === 0 && !loadingPersonalized && (
               <Button onClick={() => loadPersonalizedMentors()} className="w-full">
                 Generate Recommendations
               </Button>
