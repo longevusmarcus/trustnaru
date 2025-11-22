@@ -62,12 +62,6 @@ const slides = [
     ],
   },
   {
-    icon: LineChart,
-    title: "Collective Intelligence",
-    content:
-      "Every new Future-Self Card trains our model to predict what real success looks like, so every new user gets a smarter path than the last.",
-  },
-  {
     icon: ArrowRight,
     title: "One more thing",
     isComparison: true,
