@@ -172,16 +172,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Check if first time on dashboard
+  // Check if first time on dashboard - only run once per user
   useEffect(() => {
     if (!user?.id) return;
 
     const storageKey = `dashboard_welcome_seen_${user.id}`;
     const hasSeenWelcome = localStorage.getItem(storageKey);
-    if (!hasSeenWelcome && userStats) {
+    if (!hasSeenWelcome) {
       setShowWelcome(true);
     }
-  }, [userStats, user?.id]);
+  }, [user?.id]);
 
   // Track explored sections
   useEffect(() => {
