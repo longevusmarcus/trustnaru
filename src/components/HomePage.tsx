@@ -1079,7 +1079,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   className="h-8 w-8 rounded-full"
                   onClick={() => {
                     setShowWelcome(false);
-                    localStorage.setItem(`dashboard_welcome_seen_${user?.id}`, "true");
+                    if (user?.id) {
+                      localStorage.setItem(`dashboard_welcome_seen_${user.id}`, "true");
+                    }
                   }}
                 >
                   <X className="h-4 w-4" />
