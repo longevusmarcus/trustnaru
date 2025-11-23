@@ -8,7 +8,7 @@ const FAQ = () => {
     {
       question: "What is Naru?",
       answer:
-        "Naru is your personal AI career dreamer and copilot, helping you visualize and achieve your ideal career path. It s you see your future self, get actionable guidance, and track your evolution every step of the way.",
+        "Naru is your personal AI career dreamer and copilot, helping you visualize and achieve your ideal career path. See your future self, get actionable guidance, and track your evolution every step of the way.",
     },
     {
       question: "How does Naru work?",
