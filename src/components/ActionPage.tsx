@@ -1070,6 +1070,11 @@ export const ActionPage = () => {
                         {goal.description && (
                           <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
                         )}
+                        {goal.target_date && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(goal.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
                       </div>
                       <span
                         className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
