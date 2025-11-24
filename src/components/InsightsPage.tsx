@@ -3,13 +3,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles } from "lucide-react";
+import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles, Puzzle, Zap, X, Briefcase, Bot } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { checkAndAwardBadges } from "@/lib/badgeUtils";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 // Format message content: properly parse markdown and create natural formatting
 const formatMessageContent = (content: string) => {
@@ -126,6 +127,11 @@ export const InsightsPage = () => {
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
   const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [skillGapOpen, setSkillGapOpen] = useState(false);
+  const [quickWinsOpen, setQuickWinsOpen] = useState(false);
+  const [skillGaps, setSkillGaps] = useState<any[]>([]);
+  const [loadingSkillGap, setLoadingSkillGap] = useState(false);
+  const [skillGapCache, setSkillGapCache] = useState<Record<string, any>>({});
 
   // Scroll to top on mount
   useEffect(() => {
@@ -350,6 +356,49 @@ export const InsightsPage = () => {
     }
   };
 
+  const loadSkillGap = async (forceRefresh = false) => {
+    if (!user || !activePath) return;
+
+    const currentLevel = userStats?.current_level || 1;
+    const cacheKey = `${activePath.id}_level_${currentLevel}`;
+    
+    // Check cache first unless force refresh
+    if (!forceRefresh && skillGapCache[cacheKey]) {
+      setSkillGaps(skillGapCache[cacheKey]);
+      return;
+    }
+
+    setLoadingSkillGap(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke("generate-skill-gap", {
+        body: {
+          level: currentLevel,
+          pathTitle: activePath.title,
+          keySkills: activePath.key_skills || [],
+          roadmap: activePath.roadmap || [],
+        },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) throw error;
+
+      if (data?.skillGaps) {
+        setSkillGaps(data.skillGaps);
+        setSkillGapCache((prev) => ({ ...prev, [cacheKey]: data.skillGaps }));
+      }
+    } catch (error) {
+      console.error("Error loading skill gap:", error);
+      toast({
+        title: "Unable to load skill gap",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSkillGap(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     const messageToSend = inputMessage.trim();
     if (!messageToSend || isGenerating) return;
@@ -410,6 +459,16 @@ export const InsightsPage = () => {
     () => (activePath ? Math.min(33, (userStats?.missions_completed || 0) * 10) : 0),
     [activePath, userStats?.missions_completed],
   );
+
+  const quickWinsSuggestions = activePath
+    ? [
+        `Update LinkedIn with "${activePath.title}" as target role`,
+        `Spend 15 minutes researching ${activePath.target_companies?.[0] || "top companies"}`,
+        `Watch one tutorial about ${activePath.key_skills?.[0] || "key skills"}`,
+        `Connect with one person working as ${activePath.title}`,
+        `Read one article about ${activePath.category} careers`,
+      ]
+    : ["Activate a career path first"];
 
   const personalizedTips = useMemo(() => {
     if (loadingGuidance) {
@@ -748,6 +807,170 @@ export const InsightsPage = () => {
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Tools Section */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <h3 className="text-lg font-semibold mb-3">Tools</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Drawer
+              open={skillGapOpen}
+              onOpenChange={(open) => {
+                setSkillGapOpen(open);
+                if (open && skillGaps.length === 0) {
+                  loadSkillGap();
+                }
+              }}
+            >
+              <DrawerTrigger asChild>
+                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Puzzle className="h-5 w-5" />
+                  <span className="text-xs">Skill Gap</span>
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh] fixed">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSkillGapOpen(false);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+
+                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
+                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+                    <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
+                    <p className="text-sm text-muted-foreground mb-3">Level {userStats?.current_level || 1} focus areas</p>
+                    {activePath && skillGaps.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadSkillGap(true)}
+                        disabled={loadingSkillGap}
+                        className="h-7 text-xs"
+                      >
+                        {loadingSkillGap ? "Refreshing..." : "Refresh"}
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="p-6">
+                    {loadingSkillGap ? (
+                      <div className="space-y-3">
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-32 w-full" />
+                      </div>
+                    ) : skillGaps.length > 0 ? (
+                      <div className="space-y-4">
+                        {skillGaps.map((gap, idx) => (
+                          <Card key={idx} className="border-primary/20">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="flex items-start gap-2">
+                                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-xs font-bold text-primary">{idx + 1}</span>
+                                </div>
+                                <h4 className="font-semibold text-sm flex-1">{gap.skill}</h4>
+                              </div>
+
+                              <div className="space-y-2 text-xs">
+                                <div>
+                                  <p className="font-medium text-muted-foreground mb-1">Gap:</p>
+                                  <p className="text-foreground/90">{gap.gap}</p>
+                                </div>
+
+                                <div>
+                                  <p className="font-medium text-muted-foreground mb-1">How to fill it:</p>
+                                  <p className="text-foreground/90">{gap.howToFill}</p>
+                                </div>
+
+                                <div className="pt-2 border-t border-border/50">
+                                  <p className="text-primary/80 italic">{gap.whyItMatters}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-muted-foreground">Activate a path to see your skill gap analysis</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+
+            <Drawer open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
+              <DrawerTrigger asChild>
+                <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Zap className="h-5 w-5" />
+                  <span className="text-xs">Quick Wins</span>
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh] fixed">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickWinsOpen(false);
+                  }}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+
+                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
+                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+                    <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
+                    <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
+                      {quickWinsSuggestions.map((win, idx) => (
+                        <div
+                          key={idx}
+                          className="w-full text-left p-4 rounded-xl bg-background/50"
+                        >
+                          <div className="flex items-start gap-3">
+                            <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-sm leading-relaxed">{win}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
+                    <Button
+                      onClick={() => setQuickWinsOpen(false)}
+                      className="w-full h-12 rounded-full text-base font-semibold"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Taking Action
+                    </Button>
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+
+            <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+              <Briefcase className="h-5 w-5" />
+              <span className="text-xs">Jobs For You (soon)</span>
+            </Button>
+
+            <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
+              <Bot className="h-5 w-5" />
+              <span className="text-xs">Automations (soon)</span>
+            </Button>
+          </div>
         </motion.div>
       </div>
     </div>
