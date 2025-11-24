@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown } from "lucide-react";
+import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -116,6 +116,7 @@ export const InsightsPage = () => {
   const [activePath, setActivePath] = useState<any>(null);
   const [allPaths, setAllPaths] = useState<any[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
+  const [goals, setGoals] = useState<any[]>([]);
   const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -166,7 +167,7 @@ export const InsightsPage = () => {
         supabase.from("user_profiles").select("active_path_id, display_name").eq("user_id", user.id).maybeSingle(),
         supabase
           .from("user_stats")
-          .select("current_streak, missions_completed, current_level")
+          .select("current_streak, missions_completed, current_level, total_points")
           .eq("user_id", user.id)
           .maybeSingle(),
         supabase.from("career_paths").select("id, title, category").eq("user_id", user.id),
@@ -174,22 +175,33 @@ export const InsightsPage = () => {
 
       const profile = profileResult.data;
       const userName = profile?.display_name || user.email?.split("@")[0] || "there";
-      const stats = statsResult.data || { current_streak: 0, missions_completed: 0, current_level: 1 };
+      const stats = statsResult.data || { current_streak: 0, missions_completed: 0, current_level: 1, total_points: 0 };
 
-      // Fetch active path only if exists
+      // Fetch active path and goals in parallel if active path exists
       let activePathData = null;
+      let goalsData: any[] = [];
       if (profile?.active_path_id) {
-        const { data } = await supabase
-          .from("career_paths")
-          .select("id, title, category, key_skills, target_companies")
-          .eq("id", profile.active_path_id)
-          .single();
-        activePathData = data;
+        const [pathResult, goalsResult] = await Promise.all([
+          supabase
+            .from("career_paths")
+            .select("id, title, category, key_skills, target_companies")
+            .eq("id", profile.active_path_id)
+            .single(),
+          supabase
+            .from("goals")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("path_id", profile.active_path_id)
+            .order("priority", { ascending: true }),
+        ]);
+        activePathData = pathResult.data;
+        goalsData = goalsResult.data || [];
       }
 
       setActivePath(activePathData);
       setAllPaths(allPathsResult.data || []);
       setUserStats(stats);
+      setGoals(goalsData);
 
       // Set welcome message and auto-generate today's actions if path is active
       const welcomeMsg = activePathData
@@ -469,19 +481,28 @@ export const InsightsPage = () => {
         {/* Key Metrics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <h3 className="text-lg font-semibold mb-3">Your Journey</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Card>
               <CardContent className="p-4 text-center">
-                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{userStats?.current_streak || 0}</div>
-                <div className="text-xs text-muted-foreground">Day Streak</div>
+                <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{userStats?.missions_completed || 0}</div>
+                <div className="text-xs text-muted-foreground">Actions Completed</div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <Target className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{allPaths.length}</div>
-                <div className="text-xs text-muted-foreground">Paths Explored</div>
+                <div className="text-2xl font-bold">
+                  {goals.filter((g) => g.completed).length}/{goals.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Goals</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
+                <div className="text-xs text-muted-foreground">Points</div>
               </CardContent>
             </Card>
           </div>
