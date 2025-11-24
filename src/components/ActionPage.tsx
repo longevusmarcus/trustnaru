@@ -1239,7 +1239,7 @@ export const ActionPage = () => {
         {/* Today's Actions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Today's Actions</h3>
+            <h3 className="text-lg font-semibold">Today</h3>
             <div className="flex items-center gap-2">
               {actionHistory.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="h-7 text-xs">
@@ -1403,6 +1403,24 @@ export const ActionPage = () => {
             </div>
           )}
 
+          {/* Quick Wins */}
+          <div className="mt-6 space-y-3">
+            <h4 className="text-md font-semibold">Quick Wins</h4>
+            <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
+              {quickWinsSuggestions.map((win, idx) => (
+                <div
+                  key={idx}
+                  className="w-full text-left p-4 rounded-xl bg-background/50"
+                >
+                  <div className="flex items-start gap-3">
+                    <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm leading-relaxed">{win}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Action History */}
           {showHistory && actionHistory.length > 0 && (
             <div className="mt-4 pt-4 border-t space-y-2">
@@ -1542,65 +1560,6 @@ export const ActionPage = () => {
                         <p className="text-sm text-muted-foreground">Activate a path to see your skill gap analysis</p>
                       </div>
                     )}
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer>
-
-            <Drawer open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
-              <DrawerTrigger asChild>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Zap className="h-5 w-5" />
-                  <span className="text-xs">Quick Wins</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh] fixed">
-                {/* Close Button - Fixed position outside scroll container */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setQuickWinsOpen(false);
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-
-                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
-                  {/* Header */}
-                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
-                    <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
-                  </div>
-
-                  {/* Content Card */}
-                  <div className="p-6">
-                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
-                      {quickWinsSuggestions.map((win, idx) => (
-                        <div
-                          key={idx}
-                          className="w-full text-left p-4 rounded-xl bg-background/50"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                            <span className="text-sm leading-relaxed">{win}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
-                    <Button
-                      onClick={() => setQuickWinsOpen(false)}
-                      className="w-full h-12 rounded-full text-base font-semibold"
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Start Taking Action
-                    </Button>
                   </div>
                 </div>
               </DrawerContent>
