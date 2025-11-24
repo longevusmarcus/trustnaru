@@ -57,7 +57,7 @@ serve(async (req) => {
       throw new Error('SERVICE_UNAVAILABLE');
     }
 
-    const prompt = `Based on this career path, generate 5 specific, actionable goals:
+    const prompt = `Based on this career path, generate 5 specific, actionable goals with realistic, practical timelines:
 
 Career Path: ${path.title}
 Description: ${path.description}
@@ -65,16 +65,23 @@ Key Skills: ${path.key_skills?.join(', ') || 'N/A'}
 Roadmap Steps: ${path.roadmap?.map((r: any) => r.step).join(', ') || 'N/A'}
 
 Generate 5 goals that are:
-1. Specific and measurable
-2. Aligned with the career path
-3. Mix of short-term (1-3 months) and medium-term (3-6 months) timeframes
-4. Progressively build towards the career goal
+1. Specific and measurable with clear outcomes
+2. Aligned with the career path progression
+3. Realistically achievable within stated timeframes
+4. Properly sequenced (foundational skills first, advanced goals later)
+5. Timeline must match priority: high priority = 1-2 months, medium = 2-4 months, low = 4-6 months
+
+CRITICAL TIMELINE REQUIREMENTS:
+- High priority goals: 1-2 months (foundational, urgent skills)
+- Medium priority goals: 2-4 months (intermediate development)
+- Low priority goals: 4-6 months (advanced, long-term objectives)
+- Ensure goals build on each other logically
 
 Format each goal as:
 - Title: Clear, action-oriented title
-- Description: 1-2 sentences explaining the goal
-- Priority: high, medium, or low
-- Timeline: Number of months to achieve (1-6)`;
+- Description: 1-2 sentences explaining the specific outcome
+- Priority: high, medium, or low (must align with timeline)
+- Timeline: Number of months to achieve (1-6, must match priority level)`;
 
     console.log('Calling AI to generate goals...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
