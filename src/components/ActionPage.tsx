@@ -206,7 +206,7 @@ export const ActionPage = () => {
   // Clear resource cache when active path changes to force regeneration
   useEffect(() => {
     if (activePath?.id) {
-      console.log('Active path changed, clearing resource cache');
+      console.log("Active path changed, clearing resource cache");
       setResourcesCache({});
       setLevelResources([]);
     }
@@ -566,7 +566,7 @@ export const ActionPage = () => {
 
       // Clear level resources cache to force regeneration for new path
       setResourcesCache({});
-      
+
       // Clear skill gaps to force regeneration for new path
       setSkillGaps([]);
       setSkillGapCache({});
@@ -622,7 +622,7 @@ export const ActionPage = () => {
     if (!user || !activePath) return;
 
     const cacheKey = `${activePath.id}_level_${currentLevel}`;
-    
+
     // Check cache first unless force refresh
     if (!forceRefresh && skillGapCache[cacheKey]) {
       setSkillGaps(skillGapCache[cacheKey]);
@@ -961,7 +961,9 @@ export const ActionPage = () => {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-[200px]" side="bottom">
-                      <p className="font-semibold text-xs mb-1">Level {level.level}: {level.name}</p>
+                      <p className="font-semibold text-xs mb-1">
+                        Level {level.level}: {level.name}
+                      </p>
                       <p className="text-xs text-muted-foreground mb-1">{level.description}</p>
                       <p className="text-xs text-muted-foreground italic">
                         {isUnlocked ? "Tap to view this level" : "Complete more actions to unlock"}
@@ -1060,7 +1062,7 @@ export const ActionPage = () => {
         {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Goals</h3>
+              <h3 className="text-lg font-semibold">Your Milestones</h3>
               <Badge variant="secondary">
                 {goalsCompleted} of {totalGoals} completed
               </Badge>
@@ -1086,7 +1088,11 @@ export const ActionPage = () => {
                         )}
                         {goal.target_date && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(goal.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {new Date(goal.target_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </p>
                         )}
                       </div>
@@ -1107,7 +1113,7 @@ export const ActionPage = () => {
               ))}
               {goals.length > 3 && (
                 <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
-                  View All {goals.length} Goals
+                  View All {goals.length} Milestones
                 </Button>
               )}
             </div>
@@ -1116,9 +1122,9 @@ export const ActionPage = () => {
           <Card className="bg-muted/30">
             <CardContent className="p-6 text-center">
               <Sparkles className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50 animate-pulse" />
-              <h4 className="font-medium mb-2">Generating Your Goals</h4>
+              <h4 className="font-medium mb-2">Generating Your Milestones</h4>
               <p className="text-sm text-muted-foreground">
-                Your personalized goals are being created. This may take a moment...
+                Your personalized milestones are being created. This may take a moment...
               </p>
             </CardContent>
           </Card>
@@ -1127,7 +1133,7 @@ export const ActionPage = () => {
         {/* Today's Actions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Today's Actions</h3>
+            <h3 className="text-lg font-semibold">Execute</h3>
             <div className="flex items-center gap-2">
               {actionHistory.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="h-7 text-xs">
@@ -1179,21 +1185,21 @@ export const ActionPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           {action.timeframe && (
-                            <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${
-                              action.timeframe === "morning" 
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : action.timeframe === "afternoon"
-                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                  : action.timeframe === "evening"
-                                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-                                    : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            }`}>
+                            <span
+                              className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${
+                                action.timeframe === "morning"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                  : action.timeframe === "afternoon"
+                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                    : action.timeframe === "evening"
+                                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                      : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              }`}
+                            >
                               {action.timeframe}
                             </span>
                           )}
-                          {action.label && (
-                            <span className="text-xs text-muted-foreground">{action.label}</span>
-                          )}
+                          {action.label && <span className="text-xs text-muted-foreground">{action.label}</span>}
                           {action.priority && (
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
@@ -1339,7 +1345,7 @@ export const ActionPage = () => {
         {activePath && activePath.affirmations?.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
+              <h3 className="text-lg font-semibold">Affirm</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1389,7 +1395,7 @@ export const ActionPage = () => {
         {/* Level Resources */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
+            <h3 className="text-lg font-semibold">Learn</h3>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Foundation</span>
               {activePath && (
@@ -1465,7 +1471,6 @@ export const ActionPage = () => {
             </div>
           )}
         </div>
-
       </div>
 
       {/* All Goals Drawer */}
@@ -1510,7 +1515,11 @@ export const ActionPage = () => {
                         {goal.description && <p className="text-xs text-muted-foreground">{goal.description}</p>}
                         {goal.target_date && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(goal.target_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {new Date(goal.target_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </p>
                         )}
                       </div>
