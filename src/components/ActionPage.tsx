@@ -850,14 +850,14 @@ export const ActionPage = () => {
 
     const resourceKey = `${currentLevel}_${resourceIndex}`;
     const isCompleted = completedResources[resourceKey];
-    
+
     const newCompletedState = {
       ...completedResources,
-      [resourceKey]: !isCompleted
+      [resourceKey]: !isCompleted,
     };
-    
+
     setCompletedResources(newCompletedState);
-    
+
     // Save to localStorage
     const storageKey = `completed_resources_${user.id}_${activePath.id}_${currentLevel}`;
     localStorage.setItem(storageKey, JSON.stringify(newCompletedState));
@@ -965,7 +965,7 @@ export const ActionPage = () => {
         {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Next Goals</h3>
+              <h3 className="text-lg font-semibold">Your Path Goals</h3>
               <Badge variant="secondary">
                 {goalsCompleted} of {totalGoals} completed
               </Badge>
@@ -1429,15 +1429,12 @@ export const ActionPage = () => {
               {levelResources.map((resource: any, index: number) => {
                 const resourceKey = `${currentLevel}_${index}`;
                 const isCompleted = completedResources[resourceKey] || false;
-                
+
                 return (
                   <Card key={index} className={`${isCompleted ? "opacity-60" : ""} hover:shadow-md transition-all`}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <button
-                          onClick={() => handleToggleResource(index)}
-                          className="mt-0.5 flex-shrink-0"
-                        >
+                        <button onClick={() => handleToggleResource(index)} className="mt-0.5 flex-shrink-0">
                           {isCompleted ? (
                             <CheckCircle2 className="h-5 w-5 text-green-500" />
                           ) : (
