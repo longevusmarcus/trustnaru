@@ -481,7 +481,7 @@ export const InsightsPage = () => {
         {/* Key Metrics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <h3 className="text-lg font-semibold mb-3">Your Journey</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="p-4 text-center">
                 <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-primary/70" />
@@ -503,6 +503,13 @@ export const InsightsPage = () => {
                 <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
                 <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
                 <div className="text-xs text-muted-foreground">Points</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{allPaths.length}</div>
+                <div className="text-xs text-muted-foreground">Paths Generated</div>
               </CardContent>
             </Card>
           </div>
