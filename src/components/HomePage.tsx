@@ -178,8 +178,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
     const storageKey = `dashboard_welcome_seen_${user.id}`;
     const hasSeenWelcome = localStorage.getItem(storageKey);
+    
+    // Explicitly set the welcome state based on localStorage
     if (!hasSeenWelcome) {
       setShowWelcome(true);
+    } else {
+      setShowWelcome(false);
     }
   }, [user?.id]);
 
