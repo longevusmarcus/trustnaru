@@ -440,46 +440,9 @@ export const InsightsPage = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6 pb-8">
-        {/* Key Metrics */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <h3 className="text-lg font-semibold mb-3">Your Stats</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{userStats?.missions_completed || 0}</div>
-                <div className="text-xs text-muted-foreground">Actions Completed</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <Target className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">
-                  {goals.filter((g) => g.completed).length}/{goals.length || 0}
-                </div>
-                <div className="text-xs text-muted-foreground">Goals</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
-                <div className="text-xs text-muted-foreground">Points</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{allPaths.length}</div>
-                <div className="text-xs text-muted-foreground">Paths Generated</div>
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
-
         {/* Progress Overview */}
         {activePath && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -514,6 +477,43 @@ export const InsightsPage = () => {
             </Card>
           </motion.div>
         )}
+
+        {/* Key Metrics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <h3 className="text-lg font-semibold mb-3">Your Stats</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{userStats?.missions_completed || 0}</div>
+                <div className="text-xs text-muted-foreground">Actions Completed</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Target className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">
+                  {goals.filter((g) => g.completed).length}/{goals.length || 0}
+                </div>
+                <div className="text-xs text-muted-foreground">Goals</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
+                <div className="text-xs text-muted-foreground">Points</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{allPaths.length}</div>
+                <div className="text-xs text-muted-foreground">Paths Generated</div>
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
 
         {/* Path Diversity */}
         {pathCategories.length > 0 && (
