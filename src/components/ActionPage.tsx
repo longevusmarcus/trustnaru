@@ -935,6 +935,78 @@ export const ActionPage = () => {
           </Accordion>
         )}
 
+        {/* Goals Section - Make it prominent */}
+        {goals.length > 0 ? (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Your Goals</h3>
+              <Badge variant="secondary">
+                {goalsCompleted} of {totalGoals} completed
+              </Badge>
+            </div>
+            <div className="space-y-2">
+              {goals.slice(0, 3).map((goal: any) => (
+                <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
+                        {goal.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
+                          {goal.title}
+                        </h4>
+                        {goal.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
+                        )}
+                        {goal.target_date && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(goal.target_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                          goal.priority === "high"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            : goal.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
+                      >
+                        {goal.priority}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {goals.length > 3 && (
+                <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
+                  View All {goals.length} Goals
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : activePath ? (
+          <Card className="bg-muted/30">
+            <CardContent className="p-6 text-center">
+              <Sparkles className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50 animate-pulse" />
+              <h4 className="font-medium mb-2">Generating Your Goals</h4>
+              <p className="text-sm text-muted-foreground">
+                Your personalized goals are being created. This may take a moment...
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
+
         {/* 10 Levels of Guidance */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Your Journey Levels</h3>
@@ -1058,77 +1130,6 @@ export const ActionPage = () => {
           </div>
         )} */}
 
-        {/* Goals Section - Make it prominent */}
-        {goals.length > 0 ? (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Goals</h3>
-              <Badge variant="secondary">
-                {goalsCompleted} of {totalGoals} completed
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              {goals.slice(0, 3).map((goal: any) => (
-                <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
-                        {goal.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </button>
-                      <div className="flex-1">
-                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
-                          {goal.title}
-                        </h4>
-                        {goal.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
-                        )}
-                        {goal.target_date && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(goal.target_date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </p>
-                        )}
-                      </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                          goal.priority === "high"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                            : goal.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                        }`}
-                      >
-                        {goal.priority}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {goals.length > 3 && (
-                <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
-                  View All {goals.length} Goals
-                </Button>
-              )}
-            </div>
-          </div>
-        ) : activePath ? (
-          <Card className="bg-muted/30">
-            <CardContent className="p-6 text-center">
-              <Sparkles className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50 animate-pulse" />
-              <h4 className="font-medium mb-2">Generating Your Goals</h4>
-              <p className="text-sm text-muted-foreground">
-                Your personalized goals are being created. This may take a moment...
-              </p>
-            </CardContent>
-          </Card>
-        ) : null}
 
         {/* Today's Actions */}
         <div>
