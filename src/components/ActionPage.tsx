@@ -722,7 +722,7 @@ export const ActionPage = () => {
   const checkLevelCompletion = async () => {
     // Check if all actions are completed
     const allActionsCompleted = todayActions.every((action) => action.done);
-    
+
     // Check if all resources are completed
     const allResourcesCompleted = levelResources.every((_, index) => {
       const resourceKey = `${currentLevel}_${index}`;
@@ -1393,7 +1393,7 @@ export const ActionPage = () => {
         {/* Level Resources */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
+            <h3 className="text-lg font-semibold">Level-up Resources</h3>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Foundation</span>
               {activePath && (
