@@ -400,7 +400,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
           supabase
             .from("career_paths")
-            .select("id, title, description, image_url, journey_duration, category, key_skills, target_companies")
+            .select("id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations")
             .eq("user_id", user.id)
             .limit(10),
           supabase
