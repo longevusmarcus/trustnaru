@@ -345,7 +345,7 @@ export const InsightsPage = () => {
     if (!user) {
       toast({
         title: "Please sign in",
-        description: "You need to be signed in to use Daily Insights",
+        description: "You need to be signed in",
         variant: "destructive",
       });
       return;
@@ -600,7 +600,7 @@ export const InsightsPage = () => {
 
         {/* AI Insights Chat */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <h3 className="text-lg font-semibold mb-3">Daily Insights</h3>
+          <h3 className="text-lg font-semibold mb-3">Your Coach</h3>
           <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
             <CardContent className="p-0">
               {/* Chat Messages */}
