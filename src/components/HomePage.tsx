@@ -145,6 +145,10 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [showWelcome, setShowWelcome] = useState(false);
   const [exploredSections, setExploredSections] = useState<string[]>([]);
   const [explorationPopoverOpen, setExplorationPopoverOpen] = useState(false);
+  const [personalizedGuidance, setPersonalizedGuidance] = useState<any>(null);
+  const [loadingGuidance, setLoadingGuidance] = useState(false);
+  const [guidanceError, setGuidanceError] = useState<string | null>(null);
+  const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
 
   const sections = [
     { id: "home", label: "Dashboard" },
@@ -166,6 +170,19 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     () => getFeaturedTopicForUser(activePath, userStats, allPaths),
     [activePath, userStats?.current_streak, allPaths.length, today],
   );
+
+  const personalizedTips = useMemo(() => {
+    if (loadingGuidance) {
+      return [];
+    }
+    if (personalizedGuidance?.smartTips?.length) {
+      return personalizedGuidance.smartTips;
+    }
+    if (!activePath) {
+      return [];
+    }
+    return [];
+  }, [activePath, personalizedGuidance, loadingGuidance]);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -219,6 +236,63 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       }, 500);
     }
   }, [userStats?.current_streak]);
+
+  const loadPersonalizedGuidance = async (pathArg?: any, attempt: number = 1, level?: number) => {
+    const activePathData = pathArg || activePath;
+    const currentLevel = level || userStats?.current_level || 1;
+
+    if (!user || !activePathData) {
+      setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
+      setGuidanceError("Please activate a path to get smart tips.");
+      setLoadingGuidance(false);
+      return;
+    }
+
+    // Check cache first
+    if (guidanceCache[currentLevel]) {
+      console.log(`Using cached guidance for Level ${currentLevel}`);
+      setPersonalizedGuidance(guidanceCache[currentLevel]);
+      return;
+    }
+
+    setLoadingGuidance(true);
+    setGuidanceError(null);
+    try {
+      console.log(`Fetching guidance for Level ${currentLevel}...`);
+      const session = (await supabase.auth.getSession()).data.session;
+      const { data, error } = await supabase.functions.invoke("generate-personalized-guidance", {
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+
+      if (error) throw error;
+
+      const hasAny = Boolean(
+        (data?.dailyActions && data.dailyActions.length) ||
+          (data?.smartTips && data.smartTips.length) ||
+          (data?.levelResources && data.levelResources.length),
+      );
+
+      if (!hasAny && attempt === 1) {
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2, currentLevel), 900);
+        return;
+      }
+
+      const guidanceData = data || { dailyActions: [], smartTips: [], levelResources: [] };
+      setPersonalizedGuidance(guidanceData);
+      setGuidanceCache((prev) => ({ ...prev, [currentLevel]: guidanceData }));
+      setGuidanceError(hasAny ? null : "No guidance returned");
+    } catch (error) {
+      if (attempt === 1) {
+        setTimeout(() => loadPersonalizedGuidance(activePathData, 2, currentLevel), 900);
+        return;
+      }
+      console.error("Error loading personalized guidance:", error);
+      setPersonalizedGuidance({ dailyActions: [], smartTips: [], levelResources: [] });
+      setGuidanceError(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setLoadingGuidance(false);
+    }
+  };
 
   const generateDailyMissions = async (path: any) => {
     if (!path || !user) return;
@@ -399,6 +473,18 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       window.removeEventListener("streakUpdated", handleStreakUpdate);
     };
   }, [user?.id]);
+
+  // Load guidance when level changes and not cached
+  useEffect(() => {
+    const currentLevel = userStats?.current_level || 1;
+    if (activePath && user && !guidanceCache[currentLevel]) {
+      setTimeout(() => {
+        loadPersonalizedGuidance(activePath, 1, currentLevel);
+      }, 800);
+    } else if (guidanceCache[currentLevel]) {
+      setPersonalizedGuidance(guidanceCache[currentLevel]);
+    }
+  }, [userStats?.current_level, activePath?.id, user]);
 
   const handleFeaturedClick = async () => {
     setFeaturedDialogOpen(true);
@@ -864,6 +950,81 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 );
               })}
             </div>
+          </div>
+
+          {/* Quick Tips */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Tips</p>
+              {personalizedTips.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setGuidanceCache((prev) => {
+                      const newCache = { ...prev };
+                      delete newCache[userStats?.current_level || 1];
+                      return newCache;
+                    });
+                    loadPersonalizedGuidance();
+                  }}
+                  disabled={loadingGuidance}
+                  className="h-7 text-xs"
+                >
+                  {loadingGuidance ? "Refreshing..." : "Refresh"}
+                </Button>
+              )}
+            </div>
+            {loadingGuidance ? (
+              <div className="space-y-3">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            ) : !activePath ? (
+              <Card className="border-dashed p-6 text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">Activate a career path to get personalized tips</p>
+              </Card>
+            ) : guidanceError ? (
+              <Card className="border-red-500/20 bg-red-500/5 p-6 text-center space-y-3">
+                <Lightbulb className="h-8 w-8 mx-auto mb-1 text-red-500" />
+                <p className="text-sm text-muted-foreground">Couldn't load your quick tips. Please try again.</p>
+                <div className="flex justify-center">
+                  <Button size="sm" onClick={() => loadPersonalizedGuidance()}>
+                    Retry
+                  </Button>
+                </div>
+              </Card>
+            ) : personalizedTips.length === 0 ? (
+              <Card className="border-amber-500/20 bg-amber-500/5 p-6 text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-3 text-amber-500" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generating personalized tips based on your CV and market insights...
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {personalizedTips.map((tip: any, idx: number) => (
+                  <Card key={idx} className="border-primary/10 hover:border-primary/30 transition-colors p-4">
+                    <div className="flex items-start gap-3">
+                      <Lightbulb className="h-5 w-5 text-primary/70 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <p className="text-sm font-medium leading-relaxed">{tip.tip}</p>
+                        {tip.nextSteps && (
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-semibold text-primary">Next steps:</span> {tip.nextSteps}
+                          </p>
+                        )}
+                        {tip.strategicValue && (
+                          <p className="text-xs text-muted-foreground italic">💡 {tip.strategicValue}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Featured */}
