@@ -24,14 +24,25 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const watched = localStorage.getItem('tutorial-watched') === 'true';
-    setTutorialWatched(watched);
+    const loadTutorialState = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        const storageKey = `tutorial-watched-${user.id}`;
+        const watched = localStorage.getItem(storageKey) === 'true';
+        setTutorialWatched(watched);
+      }
+    };
+    loadTutorialState();
   }, []);
 
-  const handleTutorialWatched = () => {
-    localStorage.setItem('tutorial-watched', 'true');
-    setTutorialWatched(true);
-    toast({ title: "Great!", description: "Thanks for watching the tutorial!" });
+  const handleTutorialWatched = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id) {
+      const storageKey = `tutorial-watched-${user.id}`;
+      localStorage.setItem(storageKey, 'true');
+      setTutorialWatched(true);
+      toast({ title: "Great!", description: "Thanks for watching the tutorial!" });
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
