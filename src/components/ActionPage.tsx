@@ -986,7 +986,7 @@ export const ActionPage = () => {
         {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Path Goals</h3>
+              <h3 className="text-lg font-semibold">Your Goals</h3>
               <Badge variant="secondary">
                 {goalsCompleted} of {totalGoals} completed
               </Badge>
@@ -1056,7 +1056,7 @@ export const ActionPage = () => {
 
         {/* 10 Levels of Guidance */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Your Path Levels</h3>
+          <h3 className="text-lg font-semibold mb-3">Your Levels</h3>
           <TooltipProvider delayDuration={0}>
             <div className="grid grid-cols-5 gap-2 mb-4">
               {guidanceLevels.map((level) => {
