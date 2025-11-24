@@ -452,15 +452,15 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           const missions = filteredActions.map((action: any) => ({
             icon: action.completed
               ? Check
-              : action.title?.includes("Video") || action.title?.includes("Tutorial")
+              : action.title.includes("Video") || action.title.includes("Tutorial")
                 ? Video
-                : action.title?.includes("Values") || action.title?.includes("Reflect")
+                : action.title.includes("Values") || action.title.includes("Reflect")
                   ? Target
-                  : action.title?.includes("Document") || action.title?.includes("Progress")
+                  : action.title.includes("Document") || action.title.includes("Progress")
                     ? BookOpen
                     : Compass,
-            title: action.title || "",
-            description: action.description || "",
+            title: action.title,
+            description: action.description,
             duration: action.duration || "5 min",
             type: action.type || "Task",
             completed: action.completed || false,
@@ -930,25 +930,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               )}
             </Card>
           </div>
-
-          {/* Daily Affirmations */}
-          {activePath?.affirmations && activePath.affirmations.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Daily Affirmations</p>
-              <Card className="p-5">
-                <div className="space-y-4">
-                  {activePath.affirmations.map((affirmation: string, index: number) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                      <p className="text-sm leading-relaxed italic text-foreground/90">
-                        {affirmation}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          )}
 
           {/* Daily Missions */}
           <div>
