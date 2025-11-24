@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles, Puzzle, Zap, X, Briefcase, Bot } from "lucide-react";
+import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles, Puzzle, X, Briefcase, Bot } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -128,7 +128,6 @@ export const InsightsPage = () => {
   const [guidanceCache, setGuidanceCache] = useState<Record<number, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [skillGapOpen, setSkillGapOpen] = useState(false);
-  const [quickWinsOpen, setQuickWinsOpen] = useState(false);
   const [skillGaps, setSkillGaps] = useState<any[]>([]);
   const [loadingSkillGap, setLoadingSkillGap] = useState(false);
   const [skillGapCache, setSkillGapCache] = useState<Record<string, any>>({});
@@ -496,16 +495,6 @@ export const InsightsPage = () => {
     [activePath, userStats?.missions_completed],
   );
 
-  const quickWinsSuggestions = activePath
-    ? [
-        `Update LinkedIn with "${activePath.title}" as target role`,
-        `Spend 15 minutes researching ${activePath.target_companies?.[0] || "top companies"}`,
-        `Watch one tutorial about ${activePath.key_skills?.[0] || "key skills"}`,
-        `Connect with one person working as ${activePath.title}`,
-        `Read one article about ${activePath.category} careers`,
-      ]
-    : ["Activate a career path first"];
-
   const personalizedTips = useMemo(() => {
     if (loadingGuidance) {
       return []; // Show loading state instead
@@ -739,61 +728,6 @@ export const InsightsPage = () => {
                         <p className="text-sm text-muted-foreground">Activate a path to see your skill gap analysis</p>
                       </div>
                     )}
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer>
-
-            <Drawer open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
-              <DrawerTrigger asChild>
-                <Button variant="outline" className="h-20 flex flex-col gap-2">
-                  <Zap className="h-5 w-5" />
-                  <span className="text-xs">Quick Wins</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh] fixed">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setQuickWinsOpen(false);
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-
-                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
-                  <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
-                    <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
-                  </div>
-
-                  <div className="p-6">
-                    <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
-                      {quickWinsSuggestions.map((win, idx) => (
-                        <div
-                          key={idx}
-                          className="w-full text-left p-4 rounded-xl bg-background/50"
-                        >
-                          <div className="flex items-start gap-3">
-                            <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                            <span className="text-sm leading-relaxed">{win}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="px-6 pb-6 sticky bottom-0 bg-background">
-                    <Button
-                      onClick={() => setQuickWinsOpen(false)}
-                      className="w-full h-12 rounded-full text-base font-semibold"
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Start Taking Action
-                    </Button>
                   </div>
                 </div>
               </DrawerContent>
