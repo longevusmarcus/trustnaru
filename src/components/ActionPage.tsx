@@ -205,7 +205,7 @@ export const ActionPage = () => {
   // Clear resource cache when active path changes to force regeneration
   useEffect(() => {
     if (activePath?.id) {
-      console.log('Active path changed, clearing resource cache');
+      console.log("Active path changed, clearing resource cache");
       setResourcesCache({});
       setLevelResources([]);
     }
@@ -565,7 +565,7 @@ export const ActionPage = () => {
 
       // Clear level resources cache to force regeneration for new path
       setResourcesCache({});
-      
+
       // Clear skill gaps to force regeneration for new path
       setSkillGaps([]);
       setSkillGapCache({});
@@ -621,7 +621,7 @@ export const ActionPage = () => {
     if (!user || !activePath) return;
 
     const cacheKey = `${activePath.id}_level_${currentLevel}`;
-    
+
     // Check cache first unless force refresh
     if (!forceRefresh && skillGapCache[cacheKey]) {
       setSkillGaps(skillGapCache[cacheKey]);
@@ -1046,7 +1046,7 @@ export const ActionPage = () => {
         {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Goals</h3>
+              <h3 className="text-lg font-semibold">Big Actions</h3>
               <Badge variant="secondary">
                 {goalsCompleted} of {totalGoals} completed
               </Badge>
@@ -1088,7 +1088,7 @@ export const ActionPage = () => {
               ))}
               {goals.length > 3 && (
                 <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
-                  View All {goals.length} Goals
+                  View All {goals.length}
                 </Button>
               )}
             </div>
@@ -1108,7 +1108,7 @@ export const ActionPage = () => {
         {/* Today's Actions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Today's Actions</h3>
+            <h3 className="text-lg font-semibold">Small Actions</h3>
             <div className="flex items-center gap-2">
               {actionHistory.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="h-7 text-xs">
@@ -1160,21 +1160,21 @@ export const ActionPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           {action.timeframe && (
-                            <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${
-                              action.timeframe === "morning" 
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : action.timeframe === "afternoon"
-                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                                  : action.timeframe === "evening"
-                                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
-                                    : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            }`}>
+                            <span
+                              className={`text-xs font-semibold uppercase px-2 py-0.5 rounded ${
+                                action.timeframe === "morning"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                  : action.timeframe === "afternoon"
+                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                    : action.timeframe === "evening"
+                                      ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                                      : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              }`}
+                            >
                               {action.timeframe}
                             </span>
                           )}
-                          {action.label && (
-                            <span className="text-xs text-muted-foreground">{action.label}</span>
-                          )}
+                          {action.label && <span className="text-xs text-muted-foreground">{action.label}</span>}
                           {action.priority && (
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
@@ -1579,10 +1579,7 @@ export const ActionPage = () => {
                   <div className="p-6">
                     <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
                       {quickWinsSuggestions.map((win, idx) => (
-                        <div
-                          key={idx}
-                          className="w-full text-left p-4 rounded-xl bg-background/50"
-                        >
+                        <div key={idx} className="w-full text-left p-4 rounded-xl bg-background/50">
                           <div className="flex items-start gap-3">
                             <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                             <span className="text-sm leading-relaxed">{win}</span>
