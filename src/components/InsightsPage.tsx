@@ -515,6 +515,35 @@ export const InsightsPage = () => {
           </motion.div>
         )}
 
+        {/* Skill Gap */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <h3 className="text-lg font-semibold mb-3">Your Skill Gap</h3>
+          {!activePath ? (
+            <Card className="border-dashed">
+              <CardContent className="p-6 text-center">
+                <Lightbulb className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">Activate a career path to see your skill gap analysis</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-primary/20">
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Skill gap analysis helps you understand what you need to learn to reach your goals. Visit the Copilot page to see detailed skill gaps for Level {userStats?.current_level || 1}.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = "/copilot"}
+                  className="w-full"
+                >
+                  View Skill Gap Analysis
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+
         {/* Personalized Tips */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-3">
