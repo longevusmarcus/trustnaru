@@ -1133,7 +1133,7 @@ export const ActionPage = () => {
         {/* Today's Actions */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Actions To Level Up</h3>
+            <h3 className="text-lg font-semibold">Level-up Actions</h3>
             <div className="flex items-center gap-2">
               {actionHistory.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setShowHistory(!showHistory)} className="h-7 text-xs">
