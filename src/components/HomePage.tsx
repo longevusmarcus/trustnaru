@@ -252,7 +252,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     const today = new Date().toISOString().split("T")[0];
     const cacheKey = `quick_tips_${user.id}_${activePathData.id}_level_${currentLevel}`;
     const cached = localStorage.getItem(cacheKey);
-    
+
     if (cached) {
       try {
         const { data, date } = JSON.parse(cached);
@@ -299,12 +299,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const guidanceData = data || { dailyActions: [], smartTips: [], levelResources: [] };
       setPersonalizedGuidance(guidanceData);
       setGuidanceCache((prev) => ({ ...prev, [currentLevel]: guidanceData }));
-      
+
       // Save to localStorage with today's date
       const today = new Date().toISOString().split("T")[0];
       const cacheKey = `quick_tips_${user.id}_${activePathData.id}_level_${currentLevel}`;
       localStorage.setItem(cacheKey, JSON.stringify({ data: guidanceData, date: today }));
-      
+
       setGuidanceError(hasAny ? null : "No guidance returned");
     } catch (error) {
       if (attempt === 1) {
@@ -980,7 +980,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           {/* Quick Tips */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Tips</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Today's Tips</p>
               {personalizedTips.length > 0 && (
                 <Button
                   variant="ghost"
