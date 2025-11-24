@@ -1345,7 +1345,7 @@ export const ActionPage = () => {
         {activePath && activePath.affirmations?.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
+              <h3 className="text-lg font-semibold">Affirmations For You</h3>
               <Button
                 variant="ghost"
                 size="sm"
