@@ -400,7 +400,9 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
           supabase
             .from("career_paths")
-            .select("id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations")
+            .select(
+              "id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations",
+            )
             .eq("user_id", user.id)
             .limit(10),
           supabase
@@ -1062,7 +1064,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           {activePath && activePath.affirmations?.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Affirmations</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Daily Affirmations</p>
                 <Button
                   variant="ghost"
                   size="sm"
