@@ -809,15 +809,6 @@ export const InsightsPage = () => {
               </p>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
-                <Bot className="h-5 w-5" />
-                <span className="text-xs">Automations (soon)</span>
-              </Button>
-              <p className="text-[10px] text-muted-foreground text-center px-2">
-                🔥 Personalized recommendations from your data
-              </p>
-            </div>
           </div>
         </motion.div>
 

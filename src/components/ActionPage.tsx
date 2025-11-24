@@ -1422,6 +1422,26 @@ export const ActionPage = () => {
             </div>
           )}
         </div>
+
+        {/* Automations (soon) */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Automations</h3>
+          <Card className="border-dashed">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm mb-1">Smart Automations (Coming Soon)</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Personalized recommendations and automated workflows based on your data
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* All Goals Drawer */}
