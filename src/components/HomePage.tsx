@@ -866,6 +866,30 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             </div>
           </div>
 
+          {/* Quick Wins */}
+          <div>
+            <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Quick Wins</p>
+            <Card className="p-6">
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground mb-4">Small actions, big impact on your journey</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Update your LinkedIn profile with a recent achievement</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Reach out to one person in your target role for a coffee chat</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <Lightbulb className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Complete one micro-skill tutorial (15 minutes max)</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
           {/* Featured */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured Today</p>
