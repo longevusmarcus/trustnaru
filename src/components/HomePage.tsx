@@ -178,7 +178,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
     const storageKey = `dashboard_welcome_seen_${user.id}`;
     const hasSeenWelcome = localStorage.getItem(storageKey);
-    
+
     // Explicitly set the welcome state based on localStorage
     if (!hasSeenWelcome) {
       setShowWelcome(true);
@@ -1098,7 +1098,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Your Futures</p>
                     <p className="text-xs text-muted-foreground">
-                      Generate and explore visualized career paths. Activate the one that resonates
+                      Generate and explore visual career paths. Activate the ones that resonate.
                     </p>
                   </div>
                 </div>
@@ -1107,7 +1107,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Copilot</p>
                     <p className="text-xs text-muted-foreground">
-                      Get daily actions, track progress, and level up through your career path
+                      Get daily actions, track progress, and level up through your career path.
                     </p>
                   </div>
                 </div>
@@ -1116,7 +1116,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Insights & Journeys</p>
                     <p className="text-xs text-muted-foreground">
-                      Access analyses, standout profiles, and personalized guidance for your journey
+                      Access analyses, standout profiles, and personalized guidance for your journey.
                     </p>
                   </div>
                 </div>
