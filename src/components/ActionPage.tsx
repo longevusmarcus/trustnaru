@@ -64,6 +64,7 @@ export const ActionPage = () => {
   const [loadingSkillGap, setLoadingSkillGap] = useState(false);
   const [shortcutsContent, setShortcutsContent] = useState<Record<string, string>>({});
   const [loadingShortcuts, setLoadingShortcuts] = useState<Record<string, boolean>>({});
+  const [skillGapCache, setSkillGapCache] = useState<Record<string, any>>({});
 
   const handleGenerateShortcuts = async (action: any) => {
     // Validate required fields
@@ -567,6 +568,7 @@ export const ActionPage = () => {
       
       // Clear skill gaps to force regeneration for new path
       setSkillGaps([]);
+      setSkillGapCache({});
 
       // Reload all data to update with new active path
       await loadData();
@@ -615,8 +617,16 @@ export const ActionPage = () => {
     }
   };
 
-  const loadSkillGap = async () => {
+  const loadSkillGap = async (forceRefresh = false) => {
     if (!user || !activePath) return;
+
+    const cacheKey = `${activePath.id}_level_${currentLevel}`;
+    
+    // Check cache first unless force refresh
+    if (!forceRefresh && skillGapCache[cacheKey]) {
+      setSkillGaps(skillGapCache[cacheKey]);
+      return;
+    }
 
     setLoadingSkillGap(true);
     try {
@@ -635,6 +645,7 @@ export const ActionPage = () => {
 
       if (data?.skillGaps) {
         setSkillGaps(data.skillGaps);
+        setSkillGapCache((prev) => ({ ...prev, [cacheKey]: data.skillGaps }));
       }
     } catch (error) {
       console.error("Error loading skill gap:", error);
@@ -684,6 +695,10 @@ export const ActionPage = () => {
         title: `🎉 Level ${nextLevel} Unlocked!`,
         description: `Congratulations! You've advanced to ${guidanceLevels[nextLevel - 1]?.name || "the next level"}. New resources and actions await!`,
       });
+
+      // Clear skill gap cache for new level
+      setSkillGapCache({});
+      setSkillGaps([]);
 
       // Award badge
       await checkAndAwardBadges();
@@ -1468,7 +1483,20 @@ export const ActionPage = () => {
                 <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                      <h2 className="text-2xl font-bold">Your Skill Gap</h2>
+                      {activePath && skillGaps.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => loadSkillGap(true)}
+                          disabled={loadingSkillGap}
+                          className="h-7 text-xs"
+                        >
+                          {loadingSkillGap ? "Refreshing..." : "Refresh"}
+                        </Button>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">Level {currentLevel} focus areas</p>
                   </div>
 
