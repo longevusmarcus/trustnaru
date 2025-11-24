@@ -1096,27 +1096,27 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                 <div className="flex items-start gap-3">
                   <Compass className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">Your Futures</p>
+                    <p className="font-medium text-foreground">Why Naru?</p>
                     <p className="text-xs text-muted-foreground">
-                      Generate and explore visual career paths. Activate the ones that resonate.
+                      We help you see your future self in the career that fits you, and grow into it.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">Copilot</p>
+                    <p className="font-medium text-foreground">Is Founder Status worth it?</p>
                     <p className="text-xs text-muted-foreground">
-                      Get daily actions, track progress, and level up through your career path.
+                      Yes. As a founder, you get perks (TBA) and a limited price of $48/year (normally $240).
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Lightbulb className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-foreground">Insights & Journeys</p>
+                    <p className="font-medium text-foreground">What do we ask in return?</p>
                     <p className="text-xs text-muted-foreground">
-                      Access analyses, standout profiles, and personalized guidance for your journey.
+                      Tell us what works and what doesn’t. Your feedback is our roadmap.
                     </p>
                   </div>
                 </div>
@@ -1143,7 +1143,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   }
                 }}
               >
-                Explore Naru
+                Unlock Founder Status
               </Button>
             </div>
           </div>
