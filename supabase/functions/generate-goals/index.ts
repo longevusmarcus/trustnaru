@@ -68,19 +68,19 @@ Generate 5 goals that are:
 1. Specific and measurable with clear outcomes
 2. Aligned with the career path progression
 3. Realistically achievable within stated timeframes
-4. Properly sequenced (foundational skills first, advanced goals later)
-5. Timeline must match priority: high priority = 1-2 months, medium = 2-4 months, low = 4-6 months
+4. Properly sequenced (quick wins first, major goals later)
+5. Timeline must match priority: high priority = 4-6 months (harder), medium = 2-4 months, low = 1-2 months (easier)
 
 CRITICAL TIMELINE REQUIREMENTS:
-- High priority goals: 1-2 months (foundational, urgent skills)
-- Medium priority goals: 2-4 months (intermediate development)
-- Low priority goals: 4-6 months (advanced, long-term objectives)
-- Ensure goals build on each other logically
+- High priority goals: 4-6 months (most important, challenging, require significant effort)
+- Medium priority goals: 2-4 months (intermediate difficulty and importance)
+- Low priority goals: 1-2 months (easier, quick wins, foundational skills)
+- Ensure goals progress logically from easier to harder
 
 Format each goal as:
 - Title: Clear, action-oriented title
 - Description: 1-2 sentences explaining the specific outcome
-- Priority: high, medium, or low (must align with timeline)
+- Priority: high, medium, or low (must align with timeline and difficulty)
 - Timeline: Number of months to achieve (1-6, must match priority level)`;
 
     console.log('Calling AI to generate goals...');
