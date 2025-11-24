@@ -1042,137 +1042,6 @@ export const ActionPage = () => {
           </div>
         )}
 
-        {/* Affirmations */}
-        {activePath && activePath.affirmations?.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const session = (await supabase.auth.getSession()).data.session;
-                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
-                      body: { pathId: activePath.id },
-                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
-                    });
-
-                    if (error) throw error;
-
-                    if (data?.affirmations) {
-                      setActivePath({ ...activePath, affirmations: data.affirmations });
-                      toast({
-                        title: "Affirmations refreshed",
-                        description: "Your daily affirmations have been updated.",
-                      });
-                    }
-                  } catch (error) {
-                    console.error("Error refreshing affirmations:", error);
-                    toast({
-                      title: "Failed to refresh",
-                      description: "Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                className="h-7 text-xs"
-              >
-                Refresh
-              </Button>
-            </div>
-            <Card>
-              <CardContent className="p-4 space-y-3">
-                {activePath.affirmations.map((affirmation: string, index: number) => (
-                  <div key={index} className="py-2 border-l-2 border-primary/30 pl-4">
-                    <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Level Resources */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Foundation</span>
-              {activePath && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setResourcesCache((prev) => {
-                      const newCache = { ...prev };
-                      delete newCache[currentLevel];
-                      return newCache;
-                    });
-                    // Force refresh to generate new resources
-                    loadLevelResources(currentLevel, true);
-                  }}
-                  disabled={loadingResources}
-                  className="h-7 text-xs"
-                >
-                  {loadingResources ? "Refreshing..." : "Refresh"}
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {loadingResources ? (
-            <div className="space-y-3">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          ) : !activePath ? (
-            <Card className="border-dashed">
-              <CardContent className="p-6 text-center">
-                <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  Activate a career path to get personalized learning resources
-                </p>
-              </CardContent>
-            </Card>
-          ) : levelResources.length === 0 ? (
-            <Card className="border-amber-500/20 bg-amber-500/5">
-              <CardContent className="p-6 text-center">
-                <BookOpen className="h-8 w-8 mx-auto mb-3 text-amber-500" />
-                <p className="text-sm text-muted-foreground mb-3">
-                  Generating personalized resources based on your CV and skill gaps...
-                </p>
-                <Button size="sm" variant="outline" onClick={() => loadLevelResources(currentLevel)}>
-                  Retry
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {levelResources.map((resource: any, index: number) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm mb-1">{resource.resource}</h4>
-                        <p className="text-xs text-muted-foreground mb-2">{resource.impact}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Award className="h-3 w-3" />
-                            {resource.commitment}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Goals Section - Make it prominent */}
         {goals.length > 0 ? (
           <div>
@@ -1443,6 +1312,137 @@ export const ActionPage = () => {
                   </Card>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {/* Affirmations */}
+        {activePath && activePath.affirmations?.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const session = (await supabase.auth.getSession()).data.session;
+                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
+                      body: { pathId: activePath.id },
+                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+                    });
+
+                    if (error) throw error;
+
+                    if (data?.affirmations) {
+                      setActivePath({ ...activePath, affirmations: data.affirmations });
+                      toast({
+                        title: "Affirmations refreshed",
+                        description: "Your daily affirmations have been updated.",
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Error refreshing affirmations:", error);
+                    toast({
+                      title: "Failed to refresh",
+                      description: "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="h-7 text-xs"
+              >
+                Refresh
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                {activePath.affirmations.map((affirmation: string, index: number) => (
+                  <div key={index} className="py-2 border-l-2 border-primary/30 pl-4">
+                    <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Level Resources */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold">Level {currentLevel} Resources</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Foundation</span>
+              {activePath && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setResourcesCache((prev) => {
+                      const newCache = { ...prev };
+                      delete newCache[currentLevel];
+                      return newCache;
+                    });
+                    // Force refresh to generate new resources
+                    loadLevelResources(currentLevel, true);
+                  }}
+                  disabled={loadingResources}
+                  className="h-7 text-xs"
+                >
+                  {loadingResources ? "Refreshing..." : "Refresh"}
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {loadingResources ? (
+            <div className="space-y-3">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : !activePath ? (
+            <Card className="border-dashed">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  Activate a career path to get personalized learning resources
+                </p>
+              </CardContent>
+            </Card>
+          ) : levelResources.length === 0 ? (
+            <Card className="border-amber-500/20 bg-amber-500/5">
+              <CardContent className="p-6 text-center">
+                <BookOpen className="h-8 w-8 mx-auto mb-3 text-amber-500" />
+                <p className="text-sm text-muted-foreground mb-3">
+                  Generating personalized resources based on your CV and skill gaps...
+                </p>
+                <Button size="sm" variant="outline" onClick={() => loadLevelResources(currentLevel)}>
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {levelResources.map((resource: any, index: number) => (
+                <Card key={index} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm mb-1">{resource.resource}</h4>
+                        <p className="text-xs text-muted-foreground mb-2">{resource.impact}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Award className="h-3 w-3" />
+                            {resource.commitment}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </div>
