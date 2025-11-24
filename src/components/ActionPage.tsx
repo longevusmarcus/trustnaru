@@ -1042,68 +1042,56 @@ export const ActionPage = () => {
           </div>
         )}
 
-        {/* Goals Section - Make it prominent */}
-        {goals.length > 0 ? (
+        {/* Affirmations */}
+        {activePath && activePath.affirmations?.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Goals</h3>
-              <Badge variant="secondary">
-                {goalsCompleted} of {totalGoals} completed
-              </Badge>
+              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const session = (await supabase.auth.getSession()).data.session;
+                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
+                      body: { pathId: activePath.id },
+                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+                    });
+
+                    if (error) throw error;
+
+                    if (data?.affirmations) {
+                      setActivePath({ ...activePath, affirmations: data.affirmations });
+                      toast({
+                        title: "Affirmations refreshed",
+                        description: "Your daily affirmations have been updated.",
+                      });
+                    }
+                  } catch (error) {
+                    console.error("Error refreshing affirmations:", error);
+                    toast({
+                      title: "Failed to refresh",
+                      description: "Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="h-7 text-xs"
+              >
+                Refresh
+              </Button>
             </div>
-            <div className="space-y-2">
-              {goals.slice(0, 3).map((goal: any) => (
-                <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
-                        {goal.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground" />
-                        )}
-                      </button>
-                      <div className="flex-1">
-                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
-                          {goal.title}
-                        </h4>
-                        {goal.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
-                        )}
-                      </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                          goal.priority === "high"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
-                            : goal.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
-                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
-                        }`}
-                      >
-                        {goal.priority}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {goals.length > 3 && (
-                <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
-                  View All {goals.length} Goals
-                </Button>
-              )}
-            </div>
+            <Card>
+              <CardContent className="p-4 space-y-3">
+                {activePath.affirmations.map((affirmation: string, index: number) => (
+                  <div key={index} className="py-2 border-l-2 border-primary/30 pl-4">
+                    <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </div>
-        ) : activePath ? (
-          <Card className="bg-muted/30">
-            <CardContent className="p-6 text-center">
-              <Sparkles className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50 animate-pulse" />
-              <h4 className="font-medium mb-2">Generating Your Goals</h4>
-              <p className="text-sm text-muted-foreground">
-                Your personalized goals are being created. This may take a moment...
-              </p>
-            </CardContent>
-          </Card>
-        ) : null}
+        )}
 
         {/* Level Resources */}
         <div>
@@ -1185,56 +1173,68 @@ export const ActionPage = () => {
           )}
         </div>
 
-        {/* Affirmations */}
-        {activePath && activePath.affirmations?.length > 0 && (
+        {/* Goals Section - Make it prominent */}
+        {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Daily Affirmations</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const session = (await supabase.auth.getSession()).data.session;
-                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
-                      body: { pathId: activePath.id },
-                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
-                    });
-
-                    if (error) throw error;
-
-                    if (data?.affirmations) {
-                      setActivePath({ ...activePath, affirmations: data.affirmations });
-                      toast({
-                        title: "Affirmations refreshed",
-                        description: "Your daily affirmations have been updated.",
-                      });
-                    }
-                  } catch (error) {
-                    console.error("Error refreshing affirmations:", error);
-                    toast({
-                      title: "Failed to refresh",
-                      description: "Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                className="h-7 text-xs"
-              >
-                Refresh
-              </Button>
+              <h3 className="text-lg font-semibold">Your Goals</h3>
+              <Badge variant="secondary">
+                {goalsCompleted} of {totalGoals} completed
+              </Badge>
             </div>
-            <Card>
-              <CardContent className="p-4 space-y-3">
-                {activePath.affirmations.map((affirmation: string, index: number) => (
-                  <div key={index} className="py-2 border-l-2 border-primary/30 pl-4">
-                    <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+            <div className="space-y-2">
+              {goals.slice(0, 3).map((goal: any) => (
+                <Card key={goal.id} className={goal.completed ? "opacity-60" : ""}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <button onClick={() => handleToggleGoal(goal.id, goal.completed)} className="mt-1 flex-shrink-0">
+                        {goal.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <h4 className={`font-medium text-sm mb-1 ${goal.completed ? "line-through" : ""}`}>
+                          {goal.title}
+                        </h4>
+                        {goal.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">{goal.description}</p>
+                        )}
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                          goal.priority === "high"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            : goal.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
+                      >
+                        {goal.priority}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {goals.length > 3 && (
+                <Button variant="outline" className="w-full" onClick={() => setGoalDialogOpen(true)}>
+                  View All {goals.length} Goals
+                </Button>
+              )}
+            </div>
           </div>
-        )}
+        ) : activePath ? (
+          <Card className="bg-muted/30">
+            <CardContent className="p-6 text-center">
+              <Sparkles className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50 animate-pulse" />
+              <h4 className="font-medium mb-2">Generating Your Goals</h4>
+              <p className="text-sm text-muted-foreground">
+                Your personalized goals are being created. This may take a moment...
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Today's Actions */}
         <div>
