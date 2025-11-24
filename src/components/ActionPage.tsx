@@ -928,7 +928,7 @@ export const ActionPage = () => {
         {goals.length > 0 ? (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Your Goals</h3>
+              <h3 className="text-lg font-semibold">Your Next Goals</h3>
               <Badge variant="secondary">
                 {goalsCompleted} of {totalGoals} completed
               </Badge>
