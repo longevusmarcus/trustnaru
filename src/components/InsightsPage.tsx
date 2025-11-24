@@ -242,6 +242,17 @@ export const InsightsPage = () => {
 
       // Clear guidance cache when switching paths
       setGuidanceCache({});
+      
+      // Clear skill gap cache when switching paths
+      setSkillGapCache({});
+      setSkillGaps([]);
+      
+      // Clear localStorage caches for skill gaps
+      if (activePath) {
+        const currentLevel = userStats?.current_level || 1;
+        const storageCacheKey = `skill_gap_${user.id}_${activePath.id}_level_${currentLevel}`;
+        localStorage.removeItem(storageCacheKey);
+      }
 
       // Reload insights to update with new active path
       await loadInsights();
@@ -362,10 +373,31 @@ export const InsightsPage = () => {
     const currentLevel = userStats?.current_level || 1;
     const cacheKey = `${activePath.id}_level_${currentLevel}`;
     
-    // Check cache first unless force refresh
-    if (!forceRefresh && skillGapCache[cacheKey]) {
-      setSkillGaps(skillGapCache[cacheKey]);
-      return;
+    // Check localStorage cache first (date-based)
+    const today = new Date().toISOString().split("T")[0];
+    const storageCacheKey = `skill_gap_${user.id}_${activePath.id}_level_${currentLevel}`;
+    
+    if (!forceRefresh) {
+      const cached = localStorage.getItem(storageCacheKey);
+      if (cached) {
+        try {
+          const { data, date } = JSON.parse(cached);
+          if (date === today && data) {
+            console.log(`Using cached skill gaps from ${date}`);
+            setSkillGaps(data);
+            setSkillGapCache((prev) => ({ ...prev, [cacheKey]: data }));
+            return;
+          }
+        } catch (e) {
+          console.error("Error parsing cached skill gaps:", e);
+        }
+      }
+      
+      // Check memory cache
+      if (skillGapCache[cacheKey]) {
+        setSkillGaps(skillGapCache[cacheKey]);
+        return;
+      }
     }
 
     setLoadingSkillGap(true);
@@ -386,6 +418,10 @@ export const InsightsPage = () => {
       if (data?.skillGaps) {
         setSkillGaps(data.skillGaps);
         setSkillGapCache((prev) => ({ ...prev, [cacheKey]: data.skillGaps }));
+        
+        // Save to localStorage with today's date
+        const today = new Date().toISOString().split("T")[0];
+        localStorage.setItem(storageCacheKey, JSON.stringify({ data: data.skillGaps, date: today }));
       }
     } catch (error) {
       console.error("Error loading skill gap:", error);
@@ -766,7 +802,15 @@ export const InsightsPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => loadSkillGap(true)}
+                        onClick={() => {
+                          // Clear both memory and localStorage cache
+                          if (user && activePath) {
+                            const currentLevel = userStats?.current_level || 1;
+                            const storageCacheKey = `skill_gap_${user.id}_${activePath.id}_level_${currentLevel}`;
+                            localStorage.removeItem(storageCacheKey);
+                          }
+                          loadSkillGap(true);
+                        }}
                         disabled={loadingSkillGap}
                         className="h-7 text-xs"
                       >
