@@ -998,7 +998,7 @@ export const ActionPage = () => {
 
         {/* 10 Levels of Guidance */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Your Journey Levels</h3>
+          <h3 className="text-lg font-semibold mb-3">Your Path Levels</h3>
           <TooltipProvider delayDuration={0}>
             <div className="grid grid-cols-5 gap-2 mb-4">
               {guidanceLevels.map((level) => {
