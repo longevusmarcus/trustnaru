@@ -1005,8 +1005,8 @@ export const ActionPage = () => {
           </Card>
         </div>
 
-        {/* Gamification Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Gamification Stats - Hidden, moved to Insights page */}
+        {/* <div className="grid grid-cols-3 gap-3">
           <Card>
             <CardContent className="p-4 text-center">
               <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70 stroke-[1.5]" />
@@ -1030,7 +1030,7 @@ export const ActionPage = () => {
               <div className="text-xs text-muted-foreground">Goals</div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
         {/* Roadmap - Hidden as it's similar to goals */}
         {/* {activePath && roadmapMilestones.length > 0 && (
