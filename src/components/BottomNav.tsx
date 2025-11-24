@@ -38,7 +38,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               }`}
             >
               <Lightbulb className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Coach</span>
+              <span className="text-[10px] font-medium">Insights</span>
             </Button>
 
             <Button
