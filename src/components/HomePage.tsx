@@ -452,15 +452,15 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           const missions = filteredActions.map((action: any) => ({
             icon: action.completed
               ? Check
-              : action.title.includes("Video") || action.title.includes("Tutorial")
+              : action.title?.includes("Video") || action.title?.includes("Tutorial")
                 ? Video
-                : action.title.includes("Values") || action.title.includes("Reflect")
+                : action.title?.includes("Values") || action.title?.includes("Reflect")
                   ? Target
-                  : action.title.includes("Document") || action.title.includes("Progress")
+                  : action.title?.includes("Document") || action.title?.includes("Progress")
                     ? BookOpen
                     : Compass,
-            title: action.title,
-            description: action.description,
+            title: action.title || "",
+            description: action.description || "",
             duration: action.duration || "5 min",
             type: action.type || "Task",
             completed: action.completed || false,
