@@ -1018,8 +1018,8 @@ export const ActionPage = () => {
           </Card>
         </div>
 
-        {/* Roadmap */}
-        {activePath && roadmapMilestones.length > 0 && (
+        {/* Roadmap - Hidden as it's similar to goals */}
+        {/* {activePath && roadmapMilestones.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold mb-3">Your Roadmap</h3>
             <div className="space-y-2">
@@ -1040,7 +1040,7 @@ export const ActionPage = () => {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Goals Section - Make it prominent */}
         {goals.length > 0 ? (
