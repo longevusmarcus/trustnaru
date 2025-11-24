@@ -1483,21 +1483,19 @@ export const ActionPage = () => {
                 <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
                   {/* Header */}
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
-                    <div className="flex items-center justify-center gap-3 mb-2">
-                      <h2 className="text-2xl font-bold">Your Skill Gap</h2>
-                      {activePath && skillGaps.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => loadSkillGap(true)}
-                          disabled={loadingSkillGap}
-                          className="h-7 text-xs"
-                        >
-                          {loadingSkillGap ? "Refreshing..." : "Refresh"}
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Level {currentLevel} focus areas</p>
+                    <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
+                    <p className="text-sm text-muted-foreground mb-3">Level {currentLevel} focus areas</p>
+                    {activePath && skillGaps.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => loadSkillGap(true)}
+                        disabled={loadingSkillGap}
+                        className="h-7 text-xs"
+                      >
+                        {loadingSkillGap ? "Refreshing..." : "Refresh"}
+                      </Button>
+                    )}
                   </div>
 
                   {/* Content */}
