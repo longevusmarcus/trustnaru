@@ -1127,7 +1127,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           {activePath && (
             <div>
               <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Quick Wins</h3>
-              <Card 
+              <Card
                 className="border-primary/20 cursor-pointer hover:border-primary/40 transition-all hover:shadow-md"
                 onClick={() => setQuickWinsOpen(true)}
               >
@@ -1426,7 +1426,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Why Naru?</p>
                     <p className="text-xs text-muted-foreground">
-                      We help you see your future self in the career that fits you, and grow into it.
+                      We help you see your future self and grow into the career that fits you.
                     </p>
                   </div>
                 </div>
