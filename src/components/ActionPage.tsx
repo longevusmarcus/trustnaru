@@ -299,11 +299,18 @@ export const ActionPage = () => {
           .select("*")
           .eq("user_id", user.id)
           .eq("path_id", profile.active_path_id)
-          .order("priority", { ascending: false })
           .order("created_at", { ascending: true });
 
+        // Sort by priority: high first, then medium, then low
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        const sortedGoals = (goalsData || []).sort((a, b) => {
+          const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] ?? 3;
+          const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] ?? 3;
+          return aPriority - bPriority;
+        });
+
         // Always set goals, even if empty, to clear old path's goals
-        setGoals(goalsData || []);
+        setGoals(sortedGoals);
 
         // Check if we have today's actions already
         const today = new Date().toISOString().split("T")[0];
