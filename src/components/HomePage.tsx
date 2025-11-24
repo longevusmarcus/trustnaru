@@ -931,6 +931,25 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             </Card>
           </div>
 
+          {/* Daily Affirmations */}
+          {activePath?.affirmations && activePath.affirmations.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Daily Affirmations</p>
+              <Card className="p-5">
+                <div className="space-y-4">
+                  {activePath.affirmations.map((affirmation: string, index: number) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                      <p className="text-sm leading-relaxed italic text-foreground/90">
+                        {affirmation}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
           {/* Daily Missions */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Mantra Missions</p>
