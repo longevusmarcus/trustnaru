@@ -480,7 +480,7 @@ export const InsightsPage = () => {
 
         {/* Key Metrics */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <h3 className="text-lg font-semibold mb-3">Your Journey</h3>
+          <h3 className="text-lg font-semibold mb-3">Your Stats</h3>
           <div className="grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="p-4 text-center">
