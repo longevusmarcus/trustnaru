@@ -65,6 +65,7 @@ export const ActionPage = () => {
   const [shortcutsContent, setShortcutsContent] = useState<Record<string, string>>({});
   const [loadingShortcuts, setLoadingShortcuts] = useState<Record<string, boolean>>({});
   const [skillGapCache, setSkillGapCache] = useState<Record<string, any>>({});
+  const [completedResources, setCompletedResources] = useState<Record<string, boolean>>({});
 
   const handleGenerateShortcuts = async (action: any) => {
     // Validate required fields
@@ -267,6 +268,19 @@ export const ActionPage = () => {
     }
     return () => clearInterval(interval);
   }, [timerActive, timerSeconds]);
+
+  // Load completed resources from localStorage
+  useEffect(() => {
+    if (user && activePath && currentLevel) {
+      const storageKey = `completed_resources_${user.id}_${activePath.id}_${currentLevel}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        setCompletedResources(JSON.parse(stored));
+      } else {
+        setCompletedResources({});
+      }
+    }
+  }, [user, activePath?.id, currentLevel]);
 
   const loadData = async () => {
     if (!user) {
@@ -831,6 +845,29 @@ export const ActionPage = () => {
     return meditationKeywords.some((keyword) => task.toLowerCase().includes(keyword));
   };
 
+  const handleToggleResource = (resourceIndex: number) => {
+    if (!user || !activePath) return;
+
+    const resourceKey = `${currentLevel}_${resourceIndex}`;
+    const isCompleted = completedResources[resourceKey];
+    
+    const newCompletedState = {
+      ...completedResources,
+      [resourceKey]: !isCompleted
+    };
+    
+    setCompletedResources(newCompletedState);
+    
+    // Save to localStorage
+    const storageKey = `completed_resources_${user.id}_${activePath.id}_${currentLevel}`;
+    localStorage.setItem(storageKey, JSON.stringify(newCompletedState));
+
+    toast({
+      title: isCompleted ? "Resource unmarked" : "Resource completed! 🎉",
+      description: isCompleted ? "Keep learning" : "Great progress!",
+    });
+  };
+
   if (loading) {
     return (
       <div className="px-4 pb-24 pt-4">
@@ -1389,25 +1426,41 @@ export const ActionPage = () => {
             </Card>
           ) : (
             <div className="space-y-3">
-              {levelResources.map((resource: any, index: number) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <BookOpen className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm mb-1">{resource.resource}</h4>
-                        <p className="text-xs text-muted-foreground mb-2">{resource.impact}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Award className="h-3 w-3" />
-                            {resource.commitment}
-                          </span>
+              {levelResources.map((resource: any, index: number) => {
+                const resourceKey = `${currentLevel}_${index}`;
+                const isCompleted = completedResources[resourceKey] || false;
+                
+                return (
+                  <Card key={index} className={`${isCompleted ? "opacity-60" : ""} hover:shadow-md transition-all`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <button
+                          onClick={() => handleToggleResource(index)}
+                          className="mt-0.5 flex-shrink-0"
+                        >
+                          {isCompleted ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-medium text-sm mb-1 ${isCompleted ? "line-through" : ""}`}>
+                            {resource.resource}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mb-2">{resource.impact}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Award className="h-3 w-3" />
+                              {resource.commitment}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
