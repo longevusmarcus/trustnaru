@@ -719,6 +719,22 @@ export const ActionPage = () => {
     }
   };
 
+  const checkLevelCompletion = async () => {
+    // Check if all actions are completed
+    const allActionsCompleted = todayActions.every((action) => action.done);
+    
+    // Check if all resources are completed
+    const allResourcesCompleted = levelResources.every((_, index) => {
+      const resourceKey = `${currentLevel}_${index}`;
+      return completedResources[resourceKey];
+    });
+
+    // Level completes when BOTH actions and resources are done
+    if (allActionsCompleted && allResourcesCompleted) {
+      await handleLevelComplete();
+    }
+  };
+
   const handleToggleAction = async (index: number) => {
     if (!user || !activePath) return;
 
@@ -754,15 +770,12 @@ export const ActionPage = () => {
           description: "Keep working on this task",
         });
       } else {
-        // Check if level completed
-        if (allCompleted) {
-          await handleLevelComplete();
-        } else {
-          toast({
-            title: "Action completed! 🎉",
-            description: "Great progress!",
-          });
-        }
+        toast({
+          title: "Action completed! 🎉",
+          description: "Great progress!",
+        });
+        // Check if level can be completed (actions + resources)
+        await checkLevelCompletion();
       }
     } catch (error) {
       console.error("Error toggling action:", error);
@@ -821,9 +834,8 @@ export const ActionPage = () => {
 
       setLogDrawerOpen(false);
 
-      if (allCompleted) {
-        await handleLevelComplete();
-      }
+      // Check if level can be completed (actions + resources)
+      await checkLevelCompletion();
     } catch (error) {
       console.error("Error saving log:", error);
       toast({
@@ -845,7 +857,7 @@ export const ActionPage = () => {
     return meditationKeywords.some((keyword) => task.toLowerCase().includes(keyword));
   };
 
-  const handleToggleResource = (resourceIndex: number) => {
+  const handleToggleResource = async (resourceIndex: number) => {
     if (!user || !activePath) return;
 
     const resourceKey = `${currentLevel}_${resourceIndex}`;
@@ -862,10 +874,19 @@ export const ActionPage = () => {
     const storageKey = `completed_resources_${user.id}_${activePath.id}_${currentLevel}`;
     localStorage.setItem(storageKey, JSON.stringify(newCompletedState));
 
-    toast({
-      title: isCompleted ? "Resource unmarked" : "Resource completed! 🎉",
-      description: isCompleted ? "Keep learning" : "Great progress!",
-    });
+    if (!isCompleted) {
+      toast({
+        title: "Resource completed! 🎉",
+        description: "Great progress!",
+      });
+      // Check if level can be completed (actions + resources)
+      await checkLevelCompletion();
+    } else {
+      toast({
+        title: "Resource unmarked",
+        description: "Keep learning",
+      });
+    }
   };
 
   if (loading) {
@@ -1064,7 +1085,7 @@ export const ActionPage = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mb-1">{level.description}</p>
                       <p className="text-xs text-muted-foreground italic">
-                        {isUnlocked ? "Tap to view this level" : "Complete more actions to unlock"}
+                        {isUnlocked ? "Tap to view this level" : "Complete actions and resources to unlock"}
                       </p>
                     </TooltipContent>
                   </Tooltip>
