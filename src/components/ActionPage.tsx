@@ -1553,22 +1553,15 @@ export const ActionPage = () => {
                   <div className="p-6">
                     <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
                       {quickWinsSuggestions.map((win, idx) => (
-                        <button
+                        <div
                           key={idx}
-                          className="w-full text-left p-4 rounded-xl bg-background/50 hover:bg-background transition-colors"
-                          onClick={() => {
-                            toast({
-                              title: "Nice!",
-                              description: "Task added to today's actions.",
-                            });
-                            setQuickWinsOpen(false);
-                          }}
+                          className="w-full text-left p-4 rounded-xl bg-background/50"
                         >
                           <div className="flex items-start gap-3">
                             <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                             <span className="text-sm leading-relaxed">{win}</span>
                           </div>
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
