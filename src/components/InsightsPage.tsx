@@ -515,6 +515,48 @@ export const InsightsPage = () => {
           </motion.div>
         )}
 
+        {/* Skill Gap */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <h3 className="text-lg font-semibold mb-3">Your Skill Gap</h3>
+          <Card className="border-primary/20">
+            <CardContent className="p-6">
+              <p className="text-sm text-muted-foreground mb-4">Level {userStats?.current_level || 1} focus areas</p>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-muted/30">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-bold text-primary">1</span>
+                    </div>
+                    <h4 className="font-semibold text-sm">Strategic Communication</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Gap: Need to articulate technical decisions to non-technical stakeholders</p>
+                  <p className="text-xs text-primary/80 italic">How to fill it: Practice explaining your projects in business terms</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/30">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-bold text-primary">2</span>
+                    </div>
+                    <h4 className="font-semibold text-sm">Leadership Presence</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Gap: Building confidence when presenting to senior leadership</p>
+                  <p className="text-xs text-primary/80 italic">How to fill it: Join Toastmasters or practice with a mentor</p>
+                </div>
+                <div className="p-4 rounded-lg bg-muted/30">
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-bold text-primary">3</span>
+                    </div>
+                    <h4 className="font-semibold text-sm">Industry Networking</h4>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">Gap: Limited connections in target industry</p>
+                  <p className="text-xs text-primary/80 italic">How to fill it: Attend 2 industry events this month</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Personalized Tips */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-3">
