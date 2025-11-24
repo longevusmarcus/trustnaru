@@ -43,7 +43,6 @@ export const ActionPage = () => {
   const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [goalDialogOpen, setGoalDialogOpen] = useState(false);
-  const [quickWinsOpen, setQuickWinsOpen] = useState(false);
   const [goals, setGoals] = useState<any[]>([]);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [todayActions, setTodayActions] = useState<any[]>([]);
@@ -66,6 +65,17 @@ export const ActionPage = () => {
   const [shortcutsContent, setShortcutsContent] = useState<Record<string, string>>({});
   const [loadingShortcuts, setLoadingShortcuts] = useState<Record<string, boolean>>({});
   const [skillGapCache, setSkillGapCache] = useState<Record<string, any>>({});
+  const [quickWinsOpen, setQuickWinsOpen] = useState(false);
+
+  const quickWinsSuggestions = activePath
+    ? [
+        `Update LinkedIn with "${activePath.title}" as target role`,
+        `Spend 15 minutes researching ${activePath.target_companies?.[0] || "top companies"}`,
+        `Watch one tutorial about ${activePath.key_skills?.[0] || "key skills"}`,
+        `Connect with one person working as ${activePath.title}`,
+        `Read one article about ${activePath.category} careers`,
+      ]
+    : ["Activate a career path first"];
 
   const handleGenerateShortcuts = async (action: any) => {
     // Validate required fields
@@ -516,16 +526,6 @@ export const ActionPage = () => {
 
   const goalsCompleted = goals.filter((g) => g.completed).length;
   const totalGoals = goals.length;
-
-  const quickWinsSuggestions = activePath
-    ? [
-        `Update LinkedIn with "${activePath.title}" as target role`,
-        `Spend 15 minutes researching ${activePath.target_companies?.[0] || "top companies"}`,
-        `Watch one tutorial about ${activePath.key_skills?.[0] || "key skills"}`,
-        `Connect with one person working as ${activePath.title}`,
-        `Read one article about ${activePath.category} careers`,
-      ]
-    : ["Activate a career path first"];
 
   const handleSetActivePath = async (pathId: string) => {
     if (!user || pathId === activePath?.id) return;
@@ -1341,6 +1341,27 @@ export const ActionPage = () => {
           )}
         </div>
 
+        {/* Quick Wins */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Quick Wins</h3>
+          <Card 
+            className="border-primary/20 cursor-pointer hover:border-primary/40 transition-all hover:shadow-md"
+            onClick={() => setQuickWinsOpen(true)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Zap className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm mb-1">Small actions, big impact</h4>
+                  <p className="text-xs text-muted-foreground">Quick wins to boost your momentum</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Affirmations section moved to HomePage */}
 
         {/* Level Resources */}
@@ -1611,6 +1632,53 @@ export const ActionPage = () => {
               <Button onClick={handleSaveLog} className="w-full h-12 rounded-full text-base font-semibold">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Complete Action
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Quick Wins Drawer */}
+      <Drawer open={quickWinsOpen} onOpenChange={setQuickWinsOpen}>
+        <DrawerContent className="max-h-[80vh] fixed">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 rounded-full z-50 pointer-events-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              setQuickWinsOpen(false);
+            }}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+
+          <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
+            <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
+              <h2 className="text-2xl font-bold mb-2">Quick Wins</h2>
+              <p className="text-sm text-muted-foreground">Small actions, big impact on your journey</p>
+            </div>
+
+            <div className="p-6">
+              <div className="bg-muted/30 rounded-2xl p-6 space-y-3">
+                {quickWinsSuggestions.map((win, idx) => (
+                  <div key={idx} className="w-full text-left p-4 rounded-xl bg-background/50">
+                    <div className="flex items-start gap-3">
+                      <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-sm leading-relaxed">{win}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-6 pb-6 sticky bottom-0 bg-background">
+              <Button
+                onClick={() => setQuickWinsOpen(false)}
+                className="w-full h-12 rounded-full text-base font-semibold"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Start Taking Action
               </Button>
             </div>
           </div>
