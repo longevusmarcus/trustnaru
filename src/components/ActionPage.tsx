@@ -1341,56 +1341,7 @@ export const ActionPage = () => {
           )}
         </div>
 
-        {/* Affirmations */}
-        {activePath && activePath.affirmations?.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Affirmations</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const session = (await supabase.auth.getSession()).data.session;
-                    const { data, error } = await supabase.functions.invoke("generate-affirmations", {
-                      body: { pathId: activePath.id },
-                      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
-                    });
-
-                    if (error) throw error;
-
-                    if (data?.affirmations) {
-                      setActivePath({ ...activePath, affirmations: data.affirmations });
-                      toast({
-                        title: "Affirmations refreshed",
-                        description: "Your daily affirmations have been updated.",
-                      });
-                    }
-                  } catch (error) {
-                    console.error("Error refreshing affirmations:", error);
-                    toast({
-                      title: "Failed to refresh",
-                      description: "Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                className="h-7 text-xs"
-              >
-                Refresh
-              </Button>
-            </div>
-            <Card>
-              <CardContent className="p-4 space-y-3">
-                {activePath.affirmations.map((affirmation: string, index: number) => (
-                  <div key={index} className="py-2 border-l-2 border-primary/30 pl-4">
-                    <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Affirmations section moved to HomePage */}
 
         {/* Level Resources */}
         <div>
