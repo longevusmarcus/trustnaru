@@ -938,7 +938,7 @@ export const ActionPage = () => {
         {/* 10 Levels of Guidance */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Your Journey Levels</h3>
-          <TooltipProvider>
+          <TooltipProvider delayDuration={0}>
             <div className="grid grid-cols-5 gap-2 mb-4">
               {guidanceLevels.map((level) => {
                 const Icon = level.icon;
@@ -946,24 +946,25 @@ export const ActionPage = () => {
                 return (
                   <Tooltip key={level.level}>
                     <TooltipTrigger asChild>
-                      <div
+                      <button
                         className={`relative aspect-square rounded-lg ${
                           isUnlocked ? level.color + " text-white" : "bg-muted/50 text-muted-foreground"
                         } flex flex-col items-center justify-center p-2 ${
-                          isUnlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
-                        }`}
+                          isUnlocked ? "hover:opacity-90 active:scale-95" : "cursor-not-allowed"
+                        } transition-all touch-manipulation`}
                         onClick={() => isUnlocked && setCurrentLevel(level.level)}
+                        disabled={!isUnlocked}
                       >
                         {!isUnlocked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
                         <Icon className="h-4 w-4 mb-1" />
                         <span className="text-[10px] font-medium text-center leading-tight">{level.level}</span>
-                      </div>
+                      </button>
                     </TooltipTrigger>
-                    <TooltipContent className="max-w-[200px]">
+                    <TooltipContent className="max-w-[200px]" side="bottom">
                       <p className="font-semibold text-xs mb-1">Level {level.level}: {level.name}</p>
                       <p className="text-xs text-muted-foreground mb-1">{level.description}</p>
                       <p className="text-xs text-muted-foreground italic">
-                        {isUnlocked ? "Click to view this level" : "Complete more actions to unlock"}
+                        {isUnlocked ? "Tap to view this level" : "Complete more actions to unlock"}
                       </p>
                     </TooltipContent>
                   </Tooltip>
