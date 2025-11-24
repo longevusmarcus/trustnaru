@@ -248,9 +248,28 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       return;
     }
 
-    // Check cache first
+    // Check localStorage cache first (date-based)
+    const today = new Date().toISOString().split("T")[0];
+    const cacheKey = `quick_tips_${user.id}_${activePathData.id}_level_${currentLevel}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      try {
+        const { data, date } = JSON.parse(cached);
+        if (date === today && data?.smartTips) {
+          console.log(`Using cached tips from ${date}`);
+          setPersonalizedGuidance(data);
+          setGuidanceCache((prev) => ({ ...prev, [currentLevel]: data }));
+          return;
+        }
+      } catch (e) {
+        console.error("Error parsing cached tips:", e);
+      }
+    }
+
+    // Check memory cache
     if (guidanceCache[currentLevel]) {
-      console.log(`Using cached guidance for Level ${currentLevel}`);
+      console.log(`Using memory cached guidance for Level ${currentLevel}`);
       setPersonalizedGuidance(guidanceCache[currentLevel]);
       return;
     }
@@ -280,6 +299,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const guidanceData = data || { dailyActions: [], smartTips: [], levelResources: [] };
       setPersonalizedGuidance(guidanceData);
       setGuidanceCache((prev) => ({ ...prev, [currentLevel]: guidanceData }));
+      
+      // Save to localStorage with today's date
+      const today = new Date().toISOString().split("T")[0];
+      const cacheKey = `quick_tips_${user.id}_${activePathData.id}_level_${currentLevel}`;
+      localStorage.setItem(cacheKey, JSON.stringify({ data: guidanceData, date: today }));
+      
       setGuidanceError(hasAny ? null : "No guidance returned");
     } catch (error) {
       if (attempt === 1) {
@@ -961,11 +986,17 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    // Clear both memory and localStorage cache
                     setGuidanceCache((prev) => {
                       const newCache = { ...prev };
                       delete newCache[userStats?.current_level || 1];
                       return newCache;
                     });
+                    if (user && activePath) {
+                      const currentLevel = userStats?.current_level || 1;
+                      const cacheKey = `quick_tips_${user.id}_${activePath.id}_level_${currentLevel}`;
+                      localStorage.removeItem(cacheKey);
+                    }
                     loadPersonalizedGuidance();
                   }}
                   disabled={loadingGuidance}
