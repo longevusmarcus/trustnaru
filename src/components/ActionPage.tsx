@@ -848,31 +848,6 @@ export const ActionPage = () => {
       <div
         className={`max-w-md mx-auto space-y-6 transition-opacity duration-300 ${isTransitioning ? "opacity-50" : "opacity-100"}`}
       >
-        {/* Active Path Info */}
-        {activePath ? (
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Target className="h-5 w-5 text-primary mt-1" />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm mb-1">Active Path</h3>
-                  <p className="text-sm text-muted-foreground">{activePath.title}</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">{activePath.category}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="bg-muted/30">
-            <CardContent className="p-6 text-center">
-              <Map className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground mb-4">
-                No active path yet. Activate a career path from your Futures to get started!
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Path Switcher Accordion - Show only if multiple paths */}
         {allPaths.length > 1 && (
           <Accordion
@@ -922,6 +897,31 @@ export const ActionPage = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
+        )}
+
+        {/* Active Path Info */}
+        {activePath ? (
+          <Card className="bg-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Target className="h-5 w-5 text-primary mt-1" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-sm mb-1">Active Path</h3>
+                  <p className="text-sm text-muted-foreground">{activePath.title}</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">{activePath.category}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-muted/30">
+            <CardContent className="p-6 text-center">
+              <Map className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground mb-4">
+                No active path yet. Activate a career path from your Futures to get started!
+              </p>
+            </CardContent>
+          </Card>
         )}
 
         {/* Goals Section - Make it prominent */}
