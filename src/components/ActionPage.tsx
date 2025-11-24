@@ -21,6 +21,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -937,27 +938,39 @@ export const ActionPage = () => {
         {/* 10 Levels of Guidance */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Your Journey Levels</h3>
-          <div className="grid grid-cols-5 gap-2 mb-4">
-            {guidanceLevels.map((level) => {
-              const Icon = level.icon;
-              const isUnlocked = level.level <= currentLevel;
-              return (
-                <div
-                  key={level.level}
-                  className={`relative aspect-square rounded-lg ${
-                    isUnlocked ? level.color + " text-white" : "bg-muted/50 text-muted-foreground"
-                  } flex flex-col items-center justify-center p-2 ${
-                    isUnlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
-                  }`}
-                  onClick={() => isUnlocked && setCurrentLevel(level.level)}
-                >
-                  {!isUnlocked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
-                  <Icon className="h-4 w-4 mb-1" />
-                  <span className="text-[10px] font-medium text-center leading-tight">{level.level}</span>
-                </div>
-              );
-            })}
-          </div>
+          <TooltipProvider>
+            <div className="grid grid-cols-5 gap-2 mb-4">
+              {guidanceLevels.map((level) => {
+                const Icon = level.icon;
+                const isUnlocked = level.level <= currentLevel;
+                return (
+                  <Tooltip key={level.level}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`relative aspect-square rounded-lg ${
+                          isUnlocked ? level.color + " text-white" : "bg-muted/50 text-muted-foreground"
+                        } flex flex-col items-center justify-center p-2 ${
+                          isUnlocked ? "cursor-pointer hover:opacity-90" : "cursor-not-allowed"
+                        }`}
+                        onClick={() => isUnlocked && setCurrentLevel(level.level)}
+                      >
+                        {!isUnlocked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
+                        <Icon className="h-4 w-4 mb-1" />
+                        <span className="text-[10px] font-medium text-center leading-tight">{level.level}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[200px]">
+                      <p className="font-semibold text-xs mb-1">Level {level.level}: {level.name}</p>
+                      <p className="text-xs text-muted-foreground mb-1">{level.description}</p>
+                      <p className="text-xs text-muted-foreground italic">
+                        {isUnlocked ? "Click to view this level" : "Complete more actions to unlock"}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
 
           {/* Current Level Details */}
           <Card className={`${guidanceLevels[currentLevel - 1].color} text-white`}>
