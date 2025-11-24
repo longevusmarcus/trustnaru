@@ -638,7 +638,7 @@ export const InsightsPage = () => {
           </motion.div>
         )}
 
-        {/* Tools Section */}
+        {/* AI Insights Chat */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <h3 className="text-lg font-semibold mb-3">Your Coach</h3>
           <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
@@ -762,9 +762,9 @@ export const InsightsPage = () => {
           </Card>
         </motion.div>
 
-        {/* AI Insights Chat */}
+        {/* Tools Section */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <h3 className="text-lg font-semibold mb-3">Your Coach</h3>
+          <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
             <Drawer
               open={skillGapOpen}
