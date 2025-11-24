@@ -1058,6 +1058,57 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             )}
           </div>
 
+          {/* Affirmations */}
+          {activePath && activePath.affirmations?.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Affirmations</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const session = (await supabase.auth.getSession()).data.session;
+                      const { data, error } = await supabase.functions.invoke("generate-affirmations", {
+                        body: { pathId: activePath.id },
+                        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+                      });
+
+                      if (error) throw error;
+
+                      if (data?.affirmations) {
+                        setActivePath({ ...activePath, affirmations: data.affirmations });
+                        toast({
+                          title: "Affirmations refreshed",
+                          description: "Your daily affirmations have been updated.",
+                        });
+                      }
+                    } catch (error) {
+                      console.error("Error refreshing affirmations:", error);
+                      toast({
+                        title: "Failed to refresh",
+                        description: "Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  className="h-7 text-xs"
+                >
+                  Refresh
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {activePath.affirmations.map((affirmation: string, index: number) => (
+                  <Card key={index} className="border-primary/10 p-4">
+                    <div className="py-1 border-l-2 border-primary/30 pl-4">
+                      <p className="text-sm italic text-foreground/90">"{affirmation}"</p>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Featured */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Featured Today</p>
