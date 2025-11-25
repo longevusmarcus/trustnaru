@@ -143,7 +143,13 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   const [dailyMissions, setDailyMissions] = useState<any[]>(defaultMissions);
   const [completedMissions, setCompletedMissions] = useState<Set<string>>(new Set());
   const [showCelebration, setShowCelebration] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    // Initialize based on localStorage - only show if user hasn't seen it
+    const userId = user?.id;
+    if (!userId) return false;
+    const storageKey = `dashboard_welcome_seen_${userId}`;
+    return !localStorage.getItem(storageKey);
+  });
   const [exploredSections, setExploredSections] = useState<string[]>([]);
   const [explorationPopoverOpen, setExplorationPopoverOpen] = useState(false);
   const [personalizedGuidance, setPersonalizedGuidance] = useState<any>(null);
@@ -200,21 +206,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  // Check if first time on dashboard - only run once per user
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const storageKey = `dashboard_welcome_seen_${user.id}`;
-    const hasSeenWelcome = localStorage.getItem(storageKey);
-
-    // Explicitly set the welcome state based on localStorage
-    if (!hasSeenWelcome) {
-      setShowWelcome(true);
-    } else {
-      setShowWelcome(false);
-    }
-  }, [user?.id]);
 
   // Track explored sections
   useEffect(() => {
