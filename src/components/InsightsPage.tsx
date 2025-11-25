@@ -642,7 +642,7 @@ export const InsightsPage = () => {
 
         {/* Tools Section */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <h3 className="text-lg font-semibold mb-3">Tools For You</h3>
+          <h3 className="text-lg font-semibold mb-3">Tools</h3>
           <div className="grid grid-cols-2 gap-3">
             <Drawer
               open={skillGapOpen}
