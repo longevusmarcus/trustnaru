@@ -228,6 +228,13 @@ ${userContext}
 
 TASK: Generate exactly 3-5 HIGHLY SPECIFIC, CONCRETE, and DIVERSE resources for Level ${level}: ${levelDesc}
 
+CRITICAL PATH-SPECIFIC KEYWORD REQUIREMENTS:
+- ALL resources MUST relate directly to these path keywords: ${activePath.title}, ${activePath.category || ""}
+- ALL resources MUST address at least one of these key skills: ${activePath.key_skills?.join(", ") || "general skills"}
+- Resource titles and descriptions MUST contain terminology from: ${activePath.title}
+- DO NOT suggest generic resources unrelated to "${activePath.title}" career path
+- VERIFY every resource is coherent with the specific path: ${activePath.title}
+
 CRITICAL REQUIREMENT - AVOID REDUNDANCY:
 - DO NOT suggest multiple resources in the same narrow category (e.g., don't suggest 3 marketing courses)
 - ENSURE VARIETY across resource types: mix books, courses, certifications, tools, communities, events
