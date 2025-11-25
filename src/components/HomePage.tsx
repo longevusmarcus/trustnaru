@@ -380,7 +380,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const today = new Date().toISOString().split("T")[0];
 
       // Fetch only essential data in parallel - optimized queries
-      const [statsResult, streakResult, badgesResult, profileResult, pathsResult, dailyActionsResult] =
+      const [statsResult, streakResult, badgesResult, profileResult, dailyActionsResult] =
         await Promise.all([
           supabase
             .from("user_stats")
@@ -402,13 +402,6 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             .limit(3),
           supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
           supabase
-            .from("career_paths")
-            .select(
-              "id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations",
-            )
-            .eq("user_id", user.id)
-            .limit(10),
-          supabase
             .from("daily_actions")
             .select("actions, all_completed, created_at")
             .eq("user_id", user.id)
@@ -418,28 +411,67 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             .maybeSingle(),
         ]);
 
+      // Fetch active path separately if exists
+      let activePathData = null;
+      let allPathsData = [];
+      
+      if (profileResult.data?.active_path_id) {
+        const [activePathResult, pathsResult] = await Promise.all([
+          supabase
+            .from("career_paths")
+            .select(
+              "id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations",
+            )
+            .eq("id", profileResult.data.active_path_id)
+            .maybeSingle(),
+          supabase
+            .from("career_paths")
+            .select(
+              "id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations",
+            )
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(20),
+        ]);
+        
+        activePathData = activePathResult.data;
+        allPathsData = pathsResult.data || [];
+        
+        // Ensure active path is in the list
+        if (activePathData && !allPathsData.find(p => p.id === activePathData.id)) {
+          allPathsData = [activePathData, ...allPathsData];
+        }
+      } else {
+        const pathsResult = await supabase
+          .from("career_paths")
+          .select(
+            "id, title, description, image_url, journey_duration, category, key_skills, target_companies, affirmations",
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        allPathsData = pathsResult.data || [];
+      }
+
       // Process results efficiently
       if (profileResult.data) {
         setDisplayName(profileResult.data.display_name || user.email?.split("@")[0] || "there");
 
-        if (profileResult.data.active_path_id && pathsResult.data) {
-          const activePathData = pathsResult.data.find((p) => p.id === profileResult.data.active_path_id);
-          setActivePath(activePathData || null);
-          setFirstPath(activePathData || null); // Show active path on dashboard
+        if (activePathData) {
+          setActivePath(activePathData);
+          setFirstPath(activePathData); // Show active path on dashboard
 
           // Generate daily missions if none exist for today
-          if (!dailyActionsResult.data?.actions && activePathData) {
+          if (!dailyActionsResult.data?.actions) {
             generateDailyMissions(activePathData);
           }
         }
       }
 
-      if (pathsResult.data) {
-        setAllPaths(pathsResult.data);
-        // Only set firstPath if not already set by active path
-        if (!profileResult.data?.active_path_id) {
-          setFirstPath(pathsResult.data[0] || null);
-        }
+      setAllPaths(allPathsData);
+      // Only set firstPath if not already set by active path
+      if (!activePathData && allPathsData.length > 0) {
+        setFirstPath(allPathsData[0]);
       }
 
       setUserStats(statsResult.data || { current_streak: 0, longest_streak: 0, total_points: 0 });
