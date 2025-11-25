@@ -3,7 +3,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { TrendingUp, Target, Award, Lightbulb, Send, ChevronDown, CheckCircle2, Sparkles, Puzzle, X, Briefcase, Bot } from "lucide-react";
+import {
+  TrendingUp,
+  Target,
+  Award,
+  Lightbulb,
+  Send,
+  ChevronDown,
+  CheckCircle2,
+  Sparkles,
+  Puzzle,
+  X,
+  Briefcase,
+  Bot,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -241,11 +254,11 @@ export const InsightsPage = () => {
 
       // Clear guidance cache when switching paths
       setGuidanceCache({});
-      
+
       // Clear skill gap cache when switching paths
       setSkillGapCache({});
       setSkillGaps([]);
-      
+
       // Clear localStorage caches for skill gaps
       if (activePath) {
         const currentLevel = userStats?.current_level || 1;
@@ -371,11 +384,11 @@ export const InsightsPage = () => {
 
     const currentLevel = userStats?.current_level || 1;
     const cacheKey = `${activePath.id}_level_${currentLevel}`;
-    
+
     // Check localStorage cache first (date-based)
     const today = new Date().toISOString().split("T")[0];
     const storageCacheKey = `skill_gap_${user.id}_${activePath.id}_level_${currentLevel}`;
-    
+
     if (!forceRefresh) {
       const cached = localStorage.getItem(storageCacheKey);
       if (cached) {
@@ -391,7 +404,7 @@ export const InsightsPage = () => {
           console.error("Error parsing cached skill gaps:", e);
         }
       }
-      
+
       // Check memory cache
       if (skillGapCache[cacheKey]) {
         setSkillGaps(skillGapCache[cacheKey]);
@@ -417,7 +430,7 @@ export const InsightsPage = () => {
       if (data?.skillGaps) {
         setSkillGaps(data.skillGaps);
         setSkillGapCache((prev) => ({ ...prev, [cacheKey]: data.skillGaps }));
-        
+
         // Save to localStorage with today's date
         const today = new Date().toISOString().split("T")[0];
         localStorage.setItem(storageCacheKey, JSON.stringify({ data: data.skillGaps, date: today }));
@@ -662,7 +675,9 @@ export const InsightsPage = () => {
                 <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
-                    <p className="text-sm text-muted-foreground mb-3">Level {userStats?.current_level || 1} focus areas</p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Level {userStats?.current_level || 1} focus areas
+                    </p>
                     {activePath && skillGaps.length > 0 && (
                       <Button
                         variant="ghost"
@@ -736,13 +751,12 @@ export const InsightsPage = () => {
             <div className="flex flex-col gap-1">
               <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
                 <Briefcase className="h-5 w-5" />
-                <span className="text-xs">Jobs For You (soon)</span>
+                <span className="text-xs">Curated Jobs (soon)</span>
               </Button>
               <p className="text-[10px] text-muted-foreground text-center px-2">
                 🔥 Opportunities aligned with your path + skills
               </p>
             </div>
-
           </div>
         </motion.div>
 
