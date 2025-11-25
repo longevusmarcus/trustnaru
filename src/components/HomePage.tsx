@@ -1147,8 +1147,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <Lightbulb className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">{dailyTopic.title}</h3>
-                  <p className="text-sm text-muted-foreground">{dailyTopic.description}</p>
+                  <h3 className="font-medium text-sm mb-1">{dailyTopic.title}</h3>
+                  <p className="text-xs text-muted-foreground">{dailyTopic.description}</p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
