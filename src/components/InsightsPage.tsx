@@ -568,6 +568,13 @@ export const InsightsPage = () => {
           <div className="grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="p-4 text-center">
+                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
+                <div className="text-2xl font-bold">{allPaths.length}</div>
+                <div className="text-xs text-muted-foreground">Paths Generated</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
                 <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-primary/70" />
                 <div className="text-2xl font-bold">{userStats?.missions_completed || 0}</div>
                 <div className="text-xs text-muted-foreground">Actions Completed</div>
@@ -587,13 +594,6 @@ export const InsightsPage = () => {
                 <Sparkles className="h-5 w-5 mx-auto mb-2 text-primary/70" />
                 <div className="text-2xl font-bold">{userStats?.total_points || 0}</div>
                 <div className="text-xs text-muted-foreground">Points</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <TrendingUp className="h-5 w-5 mx-auto mb-2 text-primary/70" />
-                <div className="text-2xl font-bold">{allPaths.length}</div>
-                <div className="text-xs text-muted-foreground">Paths Generated</div>
               </CardContent>
             </Card>
           </div>
