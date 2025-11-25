@@ -1471,7 +1471,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   }
                 }}
               >
-                Unlock Founder Status
+                Explore Naru
               </Button>
             </div>
           </div>
