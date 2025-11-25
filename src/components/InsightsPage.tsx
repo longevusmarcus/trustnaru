@@ -642,7 +642,7 @@ export const InsightsPage = () => {
 
         {/* Tools Section */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <h3 className="text-lg font-semibold mb-3">Tools</h3>
+          <h3 className="text-lg font-semibold mb-3">Tools For You</h3>
           <div className="grid grid-cols-2 gap-3">
             <Drawer
               open={skillGapOpen}
@@ -659,7 +659,7 @@ export const InsightsPage = () => {
                   <span className="text-xs">Skill Gap</span>
                 </Button>
               </DrawerTrigger>
-              <DrawerContent 
+              <DrawerContent
                 className="max-h-[80vh] fixed"
                 onInteractOutside={(e) => {
                   e.preventDefault();
@@ -759,7 +759,7 @@ export const InsightsPage = () => {
             <div className="flex flex-col gap-1">
               <Button variant="outline" className="h-20 flex flex-col gap-2" disabled>
                 <Briefcase className="h-5 w-5" />
-                <span className="text-xs">Curated Jobs (soon)</span>
+                <span className="text-xs">Jobs Matching (soon)</span>
               </Button>
               <p className="text-[10px] text-muted-foreground text-center px-2">
                 🔥 Opportunities aligned with your path + skills
@@ -770,7 +770,7 @@ export const InsightsPage = () => {
 
         {/* AI Insights Chat */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <h3 className="text-lg font-semibold mb-3">Your Coach</h3>
+          <h3 className="text-lg font-semibold mb-3">Personal Coach</h3>
           <Card className="bg-card/50 backdrop-blur-sm border border-border/50">
             <CardContent className="p-0">
               {/* Chat Messages */}
