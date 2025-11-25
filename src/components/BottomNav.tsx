@@ -21,7 +21,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               variant="ghost"
               size="icon"
               onClick={() => onNavigate("home")}
-              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
+              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent hover:text-foreground ${
                 active === "home" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -33,7 +33,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               variant="ghost"
               size="icon"
               onClick={() => onNavigate("future")}
-              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
+              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent hover:text-foreground ${
                 active === "future" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -54,7 +54,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               variant="ghost"
               size="icon"
               onClick={() => onNavigate("insights")}
-              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
+              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent hover:text-foreground ${
                 active === "insights" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
@@ -66,7 +66,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               variant="ghost"
               size="icon"
               onClick={() => onNavigate("copilot")}
-              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
+              className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent hover:text-foreground ${
                 active === "copilot" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
