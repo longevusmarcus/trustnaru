@@ -619,7 +619,7 @@ export const InsightsPage = () => {
               <CardContent className="p-4">
                 <div className="flex items-center gap-3 mb-3">
                   <Award className="h-5 w-5 text-primary/70" />
-                  <h4 className="font-medium">Career Diversity</h4>
+                  <h4 className="font-medium">Career Direction</h4>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">
                   You're exploring {pathCategories.length} different career direction
