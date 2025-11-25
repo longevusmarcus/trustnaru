@@ -1023,6 +1023,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    if (loadingGuidance) return;
+                    setLoadingGuidance(true);
                     // Clear both memory and localStorage cache
                     setGuidanceCache((prev) => {
                       const newCache = { ...prev };
@@ -1104,6 +1106,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   variant="ghost"
                   size="sm"
                   onClick={async () => {
+                    if (loadingGuidance) return;
+                    setLoadingGuidance(true);
                     try {
                       const session = (await supabase.auth.getSession()).data.session;
                       const { data, error } = await supabase.functions.invoke("generate-affirmations", {
@@ -1127,11 +1131,14 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                         description: "Please try again.",
                         variant: "destructive",
                       });
+                    } finally {
+                      setLoadingGuidance(false);
                     }
                   }}
+                  disabled={loadingGuidance}
                   className="h-7 text-xs"
                 >
-                  Refresh
+                  {loadingGuidance ? "Refreshing..." : "Refresh"}
                 </Button>
               </div>
               <div className="space-y-3">
