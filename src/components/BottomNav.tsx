@@ -32,13 +32,13 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onNavigate("insights")}
+              onClick={() => onNavigate("future")}
               className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
-                active === "insights" ? "text-foreground" : "text-muted-foreground"
+                active === "future" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              <Lightbulb className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Insights</span>
+              <Eye className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Futures</span>
             </Button>
 
             <Button
@@ -53,13 +53,13 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onNavigate("future")}
+              onClick={() => onNavigate("insights")}
               className={`flex flex-col items-center gap-1 h-auto py-2 hover:bg-transparent ${
-                active === "future" ? "text-foreground" : "text-muted-foreground"
+                active === "insights" ? "text-foreground" : "text-muted-foreground"
               }`}
             >
-              <Eye className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Futures</span>
+              <Lightbulb className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Insights</span>
             </Button>
 
             <Button
