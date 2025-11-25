@@ -1069,10 +1069,9 @@ export const ActionPage = () => {
                         className={`relative aspect-square rounded-lg ${
                           isUnlocked ? level.color + " text-white" : "bg-muted/50 text-muted-foreground"
                         } flex flex-col items-center justify-center p-2 ${
-                          isUnlocked ? "hover:opacity-90 active:scale-95" : "cursor-not-allowed"
+                          isUnlocked ? "hover:opacity-90 active:scale-95 cursor-pointer" : "cursor-default"
                         } transition-all touch-manipulation`}
                         onClick={() => isUnlocked && setCurrentLevel(level.level)}
-                        disabled={!isUnlocked}
                       >
                         {!isUnlocked && <Lock className="h-3 w-3 absolute top-1 right-1" />}
                         <Icon className="h-4 w-4 mb-1" />
