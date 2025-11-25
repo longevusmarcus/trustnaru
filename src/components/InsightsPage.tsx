@@ -659,7 +659,15 @@ export const InsightsPage = () => {
                   <span className="text-xs">Skill Gap</span>
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh] fixed">
+              <DrawerContent 
+                className="max-h-[80vh] fixed"
+                onInteractOutside={(e) => {
+                  e.preventDefault();
+                }}
+                onPointerDownOutside={(e) => {
+                  e.preventDefault();
+                }}
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -672,7 +680,7 @@ export const InsightsPage = () => {
                   <X className="h-5 w-5" />
                 </Button>
 
-                <div className="overflow-y-auto max-h-[calc(80vh-2rem)]">
+                <div className="overflow-y-auto max-h-[calc(80vh-2rem)] touch-pan-y">
                   <div className="text-center pt-8 pb-6 px-6 border-b sticky top-0 bg-background z-10">
                     <h2 className="text-2xl font-bold mb-2">Your Skill Gap</h2>
                     <p className="text-sm text-muted-foreground mb-3">
