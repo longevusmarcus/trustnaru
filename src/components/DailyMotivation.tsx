@@ -117,8 +117,11 @@ export const DailyMotivation = ({ open, onOpenChange, pathTitle }: DailyMotivati
             </Button>
             <Button
               variant="ghost"
-              className="text-xs opacity-40 hover:opacity-100 transition-opacity"
-              onClick={() => onOpenChange(false)}
+              className="text-xs opacity-40 hover:opacity-100 transition-opacity pointer-events-auto touch-manipulation min-h-[44px] relative z-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenChange(false);
+              }}
             >
               Close
             </Button>
