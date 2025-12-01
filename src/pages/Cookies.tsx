@@ -141,8 +141,8 @@ const Cookies = () => {
             <h2 className="text-xl font-light mb-4">8. More Information</h2>
             <p className="text-muted-foreground leading-relaxed">
               For more information about how we use cookies and protect your privacy, please see our Privacy Policy. If you have specific questions about our use of cookies, please contact us at:{" "}
-              <a href="mailto:hello@rocketminds.io" className="text-emerald-500 hover:text-emerald-400">
-                hello@rocketminds.io
+              <a href="mailto:privacy@rocketminds.io" className="text-emerald-500 hover:text-emerald-400">
+                privacy@rocketminds.io
               </a>
             </p>
           </section>
