@@ -111,8 +111,8 @@ const FAQ = () => {
               <h2 className="text-xl font-light mb-3">Still have questions?</h2>
               <p className="text-muted-foreground leading-relaxed mb-4">
                 We're here to help. Reach out to us at{" "}
-                <a href="mailto:hello@rocketminds.io" className="text-emerald-500 hover:text-emerald-400">
-                  hello@rocketminds.io
+                <a href="mailto:naru@rocketminds.io" className="text-emerald-500 hover:text-emerald-400">
+                  naru@rocketminds.io
                 </a>
               </p>
             </section>
