@@ -31,10 +31,27 @@ serve(async (req) => {
     }
 
     console.log('Processing audio transcription with Gemini...');
+    console.log('Audio data length:', audio.length);
 
-    // Convert base64 audio to proper format for Gemini
+    // Detect mime type from base64 header or default to webm
+    let mimeType = "audio/webm";
+    if (audio.startsWith('data:')) {
+      const match = audio.match(/^data:([^;]+);base64,/);
+      if (match) {
+        mimeType = match[1];
+        // Remove data URL prefix to get raw base64
+        console.log('Detected mime type from data URL:', mimeType);
+      }
+    }
+    
+    // Clean the base64 data - remove any data URL prefix if present
+    const cleanedAudio = audio.replace(/^data:[^;]+;base64,/, '');
+    console.log('Cleaned audio data length:', cleanedAudio.length);
+    console.log('Using mime type:', mimeType);
+
+    // Use stable Gemini model for audio transcription
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
@@ -44,12 +61,12 @@ serve(async (req) => {
           contents: [{
             parts: [
               {
-                text: "Please transcribe this audio accurately. Return only the transcribed text without any additional commentary."
+                text: "Please transcribe this audio accurately. Return only the transcribed text without any additional commentary or formatting."
               },
               {
                 inline_data: {
-                  mime_type: "audio/webm",
-                  data: audio
+                  mime_type: mimeType,
+                  data: cleanedAudio
                 }
               }
             ]
@@ -61,6 +78,8 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API error:', response.status, errorText);
+      console.error('Request mime_type:', mimeType);
+      console.error('Audio data preview (first 100 chars):', cleanedAudio.substring(0, 100));
       throw new Error('TRANSCRIPTION_FAILED');
     }
 
