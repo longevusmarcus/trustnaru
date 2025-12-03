@@ -36,14 +36,14 @@ async function generateWithLovableAI(
   if (!LOVABLE_API_KEY) throw new Error("Missing LOVABLE_API_KEY secret");
 
   const messages: any[] = [];
-  
+
   if (refImage) {
     messages.push({
       role: "user",
       content: [
         { type: "text", text: prompt },
-        { type: "image_url", image_url: { url: `data:${refImage.mime_type};base64,${refImage.data}` } }
-      ]
+        { type: "image_url", image_url: { url: `data:${refImage.mime_type};base64,${refImage.data}` } },
+      ],
     });
   } else {
     messages.push({ role: "user", content: prompt });
@@ -52,7 +52,7 @@ async function generateWithLovableAI(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`Lovable AI attempt ${attempt + 1}/${maxRetries + 1}`);
-      
+
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -62,7 +62,7 @@ async function generateWithLovableAI(
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-image-preview",
           messages,
-          modalities: ["image", "text"]
+          modalities: ["image", "text"],
         }),
       });
 
@@ -78,7 +78,7 @@ async function generateWithLovableAI(
 
       const data = await response.json();
       console.log("Lovable AI response received");
-      
+
       const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
       if (!imageUrl) {
         console.error("No image in response:", JSON.stringify(data).slice(0, 500));
@@ -87,12 +87,12 @@ async function generateWithLovableAI(
 
       const base64Match = imageUrl.match(/^data:image\/\w+;base64,(.+)$/);
       if (!base64Match) throw new Error("Invalid image data URL format");
-      
+
       const base64Data = base64Match[1];
       const binaryString = atob(base64Data);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-      
+
       return bytes;
     } catch (err) {
       console.error(`Attempt ${attempt + 1} failed:`, err);
@@ -109,14 +109,15 @@ const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
   const roleTitle = careerPath.title || "Professional";
   const keySkills = careerPath.key_skills?.slice(0, 2).join(", ") || "professional skills";
   const lifestyle = careerPath.lifestyle_benefits?.[0] || "successful professional lifestyle";
-  const baseQualifiers = "High-resolution professional photograph, natural lighting, cinematic composition.";
-  const identityNotice = "Create a professional looking person. Realistic, natural expressions.";
+  const baseQualifiers = "High-resolution professional photograph, natural lighting, hyper-realistic composition.";
+  const identityNotice =
+    "Preserve the subject's likeness and facial features from reference photos. Avoid unrealistic face alterations.";
 
   if ((existingImageCount ?? 0) === 0) {
     return [
       `Professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
       `Candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
-      `Lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, cinematic framing. ${baseQualifiers} ${identityNotice}`,
+      `Lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, modern framing. ${baseQualifiers} ${identityNotice}`,
     ];
   }
 
@@ -139,7 +140,8 @@ serve(async (req) => {
     const user = authData?.user;
     if (!user)
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
     const body = await req.json();
@@ -152,10 +154,13 @@ serve(async (req) => {
     if (!careerPath) throw new Error("Career path not found");
 
     const { data: userPhotos } = await supabaseClient
-      .from("user_photos").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    
+      .from("user_photos")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
     const refImages: { data: string; mime_type: string }[] = [];
-    
+
     if (userPhotos && userPhotos.length > 0) {
       for (const photo of userPhotos.slice(0, 3)) {
         try {
@@ -186,9 +191,13 @@ serve(async (req) => {
         const imageBytes = await generateWithLovableAI(prompt, selectedRef, 2);
         const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
         const { error: uploadError } = await supabaseClient.storage
-          .from("career-images").upload(fileName, imageBytes, { contentType: "image/png", upsert: false });
-        
-        if (uploadError) { console.error(`Upload error for image ${i + 1}:`, uploadError); continue; }
+          .from("career-images")
+          .upload(fileName, imageBytes, { contentType: "image/png", upsert: false });
+
+        if (uploadError) {
+          console.error(`Upload error for image ${i + 1}:`, uploadError);
+          continue;
+        }
 
         const { data: publicData } = supabaseClient.storage.from("career-images").getPublicUrl(fileName);
         if (publicData?.publicUrl) {
@@ -205,19 +214,27 @@ serve(async (req) => {
     if (allImageUrls.length === 0) throw new Error("Failed to generate any images");
 
     const combinedImages = [...(careerPath.all_images || []), ...allImageUrls];
-    await supabaseClient.from("career_paths")
-      .update({ image_url: careerPath.image_url || allImageUrls[0], all_images: combinedImages }).eq("id", pathId);
+    await supabaseClient
+      .from("career_paths")
+      .update({ image_url: careerPath.image_url || allImageUrls[0], all_images: combinedImages })
+      .eq("id", pathId);
 
     console.log(`Successfully generated ${allImageUrls.length} images`);
 
     return new Response(
-      JSON.stringify({ success: true, imageUrl: allImageUrls[0], allImages: allImageUrls, message: `Generated ${allImageUrls.length} images` }),
+      JSON.stringify({
+        success: true,
+        imageUrl: allImageUrls[0],
+        allImages: allImageUrls,
+        message: `Generated ${allImageUrls.length} images`,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("Error generating path image:", err);
     return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
