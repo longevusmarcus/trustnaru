@@ -34,7 +34,7 @@ async function generateWithGemini(prompt: string, refImageBase64: string, maxRet
       console.log(`Attempt ${attempt + 1}/${maxRetries + 1}`);
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateImage?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
