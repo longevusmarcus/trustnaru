@@ -27,68 +27,66 @@ async function fetchUrlToBase64(url: string): Promise<{ base64: string; mimeType
   return { base64: arrayBufferToBase64(buffer), mimeType: contentType.split(";")[0] };
 }
 
-async function generateWithLovableAI(
+async function generateWithGemini(
   prompt: string,
   refImage: { data: string; mime_type: string } | null,
   maxRetries = 2,
 ): Promise<Uint8Array> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY) throw new Error("Missing LOVABLE_API_KEY secret");
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY secret");
 
-  const messages: any[] = [];
+  const parts: any[] = [{ text: prompt }];
 
   if (refImage) {
-    messages.push({
-      role: "user",
-      content: [
-        { type: "text", text: prompt },
-        { type: "image_url", image_url: { url: `data:${refImage.mime_type};base64,${refImage.data}` } },
-      ],
+    parts.push({
+      inline_data: {
+        mime_type: refImage.mime_type,
+        data: refImage.data,
+      },
     });
-  } else {
-    messages.push({ role: "user", content: prompt });
   }
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Lovable AI attempt ${attempt + 1}/${maxRetries + 1}`);
+      console.log(`Gemini API attempt ${attempt + 1}/${maxRetries + 1}`);
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-pro-image-preview",
-          messages,
-          modalities: ["image", "text"],
-        }),
-      });
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: {
+              responseModalities: ["TEXT", "IMAGE"],
+            },
+          }),
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
-        console.error("Lovable AI error:", response.status, text);
+        console.error("Gemini API error:", response.status, text);
         if (response.status >= 500 && attempt < maxRetries) {
           await sleep(Math.pow(2, attempt) * 1000);
           continue;
         }
-        throw new Error(`Lovable AI error ${response.status}: ${text}`);
+        throw new Error(`Gemini API error ${response.status}: ${text}`);
       }
 
       const data = await response.json();
-      console.log("Lovable AI response received");
+      console.log("Gemini API response received");
 
-      const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-      if (!imageUrl) {
-        console.error("No image in response:", JSON.stringify(data).slice(0, 500));
-        throw new Error("No image returned by Lovable AI");
+      // Find the image part in the response
+      const candidate = data.candidates?.[0];
+      const imagePart = candidate?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.startsWith("image/"));
+      
+      if (!imagePart?.inlineData?.data) {
+        console.error("No image in Gemini response:", JSON.stringify(data).slice(0, 500));
+        throw new Error("No image returned by Gemini");
       }
 
-      const base64Match = imageUrl.match(/^data:image\/\w+;base64,(.+)$/);
-      if (!base64Match) throw new Error("Invalid image data URL format");
-
-      const base64Data = base64Match[1];
+      const base64Data = imagePart.inlineData.data;
       const binaryString = atob(base64Data);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
@@ -102,7 +100,7 @@ async function generateWithLovableAI(
     }
   }
 
-  throw new Error("All Lovable AI attempts failed");
+  throw new Error("All Gemini API attempts failed");
 }
 
 const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
@@ -188,7 +186,7 @@ serve(async (req) => {
       console.log(`Generating image ${i + 1}/${scenePrompts.length}...`);
 
       try {
-        const imageBytes = await generateWithLovableAI(prompt, selectedRef, 2);
+        const imageBytes = await generateWithGemini(prompt, selectedRef, 2);
         const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
         const { error: uploadError } = await supabaseClient.storage
           .from("career-images")
