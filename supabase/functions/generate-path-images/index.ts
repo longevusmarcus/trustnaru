@@ -35,8 +35,8 @@ async function generateWithGemini(
   const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
   if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY");
 
-  // Use generateContent with gemini-2.0-flash-preview-image-generation for higher quotas
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${GEMINI_API_KEY}`;
+  // Use gemini-2.5-flash-image for native image generation
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent`;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -61,10 +61,7 @@ async function generateWithGemini(
       const requestBody = {
         contents: [{
           parts: parts
-        }],
-        generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"]
-        }
+        }]
       };
 
       console.log("Sending request to Gemini...");
@@ -72,7 +69,8 @@ async function generateWithGemini(
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY
         },
         body: JSON.stringify(requestBody),
       });
