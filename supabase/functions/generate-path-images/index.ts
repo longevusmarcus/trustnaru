@@ -61,7 +61,7 @@ async function generateWithGemini(
               responseModalities: ["TEXT", "IMAGE"],
             },
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -80,7 +80,7 @@ async function generateWithGemini(
       // Find the image part in the response
       const candidate = data.candidates?.[0];
       const imagePart = candidate?.content?.parts?.find((p: any) => p.inlineData?.mimeType?.startsWith("image/"));
-      
+
       if (!imagePart?.inlineData?.data) {
         console.error("No image in Gemini response:", JSON.stringify(data).slice(0, 500));
         throw new Error("No image returned by Gemini");
@@ -107,9 +107,9 @@ const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
   const roleTitle = careerPath.title || "Professional";
   const keySkills = careerPath.key_skills?.slice(0, 2).join(", ") || "professional skills";
   const lifestyle = careerPath.lifestyle_benefits?.[0] || "successful professional lifestyle";
-  const baseQualifiers = "High-resolution professional photograph, natural lighting, hyper-realistic composition.";
+  const baseQualifiers = "High-resolution professional photograph, natural lighting, realistic settings.";
   const identityNotice =
-    "Preserve the subject's likeness and facial features from reference photos. Avoid unrealistic face alterations.";
+    "Preserve the subject's likeness and facial features from reference photos. Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic moment. Avoid unrealistic face alterations.";
 
   if ((existingImageCount ?? 0) === 0) {
     return [
