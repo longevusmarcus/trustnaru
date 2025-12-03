@@ -129,23 +129,23 @@ async function generateWithGemini(
 const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
   const roleTitle = careerPath.title || "Professional";
   const keySkills = careerPath.key_skills?.slice(0, 2).join(", ") || "professional skills";
-  const industry = careerPath.category || "business";
-  const baseQualifiers = "High-resolution professional photograph, natural lighting, realistic settings, corporate environment.";
+  const lifestyle = careerPath.lifestyle_benefits?.[0] || "successful professional lifestyle";
+  const baseQualifiers = "High-resolution professional photograph, natural lighting, realistic settings.";
   const identityNotice =
-    "Preserve the subject's likeness and facial features from reference photos. Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic moment.";
+    "Preserve the subject's likeness and facial features from reference photos. Use EXACT person from reference photo - identical facial features, skin texture, hair, body type, proportions. NO modifications to face or body. Photojournalistic style capturing authentic moment. Avoid unrealistic face alterations.";
 
   if ((existingImageCount ?? 0) === 0) {
     return [
-      `Generate a professional photograph of a ${roleTitle} actively working at a desk with a computer, demonstrating ${keySkills}. Modern office setting. ${baseQualifiers} ${identityNotice}`,
-      `Generate a professional photograph of a ${roleTitle} in a meeting room presenting to colleagues, confident posture. ${baseQualifiers} ${identityNotice}`,
-      `Generate a professional headshot of a ${roleTitle} in ${industry} industry, standing in a modern office lobby, professional attire, confident smile. ${baseQualifiers} ${identityNotice}`,
+      `Generate a professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
+      `Generate a candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
+      `Generate a lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, modern framing. ${baseQualifiers} ${identityNotice}`,
     ];
   }
 
   return [
-    `Generate a professional photograph of a ${roleTitle} focused at work, demonstrating ${keySkills}, modern workspace. ${baseQualifiers} ${identityNotice}`,
-    `Generate a professional photograph of a ${roleTitle} at a professional conference or networking event, engaging with others. ${baseQualifiers} ${identityNotice}`,
-    `Generate a professional photograph of a ${roleTitle} working remotely from a home office, professional setup. ${baseQualifiers} ${identityNotice}`,
+    `Generate a professional shot of a ${roleTitle} focused at work, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
+    `Generate an evening networking shot of a ${roleTitle} in social context, natural interactions. ${baseQualifiers} ${identityNotice}`,
+    `Generate a home office portrait of a ${roleTitle} in a personal workspace, authentic expression. ${baseQualifiers} ${identityNotice}`,
   ];
 };
 
