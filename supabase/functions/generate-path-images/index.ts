@@ -138,14 +138,14 @@ const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
     return [
       `Generate a professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
       `Generate a candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
-      `Generate a lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, modern framing. ${baseQualifiers} ${identityNotice}`,
+      `HYPERREALISTIC lifestyle photograph of a ${roleTitle} enjoying ${lifestyle}. Shot on Nikon Z9, 85mm f/1.4 lens, golden hour natural lighting, shallow depth of field, bokeh background. Editorial magazine quality, Condé Nast style. ${identityNotice}`,
     ];
   }
 
   return [
     `Generate a professional shot of a ${roleTitle} focused at work, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
     `Generate an evening networking shot of a ${roleTitle} in social context, natural interactions. ${baseQualifiers} ${identityNotice}`,
-    `Generate a home office portrait of a ${roleTitle} in a personal workspace, authentic expression. ${baseQualifiers} ${identityNotice}`,
+    `HYPERREALISTIC documentary photograph of a ${roleTitle} in personal workspace environment. Shot on Sony A7R V, 50mm f/1.2 GM lens, natural window light, film grain texture. Authentic candid moment, Magnum Photos aesthetic. ${identityNotice}`,
   ];
 };
 
