@@ -71,9 +71,9 @@ serve(async (req) => {
       journeyStage: stats?.current_level < 3 ? 'beginning' : stats?.current_level < 6 ? 'developing' : 'advancing'
     };
 
-    // Generate personalized motivation using Lovable AI
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    // Generate personalized motivation using Gemini API directly
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
 
     const prompt = `Generate a single short, personal, encouraging message (max 15 words) for someone on their ${context.pathTitle} journey.
 
@@ -86,31 +86,33 @@ Keep it gentle, concise, and specific to their path. Avoid clichés. Make it fee
 
 CRITICAL: DO NOT use any markdown formatting. NO asterisks (**), NO bold, NO italics. Output plain text only.`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    console.log('Calling Gemini API for motivation...');
+
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: 'You are a supportive career mentor. Create brief, gentle motivations. Output plain text only without any markdown formatting like asterisks or bold.' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 100,
-        temperature: 0.7
+        contents: [{
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 100,
+          temperature: 0.7
+        }
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI API error:', aiResponse.status, errorText);
+      console.error('Gemini API error:', aiResponse.status, errorText);
       throw new Error(`AI generation failed: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    let motivation = aiData.choices[0].message.content.trim();
+    let motivation = aiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Today is a great day to keep moving forward.';
     
     // Remove any markdown formatting that might still appear
     motivation = motivation.replace(/\*\*/g, '').replace(/\*/g, '').replace(/__/g, '').replace(/_/g, '');
