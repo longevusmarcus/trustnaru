@@ -88,7 +88,7 @@ CRITICAL: DO NOT use any markdown formatting. NO asterisks (**), NO bold, NO ita
 
     console.log('Calling Gemini API for motivation...');
 
-    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
+    const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
