@@ -35,36 +35,45 @@ async function generateWithGemini(
   const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
   if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY");
 
-  const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateImage";
+  // Use generateContent with gemini-2.0-flash-exp which supports image generation
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`Gemini API attempt ${attempt + 1}/${maxRetries + 1}`);
 
-      // Build the request body for generateImage
-      const requestBody: any = {
-        prompt: { text: prompt },
-        imageConfig: { 
-          height: 1024, 
-          width: 1024 
-        }
-      };
+      // Build the content parts
+      const parts: any[] = [];
       
-      // Add reference image if provided
+      // Add reference image first if provided
       if (refImage) {
-        requestBody.referenceImages = [{
+        parts.push({
           inlineData: {
             mimeType: refImage.mime_type,
             data: refImage.data
           }
-        }];
+        });
       }
+      
+      // Add the text prompt
+      parts.push({ text: prompt });
+
+      const requestBody = {
+        contents: [{
+          parts: parts
+        }],
+        generationConfig: {
+          responseModalities: ["IMAGE", "TEXT"],
+          responseMimeType: "image/png"
+        }
+      };
+
+      console.log("Sending request to Gemini...");
 
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GEMINI_API_KEY}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(requestBody),
       });
@@ -82,22 +91,32 @@ async function generateWithGemini(
       const data = await response.json();
       console.log("Gemini API response received");
 
-      // Extract image from generateImage response
-      const images = data.images;
-      if (!images || images.length === 0) {
-        console.error("No images in Gemini response:", JSON.stringify(data).slice(0, 500));
-        throw new Error("No image returned by Gemini");
+      // Extract image from generateContent response
+      const candidates = data.candidates;
+      if (!candidates || candidates.length === 0) {
+        console.error("No candidates in Gemini response:", JSON.stringify(data).slice(0, 500));
+        throw new Error("No candidates returned by Gemini");
       }
 
-      const base64Data = images[0].imageData || images[0].data;
-      if (!base64Data) {
+      const content = candidates[0].content;
+      if (!content || !content.parts) {
+        console.error("No content parts in response:", JSON.stringify(candidates[0]).slice(0, 500));
+        throw new Error("No content parts in response");
+      }
+
+      // Find the image part
+      const imagePart = content.parts.find((part: any) => part.inlineData);
+      if (!imagePart || !imagePart.inlineData) {
+        console.error("No image data in response parts:", JSON.stringify(content.parts).slice(0, 500));
         throw new Error("No image data in response");
       }
-      
+
+      const base64Data = imagePart.inlineData.data;
       const binaryString = atob(base64Data);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
 
+      console.log("Successfully decoded image data");
       return bytes;
     } catch (err) {
       console.error(`Attempt ${attempt + 1} failed:`, err);
@@ -120,16 +139,16 @@ const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
 
   if ((existingImageCount ?? 0) === 0) {
     return [
-      `Professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
-      `Candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
-      `Lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, modern framing. ${baseQualifiers} ${identityNotice}`,
+      `Generate a professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
+      `Generate a candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
+      `Generate a lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, modern framing. ${baseQualifiers} ${identityNotice}`,
     ];
   }
 
   return [
-    `Professional shot of a ${roleTitle} focused at work, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
-    `Evening networking shot of a ${roleTitle} in social context, natural interactions. ${baseQualifiers} ${identityNotice}`,
-    `Home office portrait of a ${roleTitle} in a personal workspace, authentic expression. ${baseQualifiers} ${identityNotice}`,
+    `Generate a professional shot of a ${roleTitle} focused at work, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
+    `Generate an evening networking shot of a ${roleTitle} in social context, natural interactions. ${baseQualifiers} ${identityNotice}`,
+    `Generate a home office portrait of a ${roleTitle} in a personal workspace, authentic expression. ${baseQualifiers} ${identityNotice}`,
   ];
 };
 
