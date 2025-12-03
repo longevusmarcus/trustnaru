@@ -35,33 +35,38 @@ async function generateWithGemini(
   const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
   if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY");
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${GEMINI_API_KEY}`;
+  const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateImage";
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       console.log(`Gemini API attempt ${attempt + 1}/${maxRetries + 1}`);
 
-      const parts: any[] = [{ text: prompt }];
+      // Build the request body for generateImage
+      const requestBody: any = {
+        prompt: { text: prompt },
+        imageConfig: { 
+          height: 1024, 
+          width: 1024 
+        }
+      };
       
+      // Add reference image if provided
       if (refImage) {
-        parts.push({
+        requestBody.referenceImages = [{
           inlineData: {
             mimeType: refImage.mime_type,
             data: refImage.data
           }
-        });
+        }];
       }
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            responseModalities: ["image", "text"],
-            responseMimeType: "image/png"
-          }
-        }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GEMINI_API_KEY}`
+        },
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -77,25 +82,18 @@ async function generateWithGemini(
       const data = await response.json();
       console.log("Gemini API response received");
 
-      // Extract image from response
-      const candidates = data.candidates;
-      if (!candidates || candidates.length === 0) {
-        throw new Error("No candidates in Gemini response");
-      }
-
-      const content = candidates[0].content;
-      if (!content || !content.parts) {
-        throw new Error("No content parts in Gemini response");
-      }
-
-      // Find the image part
-      const imagePart = content.parts.find((p: any) => p.inlineData?.mimeType?.startsWith("image/"));
-      if (!imagePart) {
-        console.error("No image in Gemini response:", JSON.stringify(data).slice(0, 500));
+      // Extract image from generateImage response
+      const images = data.images;
+      if (!images || images.length === 0) {
+        console.error("No images in Gemini response:", JSON.stringify(data).slice(0, 500));
         throw new Error("No image returned by Gemini");
       }
 
-      const base64Data = imagePart.inlineData.data;
+      const base64Data = images[0].imageData || images[0].data;
+      if (!base64Data) {
+        throw new Error("No image data in response");
+      }
+      
       const binaryString = atob(base64Data);
       const bytes = new Uint8Array(binaryString.length);
       for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
