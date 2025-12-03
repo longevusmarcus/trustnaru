@@ -7,22 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// small helper
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Convert ArrayBuffer to base64 safely */
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   const chunkSize = 0x8000;
   let binary = "";
   for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
   }
   return btoa(binary);
 }
 
-/** Fetch URL -> { base64, mimeType } */
 async function fetchUrlToBase64(url: string): Promise<{ base64: string; mimeType: string }> {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`Failed to fetch reference image: ${resp.status}`);
@@ -31,76 +27,76 @@ async function fetchUrlToBase64(url: string): Promise<{ base64: string; mimeType
   return { base64: arrayBufferToBase64(buffer), mimeType: contentType.split(";")[0] };
 }
 
-/** Normalize mime for Gemini */
 function normalizeMimeType(mime: string) {
   return mime === "image/png" ? "image/png" : "image/jpeg";
 }
 
-/** Generate image using Gemini 2.5 preview endpoint */
-async function generateWithGeminiImage(
+async function generateWithGemini3(
   prompt: string,
   refImages: { data: string; mime_type: string }[],
   maxRetries = 2,
 ): Promise<Uint8Array> {
   const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-  if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY secret");
 
-  const payload: any = { prompt, images: refImages };
+  const payload: any = {
+    prompt,
+    images: refImages,
+    // optional: add style / resolution params if supported
+  };
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-image:generateImage?key=${GEMINI_API_KEY}`;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Gemini 2.5 attempt ${attempt + 1}/${maxRetries + 1}`);
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateImage?key=${GEMINI_API_KEY}`,
-        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) },
-      );
+      console.log(`Gemini 3.0 attempt ${attempt + 1}/${maxRetries + 1}`);
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!res.ok) {
         const text = await res.text();
-        console.error("Gemini error:", res.status, text);
+        console.error("Gemini 3.0 HTTP error:", res.status, text);
         if (res.status >= 500 && attempt < maxRetries) {
           await sleep(Math.pow(2, attempt) * 1000);
           continue;
         }
-        throw new Error(`Gemini error ${res.status}: ${text}`);
+        throw new Error(`Gemini 3.0 error ${res.status}: ${text}`);
       }
 
       const json = await res.json();
       const base64 = json?.images?.[0]?.data;
-      if (!base64) throw new Error("No image data returned by Gemini");
+      if (!base64) throw new Error("No image data returned by Gemini 3.0");
 
-      const bin = atob(base64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
       return bytes;
     } catch (err) {
-      console.error(`Gemini attempt ${attempt + 1} failed:`, err);
+      console.error(`Gemini 3.0 attempt ${attempt + 1} failed:`, err);
       if (attempt === maxRetries) throw err;
       await sleep(Math.pow(2, attempt) * 1000);
     }
   }
 
-  throw new Error("All Gemini attempts failed");
+  throw new Error("All Gemini 3.0 attempts failed");
 }
 
-/** Build prompts for career images */
+// Scene prompt builder (identity-preserving)
 const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
   const roleTitle = careerPath.title || "Professional";
   const keySkills = careerPath.key_skills?.slice(0, 2).join(", ") || "professional skills";
   const lifestyle = careerPath.lifestyle_benefits?.[0] || "successful professional lifestyle";
-
-  const baseQualifiers =
-    "High-resolution professional photograph, natural lighting, shallow depth of field, cinematic composition.";
-
-  // keep original phrasing but drop consent note
+  const baseQualifiers = "High-resolution professional photograph, natural lighting, cinematic composition.";
   const identityNotice =
     "Preserve the subject's likeness and facial features from reference photos. Avoid unrealistic face alterations.";
 
   if ((existingImageCount ?? 0) === 0) {
     return [
       `Professional photograph of a ${roleTitle} actively working, demonstrating ${keySkills}. ${baseQualifiers} ${identityNotice}`,
-      `Candid shot of a ${roleTitle} collaborating or presenting his work. ${baseQualifiers} ${identityNotice}`,
+      `Candid shot of a ${roleTitle} collaborating or presenting ideas in a modern office. ${baseQualifiers} ${identityNotice}`,
       `Lifestyle portrait of a ${roleTitle} enjoying ${lifestyle}, golden hour lighting, cinematic framing. ${baseQualifiers} ${identityNotice}`,
     ];
   }
@@ -112,16 +108,16 @@ const constructScenePrompts = (careerPath: any, existingImageCount = 0) => {
   ];
 };
 
-/** MAIN HANDLER */
+// Main handler
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+    const supabaseClient = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
       global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
     });
 
-    const { data: authData } = await supabase.auth.getUser();
+    const { data: authData } = await supabaseClient.auth.getUser();
     const user = authData?.user;
     if (!user)
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -133,88 +129,74 @@ serve(async (req) => {
     const pathId = body?.pathId;
     if (!pathId) throw new Error("Missing pathId");
 
-    const { data: careerPath, error: careerErr } = await supabase
-      .from("career_paths")
-      .select("*")
-      .eq("id", pathId)
-      .single();
-    if (careerErr || !careerPath) throw new Error("Career path not found");
+    const { data: careerPath } = await supabaseClient.from("career_paths").select("*").eq("id", pathId).single();
+    if (!careerPath) throw new Error("Career path not found");
 
-    const { data: photos } = await supabase
+    const { data: userPhotos } = await supabaseClient
       .from("user_photos")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
-    if (!photos?.length) throw new Error("No reference photos");
+    if (!userPhotos || userPhotos.length === 0) throw new Error("No reference photo found");
 
-    const chosen = photos.slice(0, 3);
-    const refs: { data: string; mime_type: string }[] = [];
+    const chosenPhotos = userPhotos.slice(0, 3);
+    const refImages: { data: string; mime_type: string }[] = [];
 
-    for (const p of chosen) {
-      try {
-        let obj = p.photo_url.replace(/^user-photos\//, "").replace(/^\/+/, "");
-        const { data: signed } = await supabase.storage.from("user-photos").createSignedUrl(obj, 3600);
-        if (!signed?.signedUrl) continue;
-        const { base64, mimeType } = await fetchUrlToBase64(signed.signedUrl);
-        refs.push({ data: base64, mime_type: normalizeMimeType(mimeType) });
-      } catch (e) {
-        console.error("Failed to load reference image:", e);
-      }
-    }
-
-    if (refs.length === 0) {
-      const p = photos[0];
-      let obj = p.photo_url.replace(/^user-photos\//, "").replace(/^\/+/, "");
-      const { data: signed } = await supabase.storage.from("user-photos").createSignedUrl(obj, 3600);
-      if (!signed?.signedUrl) throw new Error("Failed to access reference photo");
+    for (const photo of chosenPhotos) {
+      const objectPath = (photo.photo_url as string).replace(/^user-photos\/?/, "");
+      const { data: signed } = await supabaseClient.storage.from("user-photos").createSignedUrl(objectPath, 3600);
+      if (!signed?.signedUrl) continue;
       const { base64, mimeType } = await fetchUrlToBase64(signed.signedUrl);
-      refs.push({ data: base64, mime_type: normalizeMimeType(mimeType) });
+      refImages.push({ data: base64, mime_type: normalizeMimeType(mimeType) });
     }
 
-    const existingCount = careerPath.all_images?.length ?? 0;
-    const prompts = constructScenePrompts(careerPath, existingCount);
-    const urls: string[] = [];
+    if (refImages.length === 0) throw new Error("No valid reference images");
 
-    for (let i = 0; i < prompts.length; i++) {
-      const prompt = `${prompts[i]}\n\nPhotographic style: realistic, natural expressions, minimal retouching.`;
-      const selectedRef = [refs[i % refs.length]];
+    const existingImageCount = careerPath.all_images?.length || 0;
+    const scenePrompts = constructScenePrompts(careerPath, existingImageCount);
+
+    const allImageUrls: string[] = [];
+    for (let i = 0; i < scenePrompts.length; i++) {
+      const prompt = `${scenePrompts[i]}\n\nPhotographic style: realistic, natural expressions, minimal retouching.`;
+      const selectedRefs = [refImages[i % refImages.length]];
 
       try {
-        const bytes = await generateWithGeminiImage(prompt, selectedRef);
-        const name = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
-        const { error: upErr } = await supabase.storage
+        const imageBytes = await generateWithGemini3(prompt, selectedRefs, 2);
+        const fileName = `${user.id}/${pathId}-${i + 1}-${Date.now()}.png`;
+        const { error: uploadError } = await supabaseClient.storage
           .from("career-images")
-          .upload(name, bytes, { contentType: "image/png", upsert: false });
-        if (upErr) continue;
+          .upload(fileName, imageBytes, { contentType: "image/png", upsert: false });
+        if (uploadError) continue;
 
-        const { data: pub } = supabase.storage.from("career-images").getPublicUrl(name);
-        if (pub?.publicUrl) urls.push(pub.publicUrl);
-      } catch (e) {
-        console.error("Generation failed:", e);
+        const { data: publicData } = supabaseClient.storage.from("career-images").getPublicUrl(fileName);
+        if (publicData?.publicUrl) allImageUrls.push(publicData.publicUrl);
+      } catch (err) {
+        console.error(`Generation failed for image ${i + 1}:`, err);
       }
 
-      if (i < prompts.length - 1) await sleep(1200);
+      if (i < scenePrompts.length - 1) await sleep(1500);
     }
 
-    if (!urls.length) throw new Error("No images generated");
+    if (allImageUrls.length === 0) throw new Error("Failed to generate any images");
 
-    const merged = [...(careerPath.all_images ?? []), ...urls];
-    const mainImage = careerPath.image_url || urls[0];
-
-    await supabase.from("career_paths").update({ image_url: mainImage, all_images: merged }).eq("id", pathId);
+    const combinedImages = [...(careerPath.all_images || []), ...allImageUrls];
+    await supabaseClient
+      .from("career_paths")
+      .update({ image_url: careerPath.image_url || allImageUrls[0], all_images: combinedImages })
+      .eq("id", pathId);
 
     return new Response(
       JSON.stringify({
         success: true,
-        imageUrl: mainImage,
-        allImages: urls,
-        message: `Generated ${urls.length} images`,
+        imageUrl: allImageUrls[0],
+        allImages: allImageUrls,
+        message: `Successfully generated ${allImageUrls.length} images`,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
-    console.error("Handler error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    console.error("Error generating path image:", err);
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
