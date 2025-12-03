@@ -63,8 +63,7 @@ async function generateWithGemini(
           parts: parts
         }],
         generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"],
-          responseMimeType: "image/png"
+          responseModalities: ["IMAGE", "TEXT"]
         }
       };
 
