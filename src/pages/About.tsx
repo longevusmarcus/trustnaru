@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Target, Compass, Brain, TrendingUp, Users, Rocket, Eye, Zap, MessageCircle, Star, Award, Lightbulb, Route, Flame, CircleCheck, BarChart3, Wand2 } from "lucide-react";
+import { ArrowRight, Sparkles, Brain, Flame, BarChart3, Rocket, Lightbulb, CircleCheck, Award, Eye, Target, LineChart, Users, Check, User, Compass, ClipboardList, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 import { useRef } from "react";
@@ -45,22 +45,47 @@ const About = () => {
   const features = [
     {
       icon: Eye,
-      title: "Visualize Your Future",
-      description: "See yourself in your dream career with AI-generated visualizations that inspire action.",
+      title: "Futures",
+      subtitle: "Visualize possible selves",
+      description: "See AI-generated visualizations of your future career paths with detailed roadmaps and lifestyle previews.",
       gradient: "from-violet-500/20 to-purple-500/20"
     },
     {
-      icon: Wand2,
-      title: "Personalized Guidance",
-      description: "Get tailored advice and actionable steps based on your unique skills and aspirations.",
+      icon: Target,
+      title: "Copilot",
+      subtitle: "Turn it into action plan",
+      description: "Get personalized daily actions, goals, and step-by-step guidance to become your future self.",
       gradient: "from-blue-500/20 to-cyan-500/20"
     },
     {
-      icon: Route,
-      title: "Clear Direction",
-      description: "Navigate your career path with confidence using AI-powered insights and roadmaps.",
+      icon: LineChart,
+      title: "Insights",
+      subtitle: "Track evolution",
+      description: "Monitor your journey progress, stats, and career direction with powerful analytics.",
       gradient: "from-emerald-500/20 to-teal-500/20"
+    },
+    {
+      icon: Users,
+      title: "Community",
+      subtitle: "Emulate high-achievers",
+      description: "Connect with mentors on your path and receive exclusive guidance from those who've succeeded.",
+      gradient: "from-rose-500/20 to-orange-500/20"
     }
+  ];
+
+  const journeySteps = [
+    { title: "Digital Twin", description: "Tell Naru where you are + where you're headed (resume & your verbal pitch)" },
+    { title: "Explore", description: "Consider possible futures & career paths tailored to you" },
+    { title: "Select", description: "See tradeoffs & pick the best-fit path (role, lifestyle, risk, timeline)" },
+    { title: "Plan", description: "Get a step-by-step action plan to become future self" },
+    { title: "Execute", description: "Track progress and stay accountable with tangible milestones" }
+  ];
+
+  const differentiators = [
+    "Mobile-first, voice-native experience powered by Generative and Predictive AI",
+    "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
+    "Measurable milestones & actions that adapt to real progress (not generic templates)",
+    "Model learns from users, improving guidance and outcomes over time"
   ];
 
   const floatingCards = [
@@ -106,12 +131,6 @@ const About = () => {
     }
   ];
 
-  const manifestoTexts = [
-    { text: "For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential.", highlight: "Naru changes that." },
-    { text: "With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality.", highlight: null },
-    { text: "Naru isn't just a tool—", highlight: "it's the key to becoming who you're meant to be." }
-  ];
-
   return (
     <>
       <Helmet>
@@ -130,7 +149,7 @@ const About = () => {
               <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
                 <a href="#manifesto" className="hover:text-foreground transition-colors">Manifesto</a>
                 <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                <a href="#vision" className="hover:text-foreground transition-colors">Vision</a>
+                <a href="#journey" className="hover:text-foreground transition-colors">How it works</a>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -152,7 +171,7 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards - More sophisticated with Lucide icons */}
+          {/* Floating Cards */}
           {floatingCards.map((card, index) => (
             <motion.div
               key={index}
@@ -196,9 +215,9 @@ const About = () => {
               transition={{ delay: 0.1, duration: 0.6 }}
               className="text-4xl md:text-6xl lg:text-7xl text-foreground mb-8 leading-tight"
             >
-              <span className="font-light">Because Your Future</span>
-              <br />
-              <span className="font-cormorant italic font-light text-5xl md:text-7xl lg:text-8xl">Deserves a Clear Path</span>
+              <span className="font-light">Introducing </span>
+              <span className="font-cormorant italic font-light underline decoration-1 underline-offset-8">Naru</span>
+              <span className="font-light"> – your career OS</span>
             </motion.h1>
 
             <motion.p
@@ -207,7 +226,7 @@ const About = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
             >
-              Redefining career development with AI-powered visualization, personalized guidance, and actionable insights.
+              Naru reveals your future professional identity and guides you step-by-step to grow
             </motion.p>
 
             <motion.div
@@ -255,7 +274,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Features Section - 4 main features */}
         <section id="features" className="py-32 px-6 bg-gradient-to-b from-secondary/20 to-background">
           <div className="max-w-6xl mx-auto">
             <motion.div
@@ -274,38 +293,32 @@ const About = () => {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.15, duration: 0.6 }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
                   className="group relative"
                 >
-                  {/* Card with gradient border on hover */}
-                  <div className="relative bg-card border border-border/50 rounded-3xl p-8 h-full overflow-hidden hover:border-border transition-all duration-500 hover:shadow-2xl hover:shadow-background/40">
-                    {/* Subtle gradient overlay on hover */}
+                  <div className="relative bg-card border border-border/50 rounded-3xl p-6 h-full overflow-hidden hover:border-border transition-all duration-500 hover:shadow-2xl hover:shadow-background/40">
+                    {/* Gradient overlay on hover */}
                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                     
                     <div className="relative z-10">
-                      {/* Icon container with ring effect */}
-                      <div className="relative w-16 h-16 mb-8">
+                      {/* Icon */}
+                      <div className="relative w-14 h-14 mb-6">
                         <div className="absolute inset-0 rounded-2xl bg-secondary/50 group-hover:bg-secondary transition-colors duration-300" />
                         <div className="absolute inset-[2px] rounded-[14px] bg-card group-hover:bg-card/80 transition-colors duration-300 flex items-center justify-center">
-                          <feature.icon className="h-7 w-7 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                          <feature.icon className="h-6 w-6 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
                         </div>
                       </div>
                       
-                      <h3 className="text-xl font-medium text-foreground mb-4">{feature.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                      
-                      {/* Subtle arrow indicator */}
-                      <div className="mt-6 flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Learn more</span>
-                        <ArrowRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
-                      </div>
+                      <h3 className="text-xl font-medium text-foreground mb-1">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-4 font-cormorant italic">{feature.subtitle}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -314,8 +327,84 @@ const About = () => {
           </div>
         </section>
 
+        {/* Journey Flow Section */}
+        <section id="journey" className="py-32 px-6">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                <span className="font-light">Naru unlocks </span>
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">YOUR</span>
+                <span className="font-light"> purpose</span>
+              </h2>
+            </motion.div>
+
+            {/* Journey Steps - Arrow flow */}
+            <div className="flex flex-col lg:flex-row items-stretch gap-0 mb-20">
+              {journeySteps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="flex-1 relative"
+                >
+                  {/* Arrow shape container */}
+                  <div className="relative bg-secondary/60 hover:bg-secondary/80 transition-colors duration-300 h-full min-h-[180px] lg:min-h-[140px] flex flex-col justify-start p-5 lg:pr-8"
+                    style={{
+                      clipPath: index === journeySteps.length - 1 
+                        ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
+                        : 'polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%, 8% 50%)',
+                      marginLeft: index === 0 ? '0' : '-12px'
+                    }}
+                  >
+                    <h4 className="text-base font-medium text-foreground mb-2 pl-2">{step.title}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-2">{step.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* What makes Naru different */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="bg-card/50 backdrop-blur-sm border border-primary/30 rounded-3xl p-8 md:p-10"
+            >
+              <h3 className="text-xl md:text-2xl font-medium text-foreground text-center mb-8">
+                What makes Naru different
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                {differentiators.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.4 }}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Vision Section */}
-        <section id="vision" className="py-32 px-6">
+        <section className="py-32 px-6 bg-gradient-to-b from-secondary/20 to-background">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0 }}
@@ -382,7 +471,7 @@ const About = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 px-6 bg-gradient-to-b from-secondary/20 to-background">
+        <section className="py-32 px-6">
           <div className="max-w-3xl mx-auto text-center">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
