@@ -399,11 +399,14 @@ const About = () => {
 
               {/* Naru unlocks YOUR purpose - Journey Steps */}
               <div className="text-center mb-12">
-                <h3 className="text-2xl md:text-4xl text-foreground mb-6">
+                <h3 className="text-2xl md:text-4xl text-foreground mb-4">
                   <span className="font-light">Naru unlocks </span>
                   <span className="font-cormorant italic font-light text-3xl md:text-5xl">YOUR</span>
                   <span className="font-light"> purpose</span>
                 </h3>
+                <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+                  Turn your career into a game. Visualize your future, unlock paths, complete daily quests, and level up.
+                </p>
               </div>
 
               {/* Journey Steps - Arrow flow */}
