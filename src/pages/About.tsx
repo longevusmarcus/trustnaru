@@ -19,32 +19,125 @@ const ManifestoText = () => {
     offset: ["start 0.85", "start 0.15"]
   });
 
-  const fullText = "For too long, careers have been a solo journey—confusing, overwhelming, and disconnected from who we truly are. Naru changes the experience. With AI-powered visualizations, deeply personalized guidance, and clear daily actions, Naru helps you see who you're becoming, align with what matters, and move forward with confidence. Naru isn't just a tool, it's a companion for becoming your fullest self.";
+  // Define paragraphs with special styling for certain words
+  const paragraphs = [
+    {
+      text: "For too long, careers have been a solo journey—confusing, overwhelming, and disconnected from who we truly are.",
+      highlights: ["solo journey", "disconnected"]
+    },
+    {
+      text: "Naru changes the experience.",
+      highlights: ["Naru"],
+      isAccent: true
+    },
+    {
+      text: "With AI-powered visualizations, deeply personalized guidance, and clear daily actions, Naru helps you see who you're becoming, align with what matters, and move forward with confidence.",
+      highlights: ["who you're becoming", "confidence"]
+    },
+    {
+      text: "Naru isn't just a tool, it's a companion for becoming your fullest self.",
+      highlights: ["companion", "fullest self"],
+      hasCircle: "fullest self"
+    }
+  ];
+
+  // Flatten all words while tracking paragraph breaks and highlights
+  const allElements: { word: string; isBreak?: boolean; isHighlight?: boolean; hasCircle?: boolean; isAccent?: boolean }[] = [];
   
-  const words = fullText.split(" ");
+  paragraphs.forEach((para, pIndex) => {
+    const words = para.text.split(" ");
+    words.forEach((word) => {
+      const isHighlight = para.highlights.some(h => para.text.indexOf(h) !== -1 && h.split(" ").includes(word.replace(/[.,!?]/g, '')));
+      const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ''));
+      allElements.push({ 
+        word, 
+        isHighlight,
+        hasCircle,
+        isAccent: para.isAccent
+      });
+    });
+    if (pIndex < paragraphs.length - 1) {
+      allElements.push({ word: "", isBreak: true });
+    }
+  });
+
+  const wordCount = allElements.filter(e => !e.isBreak).length;
+  let wordIndex = 0;
 
   return (
-    <div ref={ref} className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed text-center">
-      {words.map((word, index) => {
-        const start = index / words.length;
-        const end = start + 1 / words.length;
+    <div ref={ref} className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed text-center space-y-8">
+      {paragraphs.map((para, pIndex) => {
+        const words = para.text.split(" ");
+        const startIdx = wordIndex;
+        wordIndex += words.length;
+        
         return (
-          <ManifestoWord key={index} range={[start, end]} progress={scrollYProgress}>
-            {word}
-          </ManifestoWord>
+          <p key={pIndex} className={`${para.isAccent ? 'text-3xl md:text-4xl lg:text-5xl font-normal' : ''}`}>
+            {words.map((word, wIndex) => {
+              const globalIdx = startIdx + wIndex;
+              const start = globalIdx / wordCount;
+              const end = start + 1 / wordCount;
+              const isHighlight = para.highlights.some(h => h.split(" ").includes(word.replace(/[.,!?]/g, '')));
+              const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ''));
+              
+              return (
+                <ManifestoWord 
+                  key={wIndex} 
+                  range={[start, end]} 
+                  progress={scrollYProgress}
+                  isHighlight={isHighlight}
+                  hasCircle={hasCircle}
+                  isAccent={para.isAccent}
+                >
+                  {word}
+                </ManifestoWord>
+              );
+            })}
+          </p>
         );
       })}
     </div>
   );
 };
 
-const ManifestoWord = ({ children, range, progress }: { children: string; range: [number, number]; progress: any }) => {
+const ManifestoWord = ({ 
+  children, 
+  range, 
+  progress, 
+  isHighlight, 
+  hasCircle,
+  isAccent 
+}: { 
+  children: string; 
+  range: [number, number]; 
+  progress: any;
+  isHighlight?: boolean;
+  hasCircle?: boolean;
+  isAccent?: boolean;
+}) => {
   const opacity = useTransform(progress, range, [0.2, 1]);
-  const color = useTransform(progress, range, ["hsl(0 0% 50%)", "hsl(0 0% 98%)"]);
+  const color = useTransform(
+    progress, 
+    range, 
+    isAccent 
+      ? ["hsl(142 50% 40%)", "hsl(142 70% 65%)"] 
+      : isHighlight 
+        ? ["hsl(0 0% 50%)", "hsl(142 50% 70%)"]
+        : ["hsl(0 0% 50%)", "hsl(0 0% 98%)"]
+  );
 
   return (
-    <motion.span style={{ opacity, color }} className="inline-block mr-[0.25em]">
+    <motion.span 
+      style={{ opacity, color }} 
+      className={`inline-block mr-[0.25em] relative ${isHighlight ? 'font-normal' : ''}`}
+    >
       {children}
+      {hasCircle && (
+        <motion.span 
+          className="absolute -inset-x-2 -inset-y-1 border-2 border-emerald-500/50 rounded-full pointer-events-none"
+          style={{ opacity }}
+        />
+      )}
     </motion.span>
   );
 };
