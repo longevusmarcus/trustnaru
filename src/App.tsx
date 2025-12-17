@@ -18,6 +18,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
 import FAQ from "./pages/FAQ";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +52,7 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Pages that should NOT show the desktop blocker
-  const excludedPaths = ["/terms", "/privacy", "/cookies", "/faq"];
+  const excludedPaths = ["/terms", "/privacy", "/cookies", "/faq", "/about"];
   const isExcludedPath = excludedPaths.includes(location.pathname);
 
   if (!isMobile && !bypassMobileCheck && !isExcludedPath) {
@@ -74,6 +75,7 @@ const App = () => {
               <MobileCheckWrapper>
                 <Routes>
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/cookies" element={<Cookies />} />
