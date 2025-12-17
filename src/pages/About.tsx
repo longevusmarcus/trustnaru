@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 import { useRef } from "react";
 
+// Import app images
+import insightsCompass from "@/assets/insights-compass.png";
+import insightsChat from "@/assets/insights-chat.png";
+import insightsAnalytics from "@/assets/insights-analytics.png";
+import insightsTips from "@/assets/insights-tips.png";
+
 // Component for animated text that highlights on scroll
 const AnimatedParagraph = ({ children, className }: { children: string; className?: string }) => {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -48,28 +54,32 @@ const About = () => {
       title: "Futures",
       subtitle: "Visualize possible selves",
       description: "See AI-generated visualizations of your future career paths with detailed roadmaps and lifestyle previews.",
-      gradient: "from-violet-500/20 to-purple-500/20"
+      gradient: "from-violet-500/20 to-purple-500/20",
+      image: insightsCompass
     },
     {
       icon: Target,
       title: "Copilot",
       subtitle: "Turn it into action plan",
       description: "Get personalized daily actions, goals, and step-by-step guidance to become your future self.",
-      gradient: "from-blue-500/20 to-cyan-500/20"
+      gradient: "from-blue-500/20 to-cyan-500/20",
+      image: insightsChat
     },
     {
       icon: LineChart,
       title: "Insights",
       subtitle: "Track evolution",
       description: "Monitor your journey progress, stats, and career direction with powerful analytics.",
-      gradient: "from-emerald-500/20 to-teal-500/20"
+      gradient: "from-emerald-500/20 to-teal-500/20",
+      image: insightsAnalytics
     },
     {
       icon: Users,
       title: "Community",
       subtitle: "Emulate high-achievers",
       description: "Connect with mentors on your path and receive exclusive guidance from those who've succeeded.",
-      gradient: "from-rose-500/20 to-orange-500/20"
+      gradient: "from-rose-500/20 to-orange-500/20",
+      image: insightsTips
     }
   ];
 
@@ -306,16 +316,26 @@ const About = () => {
                     transition={{ delay: index * 0.1, duration: 0.6 }}
                     className="group relative"
                   >
-                    <div className="relative bg-card/80 border border-border/40 rounded-2xl p-6 h-full overflow-hidden hover:border-border/80 transition-all duration-500 hover:shadow-xl hover:shadow-background/30">
+                    <div className="relative bg-card/80 border border-border/40 rounded-2xl overflow-hidden hover:border-border/80 transition-all duration-500 hover:shadow-xl hover:shadow-background/30 h-full flex flex-col">
                       {/* Gradient overlay on hover */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                       
-                      <div className="relative z-10">
+                      {/* Image section */}
+                      <div className="relative z-10 h-32 overflow-hidden bg-muted/30">
+                        <img 
+                          src={feature.image} 
+                          alt={feature.title}
+                          className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card/90 to-transparent" />
+                      </div>
+                      
+                      <div className="relative z-10 p-6 flex-1">
                         {/* Icon */}
-                        <div className="relative w-12 h-12 mb-5">
-                          <div className="absolute inset-0 rounded-xl bg-muted/50 group-hover:bg-muted transition-colors duration-300" />
-                          <div className="absolute inset-[2px] rounded-[10px] bg-card group-hover:bg-card/90 transition-colors duration-300 flex items-center justify-center">
-                            <feature.icon className="h-5 w-5 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                        <div className="relative w-10 h-10 mb-4 -mt-10">
+                          <div className="absolute inset-0 rounded-xl bg-card border border-border/50 shadow-lg" />
+                          <div className="absolute inset-[2px] rounded-[10px] bg-card flex items-center justify-center">
+                            <feature.icon className="h-4 w-4 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
                           </div>
                         </div>
                         
