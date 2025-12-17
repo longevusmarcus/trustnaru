@@ -331,7 +331,7 @@ const About = () => {
         </section>
 
         {/* Journey Flow Section */}
-        <section id="journey" className="py-24 px-6 bg-muted/30">
+        <section id="journey" className="py-24 px-6 bg-white dark:bg-zinc-900">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
