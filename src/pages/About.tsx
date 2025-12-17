@@ -1,6 +1,26 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Brain, Flame, BarChart3, Rocket, Lightbulb, CircleCheck, Award, Eye, Target, LineChart, Users, Check, User, Compass, ClipboardList, Play, Star } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Brain,
+  Flame,
+  BarChart3,
+  Rocket,
+  Lightbulb,
+  CircleCheck,
+  Award,
+  Eye,
+  Target,
+  LineChart,
+  Users,
+  Check,
+  User,
+  Compass,
+  ClipboardList,
+  Play,
+  Star,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 import { useRef } from "react";
@@ -26,44 +46,52 @@ const ManifestoText = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 0.85", "start 0.15"]
+    offset: ["start 0.85", "start 0.15"],
   });
 
   // Define paragraphs with special styling for certain words
   const paragraphs = [
     {
       text: "For too long, careers have been a solo journey—confusing, overwhelming, and disconnected from who we truly are.",
-      highlights: ["solo journey", "disconnected"]
+      highlights: ["solo journey", "disconnected"],
     },
     {
       text: "Naru changes the experience.",
       highlights: ["Naru"],
-      isAccent: true
+      isAccent: true,
     },
     {
       text: "With AI-powered visualizations, deeply personalized guidance, and clear daily actions, Naru helps you see who you're becoming, align with what matters, and move forward with confidence.",
-      highlights: ["who you're becoming", "confidence"]
+      highlights: ["who you're becoming", "confidence"],
     },
     {
       text: "Naru isn't just a tool, it's a companion for becoming your fullest self.",
       highlights: ["companion", "fullest self"],
-      hasCircle: "fullest self"
-    }
+      hasCircle: "fullest self",
+    },
   ];
 
   // Flatten all words while tracking paragraph breaks and highlights
-  const allElements: { word: string; isBreak?: boolean; isHighlight?: boolean; hasCircle?: boolean; isAccent?: boolean }[] = [];
-  
+  const allElements: {
+    word: string;
+    isBreak?: boolean;
+    isHighlight?: boolean;
+    hasCircle?: boolean;
+    isAccent?: boolean;
+  }[] = [];
+
   paragraphs.forEach((para, pIndex) => {
     const words = para.text.split(" ");
     words.forEach((word) => {
-      const isHighlight = para.highlights.some(h => para.text.indexOf(h) !== -1 && h.split(" ").includes(word.replace(/[.,!?]/g, '')));
-      const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ''));
-      allElements.push({ 
-        word, 
+      const isHighlight = para.highlights.some(
+        (h) => para.text.indexOf(h) !== -1 && h.split(" ").includes(word.replace(/[.,!?]/g, "")),
+      );
+      const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ""));
+      allElements.push({
+        word,
         isHighlight,
         hasCircle,
-        isAccent: para.isAccent
+        isAccent: para.isAccent,
       });
     });
     if (pIndex < paragraphs.length - 1) {
@@ -71,29 +99,32 @@ const ManifestoText = () => {
     }
   });
 
-  const wordCount = allElements.filter(e => !e.isBreak).length;
+  const wordCount = allElements.filter((e) => !e.isBreak).length;
   let wordIndex = 0;
 
   return (
-    <div ref={ref} className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed text-center space-y-8">
+    <div
+      ref={ref}
+      className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed text-center space-y-8"
+    >
       {paragraphs.map((para, pIndex) => {
         const words = para.text.split(" ");
         const startIdx = wordIndex;
         wordIndex += words.length;
-        
+
         return (
-          <p key={pIndex} className={`${para.isAccent ? 'text-3xl md:text-4xl lg:text-5xl font-normal' : ''}`}>
+          <p key={pIndex} className={`${para.isAccent ? "text-3xl md:text-4xl lg:text-5xl font-normal" : ""}`}>
             {words.map((word, wIndex) => {
               const globalIdx = startIdx + wIndex;
               const start = globalIdx / wordCount;
               const end = start + 1 / wordCount;
-              const isHighlight = para.highlights.some(h => h.split(" ").includes(word.replace(/[.,!?]/g, '')));
-              const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ''));
-              
+              const isHighlight = para.highlights.some((h) => h.split(" ").includes(word.replace(/[.,!?]/g, "")));
+              const hasCircle = para.hasCircle && para.hasCircle.split(" ").includes(word.replace(/[.,!?]/g, ""));
+
               return (
-                <ManifestoWord 
-                  key={wIndex} 
-                  range={[start, end]} 
+                <ManifestoWord
+                  key={wIndex}
+                  range={[start, end]}
                   progress={scrollYProgress}
                   isHighlight={isHighlight}
                   hasCircle={hasCircle}
@@ -110,16 +141,16 @@ const ManifestoText = () => {
   );
 };
 
-const ManifestoWord = ({ 
-  children, 
-  range, 
-  progress, 
-  isHighlight, 
+const ManifestoWord = ({
+  children,
+  range,
+  progress,
+  isHighlight,
   hasCircle,
-  isAccent 
-}: { 
-  children: string; 
-  range: [number, number]; 
+  isAccent,
+}: {
+  children: string;
+  range: [number, number];
   progress: any;
   isHighlight?: boolean;
   hasCircle?: boolean;
@@ -127,23 +158,23 @@ const ManifestoWord = ({
 }) => {
   const opacity = useTransform(progress, range, [0.2, 1]);
   const color = useTransform(
-    progress, 
-    range, 
-    isAccent 
-      ? ["hsl(142 50% 40%)", "hsl(142 70% 65%)"] 
-      : isHighlight 
+    progress,
+    range,
+    isAccent
+      ? ["hsl(142 50% 40%)", "hsl(142 70% 65%)"]
+      : isHighlight
         ? ["hsl(0 0% 50%)", "hsl(142 50% 70%)"]
-        : ["hsl(0 0% 50%)", "hsl(0 0% 98%)"]
+        : ["hsl(0 0% 50%)", "hsl(0 0% 98%)"],
   );
 
   return (
-    <motion.span 
-      style={{ opacity, color }} 
-      className={`inline-block mr-[0.25em] relative ${isHighlight ? 'font-normal' : ''}`}
+    <motion.span
+      style={{ opacity, color }}
+      className={`inline-block mr-[0.25em] relative ${isHighlight ? "font-normal" : ""}`}
     >
       {children}
       {hasCircle && (
-        <motion.span 
+        <motion.span
           className="absolute -inset-x-2 -inset-y-1 border-2 border-emerald-500/50 rounded-full pointer-events-none"
           style={{ opacity }}
         />
@@ -157,7 +188,7 @@ const VideoSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start end", "center center"]
+    offset: ["start end", "center center"],
   });
 
   // Transform from tilted (15deg) to flat (0deg) as user scrolls
@@ -190,12 +221,12 @@ const VideoSection = () => {
 
         <motion.div
           ref={containerRef}
-          style={{ 
-            rotateX, 
-            scale, 
+          style={{
+            rotateX,
+            scale,
             opacity,
             transformStyle: "preserve-3d",
-            transformOrigin: "center bottom"
+            transformOrigin: "center bottom",
           }}
           className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-background/50 bg-card/50"
         >
@@ -216,16 +247,17 @@ const About = () => {
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress: heroScrollProgress } = useScroll({
     target: heroRef,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end start"],
   });
   const features = [
     {
       icon: Eye,
       title: "Futures",
       subtitle: "Visualize possible selves",
-      description: "See AI-generated visualizations of your future career paths with detailed roadmaps and lifestyle previews.",
+      description:
+        "See AI-generated visualizations of your future career paths with detailed roadmaps and lifestyle previews.",
       gradient: "from-violet-500/20 to-purple-500/20",
-      image: featureFutures
+      image: featureFutures,
     },
     {
       icon: Target,
@@ -233,7 +265,7 @@ const About = () => {
       subtitle: "Turn it into action plan",
       description: "Get personalized daily actions, goals, and step-by-step guidance to become your future self.",
       gradient: "from-blue-500/20 to-cyan-500/20",
-      image: featureCopilot
+      image: featureCopilot,
     },
     {
       icon: LineChart,
@@ -241,24 +273,28 @@ const About = () => {
       subtitle: "Track evolution",
       description: "Monitor your journey progress, stats, and career direction with powerful analytics.",
       gradient: "from-emerald-500/20 to-teal-500/20",
-      image: featureInsights
+      image: featureInsights,
     },
     {
       icon: Users,
       title: "Community",
       subtitle: "Emulate high-achievers",
-      description: "Connect with mentors on your path and receive exclusive guidance from those who've succeeded.",
+      description:
+        "Connect with professionals on your path and receive exclusive guidance from those who've succeeded.",
       gradient: "from-rose-500/20 to-orange-500/20",
-      image: featureCommunity
-    }
+      image: featureCommunity,
+    },
   ];
 
   const journeySteps = [
-    { title: "Digital Twin", description: "Tell Naru where you are + where you're headed (resume & your verbal pitch)" },
+    {
+      title: "Digital Twin",
+      description: "Tell Naru where you are + where you're headed (resume & your verbal pitch)",
+    },
     { title: "Explore", description: "Consider possible futures & career paths tailored to you" },
     { title: "Select", description: "See tradeoffs & pick the best-fit path (role, lifestyle, risk, timeline)" },
     { title: "Plan", description: "Get a step-by-step action plan to become future self" },
-    { title: "Execute", description: "Track progress and stay accountable with tangible milestones" }
+    { title: "Execute", description: "Track progress and stay accountable with tangible milestones" },
   ];
 
   const comparisonFeatures = [
@@ -266,57 +302,60 @@ const About = () => {
     { feature: "Evidence-backed paths", naru: "check", linkedin: "none", betterup: "none" },
     { feature: "Daily action copilot", naru: "check", linkedin: "none", betterup: "partial" },
     { feature: "Progress tracking & adaptation", naru: "check", linkedin: "partial", betterup: "partial" },
-    { feature: "Coach / human layer", naru: "Optional", linkedin: "none", betterup: "Core" }
+    { feature: "Coach / human layer", naru: "Optional", linkedin: "none", betterup: "Core" },
   ];
 
   const floatingCards = [
-    { 
-      title: "Path Activated", 
-      text: "You've started your journey to become a Product Lead at a top tech company.", 
+    {
+      title: "Path Activated",
+      text: "You've started your journey to become a Product Lead at a top tech company.",
       delay: 0,
       position: "left-1 md:left-4 lg:left-12 top-24 md:top-32 lg:top-36",
       icon: Rocket,
       time: "2m ago",
       iconColor: "text-violet-400",
-      iconBg: "bg-violet-500/20"
+      iconBg: "bg-violet-500/20",
     },
-    { 
-      title: "New Insight", 
-      text: "Your skills in design thinking align perfectly with product strategy roles.", 
+    {
+      title: "New Insight",
+      text: "Your skills in design thinking align perfectly with product strategy roles.",
       delay: 0.2,
       position: "right-1 md:right-4 lg:right-12 top-40 md:top-48 lg:top-52",
       icon: Lightbulb,
       time: "15m ago",
       iconColor: "text-amber-400",
-      iconBg: "bg-amber-500/20"
+      iconBg: "bg-amber-500/20",
     },
-    { 
-      title: "Daily Action", 
-      text: "Connect with 2 product leaders on LinkedIn who inspire your vision.", 
+    {
+      title: "Daily Action",
+      text: "Connect with 2 product leaders on LinkedIn who inspire your vision.",
       delay: 0.4,
       position: "left-1 md:left-4 lg:left-20 bottom-24 md:bottom-32 lg:bottom-36",
       icon: CircleCheck,
       time: "1h ago",
       iconColor: "text-emerald-400",
-      iconBg: "bg-emerald-500/20"
+      iconBg: "bg-emerald-500/20",
     },
-    { 
-      title: "Goal Achieved", 
-      text: "Congratulations! You've unlocked Level 2 of your career path.", 
+    {
+      title: "Goal Achieved",
+      text: "Congratulations! You've unlocked Level 2 of your career path.",
       delay: 0.6,
       position: "right-1 md:right-4 lg:right-20 bottom-40 md:bottom-48 lg:bottom-52",
       icon: Award,
       time: "3h ago",
       iconColor: "text-rose-400",
-      iconBg: "bg-rose-500/20"
-    }
+      iconBg: "bg-rose-500/20",
+    },
   ];
 
   return (
     <>
       <Helmet>
         <title>About Naru - The Career Dreamer & Copilot</title>
-        <meta name="description" content="Discover how Naru helps you visualize your future self, unlock personalized guidance, and track your evolution every step of the way." />
+        <meta
+          name="description"
+          content="Discover how Naru helps you visualize your future self, unlock personalized guidance, and track your evolution every step of the way."
+        />
       </Helmet>
 
       <div className="min-h-screen bg-background overflow-x-hidden">
@@ -328,14 +367,25 @@ const About = () => {
                 Naru
               </Link>
               <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                <a href="#manifesto" className="hover:text-foreground transition-colors">Manifesto</a>
-                <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                <a href="#journey" className="hover:text-foreground transition-colors">Why Naru</a>
-                <a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a>
+                <a href="#manifesto" className="hover:text-foreground transition-colors">
+                  Manifesto
+                </a>
+                <a href="#features" className="hover:text-foreground transition-colors">
+                  Features
+                </a>
+                <a href="#journey" className="hover:text-foreground transition-colors">
+                  Why Naru
+                </a>
+                <a href="#testimonials" className="hover:text-foreground transition-colors">
+                  Testimonials
+                </a>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/auth" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                to="/auth"
+                className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Login
               </Link>
               <Button asChild size="sm" className="rounded-full bg-primary hover:bg-primary/90">
@@ -352,7 +402,7 @@ const About = () => {
           {/* Gradient Background */}
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
-          
+
           {/* Floating Cards with funnel effect - converge to center */}
           {floatingCards.map((card, index) => {
             // Funnel effect - cards converge towards center while shrinking
@@ -362,32 +412,43 @@ const About = () => {
             const cardScale = useTransform(heroScrollProgress, [0, 0.5], [1, 0.4]);
             // Move towards center - left cards go right, right cards go left
             const cardX = useTransform(heroScrollProgress, [0, 0.5], [0, isLeft ? 150 : -150]);
-            
+
             return (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: card.delay + 0.6, duration: 0.7, ease: "easeOut" }}
-                style={{ 
-                  y: cardY, 
-                  opacity: cardOpacity, 
+                style={{
+                  y: cardY,
+                  opacity: cardOpacity,
                   scale: cardScale,
-                  x: cardX
+                  x: cardX,
                 }}
                 className={`absolute ${card.position} max-w-[130px] md:max-w-[200px] lg:max-w-[300px] z-20`}
               >
                 <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-lg md:rounded-xl lg:rounded-2xl p-1.5 md:p-2.5 lg:p-4 shadow-xl shadow-background/30">
                   <div className="flex items-start gap-1 md:gap-2 lg:gap-3">
-                    <div className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 rounded-md md:rounded-lg lg:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-                      <card.icon className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 ${card.iconColor}`} strokeWidth={1.5} />
+                    <div
+                      className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 rounded-md md:rounded-lg lg:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}
+                    >
+                      <card.icon
+                        className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 ${card.iconColor}`}
+                        strokeWidth={1.5}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1 md:gap-2 mb-0 md:mb-0.5 lg:mb-1">
-                        <span className="text-[9px] md:text-xs lg:text-sm font-medium text-foreground">{card.title}</span>
-                        <span className="text-[7px] md:text-[10px] lg:text-xs text-muted-foreground shrink-0 hidden md:inline">{card.time}</span>
+                        <span className="text-[9px] md:text-xs lg:text-sm font-medium text-foreground">
+                          {card.title}
+                        </span>
+                        <span className="text-[7px] md:text-[10px] lg:text-xs text-muted-foreground shrink-0 hidden md:inline">
+                          {card.time}
+                        </span>
                       </div>
-                      <p className="text-[8px] md:text-[10px] lg:text-xs text-muted-foreground leading-tight line-clamp-2">{card.text}</p>
+                      <p className="text-[8px] md:text-[10px] lg:text-xs text-muted-foreground leading-tight line-clamp-2">
+                        {card.text}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -404,7 +465,9 @@ const About = () => {
               className="inline-flex items-center gap-1.5 md:gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-3 md:px-5 py-1.5 md:py-2.5 mb-6 md:mb-10"
             >
               <Brain className="h-3 w-3 md:h-4 md:w-4 text-foreground" />
-              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">Supported by top brains at Meta, BCG & Stripe</span>
+              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">
+                Supported by top brains at Meta, BCG & Stripe
+              </span>
             </motion.div>
 
             <motion.h1
@@ -415,7 +478,9 @@ const About = () => {
             >
               <span className="font-light block md:inline">Because Your Future</span>
               <br className="hidden md:block" />
-              <span className="font-cormorant italic font-light text-4xl md:text-7xl lg:text-8xl block md:inline">Deserves a Clear Path</span>
+              <span className="font-cormorant italic font-light text-4xl md:text-7xl lg:text-8xl block md:inline">
+                Deserves a Clear Path
+              </span>
             </motion.h1>
 
             <motion.p
@@ -432,7 +497,11 @@ const About = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+              >
                 <Link to="/auth">
                   Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -479,7 +548,8 @@ const About = () => {
                   <span className="font-cormorant italic font-light text-4xl md:text-6xl">career OS</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Redefining career development with AI-powered visualization, personalized guidance, and actionable plans—so you can level up with clarity, purpose, and momentum.
+                  Redefining career development with AI-powered visualization, personalized guidance, and actionable
+                  plans—so you can level up with clarity, purpose, and momentum.
                 </p>
               </div>
 
@@ -495,27 +565,32 @@ const About = () => {
                   >
                     <div className="relative bg-card/80 border border-border/40 rounded-2xl overflow-hidden hover:border-border/80 transition-all duration-500 hover:shadow-xl hover:shadow-background/30 h-full flex flex-col">
                       {/* Gradient overlay on hover */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
-                      
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`}
+                      />
+
                       {/* Image section */}
                       <div className="relative z-10 aspect-[4/5] md:aspect-[9/16] max-h-64 overflow-hidden bg-muted/30 rounded-t-xl flex items-center justify-center">
-                        <img 
-                          src={feature.image} 
+                        <img
+                          src={feature.image}
                           alt={feature.title}
                           className="w-full h-full object-cover object-center md:object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
                       </div>
-                      
+
                       <div className="relative z-10 p-6 flex-1">
                         {/* Icon */}
                         <div className="relative w-10 h-10 mb-4 -mt-10">
                           <div className="absolute inset-0 rounded-xl bg-card border border-border/50 shadow-lg" />
                           <div className="absolute inset-[2px] rounded-[10px] bg-card flex items-center justify-center">
-                            <feature.icon className="h-4 w-4 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                            <feature.icon
+                              className="h-4 w-4 text-foreground group-hover:scale-110 transition-transform duration-300"
+                              strokeWidth={1.5}
+                            />
                           </div>
                         </div>
-                        
+
                         <h3 className="text-lg font-medium text-foreground mb-1">{feature.title}</h3>
                         <p className="text-xs text-muted-foreground mb-3 font-cormorant italic">{feature.subtitle}</p>
                         <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
@@ -533,7 +608,8 @@ const About = () => {
                   <span className="font-light"> purpose</span>
                 </h3>
                 <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-                  Turn your career into a game. Visualize your future, unlock paths, complete daily quests, and level up.
+                  Turn your career into a game. Visualize your future, unlock paths, complete daily quests, and level
+                  up.
                 </p>
               </div>
 
@@ -549,12 +625,14 @@ const About = () => {
                     className="flex-1 relative"
                   >
                     {/* Arrow shape container */}
-                    <div className="relative bg-muted/40 h-full min-h-[130px] flex flex-col justify-start p-5 pr-8"
+                    <div
+                      className="relative bg-muted/40 h-full min-h-[130px] flex flex-col justify-start p-5 pr-8"
                       style={{
-                        clipPath: index === journeySteps.length - 1 
-                          ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
-                          : 'polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%, 8% 50%)',
-                        marginLeft: index === 0 ? '0' : '-12px'
+                        clipPath:
+                          index === journeySteps.length - 1
+                            ? "polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)"
+                            : "polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%, 8% 50%)",
+                        marginLeft: index === 0 ? "0" : "-12px",
                       }}
                     >
                       <h4 className="text-sm font-medium text-foreground mb-2 pl-2">{step.title}</h4>
@@ -580,14 +658,14 @@ const About = () => {
                       <div className="absolute -top-3 -left-2 w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
                         <span className="text-xs font-medium text-primary">{index + 1}</span>
                       </div>
-                      
+
                       {/* Arrow indicator (except last) */}
                       {index < journeySteps.length - 1 && (
                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10">
                           <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-border/60" />
                         </div>
                       )}
-                      
+
                       <h4 className="text-base font-medium text-foreground mb-2 ml-4">{step.title}</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed ml-4">{step.description}</p>
                     </div>
@@ -608,11 +686,7 @@ const About = () => {
                     className="relative w-full max-w-[320px] sm:max-w-[360px] md:w-56 md:max-w-none lg:w-64 shrink-0"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/50 border border-border/30">
-                      <img 
-                        src={showcaseVoice} 
-                        alt="Voice recording feature"
-                        className="block w-full h-auto"
-                      />
+                      <img src={showcaseVoice} alt="Voice recording feature" className="block w-full h-auto" />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
                   </motion.div>
@@ -627,11 +701,7 @@ const About = () => {
                     className="relative w-full max-w-[360px] sm:max-w-[420px] md:w-72 md:max-w-none lg:w-80 shrink-0 z-10"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/60 border border-border/40">
-                      <img 
-                        src={showcaseDashboard} 
-                        alt="Dashboard view"
-                        className="block w-full h-auto"
-                      />
+                      <img src={showcaseDashboard} alt="Dashboard view" className="block w-full h-auto" />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
                   </motion.div>
@@ -646,11 +716,7 @@ const About = () => {
                     className="relative w-full max-w-[320px] sm:max-w-[360px] md:w-56 md:max-w-none lg:w-64 shrink-0"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/50 border border-border/30">
-                      <img 
-                        src={showcaseFutures} 
-                        alt="Futures exploration"
-                        className="block w-full h-auto"
-                      />
+                      <img src={showcaseFutures} alt="Futures exploration" className="block w-full h-auto" />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
                   </motion.div>
@@ -699,7 +765,7 @@ const About = () => {
                     <span className="text-sm md:text-base font-medium text-muted-foreground">BetterUp</span>
                   </div>
                 </div>
-                
+
                 {/* Table Rows */}
                 {comparisonFeatures.map((row, index) => (
                   <motion.div
@@ -708,7 +774,7 @@ const About = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.05, duration: 0.4 }}
-                    className={`grid grid-cols-4 ${index !== comparisonFeatures.length - 1 ? 'border-b border-border/30' : ''}`}
+                    className={`grid grid-cols-4 ${index !== comparisonFeatures.length - 1 ? "border-b border-border/30" : ""}`}
                   >
                     <div className="p-4 md:p-6 flex items-center">
                       <span className="text-sm md:text-base text-foreground">{row.feature}</span>
@@ -742,7 +808,7 @@ const About = () => {
                     </div>
                   </motion.div>
                 ))}
-              
+
                 {/* Legend - inside table card */}
                 <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground py-6 border-t border-border/30">
                   <div className="flex items-center gap-2">
@@ -758,7 +824,7 @@ const About = () => {
                     <span>not offered</span>
                   </div>
                 </div>
-                
+
                 {/* What makes Naru different - inside table card */}
                 <div className="border-t border-border/30 p-8 md:p-10">
                   <h4 className="text-lg md:text-xl font-medium text-foreground text-center mb-8">
@@ -769,7 +835,7 @@ const About = () => {
                       "Mobile-first, voice-native experience powered by Generative and Predictive AI",
                       "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
                       "Measurable milestones & actions that adapt to real progress (not generic templates)",
-                      "Model learns from users, improving guidance and outcomes over time"
+                      "Model learns from users, improving guidance and outcomes over time",
                     ].map((item, index) => (
                       <motion.div
                         key={index}
@@ -815,23 +881,26 @@ const About = () => {
             <div className="grid md:grid-cols-3 gap-6 mb-16">
               {[
                 {
-                  quote: "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
+                  quote:
+                    "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
                   initials: "S.C.",
                   role: "Senior Product Manager",
-                  photo: testimonial1
+                  photo: testimonial1,
                 },
                 {
-                  quote: "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
+                  quote:
+                    "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
                   initials: "M.J.",
                   role: "Engineering Lead",
-                  photo: testimonial2
+                  photo: testimonial2,
                 },
                 {
-                  quote: "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
+                  quote:
+                    "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
                   initials: "E.R.",
                   role: "Graduate Student",
-                  photo: testimonial3
-                }
+                  photo: testimonial3,
+                },
               ].map((testimonial, index) => (
                 <motion.div
                   key={index}
@@ -846,12 +915,10 @@ const About = () => {
                       <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-foreground/90 mb-8 flex-grow leading-relaxed">
-                    "{testimonial.quote}"
-                  </p>
+                  <p className="text-foreground/90 mb-8 flex-grow leading-relaxed">"{testimonial.quote}"</p>
                   <div className="flex items-center gap-4">
-                    <img 
-                      src={testimonial.photo} 
+                    <img
+                      src={testimonial.photo}
                       alt={testimonial.initials}
                       className="w-12 h-12 rounded-full object-cover border border-border/50"
                     />
@@ -882,7 +949,11 @@ const About = () => {
                 Join thousands of professionals who've transformed their careers with Naru.
               </p>
 
-              <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+              >
                 <Link to="/auth">
                   Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
@@ -899,7 +970,8 @@ const About = () => {
               <div className="md:col-span-2">
                 <div className="text-2xl font-semibold text-foreground mb-4">Naru</div>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-6">
-                  The AI-powered career OS that helps you visualize your future self and guides you step-by-step to become who you're meant to be.
+                  The AI-powered career OS that helps you visualize your future self and guides you step-by-step to
+                  become who you're meant to be.
                 </p>
                 <Button asChild variant="outline" size="sm" className="rounded-full">
                   <Link to="/auth">
@@ -907,29 +979,43 @@ const About = () => {
                   </Link>
                 </Button>
               </div>
-              
+
               {/* Navigation */}
               <div>
                 <h4 className="text-sm font-medium text-foreground mb-4">Product</h4>
                 <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                  <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                  <a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a>
-                  <a href="#journey" className="hover:text-foreground transition-colors">Why Naru</a>
-                  <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
+                  <a href="#features" className="hover:text-foreground transition-colors">
+                    Features
+                  </a>
+                  <a href="#testimonials" className="hover:text-foreground transition-colors">
+                    Testimonials
+                  </a>
+                  <a href="#journey" className="hover:text-foreground transition-colors">
+                    Why Naru
+                  </a>
+                  <Link to="/faq" className="hover:text-foreground transition-colors">
+                    FAQ
+                  </Link>
                 </div>
               </div>
-              
+
               {/* Legal */}
               <div>
                 <h4 className="text-sm font-medium text-foreground mb-4">Legal</h4>
                 <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                  <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-                  <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-                  <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+                  <Link to="/terms" className="hover:text-foreground transition-colors">
+                    Terms of Service
+                  </Link>
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">
+                    Privacy Policy
+                  </Link>
+                  <Link to="/cookies" className="hover:text-foreground transition-colors">
+                    Cookie Policy
+                  </Link>
                 </div>
               </div>
             </div>
-            
+
             {/* Bottom bar */}
             <div className="pt-8 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4">
               <p className="text-sm text-muted-foreground">© 2025 Naru by RocketMinds. All rights reserved.</p>
