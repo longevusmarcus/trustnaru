@@ -209,7 +209,7 @@ const About = () => {
       title: "Path Activated", 
       text: "You've started your journey to become a Product Lead at a top tech company.", 
       delay: 0,
-      position: "left-2 md:left-4 lg:left-12 top-28 md:top-36",
+      position: "left-4 lg:left-12 top-32 lg:top-36",
       icon: Rocket,
       time: "2m ago",
       iconColor: "text-violet-400",
@@ -219,7 +219,7 @@ const About = () => {
       title: "New Insight", 
       text: "Your skills in design thinking align perfectly with product strategy roles.", 
       delay: 0.2,
-      position: "right-2 md:right-4 lg:right-12 top-44 md:top-52",
+      position: "right-4 lg:right-12 top-48 lg:top-52",
       icon: Lightbulb,
       time: "15m ago",
       iconColor: "text-amber-400",
@@ -229,7 +229,7 @@ const About = () => {
       title: "Daily Action", 
       text: "Connect with 2 product leaders on LinkedIn who inspire your vision.", 
       delay: 0.4,
-      position: "left-2 md:left-8 lg:left-20 bottom-28 md:bottom-36",
+      position: "left-4 lg:left-20 bottom-32 lg:bottom-36",
       icon: CircleCheck,
       time: "1h ago",
       iconColor: "text-emerald-400",
@@ -239,7 +239,7 @@ const About = () => {
       title: "Goal Achieved", 
       text: "Congratulations! You've unlocked Level 2 of your career path.", 
       delay: 0.6,
-      position: "right-2 md:right-8 lg:right-20 bottom-44 md:bottom-52",
+      position: "right-4 lg:right-20 bottom-48 lg:bottom-52",
       icon: Award,
       time: "3h ago",
       iconColor: "text-rose-400",
@@ -307,7 +307,7 @@ const About = () => {
                   scale: cardScale,
                   x: cardX
                 }}
-                className={`absolute ${card.position} max-w-[180px] md:max-w-[240px] lg:max-w-[300px] z-20`}
+                className={`absolute ${card.position} max-w-[200px] lg:max-w-[300px] z-20 hidden md:block`}
               >
                 <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-xl md:rounded-2xl p-2.5 md:p-4 shadow-xl shadow-background/30">
                   <div className="flex items-start gap-2 md:gap-3">
@@ -369,6 +369,29 @@ const About = () => {
                   Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+            </motion.div>
+
+            {/* Mobile-only floating cards preview */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="md:hidden mt-12 grid grid-cols-2 gap-3"
+            >
+              {floatingCards.slice(0, 4).map((card, index) => (
+                <div 
+                  key={index}
+                  className="bg-card/80 backdrop-blur-md border border-border/50 rounded-xl p-3"
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`w-6 h-6 rounded-lg ${card.iconBg} flex items-center justify-center shrink-0`}>
+                      <card.icon className={`h-3 w-3 ${card.iconColor}`} strokeWidth={1.5} />
+                    </div>
+                    <span className="text-[11px] font-medium text-foreground">{card.title}</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{card.text}</p>
+                </div>
+              ))}
             </motion.div>
           </div>
         </section>
