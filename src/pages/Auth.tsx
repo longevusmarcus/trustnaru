@@ -417,7 +417,25 @@ const Auth = () => {
 
         {/* Terms and Privacy - Outside Card */}
         <p className="text-xs text-center text-muted-foreground/60 font-light px-4">
-          By continuing, you agree to Naru&apos;s{" "}
+          Check our{" "}
+          <a
+            href="/about"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            About
+          </a>
+          {" and "}
+          <a
+            href="/faq"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
+          >
+            FAQs
+          </a>
+          . By continuing, you agree to Naru&apos;s{" "}
           <a
             href="/terms"
             target="_blank"
@@ -444,15 +462,7 @@ const Auth = () => {
           >
             Cookie Policy
           </a>
-          .{" "}
-          <a
-            href="/faq"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-emerald-500 hover:text-emerald-400 underline underline-offset-2"
-          >
-            Check our FAQs
-          </a>
+          .
         </p>
       </div>
     </div>
