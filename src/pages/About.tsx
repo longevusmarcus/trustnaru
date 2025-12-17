@@ -335,8 +335,8 @@ const About = () => {
               transition={{ duration: 0.6 }}
               className="inline-flex items-center gap-1.5 md:gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-3 md:px-5 py-1.5 md:py-2.5 mb-6 md:mb-10"
             >
-              <Sparkles className="h-3 w-3 md:h-4 md:w-4 text-foreground" />
-              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">Supported by professionals at Meta, BCG & Stripe</span>
+              <Brain className="h-3 w-3 md:h-4 md:w-4 text-foreground" />
+              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">Supported by top brains at Meta, BCG & Stripe</span>
             </motion.div>
 
             <motion.h1
