@@ -391,7 +391,7 @@ const About = () => {
                   </h3>
                 </div>
                 {/* Table Header */}
-                <div className="grid grid-cols-4 border-b border-border/50 bg-muted/30">
+                <div className="grid grid-cols-4 border-b border-border/50">
                   <div className="p-4 md:p-6" />
                   <div className="p-4 md:p-6 text-center">
                     <span className="text-sm md:text-base font-medium text-foreground">Naru</span>
