@@ -52,7 +52,7 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Pages that should NOT show the desktop blocker
-  const excludedPaths = ["/terms", "/privacy", "/cookies", "/faq", "/about"];
+  const excludedPaths = ["/", "/terms", "/privacy", "/cookies", "/faq", "/about"];
   const isExcludedPath = excludedPaths.includes(location.pathname);
 
   if (!isMobile && !bypassMobileCheck && !isExcludedPath) {
@@ -74,13 +74,14 @@ const App = () => {
               <ScrollToTop />
               <MobileCheckWrapper>
                 <Routes>
+                  <Route path="/" element={<About />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/about" element={<About />} />
+                  <Route path="/about" element={<Navigate to="/" replace />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/cookies" element={<Cookies />} />
                   <Route path="/faq" element={<FAQ />} />
-                  <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                  <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                   <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
