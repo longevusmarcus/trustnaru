@@ -81,11 +81,12 @@ const About = () => {
     { title: "Execute", description: "Track progress and stay accountable with tangible milestones" }
   ];
 
-  const differentiators = [
-    "Mobile-first, voice-native experience powered by Generative and Predictive AI",
-    "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
-    "Measurable milestones & actions that adapt to real progress (not generic templates)",
-    "Model learns from users, improving guidance and outcomes over time"
+  const comparisonFeatures = [
+    { feature: "Future-self identity model", naru: "check", linkedin: "none", betterup: "none" },
+    { feature: "Evidence-backed paths", naru: "check", linkedin: "none", betterup: "none" },
+    { feature: "Daily action copilot", naru: "check", linkedin: "none", betterup: "partial" },
+    { feature: "Progress tracking & adaptation", naru: "check", linkedin: "partial", betterup: "partial" },
+    { feature: "Coach / human layer", naru: "Optional", linkedin: "none", betterup: "Core" }
   ];
 
   const floatingCards = [
@@ -371,33 +372,91 @@ const About = () => {
               ))}
             </div>
 
-            {/* What makes Naru different */}
+            {/* What makes Naru different - Comparison Table */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-card/50 backdrop-blur-sm border border-primary/30 rounded-3xl p-8 md:p-10"
+              className="space-y-8"
             >
-              <h3 className="text-xl md:text-2xl font-medium text-foreground text-center mb-8">
-                What makes Naru different
+              <h3 className="text-2xl md:text-4xl font-light text-foreground text-center">
+                Naru is <span className="font-cormorant italic">identity & outcome</span> first
               </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                {differentiators.map((item, index) => (
+              
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+                {/* Table Header */}
+                <div className="grid grid-cols-4 border-b border-border/50 bg-card/50">
+                  <div className="p-4 md:p-6" />
+                  <div className="p-4 md:p-6 text-center">
+                    <span className="text-sm md:text-base font-medium text-foreground">Naru</span>
+                  </div>
+                  <div className="p-4 md:p-6 text-center">
+                    <span className="text-sm md:text-base font-medium text-muted-foreground">LinkedIn</span>
+                  </div>
+                  <div className="p-4 md:p-6 text-center">
+                    <span className="text-sm md:text-base font-medium text-muted-foreground">BetterUp</span>
+                  </div>
+                </div>
+                
+                {/* Table Rows */}
+                {comparisonFeatures.map((row, index) => (
                   <motion.div
                     key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.1, duration: 0.4 }}
-                    className="flex items-start gap-3"
+                    transition={{ delay: index * 0.05, duration: 0.4 }}
+                    className={`grid grid-cols-4 ${index !== comparisonFeatures.length - 1 ? 'border-b border-border/30' : ''}`}
                   >
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
+                    <div className="p-4 md:p-6 flex items-center">
+                      <span className="text-sm md:text-base text-foreground">{row.feature}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
+                    <div className="p-4 md:p-6 flex items-center justify-center">
+                      {row.naru === "check" ? (
+                        <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
+                      ) : (
+                        <span className="text-sm text-muted-foreground">{row.naru}</span>
+                      )}
+                    </div>
+                    <div className="p-4 md:p-6 flex items-center justify-center">
+                      {row.linkedin === "check" ? (
+                        <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
+                      ) : row.linkedin === "partial" ? (
+                        <span className="text-muted-foreground">△</span>
+                      ) : (
+                        <span className="text-muted-foreground/50">–</span>
+                      )}
+                    </div>
+                    <div className="p-4 md:p-6 flex items-center justify-center">
+                      {row.betterup === "check" ? (
+                        <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
+                      ) : row.betterup === "partial" ? (
+                        <span className="text-muted-foreground">△</span>
+                      ) : row.betterup === "none" ? (
+                        <span className="text-muted-foreground/50">–</span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">{row.betterup}</span>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
+              </div>
+              
+              {/* Legend */}
+              <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Check className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.5} />
+                  <span>built-in</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>△</span>
+                  <span>partial</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>–</span>
+                  <span>not offered</span>
+                </div>
               </div>
             </motion.div>
           </div>
