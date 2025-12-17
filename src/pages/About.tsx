@@ -446,58 +446,52 @@ const About = () => {
                     </div>
                   </motion.div>
                 ))}
-              </div>
               
-              {/* Legend */}
-              <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Check className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.5} />
-                  <span>built-in</span>
+                {/* Legend - inside table card */}
+                <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground py-6 border-t border-border/30">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.5} />
+                    <span>built-in</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>△</span>
+                    <span>partial</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>–</span>
+                    <span>not offered</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>△</span>
-                  <span>partial</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span>–</span>
-                  <span>not offered</span>
+                
+                {/* What makes Naru different - inside table card */}
+                <div className="border-t border-border/30 p-8 md:p-10">
+                  <h4 className="text-lg md:text-xl font-medium text-foreground text-center mb-8">
+                    What makes Naru different
+                  </h4>
+                  <div className="space-y-4 max-w-2xl mx-auto">
+                    {[
+                      "Mobile-first, voice-native experience powered by Generative and Predictive AI",
+                      "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
+                      "Measurable milestones & actions that adapt to real progress (not generic templates)",
+                      "Model learns from users, improving guidance and outcomes over time"
+                    ].map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
+                        className="flex items-start gap-4"
+                      >
+                        <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
+                        </div>
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{item}</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              
-              {/* What makes Naru different - Bullet points */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="mt-16 bg-background backdrop-blur-sm border border-border/30 rounded-3xl p-8 md:p-10"
-              >
-                <h4 className="text-lg md:text-xl font-medium text-foreground text-center mb-8">
-                  What makes Naru different
-                </h4>
-                <div className="space-y-4 max-w-2xl mx-auto">
-                  {[
-                    "Mobile-first, voice-native experience powered by Generative and Predictive AI",
-                    "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
-                    "Measurable milestones & actions that adapt to real progress (not generic templates)",
-                    "Model learns from users, improving guidance and outcomes over time"
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
-                      className="flex items-start gap-4"
-                    >
-                      <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
-                      </div>
-                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{item}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </section>
