@@ -360,7 +360,7 @@ const About = () => {
                     className="flex-1 relative"
                   >
                     {/* Arrow shape container */}
-                    <div className="relative bg-muted/60 hover:bg-muted/80 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
+                    <div className="relative bg-background hover:bg-muted/30 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
                       style={{
                         clipPath: index === journeySteps.length - 1 
                           ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
