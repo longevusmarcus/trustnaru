@@ -348,12 +348,12 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards with funnel scroll effect - Desktop & Tablet */}
+          {/* Floating Cards with smooth scroll effect - Desktop & Tablet */}
           {floatingCards.map((card, index) => {
-            const cardY = useTransform(heroScrollProgress, [0, 0.5], [0, 300 + index * 50]);
-            const cardOpacity = useTransform(heroScrollProgress, [0, 0.3, 0.5], [1, 0.5, 0]);
-            const cardScale = useTransform(heroScrollProgress, [0, 0.5], [1, 0.8 - index * 0.05]);
-            const cardX = useTransform(heroScrollProgress, [0, 0.5], [0, index % 2 === 0 ? -50 : 50]);
+            // Smoother, more uniform exit - all cards move together with gentle fade
+            const cardY = useTransform(heroScrollProgress, [0, 0.6], [0, 150]);
+            const cardOpacity = useTransform(heroScrollProgress, [0, 0.2, 0.5], [1, 0.8, 0]);
+            const cardScale = useTransform(heroScrollProgress, [0, 0.6], [1, 0.95]);
             
             return (
               <motion.div
@@ -364,8 +364,7 @@ const About = () => {
                 style={{ 
                   y: cardY, 
                   opacity: cardOpacity, 
-                  scale: cardScale,
-                  x: cardX
+                  scale: cardScale
                 }}
                 className={`absolute ${card.position} max-w-[130px] md:max-w-[200px] lg:max-w-[300px] z-20`}
               >
