@@ -449,20 +449,6 @@ const About = () => {
         {/* Why Naru Section */}
         <section id="journey" className="py-24 px-6 bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                <span className="font-light">Naru is </span>
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">identity & outcome</span>
-                <span className="font-light"> first</span>
-              </h2>
-            </motion.div>
-
             {/* What makes Naru different - Comparison Table */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -471,8 +457,20 @@ const About = () => {
               transition={{ duration: 0.6 }}
             >
               <div className="bg-background backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+                {/* Title inside card */}
+                <div className="text-center pt-10 pb-6 px-6">
+                  <h2 className="text-3xl md:text-5xl text-foreground mb-3">
+                    <span className="font-light">Naru is </span>
+                    <span className="font-cormorant italic font-light text-4xl md:text-6xl">identity & outcome</span>
+                    <span className="font-light"> first</span>
+                  </h2>
+                  <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+                    Built to help you become who you're meant to be, not just find the next job.
+                  </p>
+                </div>
+
                 {/* Table Header */}
-                <div className="grid grid-cols-4 border-b border-border/50">
+                <div className="grid grid-cols-4 border-t border-b border-border/50">
                   <div className="p-4 md:p-6" />
                   <div className="p-4 md:p-6 text-center">
                     <span className="text-sm md:text-base font-medium text-foreground">Naru</span>
