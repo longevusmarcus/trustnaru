@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Brain, Flame, BarChart3, Rocket, Lightbulb, CircleCheck, Award, Eye, Target, LineChart, Users, Check, User, Compass, ClipboardList, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Brain, Flame, BarChart3, Rocket, Lightbulb, CircleCheck, Award, Eye, Target, LineChart, Users, Check, User, Compass, ClipboardList, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 import { useRef } from "react";
@@ -497,52 +497,75 @@ const About = () => {
           </div>
         </section>
 
-        {/* Vision Section */}
+        {/* Testimonials Section */}
         <section className="py-24 px-6">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-secondary/30 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16 text-center"
+              className="text-center mb-16"
             >
-              <span className="inline-block bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-10">
-                #01. | Our Vision
-              </span>
-
-              <h2 className="text-3xl md:text-5xl text-foreground mb-8">
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">Your evolution</span>
-                <span className="font-light"> speaks for itself</span>
+              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                <span className="font-light">What our </span>
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">users</span>
+                <span className="font-light"> say</span>
               </h2>
-
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
-                Naru is the career platform designed for individuals who prioritize growth, clarity, and becoming the best version of themselves.
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Real stories from people who transformed their careers with Naru.
               </p>
-
-              <div className="grid grid-cols-3 gap-6 max-w-md mx-auto">
-                {[
-                  { icon: Brain, label: "AI-Powered", gradient: "from-violet-500/20 to-purple-500/20" },
-                  { icon: BarChart3, label: "Growth-Focused", gradient: "from-blue-500/20 to-cyan-500/20" },
-                  { icon: Flame, label: "Personal", gradient: "from-orange-500/20 to-rose-500/20" }
-                ].map((item, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="text-center group"
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="relative w-18 h-18 mx-auto mb-4">
-                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                      <div className="relative w-14 h-14 mx-auto bg-card/80 border border-border/40 rounded-xl flex items-center justify-center group-hover:border-border transition-all duration-300">
-                        <item.icon className="h-6 w-6 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">{item.label}</span>
-                  </motion.div>
-                ))}
-              </div>
             </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "Naru helped me visualize my future self as a product leader. Within 6 months, I landed my dream role at a top tech company.",
+                  name: "Sarah Chen",
+                  role: "Senior Product Manager",
+                  company: "Stripe"
+                },
+                {
+                  quote: "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
+                  name: "Marcus Johnson",
+                  role: "Engineering Lead",
+                  company: "Notion"
+                },
+                {
+                  quote: "I was stuck in my career for years. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
+                  name: "Elena Rodriguez",
+                  role: "UX Director",
+                  company: "Figma"
+                }
+              ].map((testimonial, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className="bg-secondary/30 backdrop-blur-sm border border-border/30 rounded-3xl p-8 flex flex-col"
+                >
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-foreground/90 mb-8 flex-grow leading-relaxed">
+                    "{testimonial.quote}"
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border/50 flex items-center justify-center">
+                      <span className="text-lg font-medium text-foreground">{testimonial.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">{testimonial.name}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role} at {testimonial.company}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
 
