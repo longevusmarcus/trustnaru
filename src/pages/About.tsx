@@ -338,7 +338,7 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
+              className="bg-background backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
             >
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-5xl text-foreground mb-6">
@@ -388,9 +388,9 @@ const About = () => {
                 Naru is <span className="font-cormorant italic">identity & outcome</span> first
               </h3>
               
-              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+              <div className="bg-background backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
                 {/* Table Header */}
-                <div className="grid grid-cols-4 border-b border-border/50 bg-card/50">
+                <div className="grid grid-cols-4 border-b border-border/50 bg-muted/30">
                   <div className="p-4 md:p-6" />
                   <div className="p-4 md:p-6 text-center">
                     <span className="text-sm md:text-base font-medium text-foreground">Naru</span>
@@ -469,7 +469,7 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="mt-16 bg-card/20 backdrop-blur-sm border border-border/30 rounded-3xl p-8 md:p-10"
+                className="mt-16 bg-background backdrop-blur-sm border border-border/30 rounded-3xl p-8 md:p-10"
               >
                 <h4 className="text-lg md:text-xl font-medium text-foreground text-center mb-8">
                   What makes Naru different
