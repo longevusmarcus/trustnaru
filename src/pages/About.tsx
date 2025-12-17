@@ -1,8 +1,45 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles, Target, Compass, Brain, TrendingUp, Users, Rocket, Eye, Zap, MessageCircle, Star, Award, Lightbulb, Route, Flame, CircleCheck, BarChart3, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
+import { useRef } from "react";
+
+// Component for animated text that highlights on scroll
+const AnimatedParagraph = ({ children, className }: { children: string; className?: string }) => {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.9", "start 0.3"]
+  });
+
+  const words = children.split(" ");
+
+  return (
+    <p ref={ref} className={className}>
+      {words.map((word, index) => {
+        const start = index / words.length;
+        const end = start + 1 / words.length;
+        return (
+          <Word key={index} range={[start, end]} progress={scrollYProgress}>
+            {word}
+          </Word>
+        );
+      })}
+    </p>
+  );
+};
+
+const Word = ({ children, range, progress }: { children: string; range: [number, number]; progress: any }) => {
+  const opacity = useTransform(progress, range, [0.2, 1]);
+  const color = useTransform(progress, range, ["hsl(0 0% 50%)", "hsl(0 0% 98%)"]);
+
+  return (
+    <motion.span style={{ opacity, color }} className="inline-block mr-[0.25em]">
+      {children}
+    </motion.span>
+  );
+};
 
 const About = () => {
   const features = [
@@ -67,6 +104,12 @@ const About = () => {
       iconColor: "text-rose-400",
       iconBg: "bg-rose-500/20"
     }
+  ];
+
+  const manifestoTexts = [
+    { text: "For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential.", highlight: "Naru changes that." },
+    { text: "With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality.", highlight: null },
+    { text: "Naru isn't just a tool—", highlight: "it's the key to becoming who you're meant to be." }
   ];
 
   return (
@@ -181,7 +224,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* Manifesto Section */}
+        {/* Manifesto Section with scroll-based text highlight */}
         <section id="manifesto" className="py-32 px-6">
           <div className="max-w-4xl mx-auto">
             <motion.div
@@ -196,24 +239,19 @@ const About = () => {
               </span>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="space-y-8"
-            >
-              <p className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light text-muted-foreground leading-relaxed">
-                For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential.{" "}
-                <span className="text-foreground">Naru changes that.</span>
-              </p>
-              <p className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light text-muted-foreground leading-relaxed">
+            <div className="space-y-12">
+              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
+                For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential. Naru changes that.
+              </AnimatedParagraph>
+              
+              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
                 With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality.
-              </p>
-              <p className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light text-muted-foreground leading-relaxed">
-                Naru isn't just a tool—<span className="text-foreground">it's the key to becoming who you're meant to be.</span>
-              </p>
-            </motion.div>
+              </AnimatedParagraph>
+              
+              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
+                Naru isn't just a tool—it's the key to becoming who you're meant to be.
+              </AnimatedParagraph>
+            </div>
           </div>
         </section>
 
