@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Target, Compass, Brain, TrendingUp, Users, Rocket, Eye, Zap, MessageCircle, Bell, Star, Check } from "lucide-react";
+import { ArrowRight, Sparkles, Target, Compass, Brain, TrendingUp, Users, Rocket, Eye, Zap, MessageCircle, Star, Award, Lightbulb, Route, Flame, CircleCheck, BarChart3, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 
@@ -9,17 +9,20 @@ const About = () => {
     {
       icon: Eye,
       title: "Visualize Your Future",
-      description: "See yourself in your dream career with AI-generated visualizations that inspire action."
+      description: "See yourself in your dream career with AI-generated visualizations that inspire action.",
+      gradient: "from-violet-500/20 to-purple-500/20"
     },
     {
-      icon: Zap,
+      icon: Wand2,
       title: "Personalized Guidance",
-      description: "Get tailored advice and actionable steps based on your unique skills and aspirations."
+      description: "Get tailored advice and actionable steps based on your unique skills and aspirations.",
+      gradient: "from-blue-500/20 to-cyan-500/20"
     },
     {
-      icon: Compass,
+      icon: Route,
       title: "Clear Direction",
-      description: "Navigate your career path with confidence using AI-powered insights and roadmaps."
+      description: "Navigate your career path with confidence using AI-powered insights and roadmaps.",
+      gradient: "from-emerald-500/20 to-teal-500/20"
     }
   ];
 
@@ -31,34 +34,38 @@ const About = () => {
       position: "left-4 lg:left-12 top-36",
       icon: Rocket,
       time: "2m ago",
-      avatar: "🚀"
+      iconColor: "text-violet-400",
+      iconBg: "bg-violet-500/20"
     },
     { 
       title: "New Insight", 
       text: "Your skills in design thinking align perfectly with product strategy roles.", 
       delay: 0.2,
       position: "right-4 lg:right-12 top-52",
-      icon: Sparkles,
+      icon: Lightbulb,
       time: "15m ago",
-      avatar: "✨"
+      iconColor: "text-amber-400",
+      iconBg: "bg-amber-500/20"
     },
     { 
       title: "Daily Action", 
       text: "Connect with 2 product leaders on LinkedIn who inspire your vision.", 
       delay: 0.4,
       position: "left-8 lg:left-20 bottom-36",
-      icon: MessageCircle,
+      icon: CircleCheck,
       time: "1h ago",
-      avatar: "💬"
+      iconColor: "text-emerald-400",
+      iconBg: "bg-emerald-500/20"
     },
     { 
       title: "Goal Achieved", 
       text: "Congratulations! You've unlocked Level 2 of your career path.", 
       delay: 0.6,
       position: "right-8 lg:right-20 bottom-52",
-      icon: Star,
+      icon: Award,
       time: "3h ago",
-      avatar: "⭐"
+      iconColor: "text-rose-400",
+      iconBg: "bg-rose-500/20"
     }
   ];
 
@@ -102,7 +109,7 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards - More sophisticated */}
+          {/* Floating Cards - More sophisticated with Lucide icons */}
           {floatingCards.map((card, index) => (
             <motion.div
               key={index}
@@ -113,8 +120,8 @@ const About = () => {
             >
               <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl p-4 shadow-xl shadow-background/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-lg shrink-0">
-                    {card.avatar}
+                  <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                    <card.icon className={`h-5 w-5 ${card.iconColor}`} strokeWidth={1.5} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
@@ -229,21 +236,40 @@ const About = () => {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="group bg-card/80 backdrop-blur-sm border border-border/50 rounded-3xl p-8 hover:bg-card hover:border-border hover:shadow-xl hover:shadow-background/30 transition-all duration-300"
+                  transition={{ delay: index * 0.15, duration: 0.6 }}
+                  className="group relative"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-secondary/80 flex items-center justify-center mb-6 group-hover:bg-secondary group-hover:scale-110 transition-all duration-300">
-                    <feature.icon className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+                  {/* Card with gradient border on hover */}
+                  <div className="relative bg-card border border-border/50 rounded-3xl p-8 h-full overflow-hidden hover:border-border transition-all duration-500 hover:shadow-2xl hover:shadow-background/40">
+                    {/* Subtle gradient overlay on hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    
+                    <div className="relative z-10">
+                      {/* Icon container with ring effect */}
+                      <div className="relative w-16 h-16 mb-8">
+                        <div className="absolute inset-0 rounded-2xl bg-secondary/50 group-hover:bg-secondary transition-colors duration-300" />
+                        <div className="absolute inset-[2px] rounded-[14px] bg-card group-hover:bg-card/80 transition-colors duration-300 flex items-center justify-center">
+                          <feature.icon className="h-7 w-7 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                        </div>
+                      </div>
+                      
+                      <h3 className="text-xl font-medium text-foreground mb-4">{feature.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+                      
+                      {/* Subtle arrow indicator */}
+                      <div className="mt-6 flex items-center text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Learn more</span>
+                        <ArrowRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-300" />
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-medium text-foreground mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -291,19 +317,27 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="grid grid-cols-3 gap-6 max-w-md mx-auto"
+              className="grid grid-cols-3 gap-8 max-w-lg mx-auto"
             >
               {[
-                { icon: Brain, label: "AI-Powered" },
-                { icon: TrendingUp, label: "Growth-Focused" },
-                { icon: Users, label: "Personal" }
+                { icon: Brain, label: "AI-Powered", gradient: "from-violet-500/20 to-purple-500/20" },
+                { icon: BarChart3, label: "Growth-Focused", gradient: "from-blue-500/20 to-cyan-500/20" },
+                { icon: Flame, label: "Personal", gradient: "from-orange-500/20 to-rose-500/20" }
               ].map((item, index) => (
-                <div key={index} className="text-center group">
-                  <div className="w-16 h-16 mx-auto bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-card group-hover:border-border group-hover:scale-110 transition-all duration-300">
-                    <item.icon className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+                <motion.div 
+                  key={index} 
+                  className="text-center group"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="relative w-18 h-18 mx-auto mb-4">
+                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                    <div className="relative w-16 h-16 mx-auto bg-card border border-border/50 rounded-2xl flex items-center justify-center group-hover:border-border transition-all duration-300">
+                      <item.icon className="h-7 w-7 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                </div>
+                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">{item.label}</span>
+                </motion.div>
               ))}
             </motion.div>
           </div>
