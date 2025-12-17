@@ -11,6 +11,11 @@ import featureCopilot from "@/assets/feature-copilot.png";
 import featureInsights from "@/assets/feature-insights.png";
 import featureCommunity from "@/assets/feature-community.png";
 
+// Import testimonial photos
+import testimonial1 from "@/assets/testimonial-1.png";
+import testimonial2 from "@/assets/testimonial-2.png";
+import testimonial3 from "@/assets/testimonial-3.png";
+
 // Component for manifesto text that highlights as one whole unit on scroll
 const ManifestoText = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -687,19 +692,19 @@ const About = () => {
                   quote: "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
                   initials: "S.C.",
                   role: "Senior Product Manager",
-                  photo: "https://media.licdn.com/dms/image/v2/C5603AQHjxd4Q1DBUBA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1584376209298?e=1759968000&v=beta&t=1_icgCYDfB1fK4TBLJwnyVbXJ_Qn7S8OsY40fey5Hkg"
+                  photo: testimonial1
                 },
                 {
                   quote: "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
                   initials: "M.J.",
                   role: "Engineering Lead",
-                  photo: "https://media.licdn.com/dms/image/v2/D5603AQEKeQ-eAaSKMw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1704294694465?e=1759968000&v=beta&t=pTN3V8BYLZzAsCLr7M5UzM5GQie1BJSHRLX2dyhHH30"
+                  photo: testimonial2
                 },
                 {
                   quote: "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
                   initials: "E.R.",
                   role: "Graduate Student",
-                  photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
+                  photo: testimonial3
                 }
               ].map((testimonial, index) => (
                 <motion.div
