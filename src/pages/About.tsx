@@ -147,53 +147,6 @@ const ManifestoWord = ({
   );
 };
 
-// Floating card component with proper hook usage
-const FloatingCard = ({ 
-  card, 
-  isLeft, 
-  heroScrollProgress 
-}: { 
-  card: any; 
-  isLeft: boolean; 
-  heroScrollProgress: any;
-}) => {
-  // Smooth funnel effect - cards converge towards center
-  const cardY = useTransform(heroScrollProgress, [0, 0.5], [0, 200]);
-  const cardOpacity = useTransform(heroScrollProgress, [0, 0.3, 0.5], [1, 0.6, 0]);
-  const cardScale = useTransform(heroScrollProgress, [0, 0.5], [1, 0.4]);
-  const cardX = useTransform(heroScrollProgress, [0, 0.5], [0, isLeft ? 150 : -150]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: card.delay + 0.6, duration: 0.7, ease: "easeOut" }}
-      style={{ 
-        y: cardY, 
-        opacity: cardOpacity, 
-        scale: cardScale,
-        x: cardX
-      }}
-      className={`absolute ${card.position} max-w-[130px] md:max-w-[200px] lg:max-w-[300px] z-20`}
-    >
-      <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-lg md:rounded-xl lg:rounded-2xl p-1.5 md:p-2.5 lg:p-4 shadow-xl shadow-background/30">
-        <div className="flex items-start gap-1 md:gap-2 lg:gap-3">
-          <div className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 rounded-md md:rounded-lg lg:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-            <card.icon className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 ${card.iconColor}`} strokeWidth={1.5} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-1 md:gap-2 mb-0 md:mb-0.5 lg:mb-1">
-              <span className="text-[9px] md:text-xs lg:text-sm font-medium text-foreground">{card.title}</span>
-              <span className="text-[7px] md:text-[10px] lg:text-xs text-muted-foreground shrink-0 hidden md:inline">{card.time}</span>
-            </div>
-            <p className="text-[8px] md:text-[10px] lg:text-xs text-muted-foreground leading-tight line-clamp-2">{card.text}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
 // Video section with 3D scroll perspective effect
 const VideoSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -395,15 +348,47 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards with smooth funnel effect */}
-          {floatingCards.map((card, index) => (
-            <FloatingCard
-              key={index}
-              card={card}
-              isLeft={index % 2 === 0}
-              heroScrollProgress={heroScrollProgress}
-            />
-          ))}
+          {/* Floating Cards with funnel effect - converge to center */}
+          {floatingCards.map((card, index) => {
+            // Funnel effect - cards converge towards center while shrinking
+            const isLeft = index % 2 === 0;
+            const cardY = useTransform(heroScrollProgress, [0, 0.5], [0, 200]);
+            const cardOpacity = useTransform(heroScrollProgress, [0, 0.3, 0.5], [1, 0.6, 0]);
+            const cardScale = useTransform(heroScrollProgress, [0, 0.5], [1, 0.4]);
+            // Move towards center - left cards go right, right cards go left
+            const cardX = useTransform(heroScrollProgress, [0, 0.5], [0, isLeft ? 150 : -150]);
+            
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: card.delay + 0.6, duration: 0.7, ease: "easeOut" }}
+                style={{ 
+                  y: cardY, 
+                  opacity: cardOpacity, 
+                  scale: cardScale,
+                  x: cardX
+                }}
+                className={`absolute ${card.position} max-w-[130px] md:max-w-[200px] lg:max-w-[300px] z-20`}
+              >
+                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-lg md:rounded-xl lg:rounded-2xl p-1.5 md:p-2.5 lg:p-4 shadow-xl shadow-background/30">
+                  <div className="flex items-start gap-1 md:gap-2 lg:gap-3">
+                    <div className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 rounded-md md:rounded-lg lg:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                      <card.icon className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 ${card.iconColor}`} strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1 md:gap-2 mb-0 md:mb-0.5 lg:mb-1">
+                        <span className="text-[9px] md:text-xs lg:text-sm font-medium text-foreground">{card.title}</span>
+                        <span className="text-[7px] md:text-[10px] lg:text-xs text-muted-foreground shrink-0 hidden md:inline">{card.time}</span>
+                      </div>
+                      <p className="text-[8px] md:text-[10px] lg:text-xs text-muted-foreground leading-tight line-clamp-2">{card.text}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
 
           {/* Hero Content */}
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-16 md:pt-0">
