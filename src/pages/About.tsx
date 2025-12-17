@@ -11,32 +11,34 @@ import featureCopilot from "@/assets/feature-copilot.png";
 import featureInsights from "@/assets/feature-insights.png";
 import featureCommunity from "@/assets/feature-community.png";
 
-// Component for animated text that highlights on scroll
-const AnimatedParagraph = ({ children, className }: { children: string; className?: string }) => {
-  const ref = useRef<HTMLParagraphElement>(null);
+// Component for manifesto text that highlights as one whole unit on scroll
+const ManifestoText = () => {
+  const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start 0.9", "start 0.3"]
+    offset: ["start 0.85", "start 0.15"]
   });
 
-  const words = children.split(" ");
+  const fullText = "For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential. Naru changes that. With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality. Naru isn't just a tool—it's the key to becoming who you're meant to be.";
+  
+  const words = fullText.split(" ");
 
   return (
-    <p ref={ref} className={className}>
+    <div ref={ref} className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed text-center">
       {words.map((word, index) => {
         const start = index / words.length;
         const end = start + 1 / words.length;
         return (
-          <Word key={index} range={[start, end]} progress={scrollYProgress}>
+          <ManifestoWord key={index} range={[start, end]} progress={scrollYProgress}>
             {word}
-          </Word>
+          </ManifestoWord>
         );
       })}
-    </p>
+    </div>
   );
 };
 
-const Word = ({ children, range, progress }: { children: string; range: [number, number]; progress: any }) => {
+const ManifestoWord = ({ children, range, progress }: { children: string; range: [number, number]; progress: any }) => {
   const opacity = useTransform(progress, range, [0.2, 1]);
   const color = useTransform(progress, range, ["hsl(0 0% 50%)", "hsl(0 0% 98%)"]);
 
@@ -325,23 +327,11 @@ const About = () => {
               className="text-center mb-16"
             >
               <span className="inline-block bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground">
-                #00. | Manifesto
+                Manifesto
               </span>
             </motion.div>
 
-            <div className="space-y-12">
-              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
-                For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential. Naru changes that.
-              </AnimatedParagraph>
-              
-              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
-                With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality.
-              </AnimatedParagraph>
-              
-              <AnimatedParagraph className="text-2xl md:text-3xl lg:text-4xl font-cormorant font-light leading-relaxed">
-                Naru isn't just a tool—it's the key to becoming who you're meant to be.
-              </AnimatedParagraph>
-            </div>
+            <ManifestoText />
           </div>
         </section>
 
