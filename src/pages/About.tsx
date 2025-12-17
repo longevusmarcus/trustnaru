@@ -48,6 +48,11 @@ const Word = ({ children, range, progress }: { children: string; range: [number,
 };
 
 const About = () => {
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
   const features = [
     {
       icon: Eye,
@@ -178,36 +183,49 @@ const About = () => {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
           {/* Gradient Background */}
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards */}
-          {floatingCards.map((card, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: card.delay + 0.6, duration: 0.7, ease: "easeOut" }}
-              className={`absolute hidden lg:block ${card.position} max-w-[300px]`}
-            >
-              <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl p-4 shadow-xl shadow-background/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-                    <card.icon className={`h-5 w-5 ${card.iconColor}`} strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-sm font-medium text-foreground">{card.title}</span>
-                      <span className="text-xs text-muted-foreground shrink-0">{card.time}</span>
+          {/* Floating Cards with funnel scroll effect */}
+          {floatingCards.map((card, index) => {
+            const cardY = useTransform(heroScrollProgress, [0, 0.5], [0, 300 + index * 50]);
+            const cardOpacity = useTransform(heroScrollProgress, [0, 0.3, 0.5], [1, 0.5, 0]);
+            const cardScale = useTransform(heroScrollProgress, [0, 0.5], [1, 0.8 - index * 0.05]);
+            const cardX = useTransform(heroScrollProgress, [0, 0.5], [0, index % 2 === 0 ? -50 : 50]);
+            
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: card.delay + 0.6, duration: 0.7, ease: "easeOut" }}
+                style={{ 
+                  y: cardY, 
+                  opacity: cardOpacity, 
+                  scale: cardScale,
+                  x: cardX
+                }}
+                className={`absolute hidden lg:block ${card.position} max-w-[300px]`}
+              >
+                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl p-4 shadow-xl shadow-background/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                      <card.icon className={`h-5 w-5 ${card.iconColor}`} strokeWidth={1.5} />
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{card.text}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-sm font-medium text-foreground">{card.title}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{card.time}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{card.text}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
 
           {/* Hero Content */}
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
@@ -251,6 +269,47 @@ const About = () => {
                   Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Tutorial Video Section */}
+        <section className="py-24 px-6">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <span className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-6">
+                <Play className="h-4 w-4" />
+                Watch the Experience
+              </span>
+              <h2 className="text-3xl md:text-4xl text-foreground mb-4">
+                <span className="font-light">See Naru </span>
+                <span className="font-cormorant italic font-light">in Action</span>
+              </h2>
+              <p className="text-muted-foreground max-w-xl mx-auto">
+                Discover how Naru transforms your career journey in under 3 minutes.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-background/50 bg-card/50"
+            >
+              <iframe
+                src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
+                frameBorder="0"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+                title="Naru Tutorial Video"
+              />
             </motion.div>
           </div>
         </section>
