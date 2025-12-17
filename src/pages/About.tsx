@@ -391,12 +391,6 @@ const About = () => {
               transition={{ duration: 0.6 }}
             >
               <div className="bg-background backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
-                {/* Title inside card */}
-                <div className="pt-8 pb-4 px-6">
-                  <h3 className="text-2xl md:text-4xl font-light text-foreground text-center">
-                    Naru is <span className="font-cormorant italic">identity & outcome</span> first
-                  </h3>
-                </div>
                 {/* Table Header */}
                 <div className="grid grid-cols-4 border-b border-border/50">
                   <div className="p-4 md:p-6" />
