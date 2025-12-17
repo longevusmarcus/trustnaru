@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
 import { useRef } from "react";
 
-// Import app images
-import insightsCompass from "@/assets/insights-compass.png";
-import insightsChat from "@/assets/insights-chat.png";
-import insightsAnalytics from "@/assets/insights-analytics.png";
-import insightsTips from "@/assets/insights-tips.png";
+// Import app screenshots
+import featureFutures from "@/assets/feature-futures.png";
+import featureCopilot from "@/assets/feature-copilot.png";
+import featureInsights from "@/assets/feature-insights.png";
+import featureCommunity from "@/assets/feature-community.png";
 
 // Component for animated text that highlights on scroll
 const AnimatedParagraph = ({ children, className }: { children: string; className?: string }) => {
@@ -55,7 +55,7 @@ const About = () => {
       subtitle: "Visualize possible selves",
       description: "See AI-generated visualizations of your future career paths with detailed roadmaps and lifestyle previews.",
       gradient: "from-violet-500/20 to-purple-500/20",
-      image: insightsCompass
+      image: featureFutures
     },
     {
       icon: Target,
@@ -63,7 +63,7 @@ const About = () => {
       subtitle: "Turn it into action plan",
       description: "Get personalized daily actions, goals, and step-by-step guidance to become your future self.",
       gradient: "from-blue-500/20 to-cyan-500/20",
-      image: insightsChat
+      image: featureCopilot
     },
     {
       icon: LineChart,
@@ -71,7 +71,7 @@ const About = () => {
       subtitle: "Track evolution",
       description: "Monitor your journey progress, stats, and career direction with powerful analytics.",
       gradient: "from-emerald-500/20 to-teal-500/20",
-      image: insightsAnalytics
+      image: featureInsights
     },
     {
       icon: Users,
@@ -79,7 +79,7 @@ const About = () => {
       subtitle: "Emulate high-achievers",
       description: "Connect with mentors on your path and receive exclusive guidance from those who've succeeded.",
       gradient: "from-rose-500/20 to-orange-500/20",
-      image: insightsTips
+      image: featureCommunity
     }
   ];
 
