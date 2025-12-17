@@ -684,7 +684,7 @@ const About = () => {
             <div className="grid md:grid-cols-3 gap-6 mb-16">
               {[
                 {
-                  quote: "Naru helped me visualize my future self as a product leader. Within 6 months, I landed my dream role at a top tech company.",
+                  quote: "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
                   initials: "S.C.",
                   role: "Senior Product Manager"
                 },
