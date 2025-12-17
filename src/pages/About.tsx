@@ -493,11 +493,11 @@ const About = () => {
                       <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                       
                       {/* Image section */}
-                      <div className="relative z-10 aspect-[9/16] max-h-64 overflow-hidden bg-muted/30 rounded-t-xl">
+                      <div className="relative z-10 aspect-[4/5] md:aspect-[9/16] max-h-64 overflow-hidden bg-muted/30 rounded-t-xl flex items-center justify-center">
                         <img 
                           src={feature.image} 
                           alt={feature.title}
-                          className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                          className="w-full h-full object-cover object-center md:object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
                       </div>
