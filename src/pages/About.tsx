@@ -287,11 +287,11 @@ const About = () => {
             >
               <div className="text-center mb-16">
                 <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">Tools for your</span>
-                  <span className="font-light"> evolution.</span>
+                  <span className="font-light">Your </span>
+                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">career OS</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Naru adapts to your journey, delivering AI-driven insights that boost clarity, confidence, and progress.
+                  Naru reveals your future professional identity and guides you step-by-step to grow.
                 </p>
               </div>
 
