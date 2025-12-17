@@ -209,7 +209,7 @@ const About = () => {
       title: "Path Activated", 
       text: "You've started your journey to become a Product Lead at a top tech company.", 
       delay: 0,
-      position: "left-4 lg:left-12 top-32 lg:top-36",
+      position: "left-1 md:left-4 lg:left-12 top-24 md:top-32 lg:top-36",
       icon: Rocket,
       time: "2m ago",
       iconColor: "text-violet-400",
@@ -219,7 +219,7 @@ const About = () => {
       title: "New Insight", 
       text: "Your skills in design thinking align perfectly with product strategy roles.", 
       delay: 0.2,
-      position: "right-4 lg:right-12 top-48 lg:top-52",
+      position: "right-1 md:right-4 lg:right-12 top-40 md:top-48 lg:top-52",
       icon: Lightbulb,
       time: "15m ago",
       iconColor: "text-amber-400",
@@ -229,7 +229,7 @@ const About = () => {
       title: "Daily Action", 
       text: "Connect with 2 product leaders on LinkedIn who inspire your vision.", 
       delay: 0.4,
-      position: "left-4 lg:left-20 bottom-32 lg:bottom-36",
+      position: "left-1 md:left-4 lg:left-20 bottom-24 md:bottom-32 lg:bottom-36",
       icon: CircleCheck,
       time: "1h ago",
       iconColor: "text-emerald-400",
@@ -239,7 +239,7 @@ const About = () => {
       title: "Goal Achieved", 
       text: "Congratulations! You've unlocked Level 2 of your career path.", 
       delay: 0.6,
-      position: "right-4 lg:right-20 bottom-48 lg:bottom-52",
+      position: "right-1 md:right-4 lg:right-20 bottom-40 md:bottom-48 lg:bottom-52",
       icon: Award,
       time: "3h ago",
       iconColor: "text-rose-400",
@@ -307,19 +307,19 @@ const About = () => {
                   scale: cardScale,
                   x: cardX
                 }}
-                className={`absolute ${card.position} max-w-[200px] lg:max-w-[300px] z-20 hidden md:block`}
+                className={`absolute ${card.position} max-w-[130px] md:max-w-[200px] lg:max-w-[300px] z-20`}
               >
-                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-xl md:rounded-2xl p-2.5 md:p-4 shadow-xl shadow-background/30">
-                  <div className="flex items-start gap-2 md:gap-3">
-                    <div className={`w-7 h-7 md:w-10 md:h-10 rounded-lg md:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-                      <card.icon className={`h-3.5 w-3.5 md:h-5 md:w-5 ${card.iconColor}`} strokeWidth={1.5} />
+                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-lg md:rounded-xl lg:rounded-2xl p-1.5 md:p-2.5 lg:p-4 shadow-xl shadow-background/30">
+                  <div className="flex items-start gap-1 md:gap-2 lg:gap-3">
+                    <div className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 rounded-md md:rounded-lg lg:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                      <card.icon className={`h-2.5 w-2.5 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 ${card.iconColor}`} strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1 md:gap-2 mb-0.5 md:mb-1">
-                        <span className="text-xs md:text-sm font-medium text-foreground">{card.title}</span>
-                        <span className="text-[10px] md:text-xs text-muted-foreground shrink-0">{card.time}</span>
+                      <div className="flex items-center justify-between gap-1 md:gap-2 mb-0 md:mb-0.5 lg:mb-1">
+                        <span className="text-[9px] md:text-xs lg:text-sm font-medium text-foreground">{card.title}</span>
+                        <span className="text-[7px] md:text-[10px] lg:text-xs text-muted-foreground shrink-0 hidden md:inline">{card.time}</span>
                       </div>
-                      <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">{card.text}</p>
+                      <p className="text-[8px] md:text-[10px] lg:text-xs text-muted-foreground leading-tight line-clamp-2">{card.text}</p>
                     </div>
                   </div>
                 </div>
@@ -328,26 +328,26 @@ const About = () => {
           })}
 
           {/* Hero Content */}
-          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+          <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-16 md:pt-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 mb-10"
+              className="inline-flex items-center gap-1.5 md:gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-3 md:px-5 py-1.5 md:py-2.5 mb-6 md:mb-10"
             >
-              <Sparkles className="h-4 w-4 text-foreground" />
-              <span className="text-sm text-muted-foreground">Supported by professionals at Meta, BCG & Stripe</span>
+              <Sparkles className="h-3 w-3 md:h-4 md:w-4 text-foreground" />
+              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">Supported by professionals at Meta, BCG & Stripe</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6 }}
-              className="text-4xl md:text-6xl lg:text-7xl text-foreground mb-8 leading-tight"
+              className="text-3xl md:text-6xl lg:text-7xl text-foreground mb-6 md:mb-8 leading-tight"
             >
-              <span className="font-light">Because Your Future</span>
-              <br />
-              <span className="font-cormorant italic font-light text-5xl md:text-7xl lg:text-8xl">Deserves a Clear Path</span>
+              <span className="font-light block md:inline">Because Your Future</span>
+              <br className="hidden md:block" />
+              <span className="font-cormorant italic font-light text-4xl md:text-7xl lg:text-8xl block md:inline">Deserves a Clear Path</span>
             </motion.h1>
 
             <motion.p
@@ -369,29 +369,6 @@ const About = () => {
                   Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-            </motion.div>
-
-            {/* Mobile-only floating cards preview */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="md:hidden mt-12 grid grid-cols-2 gap-3"
-            >
-              {floatingCards.slice(0, 4).map((card, index) => (
-                <div 
-                  key={index}
-                  className="bg-card/80 backdrop-blur-md border border-border/50 rounded-xl p-3"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className={`w-6 h-6 rounded-lg ${card.iconBg} flex items-center justify-center shrink-0`}>
-                      <card.icon className={`h-3 w-3 ${card.iconColor}`} strokeWidth={1.5} />
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground">{card.title}</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{card.text}</p>
-                </div>
-              ))}
             </motion.div>
           </div>
         </section>
