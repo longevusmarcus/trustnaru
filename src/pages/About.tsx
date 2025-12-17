@@ -686,17 +686,20 @@ const About = () => {
                 {
                   quote: "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
                   initials: "S.C.",
-                  role: "Senior Product Manager"
+                  role: "Senior Product Manager",
+                  photo: "https://media.licdn.com/dms/image/v2/C5603AQHjxd4Q1DBUBA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1584376209298?e=1759968000&v=beta&t=1_icgCYDfB1fK4TBLJwnyVbXJ_Qn7S8OsY40fey5Hkg"
                 },
                 {
                   quote: "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
                   initials: "M.J.",
-                  role: "Engineering Lead"
+                  role: "Engineering Lead",
+                  photo: "https://media.licdn.com/dms/image/v2/D5603AQEKeQ-eAaSKMw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1704294694465?e=1759968000&v=beta&t=pTN3V8BYLZzAsCLr7M5UzM5GQie1BJSHRLX2dyhHH30"
                 },
                 {
                   quote: "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
                   initials: "E.R.",
-                  role: "Graduate Student"
+                  role: "Graduate Student",
+                  photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
                 }
               ].map((testimonial, index) => (
                 <motion.div
@@ -716,9 +719,11 @@ const About = () => {
                     "{testimonial.quote}"
                   </p>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border/50 flex items-center justify-center">
-                      <span className="text-lg font-medium text-foreground">{testimonial.initials}</span>
-                    </div>
+                    <img 
+                      src={testimonial.photo} 
+                      alt={testimonial.initials}
+                      className="w-12 h-12 rounded-full object-cover border border-border/50"
+                    />
                     <div>
                       <p className="font-medium text-foreground">{testimonial.initials}</p>
                       <p className="text-sm text-muted-foreground">{testimonial.role}</p>
