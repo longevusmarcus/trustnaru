@@ -276,101 +276,105 @@ const About = () => {
         </section>
 
         {/* Features Section - 4 main features */}
-        <section id="features" className="py-32 px-6 bg-gradient-to-b from-secondary/20 to-background">
+        <section id="features" className="py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-20"
+              className="bg-secondary/30 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
             >
-              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">Tools for your</span>
-                <span className="font-light"> evolution.</span>
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Naru adapts to your journey, delivering AI-driven insights that boost clarity, confidence, and progress.
-              </p>
-            </motion.div>
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">Tools for your</span>
+                  <span className="font-light"> evolution.</span>
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Naru adapts to your journey, delivering AI-driven insights that boost clarity, confidence, and progress.
+                </p>
+              </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="group relative"
-                >
-                  <div className="relative bg-card border border-border/50 rounded-3xl p-6 h-full overflow-hidden hover:border-border transition-all duration-500 hover:shadow-2xl hover:shadow-background/40">
-                    {/* Gradient overlay on hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    
-                    <div className="relative z-10">
-                      {/* Icon */}
-                      <div className="relative w-14 h-14 mb-6">
-                        <div className="absolute inset-0 rounded-2xl bg-secondary/50 group-hover:bg-secondary transition-colors duration-300" />
-                        <div className="absolute inset-[2px] rounded-[14px] bg-card group-hover:bg-card/80 transition-colors duration-300 flex items-center justify-center">
-                          <feature.icon className="h-6 w-6 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
-                        </div>
-                      </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {features.map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                    className="group relative"
+                  >
+                    <div className="relative bg-card/80 border border-border/40 rounded-2xl p-6 h-full overflow-hidden hover:border-border/80 transition-all duration-500 hover:shadow-xl hover:shadow-background/30">
+                      {/* Gradient overlay on hover */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                       
-                      <h3 className="text-xl font-medium text-foreground mb-1">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 font-cormorant italic">{feature.subtitle}</p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                      <div className="relative z-10">
+                        {/* Icon */}
+                        <div className="relative w-12 h-12 mb-5">
+                          <div className="absolute inset-0 rounded-xl bg-muted/50 group-hover:bg-muted transition-colors duration-300" />
+                          <div className="absolute inset-[2px] rounded-[10px] bg-card group-hover:bg-card/90 transition-colors duration-300 flex items-center justify-center">
+                            <feature.icon className="h-5 w-5 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                          </div>
+                        </div>
+                        
+                        <h3 className="text-lg font-medium text-foreground mb-1">{feature.title}</h3>
+                        <p className="text-xs text-muted-foreground mb-3 font-cormorant italic">{feature.subtitle}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </section>
 
         {/* Journey Flow Section */}
-        <section id="journey" className="py-32 px-6">
+        <section id="journey" className="py-24 px-6 bg-muted/30">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-16"
+              className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
             >
-              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                <span className="font-light">Naru unlocks </span>
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">YOUR</span>
-                <span className="font-light"> purpose</span>
-              </h2>
-            </motion.div>
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                  <span className="font-light">Naru unlocks </span>
+                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">YOUR</span>
+                  <span className="font-light"> purpose</span>
+                </h2>
+              </div>
 
-            {/* Journey Steps - Arrow flow */}
-            <div className="flex flex-col lg:flex-row items-stretch gap-0 mb-20">
-              {journeySteps.map((step, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="flex-1 relative"
-                >
-                  {/* Arrow shape container */}
-                  <div className="relative bg-secondary/60 hover:bg-secondary/80 transition-colors duration-300 h-full min-h-[180px] lg:min-h-[140px] flex flex-col justify-start p-5 lg:pr-8"
-                    style={{
-                      clipPath: index === journeySteps.length - 1 
-                        ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
-                        : 'polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%, 8% 50%)',
-                      marginLeft: index === 0 ? '0' : '-12px'
-                    }}
+              {/* Journey Steps - Arrow flow */}
+              <div className="flex flex-col lg:flex-row items-stretch gap-0 mb-16">
+                {journeySteps.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="flex-1 relative"
                   >
-                    <h4 className="text-base font-medium text-foreground mb-2 pl-2">{step.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed pl-2">{step.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                    {/* Arrow shape container */}
+                    <div className="relative bg-muted/60 hover:bg-muted/80 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
+                      style={{
+                        clipPath: index === journeySteps.length - 1 
+                          ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
+                          : 'polygon(0 0, 92% 0, 100% 50%, 92% 100%, 0 100%, 8% 50%)',
+                        marginLeft: index === 0 ? '0' : '-12px'
+                      }}
+                    >
+                      <h4 className="text-sm font-medium text-foreground mb-2 pl-2">{step.title}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed pl-2">{step.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
 
             {/* What makes Naru different - Comparison Table */}
             <motion.div
@@ -498,103 +502,74 @@ const About = () => {
         </section>
 
         {/* Vision Section */}
-        <section className="py-32 px-6 bg-gradient-to-b from-secondary/20 to-background">
-          <div className="max-w-4xl mx-auto text-center">
+        <section className="py-24 px-6">
+          <div className="max-w-5xl mx-auto">
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="mb-16"
+              className="bg-secondary/30 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16 text-center"
             >
-              <span className="inline-block bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground">
+              <span className="inline-block bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-10">
                 #01. | Our Vision
               </span>
-            </motion.div>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-5xl text-foreground mb-8"
-            >
-              <span className="font-cormorant italic font-light text-4xl md:text-6xl">Your evolution</span>
-              <span className="font-light"> speaks for itself</span>
-            </motion.h2>
+              <h2 className="text-3xl md:text-5xl text-foreground mb-8">
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">Your evolution</span>
+                <span className="font-light"> speaks for itself</span>
+              </h2>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-              className="text-lg text-muted-foreground max-w-2xl mx-auto mb-16"
-            >
-              Naru is the career platform designed for individuals who prioritize growth, clarity, and becoming the best version of themselves.
-            </motion.p>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
+                Naru is the career platform designed for individuals who prioritize growth, clarity, and becoming the best version of themselves.
+              </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="grid grid-cols-3 gap-8 max-w-lg mx-auto"
-            >
-              {[
-                { icon: Brain, label: "AI-Powered", gradient: "from-violet-500/20 to-purple-500/20" },
-                { icon: BarChart3, label: "Growth-Focused", gradient: "from-blue-500/20 to-cyan-500/20" },
-                { icon: Flame, label: "Personal", gradient: "from-orange-500/20 to-rose-500/20" }
-              ].map((item, index) => (
-                <motion.div 
-                  key={index} 
-                  className="text-center group"
-                  whileHover={{ y: -4 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="relative w-18 h-18 mx-auto mb-4">
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                    <div className="relative w-16 h-16 mx-auto bg-card border border-border/50 rounded-2xl flex items-center justify-center group-hover:border-border transition-all duration-300">
-                      <item.icon className="h-7 w-7 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+              <div className="grid grid-cols-3 gap-6 max-w-md mx-auto">
+                {[
+                  { icon: Brain, label: "AI-Powered", gradient: "from-violet-500/20 to-purple-500/20" },
+                  { icon: BarChart3, label: "Growth-Focused", gradient: "from-blue-500/20 to-cyan-500/20" },
+                  { icon: Flame, label: "Personal", gradient: "from-orange-500/20 to-rose-500/20" }
+                ].map((item, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="text-center group"
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="relative w-18 h-18 mx-auto mb-4">
+                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                      <div className="relative w-14 h-14 mx-auto bg-card/80 border border-border/40 rounded-xl flex items-center justify-center group-hover:border-border transition-all duration-300">
+                        <item.icon className="h-6 w-6 text-foreground group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">{item.label}</span>
-                </motion.div>
-              ))}
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">{item.label}</span>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-3xl md:text-5xl text-foreground mb-8"
-            >
-              <span className="font-light">Ready to meet your </span>
-              <span className="font-cormorant italic font-light text-4xl md:text-6xl">future self</span>
-              <span className="font-light">?</span>
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-              className="text-lg text-muted-foreground mb-12"
-            >
-              Join the private beta and start your transformation today.
-            </motion.p>
-
+        <section className="py-24 px-6 bg-muted/30">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
+              transition={{ duration: 0.6 }}
+              className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16 text-center"
             >
+              <h2 className="text-3xl md:text-5xl text-foreground mb-8">
+                <span className="font-light">Ready to meet your </span>
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">future self</span>
+                <span className="font-light">?</span>
+              </h2>
+
+              <p className="text-lg text-muted-foreground mb-10">
+                Join the private beta and start your transformation today.
+              </p>
+
               <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
                 <Link to="/auth">
                   Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
