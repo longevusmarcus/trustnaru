@@ -363,7 +363,7 @@ const About = () => {
         <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl">
           <div className="bg-card/40 backdrop-blur-xl border border-border/50 rounded-full px-6 py-3 flex items-center justify-between shadow-lg shadow-background/20">
             <div className="flex items-center gap-8">
-              <Link to="/" className="text-xl font-semibold text-foreground">
+              <Link to="/" className="text-xl font-light tracking-wide bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 Naru
               </Link>
               <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
@@ -971,7 +971,7 @@ const About = () => {
             <div className="grid md:grid-cols-4 gap-10 mb-12">
               {/* Brand */}
               <div className="md:col-span-2">
-                <div className="text-2xl font-semibold text-foreground mb-4">Naru</div>
+                <div className="text-2xl font-light tracking-wide bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">Naru</div>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-6">
                   The AI-powered career OS that helps you visualize your future self and guides you step-by-step to
                   become who you're meant to be.
