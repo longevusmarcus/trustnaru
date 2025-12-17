@@ -150,7 +150,7 @@ const About = () => {
               <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
                 <a href="#manifesto" className="hover:text-foreground transition-colors">Manifesto</a>
                 <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-                <a href="#journey" className="hover:text-foreground transition-colors">How it works</a>
+                <a href="#journey" className="hover:text-foreground transition-colors">Why Naru</a>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -295,7 +295,7 @@ const About = () => {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
@@ -326,30 +326,18 @@ const About = () => {
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
-          </div>
-        </section>
 
-        {/* Journey Flow Section */}
-        <section id="journey" className="py-24 px-6 bg-muted/30">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-background backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
-            >
+              {/* Naru unlocks YOUR purpose - Journey Steps */}
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                <h3 className="text-2xl md:text-4xl text-foreground mb-6">
                   <span className="font-light">Naru unlocks </span>
-                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">YOUR</span>
+                  <span className="font-cormorant italic font-light text-3xl md:text-5xl">YOUR</span>
                   <span className="font-light"> purpose</span>
-                </h2>
+                </h3>
               </div>
 
               {/* Journey Steps - Arrow flow */}
-              <div className="flex flex-col lg:flex-row items-stretch gap-0 mb-16">
+              <div className="flex flex-col lg:flex-row items-stretch gap-0">
                 {journeySteps.map((step, index) => (
                   <motion.div
                     key={index}
@@ -374,6 +362,24 @@ const About = () => {
                   </motion.div>
                 ))}
               </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Why Naru Section */}
+        <section id="journey" className="py-24 px-6 bg-muted/30">
+          <div className="max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
+                <span className="font-light">Why </span>
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">Naru</span>
+              </h2>
             </motion.div>
 
             {/* What makes Naru different - Comparison Table */}
