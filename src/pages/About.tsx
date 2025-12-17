@@ -256,7 +256,7 @@ const About = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
             >
-              Redefining career development with AI-powered visualization, personalized guidance, and actionable insights.
+              Naru reveals your future professional identity and guides you step-by-step to grow.
             </motion.p>
 
             <motion.div
