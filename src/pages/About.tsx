@@ -377,8 +377,9 @@ const About = () => {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                <span className="font-light">Why </span>
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">Naru</span>
+                <span className="font-light">Naru is </span>
+                <span className="font-cormorant italic font-light text-4xl md:text-6xl">identity & outcome</span>
+                <span className="font-light"> first</span>
               </h2>
             </motion.div>
 
