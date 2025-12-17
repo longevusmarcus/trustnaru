@@ -434,7 +434,7 @@ const About = () => {
             >
               <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
                 <Link to="/auth">
-                  Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
+                  Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -884,7 +884,7 @@ const About = () => {
 
               <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
                 <Link to="/auth">
-                  Join Private Beta <ArrowRight className="ml-2 h-5 w-5" />
+                  Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
