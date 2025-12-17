@@ -360,7 +360,7 @@ const About = () => {
                     className="flex-1 relative"
                   >
                     {/* Arrow shape container */}
-                    <div className="relative bg-background hover:bg-muted/30 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
+                    <div className="relative bg-muted/40 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
                       style={{
                         clipPath: index === journeySteps.length - 1 
                           ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
@@ -382,13 +382,14 @@ const About = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-8"
             >
-              <h3 className="text-2xl md:text-4xl font-light text-foreground text-center">
-                Naru is <span className="font-cormorant italic">identity & outcome</span> first
-              </h3>
-              
               <div className="bg-background backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
+                {/* Title inside card */}
+                <div className="pt-8 pb-4 px-6">
+                  <h3 className="text-2xl md:text-4xl font-light text-foreground text-center">
+                    Naru is <span className="font-cormorant italic">identity & outcome</span> first
+                  </h3>
+                </div>
                 {/* Table Header */}
                 <div className="grid grid-cols-4 border-b border-border/50 bg-muted/30">
                   <div className="p-4 md:p-6" />
