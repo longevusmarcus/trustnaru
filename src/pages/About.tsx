@@ -258,7 +258,7 @@ const About = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
             >
-              Naru reveals your future professional identity and guides you step-by-step to grow into it.
+              Naru reveals the future professional identity that fits you, and guides you step-by-step to grow into it.
             </motion.p>
 
             <motion.div
