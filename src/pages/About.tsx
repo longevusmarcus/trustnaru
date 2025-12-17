@@ -351,7 +351,7 @@ const About = () => {
                   <span className="font-cormorant italic font-light text-4xl md:text-6xl">career OS</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Redefining career development with AI-powered visualization, actionable plans and personalized guidance.
+                  Redefining career development with AI-powered visualization, personalized guidance, and actionable plans—so you can level up with clarity, purpose, and momentum.
                 </p>
               </div>
 
