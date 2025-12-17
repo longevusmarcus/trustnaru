@@ -215,9 +215,9 @@ const About = () => {
               transition={{ delay: 0.1, duration: 0.6 }}
               className="text-4xl md:text-6xl lg:text-7xl text-foreground mb-8 leading-tight"
             >
-              <span className="font-light">Introducing </span>
-              <span className="font-cormorant italic font-light underline decoration-1 underline-offset-8">Naru</span>
-              <span className="font-light"> – your career OS</span>
+              <span className="font-light">Because Your Future</span>
+              <br />
+              <span className="font-cormorant italic font-light text-5xl md:text-7xl lg:text-8xl">Deserves a Clear Path</span>
             </motion.h1>
 
             <motion.p
@@ -226,7 +226,7 @@ const About = () => {
               transition={{ delay: 0.2, duration: 0.6 }}
               className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
             >
-              Naru reveals your future professional identity and guides you step-by-step to grow
+              Redefining career development with AI-powered visualization, personalized guidance, and actionable insights.
             </motion.p>
 
             <motion.div
