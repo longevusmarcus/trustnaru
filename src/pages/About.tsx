@@ -592,21 +592,18 @@ const About = () => {
               {[
                 {
                   quote: "Naru helped me visualize my future self as a product leader. Within 6 months, I landed my dream role at a top tech company.",
-                  name: "Sarah Chen",
-                  role: "Senior Product Manager",
-                  company: "Stripe"
+                  initials: "S.C.",
+                  role: "Senior Product Manager"
                 },
                 {
                   quote: "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
-                  name: "Marcus Johnson",
-                  role: "Engineering Lead",
-                  company: "Notion"
+                  initials: "M.J.",
+                  role: "Engineering Lead"
                 },
                 {
-                  quote: "I was stuck in my career for years. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
-                  name: "Elena Rodriguez",
-                  role: "UX Director",
-                  company: "Figma"
+                  quote: "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
+                  initials: "E.R.",
+                  role: "Graduate Student"
                 }
               ].map((testimonial, index) => (
                 <motion.div
@@ -627,11 +624,11 @@ const About = () => {
                   </p>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-border/50 flex items-center justify-center">
-                      <span className="text-lg font-medium text-foreground">{testimonial.name.charAt(0)}</span>
+                      <span className="text-lg font-medium text-foreground">{testimonial.initials}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role} at {testimonial.company}</p>
+                      <p className="font-medium text-foreground">{testimonial.initials}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                     </div>
                   </div>
                 </motion.div>
