@@ -19,7 +19,7 @@ const ManifestoText = () => {
     offset: ["start 0.85", "start 0.15"]
   });
 
-  const fullText = "For too long, people have navigated their careers alone—uncertain, overwhelmed, and disconnected from their true potential. Naru changes that. With AI-powered visualizations, personalized guidance, and actionable daily steps, we help you see your future self clearly, align with purpose, and turn dreams into reality. Naru isn't just a tool—it's the key to becoming who you're meant to be.";
+  const fullText = "For too long, careers have been a solo journey—confusing, overwhelming, and disconnected from who we truly are. Naru changes the experience. With AI-powered visualizations, deeply personalized guidance, and clear daily actions, Naru helps you see who you're becoming, align with what matters, and move forward with confidence. Naru isn't just a tool, it's a companion for becoming your fullest self.";
   
   const words = fullText.split(" ");
 
