@@ -151,6 +151,7 @@ const About = () => {
                 <a href="#manifesto" className="hover:text-foreground transition-colors">Manifesto</a>
                 <a href="#features" className="hover:text-foreground transition-colors">Features</a>
                 <a href="#journey" className="hover:text-foreground transition-colors">Why Naru</a>
+                <a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -498,7 +499,7 @@ const About = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-24 px-6">
+        <section id="testimonials" className="py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -517,7 +518,7 @@ const About = () => {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6 mb-16">
               {[
                 {
                   quote: "Naru helped me visualize my future self as a product leader. Within 6 months, I landed my dream role at a top tech company.",
@@ -566,27 +567,23 @@ const About = () => {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </section>
 
-        {/* CTA Section */}
-        <section className="py-24 px-6 bg-muted/30">
-          <div className="max-w-4xl mx-auto">
+            {/* CTA integrated into testimonials */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16 text-center"
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="bg-gradient-to-br from-primary/10 via-secondary/20 to-primary/5 backdrop-blur-sm border border-border/30 rounded-3xl p-10 md:p-14 text-center"
             >
-              <h2 className="text-3xl md:text-5xl text-foreground mb-8">
+              <h3 className="text-2xl md:text-4xl text-foreground mb-6">
                 <span className="font-light">Ready to meet your </span>
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">future self</span>
+                <span className="font-cormorant italic font-light text-3xl md:text-5xl">future self</span>
                 <span className="font-light">?</span>
-              </h2>
+              </h3>
 
-              <p className="text-lg text-muted-foreground mb-10">
-                Join the private beta and start your transformation today.
+              <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+                Join thousands of professionals who've transformed their careers with Naru.
               </p>
 
               <Button asChild size="lg" className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
@@ -599,15 +596,51 @@ const About = () => {
         </section>
 
         {/* Footer */}
-        <footer className="py-12 px-6 border-t border-border/50">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-xl font-semibold text-foreground">Naru</div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
+        <footer className="py-16 px-6 bg-muted/20 border-t border-border/30">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-4 gap-10 mb-12">
+              {/* Brand */}
+              <div className="md:col-span-2">
+                <div className="text-2xl font-semibold text-foreground mb-4">Naru</div>
+                <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mb-6">
+                  The AI-powered career OS that helps you visualize your future self and guides you step-by-step to become who you're meant to be.
+                </p>
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Link to="/auth">
+                    Start Free <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  </Link>
+                </Button>
+              </div>
+              
+              {/* Navigation */}
+              <div>
+                <h4 className="text-sm font-medium text-foreground mb-4">Product</h4>
+                <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+                  <a href="#features" className="hover:text-foreground transition-colors">Features</a>
+                  <a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a>
+                  <a href="#journey" className="hover:text-foreground transition-colors">Why Naru</a>
+                  <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
+                </div>
+              </div>
+              
+              {/* Legal */}
+              <div>
+                <h4 className="text-sm font-medium text-foreground mb-4">Legal</h4>
+                <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+                  <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                  <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">© 2024 Naru. All rights reserved.</p>
+            
+            {/* Bottom bar */}
+            <div className="pt-8 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">© 2024 Naru by RocketMinds. All rights reserved.</p>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
+                <span>Built with purpose for career seekers</span>
+              </div>
+            </div>
           </div>
         </footer>
       </div>
