@@ -605,13 +605,13 @@ const About = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     whileHover={{ rotate: 0, scale: 1.02, y: -8 }}
-                    className="relative w-48 md:w-56 lg:w-64 shrink-0"
+                    className="relative w-full max-w-[320px] sm:max-w-[360px] md:w-56 md:max-w-none lg:w-64 shrink-0"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/50 border border-border/30">
                       <img 
                         src={showcaseVoice} 
                         alt="Voice recording feature"
-                        className="w-full h-auto"
+                        className="block w-full h-auto"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
@@ -624,13 +624,13 @@ const About = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
                     whileHover={{ scale: 1.03, y: -10 }}
-                    className="relative w-56 md:w-72 lg:w-80 shrink-0 z-10"
+                    className="relative w-full max-w-[360px] sm:max-w-[420px] md:w-72 md:max-w-none lg:w-80 shrink-0 z-10"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/60 border border-border/40">
                       <img 
                         src={showcaseDashboard} 
                         alt="Dashboard view"
-                        className="w-full h-auto"
+                        className="block w-full h-auto"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
@@ -643,13 +643,13 @@ const About = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                     whileHover={{ rotate: 0, scale: 1.02, y: -8 }}
-                    className="relative w-48 md:w-56 lg:w-64 shrink-0"
+                    className="relative w-full max-w-[320px] sm:max-w-[360px] md:w-56 md:max-w-none lg:w-64 shrink-0"
                   >
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-background/50 border border-border/30">
                       <img 
                         src={showcaseFutures} 
                         alt="Futures exploration"
-                        className="w-full h-auto"
+                        className="block w-full h-auto"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
                     </div>
