@@ -361,7 +361,7 @@ const About = () => {
                   <span className="font-cormorant italic font-light text-4xl md:text-6xl">career OS</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Naru reveals your future professional identity and guides you step-by-step to grow.
+                  Redefining career development with AI-powered visualization, actionable plans and personalized guidance.
                 </p>
               </div>
 
