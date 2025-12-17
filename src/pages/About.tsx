@@ -331,26 +331,25 @@ const About = () => {
         </section>
 
         {/* Journey Flow Section */}
-        <section id="journey" className="py-24 px-6">
+        <section id="journey" className="py-24 px-6 bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            {/* Naru unlocks YOUR purpose - Black card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-zinc-950 border border-zinc-800/50 rounded-[2.5rem] p-8 md:p-12 lg:p-16 mb-8"
+              className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
             >
               <div className="text-center mb-12">
-                <h2 className="text-2xl md:text-4xl text-zinc-100">
+                <h2 className="text-3xl md:text-5xl text-foreground mb-6">
                   <span className="font-light">Naru unlocks </span>
-                  <span className="font-cormorant italic font-light">YOUR</span>
+                  <span className="font-cormorant italic font-light text-4xl md:text-6xl">YOUR</span>
                   <span className="font-light"> purpose</span>
                 </h2>
               </div>
 
               {/* Journey Steps - Arrow flow */}
-              <div className="flex flex-col lg:flex-row items-stretch gap-0">
+              <div className="flex flex-col lg:flex-row items-stretch gap-0 mb-16">
                 {journeySteps.map((step, index) => (
                   <motion.div
                     key={index}
@@ -361,7 +360,7 @@ const About = () => {
                     className="flex-1 relative"
                   >
                     {/* Arrow shape container */}
-                    <div className="relative bg-zinc-900/80 hover:bg-zinc-800/80 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
+                    <div className="relative bg-muted/60 hover:bg-muted/80 transition-colors duration-300 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
                       style={{
                         clipPath: index === journeySteps.length - 1 
                           ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
@@ -369,40 +368,38 @@ const About = () => {
                         marginLeft: index === 0 ? '0' : '-12px'
                       }}
                     >
-                      <h4 className="text-sm font-medium text-zinc-100 mb-2 pl-2">{step.title}</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed pl-2">{step.description}</p>
+                      <h4 className="text-sm font-medium text-foreground mb-2 pl-2">{step.title}</h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed pl-2">{step.description}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
 
-            {/* Comparison Table - Black card with title inside */}
+            {/* What makes Naru different - Comparison Table */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="bg-zinc-950 border border-zinc-800/50 rounded-[2.5rem] p-8 md:p-12 lg:p-16 mb-8"
+              className="space-y-8"
             >
-              <h3 className="text-2xl md:text-4xl text-zinc-100 text-center mb-10">
-                <span className="font-light">Naru is </span>
-                <span className="font-cormorant italic font-light">identity & outcome</span>
-                <span className="font-light"> first</span>
+              <h3 className="text-2xl md:text-4xl font-light text-foreground text-center">
+                Naru is <span className="font-cormorant italic">identity & outcome</span> first
               </h3>
               
-              <div className="bg-zinc-900/50 border border-zinc-800/50 rounded-2xl overflow-hidden mb-6">
+              <div className="bg-card/30 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden">
                 {/* Table Header */}
-                <div className="grid grid-cols-4 border-b border-zinc-800/50 bg-zinc-900/80">
+                <div className="grid grid-cols-4 border-b border-border/50 bg-card/50">
                   <div className="p-4 md:p-6" />
                   <div className="p-4 md:p-6 text-center">
-                    <span className="text-sm md:text-base font-medium text-zinc-100">Naru</span>
+                    <span className="text-sm md:text-base font-medium text-foreground">Naru</span>
                   </div>
                   <div className="p-4 md:p-6 text-center">
-                    <span className="text-sm md:text-base font-medium text-zinc-500">LinkedIn</span>
+                    <span className="text-sm md:text-base font-medium text-muted-foreground">LinkedIn</span>
                   </div>
                   <div className="p-4 md:p-6 text-center">
-                    <span className="text-sm md:text-base font-medium text-zinc-500">BetterUp</span>
+                    <span className="text-sm md:text-base font-medium text-muted-foreground">BetterUp</span>
                   </div>
                 </div>
                 
@@ -414,36 +411,36 @@ const About = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.05, duration: 0.4 }}
-                    className={`grid grid-cols-4 ${index !== comparisonFeatures.length - 1 ? 'border-b border-zinc-800/30' : ''}`}
+                    className={`grid grid-cols-4 ${index !== comparisonFeatures.length - 1 ? 'border-b border-border/30' : ''}`}
                   >
                     <div className="p-4 md:p-6 flex items-center">
-                      <span className="text-sm md:text-base text-zinc-300">{row.feature}</span>
+                      <span className="text-sm md:text-base text-foreground">{row.feature}</span>
                     </div>
                     <div className="p-4 md:p-6 flex items-center justify-center">
                       {row.naru === "check" ? (
                         <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
                       ) : (
-                        <span className="text-sm text-zinc-400">{row.naru}</span>
+                        <span className="text-sm text-muted-foreground">{row.naru}</span>
                       )}
                     </div>
                     <div className="p-4 md:p-6 flex items-center justify-center">
                       {row.linkedin === "check" ? (
                         <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
                       ) : row.linkedin === "partial" ? (
-                        <span className="text-zinc-500">△</span>
+                        <span className="text-muted-foreground">△</span>
                       ) : (
-                        <span className="text-zinc-600">–</span>
+                        <span className="text-muted-foreground/50">–</span>
                       )}
                     </div>
                     <div className="p-4 md:p-6 flex items-center justify-center">
                       {row.betterup === "check" ? (
                         <Check className="h-5 w-5 text-emerald-400" strokeWidth={2.5} />
                       ) : row.betterup === "partial" ? (
-                        <span className="text-zinc-500">△</span>
+                        <span className="text-muted-foreground">△</span>
                       ) : row.betterup === "none" ? (
-                        <span className="text-zinc-600">–</span>
+                        <span className="text-muted-foreground/50">–</span>
                       ) : (
-                        <span className="text-sm text-zinc-400">{row.betterup}</span>
+                        <span className="text-sm text-muted-foreground">{row.betterup}</span>
                       )}
                     </div>
                   </motion.div>
@@ -451,7 +448,7 @@ const About = () => {
               </div>
               
               {/* Legend */}
-              <div className="flex items-center justify-center gap-6 text-xs text-zinc-500">
+              <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Check className="h-3.5 w-3.5 text-emerald-400" strokeWidth={2.5} />
                   <span>built-in</span>
@@ -465,41 +462,41 @@ const About = () => {
                   <span>not offered</span>
                 </div>
               </div>
-            </motion.div>
-
-            {/* What makes Naru different - Black card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="bg-zinc-950 border border-zinc-800/50 rounded-[2.5rem] p-8 md:p-12 lg:p-16"
-            >
-              <h4 className="text-lg md:text-xl font-medium text-zinc-100 text-center mb-10">
-                What makes Naru different
-              </h4>
-              <div className="space-y-5 max-w-2xl mx-auto">
-                {[
-                  "Mobile-first, voice-native experience powered by Generative and Predictive AI",
-                  "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
-                  "Measurable milestones & actions that adapt to real progress (not generic templates)",
-                  "Model learns from users, improving guidance and outcomes over time"
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
-                    className="flex items-start gap-4"
-                  >
-                    <div className="w-5 h-5 rounded-md bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="h-3 w-3 text-emerald-400" strokeWidth={2.5} />
-                    </div>
-                    <p className="text-sm md:text-base text-zinc-400 leading-relaxed">{item}</p>
-                  </motion.div>
-                ))}
-              </div>
+              
+              {/* What makes Naru different - Bullet points */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="mt-16 bg-card/20 backdrop-blur-sm border border-border/30 rounded-3xl p-8 md:p-10"
+              >
+                <h4 className="text-lg md:text-xl font-medium text-foreground text-center mb-8">
+                  What makes Naru different
+                </h4>
+                <div className="space-y-4 max-w-2xl mx-auto">
+                  {[
+                    "Mobile-first, voice-native experience powered by Generative and Predictive AI",
+                    "Tailored to YOU (including unique data like your background, lifestyle preferences, career ambitions)",
+                    "Measurable milestones & actions that adapt to real progress (not generic templates)",
+                    "Model learns from users, improving guidance and outcomes over time"
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
+                      className="flex items-start gap-4"
+                    >
+                      <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
+                      </div>
+                      <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{item}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
             </motion.div>
           </div>
         </section>
