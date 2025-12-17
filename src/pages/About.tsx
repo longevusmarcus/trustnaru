@@ -209,7 +209,7 @@ const About = () => {
       title: "Path Activated", 
       text: "You've started your journey to become a Product Lead at a top tech company.", 
       delay: 0,
-      position: "left-4 lg:left-12 top-36",
+      position: "left-2 md:left-4 lg:left-12 top-28 md:top-36",
       icon: Rocket,
       time: "2m ago",
       iconColor: "text-violet-400",
@@ -219,7 +219,7 @@ const About = () => {
       title: "New Insight", 
       text: "Your skills in design thinking align perfectly with product strategy roles.", 
       delay: 0.2,
-      position: "right-4 lg:right-12 top-52",
+      position: "right-2 md:right-4 lg:right-12 top-44 md:top-52",
       icon: Lightbulb,
       time: "15m ago",
       iconColor: "text-amber-400",
@@ -229,7 +229,7 @@ const About = () => {
       title: "Daily Action", 
       text: "Connect with 2 product leaders on LinkedIn who inspire your vision.", 
       delay: 0.4,
-      position: "left-8 lg:left-20 bottom-36",
+      position: "left-2 md:left-8 lg:left-20 bottom-28 md:bottom-36",
       icon: CircleCheck,
       time: "1h ago",
       iconColor: "text-emerald-400",
@@ -239,7 +239,7 @@ const About = () => {
       title: "Goal Achieved", 
       text: "Congratulations! You've unlocked Level 2 of your career path.", 
       delay: 0.6,
-      position: "right-8 lg:right-20 bottom-52",
+      position: "right-2 md:right-8 lg:right-20 bottom-44 md:bottom-52",
       icon: Award,
       time: "3h ago",
       iconColor: "text-rose-400",
@@ -288,7 +288,7 @@ const About = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-muted/50 via-background to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-secondary/40 via-transparent to-transparent" />
           
-          {/* Floating Cards with funnel scroll effect */}
+          {/* Floating Cards with funnel scroll effect - Desktop & Tablet */}
           {floatingCards.map((card, index) => {
             const cardY = useTransform(heroScrollProgress, [0, 0.5], [0, 300 + index * 50]);
             const cardOpacity = useTransform(heroScrollProgress, [0, 0.3, 0.5], [1, 0.5, 0]);
@@ -307,19 +307,19 @@ const About = () => {
                   scale: cardScale,
                   x: cardX
                 }}
-                className={`absolute hidden lg:block ${card.position} max-w-[300px]`}
+                className={`absolute ${card.position} max-w-[180px] md:max-w-[240px] lg:max-w-[300px] z-20`}
               >
-                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl p-4 shadow-xl shadow-background/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
-                      <card.icon className={`h-5 w-5 ${card.iconColor}`} strokeWidth={1.5} />
+                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-xl md:rounded-2xl p-2.5 md:p-4 shadow-xl shadow-background/30">
+                  <div className="flex items-start gap-2 md:gap-3">
+                    <div className={`w-7 h-7 md:w-10 md:h-10 rounded-lg md:rounded-xl ${card.iconBg} flex items-center justify-center shrink-0`}>
+                      <card.icon className={`h-3.5 w-3.5 md:h-5 md:w-5 ${card.iconColor}`} strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="text-sm font-medium text-foreground">{card.title}</span>
-                        <span className="text-xs text-muted-foreground shrink-0">{card.time}</span>
+                      <div className="flex items-center justify-between gap-1 md:gap-2 mb-0.5 md:mb-1">
+                        <span className="text-xs md:text-sm font-medium text-foreground">{card.title}</span>
+                        <span className="text-[10px] md:text-xs text-muted-foreground shrink-0">{card.time}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{card.text}</p>
+                      <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed line-clamp-2 md:line-clamp-none">{card.text}</p>
                     </div>
                   </div>
                 </div>
@@ -507,8 +507,8 @@ const About = () => {
                 </p>
               </div>
 
-              {/* Journey Steps - Arrow flow */}
-              <div className="flex flex-col lg:flex-row items-stretch gap-0">
+              {/* Journey Steps - Arrow flow on desktop, stacked cards on mobile */}
+              <div className="hidden lg:flex flex-row items-stretch gap-0">
                 {journeySteps.map((step, index) => (
                   <motion.div
                     key={index}
@@ -519,7 +519,7 @@ const About = () => {
                     className="flex-1 relative"
                   >
                     {/* Arrow shape container */}
-                    <div className="relative bg-muted/40 h-full min-h-[160px] lg:min-h-[130px] flex flex-col justify-start p-5 lg:pr-8"
+                    <div className="relative bg-muted/40 h-full min-h-[130px] flex flex-col justify-start p-5 pr-8"
                       style={{
                         clipPath: index === journeySteps.length - 1 
                           ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%, 8% 50%)'
@@ -529,6 +529,37 @@ const About = () => {
                     >
                       <h4 className="text-sm font-medium text-foreground mb-2 pl-2">{step.title}</h4>
                       <p className="text-xs text-muted-foreground leading-relaxed pl-2">{step.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Mobile Journey Steps - Beautiful stacked cards */}
+              <div className="lg:hidden grid grid-cols-1 gap-4">
+                {journeySteps.map((step, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08, duration: 0.5 }}
+                    className="relative"
+                  >
+                    <div className="relative bg-card/60 border border-border/40 rounded-2xl p-5 backdrop-blur-sm">
+                      {/* Step number badge */}
+                      <div className="absolute -top-3 -left-2 w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                        <span className="text-xs font-medium text-primary">{index + 1}</span>
+                      </div>
+                      
+                      {/* Arrow indicator (except last) */}
+                      {index < journeySteps.length - 1 && (
+                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 z-10">
+                          <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-border/60" />
+                        </div>
+                      )}
+                      
+                      <h4 className="text-base font-medium text-foreground mb-2 ml-4">{step.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed ml-4">{step.description}</p>
                     </div>
                   </motion.div>
                 ))}
