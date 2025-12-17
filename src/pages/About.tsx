@@ -147,6 +147,66 @@ const ManifestoWord = ({
   );
 };
 
+// Video section with 3D scroll perspective effect
+const VideoSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "center center"]
+  });
+
+  // Transform from tilted (15deg) to flat (0deg) as user scrolls
+  const rotateX = useTransform(scrollYProgress, [0, 1], [15, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [0.6, 1]);
+
+  return (
+    <section className="py-24 px-6" style={{ perspective: "1200px" }}>
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <span className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-6">
+            <Play className="h-4 w-4" />
+            Watch the Experience
+          </span>
+          <h2 className="text-3xl md:text-4xl text-foreground mb-4">
+            <span className="font-light">See Naru </span>
+            <span className="font-cormorant italic font-light">in Action</span>
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Discover how Naru transforms your career journey in under 3 minutes.
+          </p>
+        </motion.div>
+
+        <motion.div
+          ref={containerRef}
+          style={{ 
+            rotateX, 
+            scale, 
+            opacity,
+            transformStyle: "preserve-3d",
+            transformOrigin: "center bottom"
+          }}
+          className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-background/50 bg-card/50"
+        >
+          <iframe
+            src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
+            frameBorder="0"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+            title="Naru Tutorial Video"
+          />
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 const About = () => {
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress: heroScrollProgress } = useScroll({
@@ -373,46 +433,8 @@ const About = () => {
           </div>
         </section>
 
-        {/* Tutorial Video Section */}
-        <section className="py-24 px-6">
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
-            >
-              <span className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-6">
-                <Play className="h-4 w-4" />
-                Watch the Experience
-              </span>
-              <h2 className="text-3xl md:text-4xl text-foreground mb-4">
-                <span className="font-light">See Naru </span>
-                <span className="font-cormorant italic font-light">in Action</span>
-              </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Discover how Naru transforms your career journey in under 3 minutes.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-background/50 bg-card/50"
-            >
-              <iframe
-                src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
-                frameBorder="0"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-                title="Naru Tutorial Video"
-              />
-            </motion.div>
-          </div>
-        </section>
+        {/* Tutorial Video Section with 3D scroll effect */}
+        <VideoSection />
 
         {/* Manifesto Section with scroll-based text highlight */}
         <section id="manifesto" className="py-32 px-6">
