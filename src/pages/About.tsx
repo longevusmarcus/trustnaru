@@ -236,7 +236,7 @@ const About = () => {
               className="inline-flex items-center gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 mb-10"
             >
               <Sparkles className="h-4 w-4 text-foreground" />
-              <span className="text-sm text-muted-foreground">Proudly in Private Beta</span>
+              <span className="text-sm text-muted-foreground">Supported by professionals at Meta, BCG & Stripe</span>
             </motion.div>
 
             <motion.h1
