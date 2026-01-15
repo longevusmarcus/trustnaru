@@ -458,17 +458,14 @@ const About = () => {
 
           {/* Hero Content */}
           <div className="relative z-10 text-center px-6 max-w-4xl mx-auto pt-16 md:pt-0">
-            <motion.div
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-1.5 md:gap-2 bg-card/60 backdrop-blur-sm border border-border/50 rounded-full px-3 md:px-5 py-1.5 md:py-2.5 mb-6 md:mb-10"
+              className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground/70 mb-8 md:mb-12"
             >
-              <Brain className="h-3 w-3 md:h-4 md:w-4 text-foreground" />
-              <span className="text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">
-                Supported by top brains at Meta, BCG & Stripe
-              </span>
-            </motion.div>
+              Supported by top brains at Meta, BCG & Stripe
+            </motion.p>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -517,17 +514,15 @@ const About = () => {
         {/* Manifesto Section with scroll-based text highlight */}
         <section id="manifesto" className="py-32 px-6">
           <div className="max-w-4xl mx-auto">
-            <motion.div
+            <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-16"
+              className="text-center mb-16 text-xs uppercase tracking-[0.3em] text-muted-foreground/70"
             >
-              <span className="inline-block bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground">
-                Manifesto
-              </span>
-            </motion.div>
+              Manifesto
+            </motion.p>
 
             <ManifestoText />
           </div>
