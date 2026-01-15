@@ -206,10 +206,9 @@ const VideoSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <span className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-5 py-2.5 text-sm text-muted-foreground mb-6">
-            <Play className="h-4 w-4" />
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground/70 mb-6">
             Watch the Experience
-          </span>
+          </p>
           <h2 className="text-3xl md:text-4xl text-foreground mb-4">
             <span className="font-light">See Naru </span>
             <span className="font-cormorant italic font-light">in Action</span>
