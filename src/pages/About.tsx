@@ -462,7 +462,7 @@ const About = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-muted-foreground/70 mb-8 md:mb-12"
+              className="text-[8px] md:text-xs uppercase tracking-[0.15em] md:tracking-[0.3em] text-muted-foreground/70 mb-8 md:mb-12 whitespace-nowrap"
             >
               Supported by top brains at Meta, BCG & Stripe
             </motion.p>
