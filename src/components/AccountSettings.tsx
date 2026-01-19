@@ -1,4 +1,4 @@
-import { ArrowLeft, Moon, Sun, Database } from "lucide-react";
+import { ArrowLeft, Moon, Sun, Database, Crown, ExternalLink, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -6,6 +6,8 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { format } from "date-fns";
 
 interface AccountSettingsProps {
   onBack: () => void;
@@ -14,7 +16,31 @@ interface AccountSettingsProps {
 export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { isSubscribed, isLoading: subscriptionLoading, subscriptionEnd } = useSubscription();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+
+  const handleOpenPortal = async () => {
+    setIsOpeningPortal(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Portal error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open subscription portal. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsOpeningPortal(false);
+    }
+  };
 
   const handleBatchProcessCVs = async () => {
     setIsProcessing(true);
@@ -63,6 +89,76 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
       {/* Content */}
       <div className="px-4 pb-24 pt-6">
         <div className="max-w-md mx-auto space-y-6">
+          {/* Subscription Section */}
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+              Subscription
+            </h2>
+            <Card>
+              <CardContent className="p-6">
+                {subscriptionLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : isSubscribed ? (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center">
+                        <Crown className="h-5 w-5 text-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">Early Founder</div>
+                        <div className="text-xs text-muted-foreground">
+                          Career Development ID
+                        </div>
+                      </div>
+                      <div className="text-xs px-2 py-1 rounded-full bg-foreground/10 text-foreground">
+                        Active
+                      </div>
+                    </div>
+                    
+                    {subscriptionEnd && (
+                      <div className="text-sm text-muted-foreground border-t border-border pt-4">
+                        Renews on {format(new Date(subscriptionEnd), 'MMMM d, yyyy')}
+                      </div>
+                    )}
+                    
+                    <Button
+                      onClick={handleOpenPortal}
+                      disabled={isOpeningPortal}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {isOpeningPortal ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                      )}
+                      Manage Subscription
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                        <Crown className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">Free Plan</div>
+                        <div className="text-xs text-muted-foreground">
+                          Limited features
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Upgrade to Early Founder for $29/year to unlock all features including CV analysis, personalized paths, and AI coaching.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Appearance Section */}
           <div>
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
