@@ -3,14 +3,15 @@ import { UploadCVStep } from "./wizard/UploadCVStep";
 import { PhotosStep } from "./wizard/PhotosStep";
 import { VoiceStep } from "./wizard/VoiceStep";
 import { ProcessingStep } from "./wizard/ProcessingStep";
+import { PaywallModal } from "./PaywallModal";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { useBadgeAwarding } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface WizardFlowProps {
   onComplete: (careerPaths: any[]) => void;
@@ -21,6 +22,8 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useBadgeAwarding();
+  const { isSubscribed, isLoading: subscriptionLoading } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
   const [step, setStep] = useState(1);
   const [cvUrl, setCvUrl] = useState<string | undefined>();
   const [voiceTranscription, setVoiceTranscription] = useState<string | undefined>();
@@ -30,6 +33,13 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
     photos: false,
     voice: false
   });
+
+  // Show paywall if not subscribed
+  useEffect(() => {
+    if (!subscriptionLoading && !isSubscribed) {
+      setShowPaywall(true);
+    }
+  }, [subscriptionLoading, isSubscribed]);
 
   useEffect(() => {
     // Scroll to top when wizard opens
@@ -177,6 +187,14 @@ export const WizardFlow = ({ onComplete, onClose }: WizardFlowProps) => {
       </div>
       
       <BadgeCelebration badge={newlyAwardedBadge} onComplete={clearCelebration} />
+      
+      <PaywallModal 
+        isOpen={showPaywall} 
+        onClose={() => {
+          setShowPaywall(false);
+          onClose();
+        }} 
+      />
     </div>
   );
 };
