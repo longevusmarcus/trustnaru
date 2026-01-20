@@ -38,7 +38,7 @@ export const BottomNav = ({ active, onNavigate, isVisible = true }: BottomNavPro
               }`}
             >
               <Eye className="h-5 w-5" />
-              <span className="text-[10px] font-medium">Futures</span>
+              <span className="text-[10px] font-medium">Paths</span>
             </Button>
 
             <Button
