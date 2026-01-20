@@ -76,7 +76,7 @@ export default function PathDetail() {
   }, []);
 
   if (!card) {
-    navigate("/");
+    navigate("/app");
     return null;
   }
 
@@ -209,7 +209,7 @@ export default function PathDetail() {
 
       // Navigate to copilot page with a slight delay to ensure state is updated
       setTimeout(() => {
-        navigate("/", { state: { navigateTo: "copilot" } });
+        navigate("/app", { state: { navigateTo: "copilot" } });
       }, 500);
     } catch (error) {
       console.error('Error activating path:', error);
@@ -227,7 +227,7 @@ export default function PathDetail() {
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/", { state: { navigateTo: "future" } })}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/app", { state: { navigateTo: "future" } })}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-lg font-semibold">{card.title}</h1>
