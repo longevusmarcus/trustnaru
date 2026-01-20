@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubscriptionState {
   isSubscribed: boolean;
@@ -11,6 +12,8 @@ interface SubscriptionState {
 
 export const useSubscription = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const hasShownSuccessToast = useRef(false);
   const [state, setState] = useState<SubscriptionState>({
     isSubscribed: false,
     isLoading: true,
@@ -57,15 +60,23 @@ export const useSubscription = () => {
   // Check for success parameter in URL (post-checkout)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true') {
+    if (urlParams.get('success') === 'true' && !hasShownSuccessToast.current) {
+      hasShownSuccessToast.current = true;
+      
       // Remove the success param from URL
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
       
+      // Show success toast
+      toast({
+        title: "🎉 Welcome, Early Founder!",
+        description: "Your subscription is now active. Let's build your future together!",
+      });
+      
       // Recheck subscription after a short delay
       setTimeout(checkSubscription, 2000);
     }
-  }, [checkSubscription]);
+  }, [checkSubscription, toast]);
 
   return {
     ...state,
