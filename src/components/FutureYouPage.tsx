@@ -496,6 +496,30 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
   return (
     <div className="px-4 pb-24 pt-4">
       <div className="max-w-md mx-auto space-y-6">
+        {/* Demo Banner */}
+        {isDemo && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-xl bg-accent/50 border border-accent text-center space-y-2"
+          >
+            <p className="text-sm font-medium text-accent-foreground">
+              ✨ These are sample career paths
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Complete the wizard to generate personalized paths based on your CV and goals
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/app", { state: { showWizard: true } })}
+              className="mt-2 text-xs"
+            >
+              Get My Personalized Paths
+            </Button>
+          </motion.div>
+        )}
+
         <div className="flex flex-col gap-1 items-center justify-center text-xs text-muted-foreground">
           <Button
             variant="ghost"
@@ -536,8 +560,8 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
 
                 {/* Demo Badge */}
                 {isDemo && (
-                  <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm border border-border/50">
-                    <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase">demo</span>
+                  <div className="absolute top-3 right-3 px-3 py-1.5 rounded-full bg-primary/90 backdrop-blur-sm border border-primary/50 shadow-lg">
+                    <span className="text-[10px] font-semibold text-primary-foreground tracking-wider uppercase">Sample Path</span>
                   </div>
                 )}
 
