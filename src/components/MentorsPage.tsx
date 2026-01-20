@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb, MessageSquare, Bookmark, BookmarkCheck } from "lucide-react";
+import { ExternalLink, MapPin, Building, Users, Search, Loader2, Briefcase, GraduationCap, Trophy, Clock, Lightbulb, MessageSquare, Bookmark, BookmarkCheck, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from 'embla-carousel-react';
 import { CloneButton } from "@/components/CloneButton";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { PaywallModal } from "@/components/PaywallModal";
 
 interface MentorsPageProps {
   onScrollChange?: (isScrolling: boolean) => void;
@@ -34,6 +36,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const [savingMentorId, setSavingMentorId] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isSubscribed } = useSubscription();
+  const [showPaywall, setShowPaywall] = useState(false);
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
   const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
 
@@ -718,7 +722,19 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
         <TabsContent value="foryou" className="mt-0">
           {/* Happenstance Search */}
           <div className="mb-6 space-y-3">
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg border border-primary/20 relative">
+              {/* Lock overlay for non-subscribers */}
+              {!isSubscribed && (
+                <div 
+                  className="absolute inset-0 bg-background/60 backdrop-blur-[2px] rounded-lg z-10 flex items-center justify-center cursor-pointer"
+                  onClick={() => setShowPaywall(true)}
+                >
+                  <div className="text-center space-y-2">
+                    <Lock className="h-5 w-5 mx-auto text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground font-medium">Unlock to search</p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold flex items-center gap-2">
                   <Lightbulb className="h-4 w-4 text-primary" />
@@ -737,11 +753,22 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
                   value={happenstanceQuery}
                   onChange={(e) => setHappenstanceQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && searchHappenstance()}
+                  onFocus={() => {
+                    if (!isSubscribed) {
+                      setShowPaywall(true);
+                    }
+                  }}
                   className="flex-1"
-                  disabled={loadingHappenstance}
+                  disabled={loadingHappenstance || !isSubscribed}
                 />
                 <Button 
-                  onClick={searchHappenstance}
+                  onClick={() => {
+                    if (!isSubscribed) {
+                      setShowPaywall(true);
+                      return;
+                    }
+                    searchHappenstance();
+                  }}
                   disabled={loadingHappenstance}
                   size="sm"
                 >
@@ -1157,6 +1184,8 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
           )}
         </TabsContent>
       </Tabs>
+
+      <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 };
