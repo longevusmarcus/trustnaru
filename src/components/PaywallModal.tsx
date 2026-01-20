@@ -42,7 +42,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
     "Voice-based career coaching",
     "Personalized copilot & daily missions",
     "Matching with mentors & professionals",
-    "Skill gap mapping with curated role opportunities",
+    "Skill gap mapping with matched roles",
   ];
 
   return (
@@ -102,7 +102,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 <h2 className="text-3xl font-light text-foreground">
                   Unlock Your
                   <br />
-                  <span className="font-cormorant italic">Full Potential</span>
+                  <span className="font-cormorant italic">Full Career Potential</span>
                 </h2>
                 <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto">
                   Join the founding members shaping their future with AI-powered career guidance
