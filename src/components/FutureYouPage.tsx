@@ -501,16 +501,16 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-accent/50 border border-accent text-center space-y-2"
+            className="p-4 rounded-xl bg-secondary border border-border text-center space-y-2"
           >
-            <p className="text-sm font-medium text-accent-foreground">
+            <p className="text-sm font-medium text-foreground">
               ✨ These are sample career paths
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-foreground/70">
               Complete the wizard to generate personalized paths based on your CV and goals
             </p>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => navigate("/app", { state: { showWizard: true } })}
               className="mt-2 text-xs"
