@@ -290,8 +290,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
 
       const hasAny = Boolean(
         (data?.dailyActions && data.dailyActions.length) ||
-          (data?.smartTips && data.smartTips.length) ||
-          (data?.levelResources && data.levelResources.length),
+        (data?.smartTips && data.smartTips.length) ||
+        (data?.levelResources && data.levelResources.length),
       );
 
       if (!hasAny && attempt === 1) {
@@ -380,41 +380,40 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
       const today = new Date().toISOString().split("T")[0];
 
       // Fetch only essential data in parallel - optimized queries
-      const [statsResult, streakResult, badgesResult, profileResult, dailyActionsResult] =
-        await Promise.all([
-          supabase
-            .from("user_stats")
-            .select("current_streak, longest_streak, total_points")
-            .eq("user_id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("daily_streaks")
-            .select("streak_date")
-            .eq("user_id", user.id)
-            .eq("completed", true)
-            .gte("streak_date", weekStart)
-            .lte("streak_date", weekEnd),
-          supabase
-            .from("user_badges")
-            .select("badges (name, icon, description)")
-            .eq("user_id", user.id)
-            .order("earned_at", { ascending: false })
-            .limit(3),
-          supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
-          supabase
-            .from("daily_actions")
-            .select("actions, all_completed, created_at")
-            .eq("user_id", user.id)
-            .eq("action_date", today)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ]);
+      const [statsResult, streakResult, badgesResult, profileResult, dailyActionsResult] = await Promise.all([
+        supabase
+          .from("user_stats")
+          .select("current_streak, longest_streak, total_points")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("daily_streaks")
+          .select("streak_date")
+          .eq("user_id", user.id)
+          .eq("completed", true)
+          .gte("streak_date", weekStart)
+          .lte("streak_date", weekEnd),
+        supabase
+          .from("user_badges")
+          .select("badges (name, icon, description)")
+          .eq("user_id", user.id)
+          .order("earned_at", { ascending: false })
+          .limit(3),
+        supabase.from("user_profiles").select("display_name, active_path_id").eq("user_id", user.id).single(),
+        supabase
+          .from("daily_actions")
+          .select("actions, all_completed, created_at")
+          .eq("user_id", user.id)
+          .eq("action_date", today)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
       // Fetch active path separately if exists
       let activePathData = null;
       let allPathsData = [];
-      
+
       if (profileResult.data?.active_path_id) {
         const [activePathResult, pathsResult] = await Promise.all([
           supabase
@@ -433,12 +432,12 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
             .order("created_at", { ascending: false })
             .limit(20),
         ]);
-        
+
         activePathData = activePathResult.data;
         allPathsData = pathsResult.data || [];
-        
+
         // Ensure active path is in the list
-        if (activePathData && !allPathsData.find(p => p.id === activePathData.id)) {
+        if (activePathData && !allPathsData.find((p) => p.id === activePathData.id)) {
           allPathsData = [activePathData, ...allPathsData];
         }
       } else {
@@ -1465,7 +1464,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
                   <div>
                     <p className="font-medium text-foreground">Is Founder Status worth it?</p>
                     <p className="text-xs text-muted-foreground">
-                      Yes. As a founder, you get perks (TBA) and a limited price of $48/year (normally $240).
+                      Yes. As a founder, you get perks (TBA) and a limited price of $29/year (normally $290).
                     </p>
                   </div>
                 </div>
