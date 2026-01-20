@@ -156,7 +156,7 @@ export const FutureYouPage = ({ careerPaths = [] }: { careerPaths?: any[] }) => 
       // Check if user has completed the wizard (has CV, photos, and voice)
       if (!profile.cv_url || !profile.voice_transcription || !profile.wizard_data) {
         setLoading(false);
-        navigate("/", { state: { showWizard: true } });
+        navigate("/app", { state: { showWizard: true } });
         return;
       }
 
