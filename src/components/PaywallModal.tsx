@@ -105,7 +105,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                   <span className="font-cormorant italic">Full Career Potential</span>
                 </h2>
                 <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto">
-                  Join the founding members shaping their future with AI-powered career guidance
+                  Join the founding members shaping their future with the first Career OS
                 </p>
               </motion.div>
 
