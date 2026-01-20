@@ -116,7 +116,8 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 transition={{ delay: 0.2 }}
                 className="space-y-1"
               >
-                <div className="flex items-baseline justify-center gap-1">
+                <div className="flex items-baseline justify-center gap-2">
+                  <span className="text-xl text-muted-foreground/40 line-through">$290</span>
                   <span className="text-4xl font-light text-foreground">$29</span>
                   <span className="text-muted-foreground/60">/year</span>
                 </div>
