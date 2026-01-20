@@ -13,7 +13,6 @@ import { InsightsPage } from "@/components/InsightsPage";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { WizardFlow } from "@/components/WizardFlow";
 import { IntroOnboarding } from "@/components/IntroOnboarding";
-import { CodeEntry } from "@/components/CodeEntry";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +22,6 @@ const Index = () => {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
-  const [showCodeEntry, setShowCodeEntry] = useState(false);
   const [careerPaths, setCareerPaths] = useState<any[]>([]);
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [pageRenderKey, setPageRenderKey] = useState(0);
@@ -164,13 +162,8 @@ const Index = () => {
     }
   };
 
-  const handleIntroComplete = () => {
+  const handleIntroComplete = async () => {
     setShowIntro(false);
-    setShowCodeEntry(true);
-  };
-
-  const handleCodeSuccess = async () => {
-    setShowCodeEntry(false);
     setCurrentPage("home");
 
     // Mark onboarding as completed
@@ -197,10 +190,6 @@ const Index = () => {
 
   if (showIntro) {
     return <IntroOnboarding onComplete={handleIntroComplete} />;
-  }
-
-  if (showCodeEntry) {
-    return <CodeEntry onSuccess={handleCodeSuccess} />;
   }
 
   return (
