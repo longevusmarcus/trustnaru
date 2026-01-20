@@ -216,12 +216,16 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
     if (!user?.id || isSubscribed) return;
 
     const storageKey = `paywall_shown_${user.id}`;
-    const alreadyShown = localStorage.getItem(storageKey);
+    const lastShownTimestamp = localStorage.getItem(storageKey);
+    const twentyFourHoursMs = 24 * 60 * 60 * 1000;
 
-    if (!alreadyShown) {
+    const shouldShowPaywall = !lastShownTimestamp || 
+      (Date.now() - parseInt(lastShownTimestamp, 10)) > twentyFourHoursMs;
+
+    if (shouldShowPaywall) {
       const timer = setTimeout(() => {
         setShowPaywall(true);
-        localStorage.setItem(storageKey, "true");
+        localStorage.setItem(storageKey, Date.now().toString());
       }, 10000);
 
       return () => clearTimeout(timer);
