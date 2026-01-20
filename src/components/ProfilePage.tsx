@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import * as pdfjsLib from "pdfjs-dist";
 // @ts-ignore - worker URL import for pdfjs
@@ -21,7 +22,7 @@ import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 export const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isSubscribed } = useSubscription();
+  const { isSubscribed, isLoading: isSubscriptionLoading } = useSubscription();
   const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useAutoBadgeCheck();
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -364,12 +365,14 @@ export const ProfilePage = () => {
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-2xl font-semibold">{displayName}</h2>
-            {isSubscribed && (
+            {isSubscriptionLoading ? (
+              <Skeleton className="h-5 w-20 rounded-full" />
+            ) : isSubscribed ? (
               <Badge variant="secondary" className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30 gap-1">
                 <Crown className="h-3 w-3" />
                 Founder
               </Badge>
-            )}
+            ) : null}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
