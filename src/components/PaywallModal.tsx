@@ -37,12 +37,12 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
   };
 
   const features = [
-    "AI-powered career path discovery",
-    "Personalized daily missions",
-    "Voice-based career coaching",
-    "CV analysis & optimization",
     "Unlimited path explorations",
-    "Early founder pricing locked forever",
+    "Future-self visualizations",
+    "Voice-based career coaching",
+    "Personalized daily missions",
+    "CV analysis & optimization",
+    "Match with mentors & professionals",
   ];
 
   return (
@@ -102,10 +102,10 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 <h2 className="text-3xl font-light text-foreground">
                   Unlock Your
                   <br />
-                  <span className="font-cormorant italic">Full Potential</span>
+                  <span className="font-cormorant italic">Full Career Potential</span>
                 </h2>
                 <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto">
-                  Join the founding members shaping their future with the first Career OS
+                  Join the founding members shaping their future with AI-powered career guidance
                 </p>
               </motion.div>
 
@@ -116,11 +116,12 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 transition={{ delay: 0.2 }}
                 className="space-y-1"
               >
-                <div className="flex items-baseline justify-center gap-1">
+                <div className="flex items-baseline justify-center gap-2">
+                  <span className="text-lg text-muted-foreground/40 line-through">$290</span>
                   <span className="text-4xl font-light text-foreground">$29</span>
                   <span className="text-muted-foreground/60">/year</span>
                 </div>
-                <p className="text-xs text-muted-foreground/50">Less than $2.50/month</p>
+                <p className="text-xs text-muted-foreground/50">90% off · Less than $2.50/month</p>
               </motion.div>
 
               {/* Features */}
