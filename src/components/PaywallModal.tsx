@@ -17,19 +17,19 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
   const handleSubscribe = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout");
-
+      const { data, error } = await supabase.functions.invoke('create-checkout');
+      
       if (error) throw error;
-
+      
       if (data?.url) {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error("Checkout error:", error);
+      console.error('Checkout error:', error);
       toast({
         title: "Error",
         description: "Failed to start checkout. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -37,12 +37,14 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
   };
 
   const features = [
-    "AI-powered career path discovery",
-    "Personalized daily missions",
-    "Voice-based career coaching",
-    "CV analysis & optimization",
     "Unlimited path explorations",
-    "Early founder pricing locked forever",
+    "Voice-based career coaching",
+    "Future-self visualization",
+    "Personalized copilot",
+    "Personalized daily missions",
+    "CV analysis & optimization",
+    "Match with mentors and professionals"
+    "Jobs and automations"
   ];
 
   return (
@@ -55,14 +57,14 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           {/* Backdrop */}
-          <motion.div
+          <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-background/95 backdrop-blur-xl"
             onClick={onClose}
           />
-
+          
           {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -105,7 +107,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                   <span className="font-cormorant italic">Full Potential</span>
                 </h2>
                 <p className="text-sm text-muted-foreground/80 max-w-xs mx-auto">
-                  Join the founding members shaping their future with the first Career OS
+                  Join the founding members shaping their future with AI-powered career guidance
                 </p>
               </motion.div>
 
@@ -120,7 +122,9 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                   <span className="text-4xl font-light text-foreground">$29</span>
                   <span className="text-muted-foreground/60">/year</span>
                 </div>
-                <p className="text-xs text-muted-foreground/50">Less than $2.50/month</p>
+                <p className="text-xs text-muted-foreground/50">
+                  Less than $2.50/month
+                </p>
               </motion.div>
 
               {/* Features */}
@@ -131,7 +135,10 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 className="space-y-3 text-left max-w-xs mx-auto"
               >
                 {features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3 text-sm">
+                  <div 
+                    key={index}
+                    className="flex items-start gap-3 text-sm"
+                  >
                     <Check className="h-4 w-4 text-foreground/60 mt-0.5 flex-shrink-0" />
                     <span className="text-muted-foreground">{feature}</span>
                   </div>
@@ -152,7 +159,9 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
                 >
                   {isLoading ? "Loading..." : "Start Your Journey"}
                 </Button>
-                <p className="text-[10px] text-muted-foreground/40">Cancel anytime · Secure payment via Stripe</p>
+                <p className="text-[10px] text-muted-foreground/40">
+                  Cancel anytime · Secure payment via Stripe
+                </p>
               </motion.div>
             </div>
           </motion.div>
