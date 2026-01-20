@@ -28,6 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DailyMotivation } from "./DailyMotivation";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PaywallModal } from "./PaywallModal";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const getWeekDates = () => {
   const today = new Date();
@@ -121,8 +123,10 @@ const getFeaturedTopicForUser = (activePath: any, stats: any, allPaths: any[]) =
 export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isSubscribed } = useSubscription();
   useDailyStreak(); // Track daily login and update streak
   const [userStats, setUserStats] = useState<any>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [streaks, setStreaks] = useState<Date[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<any[]>([]);
   const [firstPath, setFirstPath] = useState<any>(null);
@@ -206,6 +210,23 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  // Show paywall for first-time users after 10 seconds
+  useEffect(() => {
+    if (!user?.id || isSubscribed) return;
+
+    const storageKey = `paywall_shown_${user.id}`;
+    const alreadyShown = localStorage.getItem(storageKey);
+
+    if (!alreadyShown) {
+      const timer = setTimeout(() => {
+        setShowPaywall(true);
+        localStorage.setItem(storageKey, "true");
+      }, 10000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [user?.id, isSubscribed]);
 
   // Track explored sections
   useEffect(() => {
@@ -1506,6 +1527,8 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
           </div>
         </div>
       )}
+
+      <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </>
   );
 };
