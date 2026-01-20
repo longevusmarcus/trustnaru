@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Trophy, Target, Flame, Pencil, Calendar, Upload } from "lucide-react";
+import { LogOut, Settings, Trophy, Target, Flame, Pencil, Calendar, Upload, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useAutoBadgeCheck } from "@/hooks/useBadgeAwarding";
 import { BadgeCelebration } from "@/components/BadgeCelebration";
+import { useSubscription } from "@/hooks/useSubscription";
 
 import * as pdfjsLib from "pdfjs-dist";
 // @ts-ignore - worker URL import for pdfjs
@@ -20,6 +21,7 @@ import pdfWorker from "pdfjs-dist/build/pdf.worker?url";
 export const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isSubscribed } = useSubscription();
   const { checkAndAwardBadges, newlyAwardedBadge, clearCelebration } = useAutoBadgeCheck();
   const [userStats, setUserStats] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -362,6 +364,12 @@ export const ProfilePage = () => {
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-2xl font-semibold">{displayName}</h2>
+            {isSubscribed && (
+              <Badge variant="secondary" className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30 gap-1">
+                <Crown className="h-3 w-3" />
+                Founder
+              </Badge>
+            )}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
