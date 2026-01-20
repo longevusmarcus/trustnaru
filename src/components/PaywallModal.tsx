@@ -41,7 +41,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
     "Future-self visualizations",
     "Voice-based career coaching",
     "Personalized copilot & daily missions",
-    "Smart matching with mentors & professionals",
+    "Matching with mentors & professionals",
     "Skill gap mapping with curated role opportunities",
   ];
 
