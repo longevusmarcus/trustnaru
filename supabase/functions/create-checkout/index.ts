@@ -59,7 +59,7 @@ serve(async (req) => {
       ],
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/payment-success`,
-      cancel_url: `${req.headers.get("origin")}/app`,
+      cancel_url: `${req.headers.get("origin")}/payment-canceled`,
       client_reference_id: user.id,
       allow_promotion_codes: true,
     });
