@@ -1,12 +1,14 @@
-import { ArrowLeft, Moon, Sun, Database, Crown, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Moon, Sun, Database, Crown, ExternalLink, Loader2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/ThemeProvider";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { format } from "date-fns";
 
 interface AccountSettingsProps {
@@ -16,7 +18,9 @@ interface AccountSettingsProps {
 export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { isSubscribed, isLoading: subscriptionLoading, subscriptionEnd } = useSubscription();
+  const { isAdmin } = useAdminRole();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
 
@@ -243,34 +247,49 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
             </Card>
           </div>
 
-          {/* Admin Tools Section */}
-          <div>
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-              Admin Tools
-            </h2>
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
+          {/* Admin Tools Section - Only visible to admins */}
+          {isAdmin && (
+            <div>
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Admin Tools
+              </h2>
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  {/* Admin Dashboard Link */}
                   <div>
+                    <h3 className="text-base font-semibold mb-1">Analytics Dashboard</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      View checkout analytics and conversion rates
+                    </p>
+                    <Button
+                      onClick={() => navigate("/admin")}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Open Admin Dashboard
+                    </Button>
+                  </div>
+
+                  <div className="border-t border-border pt-4">
                     <h3 className="text-base font-semibold mb-1">Batch CV Processing</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Manually trigger batch processing of unparsed CVs
                     </p>
+                    <Button
+                      onClick={handleBatchProcessCVs}
+                      disabled={isProcessing}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Database className="h-4 w-4 mr-2" />
+                      {isProcessing ? "Processing CVs..." : "Process All Unparsed CVs"}
+                    </Button>
                   </div>
-
-                  <Button
-                    onClick={handleBatchProcessCVs}
-                    disabled={isProcessing}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Database className="h-4 w-4 mr-2" />
-                    {isProcessing ? "Processing CVs..." : "Process All Unparsed CVs"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>
