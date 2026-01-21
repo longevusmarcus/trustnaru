@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy";
 import Cookies from "./pages/Cookies";
 import FAQ from "./pages/FAQ";
 import About from "./pages/About";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
                   <Route path="/cookies" element={<Cookies />} />
                   <Route path="/faq" element={<FAQ />} />
                   <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                  <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
                   <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
                   <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
