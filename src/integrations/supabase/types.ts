@@ -143,6 +143,33 @@ export type Database = {
         }
         Relationships: []
       }
+      checkout_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          price_id: string | null
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          price_id?: string | null
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          price_id?: string | null
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       clone_waiting_list: {
         Row: {
           created_at: string
