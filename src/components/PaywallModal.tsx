@@ -4,6 +4,7 @@ import { X, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -13,10 +14,20 @@ interface PaywallModalProps {
 export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubscribe = async () => {
     setIsLoading(true);
     try {
+      // Track checkout initiation
+      if (user) {
+        await supabase.from("checkout_events").insert({
+          user_id: user.id,
+          event_type: "initiated",
+          price_id: "price_1SrFUF2LCwPxHz0nXWGYrqg7",
+        });
+      }
+
       const { data, error } = await supabase.functions.invoke("create-checkout");
 
       if (error) throw error;

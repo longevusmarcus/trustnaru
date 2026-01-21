@@ -1,18 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [showContent, setShowContent] = useState(false);
+  const { user } = useAuth();
+  const hasTracked = useRef(false);
 
   useEffect(() => {
+    // Track completed checkout event
+    const trackCompletion = async () => {
+      if (user && !hasTracked.current) {
+        hasTracked.current = true;
+        await supabase.from("checkout_events").insert({
+          user_id: user.id,
+          event_type: "completed",
+          price_id: "price_1SrFUF2LCwPxHz0nXWGYrqg7",
+        });
+      }
+    };
+    trackCompletion();
+
     // Small delay for dramatic effect
     const timer = setTimeout(() => setShowContent(true), 300);
     return () => clearTimeout(timer);
-  }, []);
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
