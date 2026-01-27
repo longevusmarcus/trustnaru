@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, TrendingUp, TrendingDown, Users, CreditCard, XCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, TrendingUp, DollarSign, CreditCard, XCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { format, subDays, startOfDay } from "date-fns";
-
 interface CheckoutEvent {
   id: string;
   user_id: string;
@@ -22,7 +23,17 @@ interface DailyStats {
   initiated: number;
   completed: number;
   abandoned: number;
+  revenue: number;
 }
+
+const SUBSCRIPTION_PRICE = 29; // $29/year
+
+const chartConfig = {
+  revenue: {
+    label: "Revenue",
+    color: "hsl(var(--primary))",
+  },
+};
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -70,11 +81,14 @@ const Admin = () => {
         format(new Date(e.created_at), "yyyy-MM-dd") === dateStr
       );
       
+      const completedCount = dayEvents.filter(e => e.event_type === "completed").length;
+      
       last7Days.push({
         date: format(date, "MMM d"),
         initiated: dayEvents.filter(e => e.event_type === "initiated").length,
-        completed: dayEvents.filter(e => e.event_type === "completed").length,
+        completed: completedCount,
         abandoned: dayEvents.filter(e => e.event_type === "abandoned").length,
+        revenue: completedCount * SUBSCRIPTION_PRICE,
       });
     }
     
@@ -84,11 +98,9 @@ const Admin = () => {
   const totalInitiated = events.filter(e => e.event_type === "initiated").length;
   const totalCompleted = events.filter(e => e.event_type === "completed").length;
   const totalAbandoned = events.filter(e => e.event_type === "abandoned").length;
+  const totalRevenue = totalCompleted * SUBSCRIPTION_PRICE;
   const conversionRate = totalInitiated > 0 
     ? ((totalCompleted / totalInitiated) * 100).toFixed(1) 
-    : "0";
-  const abandonmentRate = totalInitiated > 0 
-    ? ((totalAbandoned / totalInitiated) * 100).toFixed(1) 
     : "0";
 
   if (isRoleLoading || isLoading) {
@@ -123,11 +135,29 @@ const Admin = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+          >
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs font-normal text-muted-foreground flex items-center gap-2">
+                  <DollarSign className="h-3 w-3" />
+                  Total Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-light text-primary">${totalRevenue}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -145,7 +175,7 @@ const Admin = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            transition={{ delay: 0.2 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -163,7 +193,7 @@ const Admin = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.25 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -181,7 +211,7 @@ const Admin = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
+            transition={{ delay: 0.3 }}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -197,6 +227,53 @@ const Admin = () => {
           </motion.div>
         </div>
 
+        {/* Revenue Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-normal">Revenue (Last 7 Days)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                <AreaChart data={dailyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent formatter={(value) => [`$${value}`, "Revenue"]} />} 
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#revenueGradient)"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Daily Breakdown */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -205,7 +282,7 @@ const Admin = () => {
         >
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-normal">Last 7 Days</CardTitle>
+              <CardTitle className="text-sm font-normal">Daily Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
