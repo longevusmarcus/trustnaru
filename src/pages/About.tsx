@@ -936,7 +936,7 @@ const About = () => {
 
             {/* Bottom bar */}
             <div className="pt-8 border-t border-border/30 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-muted-foreground">© 2025 Naru by RocketMinds. All rights reserved.</p>
+              <p className="text-sm text-muted-foreground">© 2026 Naru by RocketMinds. All rights reserved.</p>
               <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
                 <span>Built with purpose for ambitious professionals, career dreamers and career changers</span>
               </div>
