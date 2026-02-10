@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://trustnaru.com/sitemap.xml
+Sitemap: https://trustnaru.lovable.app/sitemap.xml

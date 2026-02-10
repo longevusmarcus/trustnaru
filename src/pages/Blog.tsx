@@ -15,12 +15,13 @@ interface BlogPost {
   content: string[];
 }
 
-const blogPosts: BlogPost[] = [
+const blogPosts: (BlogPost & { isoDate: string })[] = [
   {
     slug: "why-visualizing-your-future-self-changes-everything",
     title: "Why Visualizing Your Future Self Changes Everything",
     subtitle: "The science behind seeing who you could become — and why it rewires how you make decisions today.",
     date: "January 2025",
+    isoDate: "2025-01-15",
     readTime: "5 min read",
     category: "Identity",
     content: [
@@ -36,6 +37,7 @@ const blogPosts: BlogPost[] = [
     title: "The Case for a Career Copilot",
     subtitle: "Career advice is everywhere. Personalized, actionable daily guidance is almost nowhere. Until now.",
     date: "December 2024",
+    isoDate: "2024-12-10",
     readTime: "4 min read",
     category: "Product",
     content: [
@@ -51,6 +53,7 @@ const blogPosts: BlogPost[] = [
     title: "Daily Actions: Compound Interest for Your Career",
     subtitle: "Small, consistent moves create outcomes that big, sporadic efforts never will.",
     date: "November 2024",
+    isoDate: "2024-11-20",
     readTime: "4 min read",
     category: "Growth",
     content: [
@@ -66,6 +69,7 @@ const blogPosts: BlogPost[] = [
     title: "What AI Gets Right About Career Guidance (And What It Doesn't)",
     subtitle: "Honest reflections on where artificial intelligence genuinely helps with career decisions — and where human judgment remains irreplaceable.",
     date: "October 2024",
+    isoDate: "2024-10-05",
     readTime: "6 min read",
     category: "Perspective",
     content: [
@@ -81,6 +85,7 @@ const blogPosts: BlogPost[] = [
     title: "Learning from Those Who Made It",
     subtitle: "Why studying the trajectories of high-achievers is one of the most underrated career strategies.",
     date: "September 2024",
+    isoDate: "2024-09-12",
     readTime: "5 min read",
     category: "Community",
     content: [
@@ -94,44 +99,86 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
+  const pageTitle = "Blog — Naru | Career Growth & Future-Self Insights";
+  const pageDescription =
+    "Thoughtful perspectives on career growth, future-self visualization, and the role of AI in professional development. Insights from the Naru team.";
+  const canonicalUrl = "https://trustnaru.lovable.app/blog";
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    name: "Naru Blog",
-    description: "Insights on career growth, AI-powered guidance, and becoming your future self.",
+    name: "Naru Blog — Thoughts on Becoming",
+    url: canonicalUrl,
+    description: pageDescription,
+    publisher: {
+      "@type": "Organization",
+      name: "Naru by RocketMinds",
+      url: "https://trustnaru.lovable.app",
+    },
     blogPost: blogPosts.map((post) => ({
       "@type": "BlogPosting",
       headline: post.title,
       description: post.subtitle,
-      datePublished: post.date,
+      datePublished: post.isoDate,
+      author: {
+        "@type": "Organization",
+        name: "Naru",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Naru by RocketMinds",
+      },
+      mainEntityOfPage: `${canonicalUrl}#${post.slug}`,
     })),
+  };
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://trustnaru.lovable.app/" },
+      { "@type": "ListItem", position: 2, name: "Blog", item: canonicalUrl },
+    ],
   };
 
   return (
     <>
       <Helmet>
-        <title>Blog — Naru | Career Growth Insights</title>
-        <meta
-          name="description"
-          content="Thoughtful perspectives on career growth, future-self visualization, and the role of AI in professional development."
-        />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="blog" />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="Naru" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbData)}</script>
       </Helmet>
 
-      <div className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background">
         {/* Header */}
-        <div className="border-b border-border/30">
+        <header className="border-b border-border/30">
           <div className="max-w-4xl mx-auto px-6 py-6">
-            <nav className="flex items-center justify-between mb-12">
-              <Link to="/">
+            <nav aria-label="Breadcrumb" className="flex items-center justify-between mb-12">
+              <Link to="/" aria-label="Back to home">
                 <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                   Home
                 </Button>
               </Link>
               <Link
                 to="/"
                 className="text-xl font-light tracking-wide bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
+                aria-label="Naru home"
               >
                 Naru
               </Link>
@@ -143,7 +190,7 @@ const Blog = () => {
               transition={{ duration: 0.5 }}
               className="max-w-2xl"
             >
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground/60 mb-4">Journal</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground/60 mb-4" aria-hidden="true">Journal</p>
               <h1 className="text-4xl md:text-5xl font-cormorant font-light text-foreground mb-4">
                 Thoughts on Becoming
               </h1>
@@ -152,7 +199,7 @@ const Blog = () => {
               </p>
             </motion.div>
           </div>
-        </div>
+        </header>
 
         {/* Articles */}
         <div className="max-w-4xl mx-auto px-6 py-12">
@@ -266,7 +313,7 @@ const Blog = () => {
             </Button>
           </div>
         </div>
-      </div>
+      </main>
     </>
   );
 };
