@@ -19,7 +19,6 @@ import {
   Compass,
   ClipboardList,
   Play,
-  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
@@ -36,10 +35,6 @@ import showcaseVoice from "@/assets/showcase-voice.png";
 import showcaseDashboard from "@/assets/showcase-dashboard.png";
 import showcaseFutures from "@/assets/showcase-futures.png";
 
-// Import testimonial photos
-import testimonial1 from "@/assets/testimonial-1.png";
-import testimonial2 from "@/assets/testimonial-2.png";
-import testimonial3 from "@/assets/testimonial-3.png";
 
 // Component for manifesto text that highlights as one whole unit on scroll
 const ManifestoText = () => {
@@ -374,9 +369,6 @@ const About = () => {
                 </a>
                 <a href="#journey" className="hover:text-foreground transition-colors">
                   Why Naru
-                </a>
-                <a href="#testimonials" className="hover:text-foreground transition-colors">
-                  Testimonials
                 </a>
               </div>
             </div>
@@ -853,85 +845,14 @@ const About = () => {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section id="testimonials" className="py-24 px-6">
+        {/* CTA Section */}
+        <section className="py-24 px-6">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-3xl md:text-5xl text-foreground mb-6">
-                <span className="font-light">What our </span>
-                <span className="font-cormorant italic font-light text-4xl md:text-6xl">users</span>
-                <span className="font-light"> say</span>
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Real stories from people who transformed their careers with Naru.
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              {[
-                {
-                  quote:
-                    "Naru helped me visualize my future self as a product leader, and even careers I didn't know how to put into words. Now I truly feel that everything is possible.",
-                  initials: "S.C.",
-                  role: "Senior Product Manager",
-                  photo: testimonial1,
-                },
-                {
-                  quote:
-                    "The daily actions and personalized guidance made career growth feel achievable. Naru became my career copilot.",
-                  initials: "M.J.",
-                  role: "Engineering Lead",
-                  photo: testimonial2,
-                },
-                {
-                  quote:
-                    "I was stuck figuring out my next steps. Naru gave me clarity on who I wanted to become and the roadmap to get there.",
-                  initials: "E.R.",
-                  role: "Graduate Student",
-                  photo: testimonial3,
-                },
-              ].map((testimonial, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="bg-secondary/30 backdrop-blur-sm border border-border/30 rounded-3xl p-8 flex flex-col"
-                >
-                  <div className="flex gap-1 mb-6">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-foreground/90 mb-8 flex-grow leading-relaxed">"{testimonial.quote}"</p>
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={testimonial.photo}
-                      alt={testimonial.initials}
-                      className="w-12 h-12 rounded-full object-cover border border-border/50"
-                    />
-                    <div>
-                      <p className="font-medium text-foreground">{testimonial.initials}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* CTA integrated into testimonials */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
               className="bg-gradient-to-br from-primary/10 via-secondary/20 to-primary/5 backdrop-blur-sm border border-border/30 rounded-3xl p-10 md:p-14 text-center"
             >
               <h3 className="text-2xl md:text-4xl text-foreground mb-6">
@@ -983,9 +904,6 @@ const About = () => {
                 <div className="flex flex-col gap-3 text-sm text-muted-foreground">
                   <a href="#features" className="hover:text-foreground transition-colors">
                     Features
-                  </a>
-                  <a href="#testimonials" className="hover:text-foreground transition-colors">
-                    Testimonials
                   </a>
                   <a href="#journey" className="hover:text-foreground transition-colors">
                     Why Naru
