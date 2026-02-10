@@ -911,6 +911,9 @@ const About = () => {
                   <Link to="/faq" className="hover:text-foreground transition-colors">
                     FAQ
                   </Link>
+                  <Link to="/blog" className="hover:text-foreground transition-colors">
+                    Blog
+                  </Link>
                 </div>
               </div>
 
