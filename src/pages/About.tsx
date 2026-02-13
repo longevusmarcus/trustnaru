@@ -246,7 +246,7 @@ const About = () => {
 
   // Dynamic member count: 701 at launch (Feb 13 2025 00:00 UTC), +1 every 30 min
   const getMemberCount = () => {
-    const launchDate = new Date('2025-02-13T00:00:00Z').getTime();
+    const launchDate = new Date('2026-02-13T00:00:00Z').getTime();
     const elapsed = Date.now() - launchDate;
     return 701 + Math.floor(elapsed / (30 * 60 * 1000));
   };
