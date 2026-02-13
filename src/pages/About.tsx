@@ -244,13 +244,18 @@ const About = () => {
     offset: ["start start", "end start"],
   });
 
-  // Dynamic member count that increments over time
-  const [memberCount, setMemberCount] = useState(701);
+  // Dynamic member count: 701 at launch (Feb 13 2025 00:00 UTC), +1 every 30 min
+  const getMemberCount = () => {
+    const launchDate = new Date('2025-02-13T00:00:00Z').getTime();
+    const elapsed = Date.now() - launchDate;
+    return 701 + Math.floor(elapsed / (30 * 60 * 1000));
+  };
+  const [memberCount, setMemberCount] = useState(getMemberCount);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setMemberCount((c) => c + 1);
-    }, 30 * 60 * 1000);
+      setMemberCount(getMemberCount());
+    }, 30 * 1000); // check every 30s for smooth updates
     return () => clearInterval(interval);
   }, []);
   const features = [
@@ -502,7 +507,7 @@ const About = () => {
                 className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
               >
                 <Link to="/auth">
-                  Join {memberCount.toLocaleString()}+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
+                  Join {memberCount.toLocaleString()} Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -882,7 +887,7 @@ const About = () => {
                   className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
                 >
                   <Link to="/auth">
-                    Join {memberCount.toLocaleString()}+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
+                    Join {memberCount.toLocaleString()} Early Members <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               </div>
