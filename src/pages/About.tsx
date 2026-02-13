@@ -245,13 +245,7 @@ const About = () => {
   });
 
   // Dynamic member count that increments over time
-  const [memberCount, setMemberCount] = useState(() => {
-    const baseCount = 700;
-    const launchDate = new Date("2025-06-01").getTime();
-    const now = Date.now();
-    const daysSinceLaunch = Math.floor((now - launchDate) / (1000 * 60 * 60 * 24));
-    return baseCount + Math.max(0, daysSinceLaunch);
-  });
+  const [memberCount, setMemberCount] = useState(701);
 
   useEffect(() => {
     // Increment by 1 every 30–90 seconds for a natural feel
