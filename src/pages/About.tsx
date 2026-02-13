@@ -248,14 +248,10 @@ const About = () => {
   const [memberCount, setMemberCount] = useState(701);
 
   useEffect(() => {
-    // Increment by 1 every 30–90 seconds for a natural feel
-    const tick = () => {
+    const interval = setInterval(() => {
       setMemberCount((c) => c + 1);
-      const next = 30000 + Math.random() * 60000;
-      timer = setTimeout(tick, next);
-    };
-    let timer = setTimeout(tick, 30000 + Math.random() * 60000);
-    return () => clearTimeout(timer);
+    }, 30 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
   const features = [
     {
