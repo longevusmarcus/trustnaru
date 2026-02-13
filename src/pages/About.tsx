@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 // Import app screenshots
 import featureFutures from "@/assets/feature-futures.png";
@@ -243,6 +243,26 @@ const About = () => {
     target: heroRef,
     offset: ["start start", "end start"],
   });
+
+  // Dynamic member count that increments over time
+  const [memberCount, setMemberCount] = useState(() => {
+    const baseCount = 700;
+    const launchDate = new Date("2025-06-01").getTime();
+    const now = Date.now();
+    const daysSinceLaunch = Math.floor((now - launchDate) / (1000 * 60 * 60 * 24));
+    return baseCount + Math.max(0, daysSinceLaunch);
+  });
+
+  useEffect(() => {
+    // Increment by 1 every 30–90 seconds for a natural feel
+    const tick = () => {
+      setMemberCount((c) => c + 1);
+      const next = 30000 + Math.random() * 60000;
+      timer = setTimeout(tick, next);
+    };
+    let timer = setTimeout(tick, 30000 + Math.random() * 60000);
+    return () => clearTimeout(timer);
+  }, []);
   const features = [
     {
       icon: Eye,
@@ -492,7 +512,7 @@ const About = () => {
                 className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
               >
                 <Link to="/auth">
-                  Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
+                  Join {memberCount.toLocaleString()}+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -872,7 +892,7 @@ const About = () => {
                   className="rounded-full text-base px-8 py-6 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
                 >
                   <Link to="/auth">
-                    Join 700+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
+                    Join {memberCount.toLocaleString()}+ Early Members <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               </div>
