@@ -427,6 +427,27 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       saved_mentors: {
         Row: {
           id: string
