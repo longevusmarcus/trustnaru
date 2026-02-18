@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { usePageView } from "@/hooks/usePageView";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { HomePage } from "@/components/HomePage";
@@ -18,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  usePageView("/app");
   const [currentPage, setCurrentPage] = useState("home");
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
