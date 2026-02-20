@@ -226,11 +226,13 @@ const VideoSection = () => {
           className="relative aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-2xl shadow-background/50 bg-card/50"
         >
           <iframe
-            src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
+            src="https://player.vimeo.com/video/1152854385?badge=0&autopause=0&player_id=0&app_id=58479"
             frameBorder="0"
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
             className="absolute inset-0 w-full h-full"
-            title="Naru Tutorial Video"
+            title="Naru - The OS for Becoming"
           />
         </motion.div>
       </div>

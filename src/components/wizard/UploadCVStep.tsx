@@ -275,9 +275,12 @@ export const UploadCVStep = ({ onNext, onSkip, hasExistingCV }: UploadCVStepProp
             <div className="bg-muted/30 rounded-2xl p-4">
               <div style={{ position: "relative", paddingBottom: "140.99216710182768%", height: 0 }}>
                 <iframe
-                  src="https://www.loom.com/embed/977861e8549745d68180aef5b7450433"
+                  src="https://player.vimeo.com/video/1152854385?badge=0&autopause=0&player_id=0&app_id=58479"
                   frameBorder="0"
+                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
                   allowFullScreen
+                  title="Naru - The OS for Becoming"
                   style={{
                     position: "absolute",
                     top: 0,
