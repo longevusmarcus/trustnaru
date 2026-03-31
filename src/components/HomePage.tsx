@@ -642,7 +642,7 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
   };
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timerActive && timerSeconds > 0) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => {

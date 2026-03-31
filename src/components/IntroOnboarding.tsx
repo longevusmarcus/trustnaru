@@ -79,7 +79,7 @@ export const IntroOnboarding = ({ onComplete }: IntroOnboardingProps) => {
   useEffect(() => {
     setVisibleItems(0);
     if (slide.items) {
-      const timers: NodeJS.Timeout[] = [];
+      const timers: ReturnType<typeof setTimeout>[] = [];
       slide.items.forEach((_, index) => {
         const timer = setTimeout(
           () => {
