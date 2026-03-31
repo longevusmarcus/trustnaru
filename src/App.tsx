@@ -68,6 +68,13 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  useEffect(() => {
+    if (isInsideMsx()) {
+      verifyMsxLaunch();
+      initMsxListener();
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
