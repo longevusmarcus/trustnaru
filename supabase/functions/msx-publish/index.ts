@@ -61,7 +61,7 @@ serve(async (req) => {
     const action = body.action || "publish";
 
     if (action === "publish") {
-      const payload = {
+    const payload = {
         name: "Naru",
         slug: "naru",
         summary:
@@ -72,6 +72,7 @@ serve(async (req) => {
         credential: msxToken,
         access: "subscriber",
         billingMode: "msx_managed",
+        shellCapabilities: ["launch_token_verify", "shell_auth_bridge"],
         method: "api",
       };
 
