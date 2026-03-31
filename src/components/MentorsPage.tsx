@@ -39,7 +39,7 @@ export const MentorsPage = ({ onScrollChange }: MentorsPageProps) => {
   const { isSubscribed } = useSubscription();
   const [showPaywall, setShowPaywall] = useState(false);
   const [emblaRef] = useEmblaCarousel({ loop: false, align: 'start' });
-  const [scrollTimeout, setScrollTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [scrollTimeout, setScrollTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   const handleCardScroll = () => {
     if (onScrollChange) {

@@ -250,7 +250,7 @@ export const ActionPage = () => {
 
   // Timer effect for meditation
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timerActive && timerSeconds > 0) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => {
