@@ -91,6 +91,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           status: publishRes.status,
+          payload,
           response: publishData,
           message:
             publishRes.ok
