@@ -76,11 +76,11 @@ serve(async (req) => {
         method: "api",
       };
 
-      // Attempt MSX publish - the base URL is per MSX docs
-      const msxApiBase =
-        Deno.env.get("MSX_API_BASE_URL") || "https://api.msx.gg";
+      // Attempt MSX publish using a resolvable MSX host
+      const msxApiBase = (Deno.env.get("MSX_API_BASE_URL") || "https://msx.gg").replace(/\/+$/, "");
+      const publishUrl = `${msxApiBase}/v1/publish`;
 
-      const publishRes = await fetch(`${msxApiBase}/v1/publish`, {
+      const publishRes = await fetch(publishUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -91,6 +91,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           status: publishRes.status,
+          endpoint: publishUrl,
           payload,
           response: publishData,
           message:
