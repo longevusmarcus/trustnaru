@@ -6,6 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-msx-launch-token",
 };
 
+const MSX_LAUNCH_VERIFY_URL =
+  "https://lsoxtrynzaxohvlqxpqe.supabase.co/functions/v1/msx-api/v1/launch/verify";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -13,7 +16,8 @@ serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const launchToken = body.launch_token || req.headers.get("x-msx-launch-token");
+    const launchToken = body.launch_token || body.token || req.headers.get("x-msx-launch-token");
+    const appSlug = body.appSlug || body.app_slug || "naru";
 
     if (!launchToken) {
       return new Response(
@@ -22,24 +26,11 @@ serve(async (req) => {
       );
     }
 
-    const msxToken = Deno.env.get("MSX_TOKEN");
-    if (!msxToken) {
-      return new Response(
-        JSON.stringify({ verified: false, error: "MSX not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Verify with MSX API
-    const msxApiBase = Deno.env.get("MSX_API_BASE_URL") || "https://api.msx.gg";
-
-    const verifyRes = await fetch(`${msxApiBase}/v1/verify-launch`, {
+    // Verify with real MSX launch/verify endpoint
+    const verifyRes = await fetch(MSX_LAUNCH_VERIFY_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${msxToken}`,
-      },
-      body: JSON.stringify({ launch_token: launchToken }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: launchToken, appSlug }),
     });
 
     if (verifyRes.ok) {
@@ -47,24 +38,16 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           verified: true,
-          entitlements: verifyData.entitlements || [],
+          accessMode: verifyData.accessMode || "full",
+          entitlements: verifyData.entitlements || ["subscriber"],
           user: verifyData.user || null,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // If MSX API is not yet live, accept token format validation as fallback
-    if (launchToken.startsWith("msx_launch_")) {
-      return new Response(
-        JSON.stringify({
-          verified: true,
-          entitlements: ["subscriber"],
-          note: "Verified by token format (MSX API pending)",
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const errText = await verifyRes.text();
+    console.error("[msx-verify] MSX API returned:", verifyRes.status, errText);
 
     return new Response(
       JSON.stringify({ verified: false, error: "Invalid launch token" }),
