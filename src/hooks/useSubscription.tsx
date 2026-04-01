@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { hasMsxFullAccess } from "@/lib/msxBridge";
 
 interface SubscriptionState {
   isSubscribed: boolean;
   isLoading: boolean;
   productId: string | null;
   subscriptionEnd: string | null;
+  isMsxEntitled: boolean;
 }
 
 export const useSubscription = () => {
@@ -18,16 +20,32 @@ export const useSubscription = () => {
     isSubscribed: false,
     isLoading: true,
     productId: null,
-    subscriptionEnd: null
+    subscriptionEnd: null,
+    isMsxEntitled: false,
   });
 
   const checkSubscription = useCallback(async () => {
+    // Check MSX entitlement first — if user launched from MSX with full access, bypass paywall
+    const msxEntitled = hasMsxFullAccess();
+    if (msxEntitled) {
+      console.log("[MSX] Full access detected — bypassing subscription check");
+      setState({
+        isSubscribed: true,
+        isLoading: false,
+        productId: "msx_included",
+        subscriptionEnd: null,
+        isMsxEntitled: true,
+      });
+      return;
+    }
+
     if (!user) {
       setState({
         isSubscribed: false,
         isLoading: false,
         productId: null,
-        subscriptionEnd: null
+        subscriptionEnd: null,
+        isMsxEntitled: false,
       });
       return;
     }
@@ -45,7 +63,8 @@ export const useSubscription = () => {
         isSubscribed: data?.subscribed ?? false,
         isLoading: false,
         productId: data?.product_id ?? null,
-        subscriptionEnd: data?.subscription_end ?? null
+        subscriptionEnd: data?.subscription_end ?? null,
+        isMsxEntitled: false,
       });
     } catch (error) {
       console.error('Subscription check error:', error);

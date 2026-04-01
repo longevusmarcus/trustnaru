@@ -9,7 +9,7 @@ import { MobileOnly } from "@/components/MobileOnly";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
-import { isInsideMsx, verifyMsxLaunch, initMsxListener } from "@/lib/msxBridge";
+import { isInsideMsx, verifyMsxLaunch, initMsxListener, hasMsxFullAccess } from "@/lib/msxBridge";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -68,12 +68,27 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  const [msxReady, setMsxReady] = useState(!isInsideMsx());
+
   useEffect(() => {
     if (isInsideMsx()) {
-      verifyMsxLaunch();
+      verifyMsxLaunch().then((ctx) => {
+        if (ctx) {
+          console.log("[MSX] Verified launch — accessMode:", ctx.accessMode);
+        }
+        setMsxReady(true);
+      });
       initMsxListener();
     }
   }, []);
+
+  if (!msxReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
