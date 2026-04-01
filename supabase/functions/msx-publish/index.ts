@@ -186,6 +186,7 @@ serve(async (req) => {
           publishFailed,
           publishResponse: publishJson,
           verifyResult,
+          reportResult,
           naruRecord: naruRecord || null,
           allSlugs,
           summary: {
