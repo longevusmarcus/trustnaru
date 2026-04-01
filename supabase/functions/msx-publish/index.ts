@@ -79,6 +79,7 @@ serve(async (req) => {
         access: "subscriber",
         billingMode: "msx_managed",
         shellCapabilities: ["launch_token_verify", "shell_auth_bridge"],
+        builderId: "fb8fcbe9-1d72-44c2-ac52-241916ed7453",
         method: "api",
       };
 
@@ -109,19 +110,26 @@ serve(async (req) => {
       }
 
       // Step 2: Trigger verification/probe for the slug
-      const verifyUrl = `${msxApiBase}/v1/verify`;
-      console.log("[MSX] Verify/probe URL:", verifyUrl);
+      const probeUrl = `${msxApiBase}/v1/runtime/probe`;
+      const probePayload = {
+        slug: "naru",
+        credential: msxToken,
+        targetUrl: "https://trustnaru.com",
+        source: "lovable-runtime-probe",
+      };
+      console.log("[MSX] Probe URL:", probeUrl);
+      console.log("[MSX] Probe payload:", JSON.stringify({ ...probePayload, credential: "<redacted>" }));
 
       let verifyResult: any = null;
       try {
-        const verifyRes = await fetch(verifyUrl, {
+        const verifyRes = await fetch(probeUrl, {
           method: "POST",
           headers: msxHeaders,
-          body: JSON.stringify({ slug: "naru" }),
+          body: JSON.stringify(probePayload),
         });
         const verifyBody = await verifyRes.text();
-        console.log("[MSX] Verify HTTP status:", verifyRes.status);
-        console.log("[MSX] Verify response:", verifyBody.substring(0, 2000));
+        console.log("[MSX] Probe HTTP status:", verifyRes.status);
+        console.log("[MSX] Probe response:", verifyBody.substring(0, 2000));
         try { verifyResult = JSON.parse(verifyBody); } catch { verifyResult = { raw: verifyBody.substring(0, 1000) }; }
       } catch (err) {
         verifyResult = { error: `Verify fetch failed: ${err.message}` };
