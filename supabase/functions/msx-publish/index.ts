@@ -75,7 +75,7 @@ serve(async (req) => {
         method: "api",
       };
 
-      const msxApiBase = (Deno.env.get("MSX_API_BASE_URL") || "https://msx.gg").replace(/\/+$/, "");
+      const msxApiBase = (Deno.env.get("MSX_API_BASE_URL") || "https://lsoxtrynzaxohvlqxpqe.supabase.co/functions/v1/msx-api").replace(/\/+$/, "");
       const publishUrl = `${msxApiBase}/v1/publish`;
 
       console.log("[MSX] MSX_API_BASE_URL env:", Deno.env.get("MSX_API_BASE_URL") || "(not set, using https://msx.gg)");
