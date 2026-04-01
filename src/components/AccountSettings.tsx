@@ -46,6 +46,61 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
     }
   };
 
+  const handleMsxPublish = async () => {
+    setIsProcessing(true);
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        throw sessionError;
+      }
+
+      const accessToken = sessionData.session?.access_token;
+
+      if (!accessToken) {
+        throw new Error("No active session. Please sign in again.");
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/msx-publish`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ action: "publish" }),
+      });
+
+      const responseText = await response.text();
+      let result: any = null;
+
+      try {
+        result = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        result = { raw: responseText };
+      }
+
+      if (!response.ok) {
+        throw new Error(result?.error || result?.message || `Function failed: ${response.status}`);
+      }
+
+      console.log("MSX publish response:", JSON.stringify(result, null, 2));
+      toast({
+        title: result?.status === 200 ? "MSX Published" : "MSX Response",
+        description: result?.message || "Publish completed.",
+      });
+    } catch (error) {
+      console.error("MSX publish error:", error);
+      toast({
+        title: "MSX Publish Failed",
+        description: error instanceof Error ? error.message : "Failed to publish to MSX",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleBatchProcessCVs = async () => {
     setIsProcessing(true);
     try {
