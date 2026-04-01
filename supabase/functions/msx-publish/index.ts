@@ -56,12 +56,11 @@ serve(async (req) => {
       );
     }
 
-    // Read the action from request body
     const body = await req.json().catch(() => ({}));
     const action = body.action || "publish";
 
     if (action === "publish") {
-    const payload = {
+      const payload = {
         name: "Naru",
         slug: "naru",
         summary:
@@ -76,28 +75,86 @@ serve(async (req) => {
         method: "api",
       };
 
-      // Attempt MSX publish using a resolvable MSX host
       const msxApiBase = (Deno.env.get("MSX_API_BASE_URL") || "https://msx.gg").replace(/\/+$/, "");
       const publishUrl = `${msxApiBase}/v1/publish`;
 
+      console.log("[MSX] MSX_API_BASE_URL env:", Deno.env.get("MSX_API_BASE_URL") || "(not set, using https://msx.gg)");
+      console.log("[MSX] POST target:", publishUrl);
+      console.log("[MSX] Payload:", JSON.stringify(payload));
+
+      // Step 1: Publish
       const publishRes = await fetch(publishUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const publishData = await publishRes.text();
+      const publishBody = await publishRes.text();
+      const isHtml = publishBody.trimStart().startsWith("<!") || publishBody.trimStart().startsWith("<html");
+
+      console.log("[MSX] Publish HTTP status:", publishRes.status);
+      console.log("[MSX] Publish response content-type:", publishRes.headers.get("content-type"));
+      console.log("[MSX] Publish response is HTML:", isHtml);
+      if (!isHtml) {
+        console.log("[MSX] Publish response body:", publishBody.substring(0, 2000));
+      } else {
+        console.log("[MSX] Publish response was HTML (not a JSON API response) — endpoint likely does not exist");
+      }
+
+      // Step 2: Verify catalog
+      const catalogUrl = `${msxApiBase}/v1/apps?includePublished=1`;
+      console.log("[MSX] Catalog verify URL:", catalogUrl);
+
+      let catalogResult: any = null;
+      let appFoundInCatalog = false;
+      try {
+        const catalogRes = await fetch(catalogUrl);
+        const catalogBody = await catalogRes.text();
+        const catalogIsHtml = catalogBody.trimStart().startsWith("<!") || catalogBody.trimStart().startsWith("<html");
+
+        console.log("[MSX] Catalog HTTP status:", catalogRes.status);
+        console.log("[MSX] Catalog response is HTML:", catalogIsHtml);
+
+        if (!catalogIsHtml) {
+          try {
+            catalogResult = JSON.parse(catalogBody);
+            // Search for our app slug
+            if (Array.isArray(catalogResult)) {
+              appFoundInCatalog = catalogResult.some((app: any) => app.slug === "naru" || app.name === "Naru");
+            } else if (catalogResult?.apps && Array.isArray(catalogResult.apps)) {
+              appFoundInCatalog = catalogResult.apps.some((app: any) => app.slug === "naru" || app.name === "Naru");
+            } else if (catalogResult?.data && Array.isArray(catalogResult.data)) {
+              appFoundInCatalog = catalogResult.data.some((app: any) => app.slug === "naru" || app.name === "Naru");
+            }
+          } catch {
+            catalogResult = { raw: catalogBody.substring(0, 2000) };
+          }
+        } else {
+          catalogResult = { error: "Catalog endpoint returned HTML, not JSON API" };
+        }
+      } catch (err) {
+        catalogResult = { error: `Catalog fetch failed: ${err.message}` };
+      }
+
+      console.log("[MSX] App found in catalog:", appFoundInCatalog);
+
+      const publishFailed = isHtml || !publishRes.ok;
 
       return new Response(
         JSON.stringify({
-          status: publishRes.status,
-          endpoint: publishUrl,
+          publishStatus: publishRes.status,
+          publishEndpoint: publishUrl,
+          publishResponseIsHtml: isHtml,
+          publishFailed,
           payload,
-          response: publishData,
-          message:
-            publishRes.ok
-              ? "Successfully published to MSX"
-              : "MSX publish returned non-OK status",
+          catalogVerifyUrl: catalogUrl,
+          appFoundInCatalog,
+          catalogResult: catalogResult,
+          verdict: publishFailed
+            ? "PUBLISH FAILED — the publish endpoint returned HTML or a non-OK status. The MSX API base URL may be wrong."
+            : appFoundInCatalog
+              ? "SUCCESS — app 'naru' is live in the MSX catalog."
+              : "PUBLISH returned OK but app NOT found in catalog. May need a different API base URL or the catalog endpoint differs.",
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -108,6 +165,7 @@ serve(async (req) => {
       { status: 400, headers: corsHeaders }
     );
   } catch (error) {
+    console.error("[MSX] Unhandled error:", error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: corsHeaders }
