@@ -79,6 +79,7 @@ serve(async (req) => {
         access: "subscriber",
         billingMode: "msx_managed",
         shellCapabilities: ["launch_token_verify", "shell_auth_bridge"],
+        builderId: "fb8fcbe9-1d72-44c2-ac52-241916ed7453",
         method: "api",
       };
 
