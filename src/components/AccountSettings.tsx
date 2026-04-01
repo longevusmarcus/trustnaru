@@ -272,6 +272,40 @@ export const AccountSettings = ({ onBack }: AccountSettingsProps) => {
                   </div>
 
                   <div className="border-t border-border pt-4">
+                    <h3 className="text-base font-semibold mb-1">MSX Publish</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Republish app to MSX with updated payload
+                    </p>
+                    <Button
+                      onClick={async () => {
+                        setIsProcessing(true);
+                        try {
+                          const { data, error } = await supabase.functions.invoke("msx-publish", {
+                            body: { action: "publish" },
+                          });
+                          if (error) throw error;
+                          console.log("MSX publish response:", JSON.stringify(data, null, 2));
+                          toast({
+                            title: data?.status === 200 ? "MSX Published" : "MSX Response",
+                            description: data?.message || JSON.stringify(data),
+                          });
+                        } catch (err: any) {
+                          console.error("MSX publish error:", err);
+                          toast({ title: "MSX Publish Failed", description: err.message, variant: "destructive" });
+                        } finally {
+                          setIsProcessing(false);
+                        }
+                      }}
+                      disabled={isProcessing}
+                      className="w-full"
+                      variant="outline"
+                    >
+                      <Database className="h-4 w-4 mr-2" />
+                      {isProcessing ? "Publishing..." : "Publish to MSX"}
+                    </Button>
+                  </div>
+
+                  <div className="border-t border-border pt-4">
                     <h3 className="text-base font-semibold mb-1">Batch CV Processing</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Manually trigger batch processing of unparsed CVs
