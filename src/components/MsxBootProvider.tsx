@@ -145,8 +145,9 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
       hasMsxLaunchContext: hasMsxCtx,
       isEmbeddedWithoutToken: embeddedNoToken,
       status,
+      failureReason,
     }),
-    [hasMsxCtx, embeddedNoToken, status],
+    [hasMsxCtx, embeddedNoToken, status, failureReason],
   );
 
   return <MsxBootContext.Provider value={value}>{children}</MsxBootContext.Provider>;
