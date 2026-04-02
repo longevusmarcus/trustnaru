@@ -9,7 +9,7 @@ import { MobileOnly } from "@/components/MobileOnly";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
-import { isInsideMsx, verifyMsxLaunch, initMsxListener, hasMsxFullAccess, bootstrapMsxSession } from "@/lib/msxBridge";
+import { isInsideMsx, persistMsxLaunchParams, verifyMsxLaunch, initMsxListener, hasMsxFullAccess, bootstrapMsxSession } from "@/lib/msxBridge";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
