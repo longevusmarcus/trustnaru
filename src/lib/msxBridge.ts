@@ -28,6 +28,8 @@ export function isInsideMsx(): boolean {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.has("msx_launch_token")) return true;
+    // Check sessionStorage for previously persisted token
+    if (sessionStorage.getItem("msx_launch_token")) return true;
     if (window.self !== window.top) return true;
     return false;
   } catch {
@@ -36,12 +38,45 @@ export function isInsideMsx(): boolean {
 }
 
 /**
+ * Persist MSX launch params from URL into sessionStorage so they survive SPA navigation.
+ * Call this as early as possible before any route changes.
+ */
+export function persistMsxLaunchParams(): void {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("msx_launch_token");
+    const slug = params.get("msx_app_slug");
+    if (token) {
+      sessionStorage.setItem("msx_launch_token", token);
+      if (slug) sessionStorage.setItem("msx_app_slug", slug);
+    }
+  } catch {
+    // sessionStorage may be unavailable
+  }
+}
+
+/**
+ * Get MSX launch token from URL params or sessionStorage
+ */
+export function getMsxLaunchToken(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("msx_launch_token") || sessionStorage.getItem("msx_launch_token") || null;
+}
+
+/**
+ * Get MSX app slug from URL params or sessionStorage
+ */
+export function getMsxAppSlug(): string {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("msx_app_slug") || sessionStorage.getItem("msx_app_slug") || "naru";
+}
+
+/**
  * Extract and verify MSX launch token against the real MSX API
  */
 export async function verifyMsxLaunch(): Promise<MsxLaunchContext | null> {
-  const params = new URLSearchParams(window.location.search);
-  const launchToken = params.get("msx_launch_token");
-  const appSlug = params.get("msx_app_slug") || "naru";
+  const launchToken = getMsxLaunchToken();
+  const appSlug = getMsxAppSlug();
 
   if (!launchToken) return null;
 
@@ -137,9 +172,8 @@ export function isMsxSessionBootstrapped(): boolean {
  * Returns true if a session was successfully created.
  */
 export async function bootstrapMsxSession(): Promise<boolean> {
-  const params = new URLSearchParams(window.location.search);
-  const launchToken = params.get("msx_launch_token");
-  const appSlug = params.get("msx_app_slug") || "naru";
+  const launchToken = getMsxLaunchToken();
+  const appSlug = getMsxAppSlug();
 
   if (!launchToken) {
     console.log("[MSX] No launch token for session bootstrap");

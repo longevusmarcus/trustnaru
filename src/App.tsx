@@ -9,7 +9,7 @@ import { MobileOnly } from "@/components/MobileOnly";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
-import { isInsideMsx, verifyMsxLaunch, initMsxListener, hasMsxFullAccess, bootstrapMsxSession } from "@/lib/msxBridge";
+import { isInsideMsx, persistMsxLaunchParams, verifyMsxLaunch, initMsxListener, hasMsxFullAccess, bootstrapMsxSession } from "@/lib/msxBridge";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -68,29 +68,45 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  // Persist MSX launch params ASAP before any routing
+  persistMsxLaunchParams();
+
   const [msxReady, setMsxReady] = useState(!isInsideMsx());
+  const [msxBootstrapDone, setMsxBootstrapDone] = useState(false);
+  const [msxRedirectTo, setMsxRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isInsideMsx()) {
-      (async () => {
-        // First verify launch context (entitlements, paywall bypass)
+    if (!isInsideMsx()) return;
+
+    (async () => {
+      try {
+        // Verify launch context (entitlements, paywall bypass)
         const ctx = await verifyMsxLaunch();
         if (ctx) {
           console.log("[MSX] Verified launch — accessMode:", ctx.accessMode);
         }
-        // Then bootstrap a local auth session so user doesn't see login UI
+        // Bootstrap a local auth session
         const bootstrapped = await bootstrapMsxSession();
         console.log("[MSX] Session bootstrap result:", bootstrapped);
+
+        if (bootstrapped) {
+          setMsxRedirectTo("/app");
+        }
+      } catch (e) {
+        console.warn("[MSX] Boot failed, falling back to normal auth:", e);
+      } finally {
+        setMsxBootstrapDone(true);
         setMsxReady(true);
-      })();
-      initMsxListener();
-    }
+      }
+    })();
+    initMsxListener();
   }, []);
 
   if (!msxReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-muted-foreground animate-pulse">Opening in MSX…</p>
       </div>
     );
   }
@@ -106,9 +122,10 @@ const App = () => {
               <ScrollToTop />
               <MobileCheckWrapper>
                 <Routes>
-                  <Route path="/" element={<About />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/about" element={<Navigate to="/" replace />} />
+                  {/* When MSX bootstrap succeeded, override landing/auth to go straight to /app */}
+                  <Route path="/" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <About />} />
+                  <Route path="/auth" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Auth />} />
+                  <Route path="/about" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Navigate to="/" replace />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/cookies" element={<Cookies />} />
