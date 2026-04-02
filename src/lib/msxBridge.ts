@@ -202,7 +202,7 @@ export async function bootstrapMsxSession(): Promise<boolean> {
       return false;
     }
 
-    // Set the session in the Supabase client
+    // Set the session in the Supabase client and confirm it is fully restored
     const { error: setErr } = await supabase.auth.setSession({
       access_token: data.access_token,
       refresh_token: data.refresh_token,
@@ -210,6 +210,15 @@ export async function bootstrapMsxSession(): Promise<boolean> {
 
     if (setErr) {
       console.error("[MSX] Failed to set session:", setErr.message);
+      return false;
+    }
+
+    const {
+      data: { session: restoredSession },
+    } = await supabase.auth.getSession();
+
+    if (!restoredSession) {
+      console.error("[MSX] Session hydration check failed after setSession");
       return false;
     }
 
