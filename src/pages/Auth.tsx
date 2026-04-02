@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isInsideMsx, isMsxSessionBootstrapped, bootstrapMsxSession } from "@/lib/msxBridge";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Star } from "lucide-react";
+import { AuthStatusBanner } from "@/components/AuthStatusBanner";
+import { MsxOpeningScreen, useMsxBoot } from "@/components/MsxBootProvider";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
@@ -32,7 +33,6 @@ const GoogleIcon = () => (
     />
   </svg>
 );
-import { AuthStatusBanner } from "@/components/AuthStatusBanner";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -49,6 +49,7 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { hasMsxLaunchContext, status } = useMsxBoot();
 
   const {
     register,
@@ -60,40 +61,36 @@ const Auth = () => {
   });
 
   useEffect(() => {
-    // If inside MSX and session was bootstrapped, skip login UI entirely
-    if (isInsideMsx()) {
-      (async () => {
-        // Try bootstrap if not done yet
-        if (!isMsxSessionBootstrapped()) {
-          await bootstrapMsxSession();
-        }
-        // Check session after bootstrap
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          navigate("/app");
-          return;
-        }
-      })();
+    if (hasMsxLaunchContext && status === "ready") {
+      navigate("/app", { replace: true });
+      return;
     }
 
-    // Check if user is already logged in
+    if (hasMsxLaunchContext && status === "booting") {
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/app");
+        navigate("/app", { replace: true });
       }
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate("/app");
+        navigate("/app", { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [hasMsxLaunchContext, status, navigate]);
+
+  if (hasMsxLaunchContext && status === "booting") {
+    return <MsxOpeningScreen />;
+  }
+
 
   const attemptAuth = async (data: AuthFormData, attempt = 0): Promise<void> => {
     try {
