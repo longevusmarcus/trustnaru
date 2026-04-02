@@ -9,7 +9,7 @@ import { MobileOnly } from "@/components/MobileOnly";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
-import { MsxBootProvider, MsxOpeningScreen, useMsxBoot } from "@/components/MsxBootProvider";
+import { MsxBootProvider, MsxOpeningScreen, MsxLaunchErrorScreen, useMsxBoot } from "@/components/MsxBootProvider";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -29,7 +29,12 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
-  const { hasMsxLaunchContext, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+
+  // Embedded in iframe without a token — show error, not login
+  if (isEmbeddedWithoutToken) {
+    return <MsxLaunchErrorScreen />;
+  }
 
   if (loading || (hasMsxLaunchContext && status === "booting")) {
     return <MsxOpeningScreen />;
@@ -72,7 +77,12 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { hasMsxLaunchContext, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+
+  // Embedded without token — show error instead of landing page
+  if (isEmbeddedWithoutToken) {
+    return <MsxLaunchErrorScreen />;
+  }
 
   if (hasMsxLaunchContext && status === "booting") {
     return <MsxOpeningScreen />;
