@@ -18,7 +18,14 @@ interface MsxBootContextValue {
   failureReason: string | null;
 }
 
-const MsxBootContext = createContext<MsxBootContextValue | undefined>(undefined);
+const defaultMsxBootContext: MsxBootContextValue = {
+  hasMsxLaunchContext: false,
+  isEmbeddedWithoutToken: false,
+  status: "idle",
+  failureReason: null,
+};
+
+const MsxBootContext = createContext<MsxBootContextValue>(defaultMsxBootContext);
 
 export const MsxOpeningScreen = () => (
   <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
@@ -156,8 +163,8 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
 export const useMsxBoot = () => {
   const context = useContext(MsxBootContext);
 
-  if (!context) {
-    throw new Error("useMsxBoot must be used within an MsxBootProvider");
+  if (context === defaultMsxBootContext) {
+    console.warn("[MSX] useMsxBoot resolved outside provider; falling back to idle state");
   }
 
   return context;
