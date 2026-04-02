@@ -17,6 +17,8 @@ interface MsxBootContextValue {
   /** True when the app is embedded in an iframe but has NO launch token. */
   isEmbeddedWithoutToken: boolean;
   status: MsxBootStatus;
+  /** Human-readable failure reason when status === "failed" */
+  failureReason: string | null;
 }
 
 const MsxBootContext = createContext<MsxBootContextValue | undefined>(undefined);
