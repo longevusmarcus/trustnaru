@@ -29,7 +29,12 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
-  const { hasMsxLaunchContext, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+
+  // Embedded in iframe without a token — show error, not login
+  if (isEmbeddedWithoutToken) {
+    return <MsxLaunchErrorScreen />;
+  }
 
   if (loading || (hasMsxLaunchContext && status === "booting")) {
     return <MsxOpeningScreen />;
