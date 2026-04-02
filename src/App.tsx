@@ -121,16 +121,11 @@ const App = () => {
             <BrowserRouter>
               <ScrollToTop />
               <MobileCheckWrapper>
-                {/* If MSX bootstrap succeeded, redirect to /app immediately */}
-                {msxBootstrapDone && msxRedirectTo ? (
-                  <Routes>
-                    <Route path="*" element={<Navigate to={msxRedirectTo} replace />} />
-                  </Routes>
-                ) : (
                 <Routes>
-                  <Route path="/" element={<About />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/about" element={<Navigate to="/" replace />} />
+                  {/* When MSX bootstrap succeeded, override landing/auth to go straight to /app */}
+                  <Route path="/" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <About />} />
+                  <Route path="/auth" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Auth />} />
+                  <Route path="/about" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Navigate to="/" replace />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/cookies" element={<Cookies />} />
@@ -145,7 +140,6 @@ const App = () => {
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                )}
               </MobileCheckWrapper>
             </BrowserRouter>
           </TooltipProvider>
