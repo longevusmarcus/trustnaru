@@ -49,7 +49,7 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status, failureReason } = useMsxBoot();
 
   const {
     register,
