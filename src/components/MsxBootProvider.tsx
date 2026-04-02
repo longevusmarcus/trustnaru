@@ -17,6 +17,8 @@ interface MsxBootContextValue {
   /** True when the app is embedded in an iframe but has NO launch token. */
   isEmbeddedWithoutToken: boolean;
   status: MsxBootStatus;
+  /** Human-readable failure reason when status === "failed" */
+  failureReason: string | null;
 }
 
 const MsxBootContext = createContext<MsxBootContextValue | undefined>(undefined);
@@ -28,14 +30,21 @@ export const MsxOpeningScreen = () => (
   </div>
 );
 
-export const MsxLaunchErrorScreen = () => (
+export const MsxLaunchErrorScreen = ({ reason }: { reason?: string }) => (
   <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-6 text-center">
     <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
       <span className="text-destructive text-xl">!</span>
     </div>
-    <h1 className="text-lg font-medium text-foreground">Missing MSX Launch Token</h1>
+    <h1 className="text-lg font-medium text-foreground">
+      {reason ? "MSX Sign-In Failed" : "Missing MSX Launch Token"}
+    </h1>
     <p className="text-sm text-muted-foreground max-w-sm">
-      This app was opened without a valid MSX launch token. Please reopen it from MSX to sign in automatically.
+      {reason
+        ? reason
+        : "This app was opened without a valid MSX launch token. Please reopen it from MSX to sign in automatically."}
+    </p>
+    <p className="text-xs text-muted-foreground/60 max-w-xs">
+      Try closing this tab and reopening the app from MSX.
     </p>
   </div>
 );
@@ -68,6 +77,7 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [status, setStatus] = useState<MsxBootStatus>(hasMsxCtx ? "booting" : "idle");
+  const [failureReason, setFailureReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasMsxCtx) {
@@ -113,9 +123,11 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
           console.log("[MSX] Boot status → ready");
           setStatus("ready");
         }
-      } catch (error) {
-        console.error("[MSX] Boot gate FAILED:", error);
+      } catch (error: any) {
+        const msg = error?.message || "Unknown MSX boot error";
+        console.error("[MSX] Boot gate FAILED:", msg);
         if (!cancelled) {
+          setFailureReason(msg);
           setStatus("failed");
         }
       }
@@ -133,8 +145,9 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
       hasMsxLaunchContext: hasMsxCtx,
       isEmbeddedWithoutToken: embeddedNoToken,
       status,
+      failureReason,
     }),
-    [hasMsxCtx, embeddedNoToken, status],
+    [hasMsxCtx, embeddedNoToken, status, failureReason],
   );
 
   return <MsxBootContext.Provider value={value}>{children}</MsxBootContext.Provider>;

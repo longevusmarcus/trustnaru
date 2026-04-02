@@ -49,7 +49,7 @@ const Auth = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status, failureReason } = useMsxBoot();
 
   const {
     register,
@@ -89,6 +89,10 @@ const Auth = () => {
 
   if (isEmbeddedWithoutToken) {
     return <MsxLaunchErrorScreen />;
+  }
+
+  if (hasMsxLaunchContext && status === "failed") {
+    return <MsxLaunchErrorScreen reason={failureReason || "MSX session bootstrap failed. Please reopen from MSX."} />;
   }
 
   if (hasMsxLaunchContext && status === "booting") {
