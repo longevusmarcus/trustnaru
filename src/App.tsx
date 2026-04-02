@@ -9,7 +9,8 @@ import { MobileOnly } from "@/components/MobileOnly";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState, useEffect } from "react";
-import { isInsideMsx, persistMsxLaunchParams, verifyMsxLaunch, initMsxListener, hasMsxFullAccess, bootstrapMsxSession } from "@/lib/msxBridge";
+import { isInsideMsx } from "@/lib/msxBridge";
+import { MsxBootProvider, MsxOpeningScreen, useMsxBoot } from "@/components/MsxBootProvider";
 import Index from "./pages/Index";
 import PathDetail from "./pages/PathDetail";
 import Auth from "./pages/Auth";
@@ -29,16 +30,21 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
+  const { hasMsxLaunchContext, status } = useMsxBoot();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (loading || (hasMsxLaunchContext && status === "booting")) {
+    return <MsxOpeningScreen />;
   }
 
-  return session ? <>{children}</> : <Navigate to="/auth" replace />;
+  if (session) {
+    return <>{children}</>;
+  }
+
+  if (hasMsxLaunchContext && status !== "failed") {
+    return <MsxOpeningScreen />;
+  }
+
+  return <Navigate to="/auth" replace />;
 };
 
 const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -56,7 +62,6 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
     setBypassMobileCheck(true);
   };
 
-  // Pages that should NOT show the desktop blocker
   const excludedPaths = ["/", "/terms", "/privacy", "/cookies", "/faq", "/about", "/blog"];
   const isExcludedPath = excludedPaths.includes(location.pathname);
 
@@ -67,86 +72,56 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const App = () => {
-  // Persist MSX launch params ASAP before any routing
-  persistMsxLaunchParams();
+const AppRoutes = () => {
+  const { hasMsxLaunchContext, status } = useMsxBoot();
 
-  const [msxReady, setMsxReady] = useState(!isInsideMsx());
-  const [msxBootstrapDone, setMsxBootstrapDone] = useState(false);
-  const [msxRedirectTo, setMsxRedirectTo] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isInsideMsx()) return;
-
-    (async () => {
-      try {
-        // Verify launch context (entitlements, paywall bypass)
-        const ctx = await verifyMsxLaunch();
-        if (ctx) {
-          console.log("[MSX] Verified launch — accessMode:", ctx.accessMode);
-        }
-        // Bootstrap a local auth session
-        const bootstrapped = await bootstrapMsxSession();
-        console.log("[MSX] Session bootstrap result:", bootstrapped);
-
-        if (bootstrapped) {
-          setMsxRedirectTo("/app");
-        }
-      } catch (e) {
-        console.warn("[MSX] Boot failed, falling back to normal auth:", e);
-      } finally {
-        setMsxBootstrapDone(true);
-        setMsxReady(true);
-      }
-    })();
-    initMsxListener();
-  }, []);
-
-  if (!msxReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="text-sm text-muted-foreground animate-pulse">Opening in MSX…</p>
-      </div>
-    );
+  if (hasMsxLaunchContext && status === "booting") {
+    return <MsxOpeningScreen />;
   }
 
   return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <MobileCheckWrapper>
+        <Routes>
+          <Route path="/" element={hasMsxLaunchContext && status === "ready" ? <Navigate to="/app" replace /> : <About />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/about" element={<Navigate to="/" replace />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+          <Route path="/payment-canceled" element={<ProtectedRoute><PaymentCanceled /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </MobileCheckWrapper>
+    </BrowserRouter>
+  );
+};
+
+const App = () => {
+  return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <ScrollToTop />
-              <MobileCheckWrapper>
-                <Routes>
-                  {/* When MSX bootstrap succeeded, override landing/auth to go straight to /app */}
-                  <Route path="/" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <About />} />
-                  <Route path="/auth" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Auth />} />
-                  <Route path="/about" element={msxBootstrapDone && msxRedirectTo ? <Navigate to="/app" replace /> : <Navigate to="/" replace />} />
-                  <Route path="/terms" element={<Terms />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/cookies" element={<Cookies />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/app" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                  <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
-                  <Route path="/payment-canceled" element={<ProtectedRoute><PaymentCanceled /></ProtectedRoute>} />
-                  <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-                  <Route path="/path/:id" element={<ProtectedRoute><PathDetail /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </MobileCheckWrapper>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ThemeProvider>
+        <MsxBootProvider>
+          <ThemeProvider defaultTheme="dark" storageKey="copilot-ui-theme">
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AppRoutes />
+            </TooltipProvider>
+          </ThemeProvider>
+        </MsxBootProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
 };
 
 export default App;
+
