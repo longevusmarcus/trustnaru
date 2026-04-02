@@ -87,6 +87,10 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [hasMsxLaunchContext, status, navigate]);
 
+  if (isEmbeddedWithoutToken) {
+    return <MsxLaunchErrorScreen />;
+  }
+
   if (hasMsxLaunchContext && status === "booting") {
     return <MsxOpeningScreen />;
   }
