@@ -72,12 +72,17 @@ const App = () => {
 
   useEffect(() => {
     if (isInsideMsx()) {
-      verifyMsxLaunch().then((ctx) => {
+      (async () => {
+        // First verify launch context (entitlements, paywall bypass)
+        const ctx = await verifyMsxLaunch();
         if (ctx) {
           console.log("[MSX] Verified launch — accessMode:", ctx.accessMode);
         }
+        // Then bootstrap a local auth session so user doesn't see login UI
+        const bootstrapped = await bootstrapMsxSession();
+        console.log("[MSX] Session bootstrap result:", bootstrapped);
         setMsxReady(true);
-      });
+      })();
       initMsxListener();
     }
   }, []);
