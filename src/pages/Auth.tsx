@@ -60,6 +60,22 @@ const Auth = () => {
   });
 
   useEffect(() => {
+    // If inside MSX and session was bootstrapped, skip login UI entirely
+    if (isInsideMsx()) {
+      (async () => {
+        // Try bootstrap if not done yet
+        if (!isMsxSessionBootstrapped()) {
+          await bootstrapMsxSession();
+        }
+        // Check session after bootstrap
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          navigate("/app");
+          return;
+        }
+      })();
+    }
+
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
