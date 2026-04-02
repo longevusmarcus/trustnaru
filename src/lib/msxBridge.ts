@@ -15,15 +15,19 @@ interface MsxShellMessage {
   payload?: unknown;
 }
 
+export interface MsxBootstrapResult {
+  success: boolean;
+  stage?: string;
+  reason?: string;
+  status?: number;
+}
+
 const MSX_LAUNCH_VERIFY_URL =
   "https://lsoxtrynzaxohvlqxpqe.supabase.co/functions/v1/msx-api/v1/launch/verify";
 
 let msxContext: MsxLaunchContext | null = null;
 let msxSessionBootstrapped = false;
 
-/**
- * Check if we're running inside an MSX shell (iframe or window)
- */
 /**
  * Check if a real MSX launch token exists (URL or persisted in sessionStorage).
  * This is the ONLY reliable signal for MSX auth context.
@@ -47,12 +51,10 @@ export function hasMsxLaunchToken(): boolean {
 export function isEmbedded(): boolean {
   try {
     if (window.self === window.top) return false;
-    // Exclude Lovable preview iframes
     const host = window.location.hostname;
     if (host.includes("lovableproject.com") || host.includes("lovable.app")) return false;
     return true;
   } catch {
-    // Cross-origin frame access throws — assume embedded
     return true;
   }
 }
@@ -127,12 +129,8 @@ export async function verifyMsxLaunch(): Promise<MsxLaunchContext | null> {
           accessMode: data.accessMode || "full",
         };
 
-        // If accessMode is "full", mark as entitled
         if (msxContext.accessMode === "full") {
-          msxContext.entitlements = [
-            ...(msxContext.entitlements || []),
-            "subscriber",
-          ];
+          msxContext.entitlements = [...(msxContext.entitlements || []), "subscriber"];
         }
 
         notifyShell({ type: "app_ready", payload: { appId: "naru" } });
@@ -194,68 +192,154 @@ export function isMsxSessionBootstrapped(): boolean {
   return msxSessionBootstrapped;
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return null;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Bootstrap a local Supabase session from MSX launch token.
  * Called automatically on app boot when inside MSX.
- * Returns true if a session was successfully created.
  */
-export async function bootstrapMsxSession(): Promise<boolean> {
+export async function bootstrapMsxSession(): Promise<MsxBootstrapResult> {
   const launchToken = getMsxLaunchToken();
   const appSlug = getMsxAppSlug();
 
   if (!launchToken) {
     console.log("[MSX] No launch token for session bootstrap");
-    return false;
+    return {
+      success: false,
+      stage: "bootstrap function failed",
+      reason: "bootstrap function failed: missing launch token",
+    };
   }
 
   try {
-    // Dynamic import to avoid circular deps
     const { supabase } = await import("@/integrations/supabase/client");
 
-    // Check if user already has a valid session
-    const { data: { session: existingSession } } = await supabase.auth.getSession();
+    const {
+      data: { session: existingSession },
+    } = await supabase.auth.getSession();
+
     if (existingSession) {
       console.log("[MSX] Existing session found, skipping bootstrap");
       msxSessionBootstrapped = true;
-      return true;
+      return { success: true };
     }
 
     console.log("[MSX] Bootstrapping session via msx-session-bootstrap...");
-    const { data, error } = await supabase.functions.invoke("msx-session-bootstrap", {
-      body: { launch_token: launchToken, app_slug: appSlug },
+
+    const bootstrapUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/msx-session-bootstrap`;
+    const response = await fetch(bootstrapUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ launch_token: launchToken, app_slug: appSlug }),
     });
 
-    if (error || !data?.success) {
-      console.warn("[MSX] Session bootstrap failed:", error?.message || data?.error);
-      return false;
+    const rawBody = await response.text();
+    let body: Record<string, unknown> | null = null;
+
+    try {
+      body = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      body = { raw: rawBody };
     }
 
-    // Set the session in the Supabase client and confirm it is fully restored
-    const { error: setErr } = await supabase.auth.setSession({
-      access_token: data.access_token,
-      refresh_token: data.refresh_token,
+    console.log("[MSX] Session bootstrap response status:", response.status);
+    console.log("[MSX] Session bootstrap response body:", body);
+
+    if (!response.ok || body?.success === false) {
+      const stage = typeof body?.stage === "string" ? body.stage : "bootstrap function failed";
+      const reason = typeof body?.reason === "string"
+        ? body.reason
+        : typeof body?.error === "string"
+          ? body.error
+          : typeof body?.detail === "string"
+            ? body.detail
+            : `HTTP ${response.status}`;
+
+      console.error("[MSX] Session bootstrap failed:", reason);
+      return {
+        success: false,
+        stage,
+        reason: `${stage}: ${reason}`,
+        status: response.status,
+      };
+    }
+
+    const accessToken = typeof body?.access_token === "string" ? body.access_token : null;
+    const refreshToken = typeof body?.refresh_token === "string" ? body.refresh_token : null;
+
+    if (!accessToken || !refreshToken) {
+      const reason = "missing access_token or refresh_token in bootstrap response";
+      console.error("[MSX] Session bootstrap failed:", reason);
+      return {
+        success: false,
+        stage: "invalid local auth tokens",
+        reason: `invalid local auth tokens: ${reason}`,
+        status: response.status,
+      };
+    }
+
+    const tokenClaims = decodeJwtPayload(accessToken);
+    console.log("[MSX] Bootstrap token claims:", {
+      iss: tokenClaims?.["iss"] ?? null,
+      aud: tokenClaims?.["aud"] ?? null,
+      sub: tokenClaims?.["sub"] ?? null,
     });
+
+    const { error: setErr } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    console.log("[MSX] supabase.auth.setSession result:", setErr ? { success: false, error: setErr.message } : { success: true });
 
     if (setErr) {
-      console.error("[MSX] Failed to set session:", setErr.message);
-      return false;
+      return {
+        success: false,
+        stage: "setSession failed",
+        reason: `setSession failed: ${setErr.message}`,
+      };
     }
 
-    const {
-      data: { session: restoredSession },
-    } = await supabase.auth.getSession();
+    const sessionResult = await supabase.auth.getSession();
+    console.log("[MSX] supabase.auth.getSession result:", {
+      hasSession: Boolean(sessionResult.data.session),
+      userId: sessionResult.data.session?.user?.id ?? null,
+      error: sessionResult.error?.message ?? null,
+    });
 
-    if (!restoredSession) {
+    if (!sessionResult.data.session) {
       console.error("[MSX] Session hydration check failed after setSession");
-      return false;
+      return {
+        success: false,
+        stage: "getSession remained empty",
+        reason: "getSession remained empty: supabase.auth.getSession() returned no local session",
+      };
     }
 
-    console.log("[MSX] Session bootstrapped successfully for user:", data.user_id);
+    console.log("[MSX] Session bootstrapped successfully for user:", body?.user_id);
     msxSessionBootstrapped = true;
-    return true;
+    return { success: true };
   } catch (e) {
-    console.warn("[MSX] Session bootstrap error:", e);
-    return false;
+    const reason = e instanceof Error ? e.message : String(e);
+    console.warn("[MSX] Session bootstrap error:", reason);
+    return {
+      success: false,
+      stage: "bootstrap function failed",
+      reason: `bootstrap function failed: ${reason}`,
+    };
   }
 }
 
@@ -273,7 +357,7 @@ export function requestShellAuth(provider: string = "google") {
  * Listen for messages from MSX shell
  */
 export function initMsxListener(
-  onAuthComplete?: (user: { id: string; email?: string }) => void
+  onAuthComplete?: (user: { id: string; email?: string }) => void,
 ) {
   window.addEventListener("message", (event) => {
     if (!event.data || event.data.source !== "msx_shell") return;
