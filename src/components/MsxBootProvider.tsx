@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { supabase } from "@/integrations/supabase/client";
 import {
   bootstrapMsxSession,
-  getMsxLaunchToken,
   hasMsxLaunchToken,
   initMsxListener,
   isEmbedded,
@@ -43,20 +42,29 @@ export const MsxLaunchErrorScreen = () => (
 
 export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
   const [hasMsxCtx] = useState<boolean>(() => {
-    persistMsxLaunchParams();
-    const hasToken = hasMsxLaunchToken();
-    console.log("[MSX] Launch token present:", hasToken, "| Token value:", getMsxLaunchToken()?.slice(0, 12) ?? "null");
-    return hasToken;
+    try {
+      persistMsxLaunchParams();
+      const hasToken = hasMsxLaunchToken();
+      console.log("[MSX] Launch token present:", hasToken);
+      return hasToken;
+    } catch (e) {
+      console.warn("[MSX] Error during launch detection:", e);
+      return false;
+    }
   });
 
   const [embeddedNoToken] = useState<boolean>(() => {
-    const embedded = isEmbedded();
-    const hasToken = hasMsxLaunchToken();
-    const result = embedded && !hasToken;
-    if (result) {
-      console.warn("[MSX] Embedded in iframe WITHOUT launch token — will show error state");
+    try {
+      const embedded = isEmbedded();
+      const hasToken = hasMsxLaunchToken();
+      const result = embedded && !hasToken;
+      if (result) {
+        console.warn("[MSX] Embedded in iframe WITHOUT launch token");
+      }
+      return result;
+    } catch {
+      return false;
     }
-    return result;
   });
 
   const [status, setStatus] = useState<MsxBootStatus>(hasMsxCtx ? "booting" : "idle");

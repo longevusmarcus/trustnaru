@@ -41,12 +41,18 @@ export function hasMsxLaunchToken(): boolean {
 
 /**
  * Check if we are running inside an iframe (embedded context).
+ * Excludes known development/preview environments.
  * This does NOT imply we have a valid MSX auth token.
  */
 export function isEmbedded(): boolean {
   try {
-    return window.self !== window.top;
+    if (window.self === window.top) return false;
+    // Exclude Lovable preview iframes
+    const host = window.location.hostname;
+    if (host.includes("lovableproject.com") || host.includes("lovable.app")) return false;
+    return true;
   } catch {
+    // Cross-origin frame access throws — assume embedded
     return true;
   }
 }
