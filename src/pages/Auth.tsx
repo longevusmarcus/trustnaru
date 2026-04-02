@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, Star } from "lucide-react";
 import { AuthStatusBanner } from "@/components/AuthStatusBanner";
-import { MsxOpeningScreen, useMsxBoot } from "@/components/MsxBootProvider";
+import { MsxOpeningScreen, MsxLaunchErrorScreen, useMsxBoot } from "@/components/MsxBootProvider";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
