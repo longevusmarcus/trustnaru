@@ -24,17 +24,39 @@ let msxSessionBootstrapped = false;
 /**
  * Check if we're running inside an MSX shell (iframe or window)
  */
-export function isInsideMsx(): boolean {
+/**
+ * Check if a real MSX launch token exists (URL or persisted in sessionStorage).
+ * This is the ONLY reliable signal for MSX auth context.
+ */
+export function hasMsxLaunchToken(): boolean {
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.has("msx_launch_token")) return true;
-    // Check sessionStorage for previously persisted token
     if (sessionStorage.getItem("msx_launch_token")) return true;
-    if (window.self !== window.top) return true;
     return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Check if we are running inside an iframe (embedded context).
+ * This does NOT imply we have a valid MSX auth token.
+ */
+export function isEmbedded(): boolean {
+  try {
+    return window.self !== window.top;
   } catch {
     return true;
   }
+}
+
+/**
+ * Legacy helper — true when we have an MSX token OR are embedded.
+ * Use hasMsxLaunchToken() for auth-gating decisions instead.
+ */
+export function isInsideMsx(): boolean {
+  return hasMsxLaunchToken() || isEmbedded();
 }
 
 /**
