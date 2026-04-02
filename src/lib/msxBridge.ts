@@ -173,9 +173,8 @@ export function isMsxSessionBootstrapped(): boolean {
  * Returns true if a session was successfully created.
  */
 export async function bootstrapMsxSession(): Promise<boolean> {
-  const params = new URLSearchParams(window.location.search);
-  const launchToken = params.get("msx_launch_token");
-  const appSlug = params.get("msx_app_slug") || "naru";
+  const launchToken = getMsxLaunchToken();
+  const appSlug = getMsxAppSlug();
 
   if (!launchToken) {
     console.log("[MSX] No launch token for session bootstrap");
