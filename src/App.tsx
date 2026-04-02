@@ -82,11 +82,16 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status, failureReason } = useMsxBoot();
 
   // Embedded without token — show error instead of landing page
   if (isEmbeddedWithoutToken) {
     return <MsxLaunchErrorScreen />;
+  }
+
+  // MSX boot failed — show error, not landing page
+  if (hasMsxLaunchContext && status === "failed") {
+    return <MsxLaunchErrorScreen reason={failureReason || "MSX session bootstrap failed. Please reopen from MSX."} />;
   }
 
   if (hasMsxLaunchContext && status === "booting") {

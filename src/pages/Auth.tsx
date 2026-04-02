@@ -91,6 +91,10 @@ const Auth = () => {
     return <MsxLaunchErrorScreen />;
   }
 
+  if (hasMsxLaunchContext && status === "failed") {
+    return <MsxLaunchErrorScreen reason={failureReason || "MSX session bootstrap failed. Please reopen from MSX."} />;
+  }
+
   if (hasMsxLaunchContext && status === "booting") {
     return <MsxOpeningScreen />;
   }
