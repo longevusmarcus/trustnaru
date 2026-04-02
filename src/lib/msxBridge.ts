@@ -19,6 +19,7 @@ const MSX_LAUNCH_VERIFY_URL =
   "https://lsoxtrynzaxohvlqxpqe.supabase.co/functions/v1/msx-api/v1/launch/verify";
 
 let msxContext: MsxLaunchContext | null = null;
+let msxSessionBootstrapped = false;
 
 /**
  * Check if we're running inside an MSX shell (iframe or window)
