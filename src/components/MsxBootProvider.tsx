@@ -28,14 +28,21 @@ export const MsxOpeningScreen = () => (
   </div>
 );
 
-export const MsxLaunchErrorScreen = () => (
+export const MsxLaunchErrorScreen = ({ reason }: { reason?: string }) => (
   <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background px-6 text-center">
     <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
       <span className="text-destructive text-xl">!</span>
     </div>
-    <h1 className="text-lg font-medium text-foreground">Missing MSX Launch Token</h1>
+    <h1 className="text-lg font-medium text-foreground">
+      {reason ? "MSX Sign-In Failed" : "Missing MSX Launch Token"}
+    </h1>
     <p className="text-sm text-muted-foreground max-w-sm">
-      This app was opened without a valid MSX launch token. Please reopen it from MSX to sign in automatically.
+      {reason
+        ? reason
+        : "This app was opened without a valid MSX launch token. Please reopen it from MSX to sign in automatically."}
+    </p>
+    <p className="text-xs text-muted-foreground/60 max-w-xs">
+      Try closing this tab and reopening the app from MSX.
     </p>
   </div>
 );
