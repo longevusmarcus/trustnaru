@@ -121,6 +121,12 @@ const App = () => {
             <BrowserRouter>
               <ScrollToTop />
               <MobileCheckWrapper>
+                {/* If MSX bootstrap succeeded, redirect to /app immediately */}
+                {msxBootstrapDone && msxRedirectTo ? (
+                  <Routes>
+                    <Route path="*" element={<Navigate to={msxRedirectTo} replace />} />
+                  </Routes>
+                ) : (
                 <Routes>
                   <Route path="/" element={<About />} />
                   <Route path="/auth" element={<Auth />} />
