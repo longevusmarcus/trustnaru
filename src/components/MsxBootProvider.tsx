@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { supabase } from "@/integrations/supabase/client";
 import {
   bootstrapMsxSession,
-  getMsxLaunchToken,
   hasMsxLaunchToken,
   initMsxListener,
   isEmbedded,
