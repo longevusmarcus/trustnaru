@@ -77,7 +77,12 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { hasMsxLaunchContext, status } = useMsxBoot();
+  const { hasMsxLaunchContext, isEmbeddedWithoutToken, status } = useMsxBoot();
+
+  // Embedded without token — show error instead of landing page
+  if (isEmbeddedWithoutToken) {
+    return <MsxLaunchErrorScreen />;
+  }
 
   if (hasMsxLaunchContext && status === "booting") {
     return <MsxOpeningScreen />;
