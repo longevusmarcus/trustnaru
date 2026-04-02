@@ -123,9 +123,11 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
           console.log("[MSX] Boot status → ready");
           setStatus("ready");
         }
-      } catch (error) {
-        console.error("[MSX] Boot gate FAILED:", error);
+      } catch (error: any) {
+        const msg = error?.message || "Unknown MSX boot error";
+        console.error("[MSX] Boot gate FAILED:", msg);
         if (!cancelled) {
+          setFailureReason(msg);
           setStatus("failed");
         }
       }
