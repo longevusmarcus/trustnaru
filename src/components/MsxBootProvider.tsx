@@ -12,12 +12,9 @@ import {
 export type MsxBootStatus = "idle" | "booting" | "ready" | "failed";
 
 interface MsxBootContextValue {
-  /** True when a real MSX launch token was found (URL or sessionStorage). */
   hasMsxLaunchContext: boolean;
-  /** True when the app is embedded in an iframe but has NO launch token. */
   isEmbeddedWithoutToken: boolean;
   status: MsxBootStatus;
-  /** Human-readable failure reason when status === "failed" */
   failureReason: string | null;
 }
 
@@ -81,6 +78,7 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!hasMsxCtx) {
+      setFailureReason(null);
       setStatus("idle");
       return;
     }
@@ -89,6 +87,7 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
     initMsxListener();
 
     const boot = async () => {
+      setFailureReason(null);
       setStatus("booting");
       console.log("[MSX] Boot gate starting…");
 
@@ -97,30 +96,31 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
         const ctx = await verifyMsxLaunch();
 
         if (!ctx || ctx.accessMode !== "full") {
-          console.warn("[MSX] Launch verify result:", ctx ? `accessMode=${ctx.accessMode}` : "null");
-          throw new Error("MSX launch verification failed or access mode is not full");
+          console.warn("[MSX] Launch verify response:", ctx ? `accessMode=${ctx.accessMode}` : "null");
+          throw new Error("bootstrap function failed: launch verify failed or access mode is not full");
         }
-        console.log("[MSX] Launch verified — accessMode:", ctx.accessMode);
 
+        console.log("[MSX] Launch verified — accessMode:", ctx.accessMode);
         console.log("[MSX] Bootstrapping session…");
-        const bootstrapped = await bootstrapMsxSession();
-        if (!bootstrapped) {
-          throw new Error("MSX session bootstrap failed");
+
+        const bootstrapResult = await bootstrapMsxSession();
+        if (!bootstrapResult.success) {
+          throw new Error(bootstrapResult.reason || bootstrapResult.stage || "bootstrap function failed");
         }
-        console.log("[MSX] Session bootstrap succeeded");
 
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
         if (!session) {
-          throw new Error("MSX session was not fully restored after setSession");
+          throw new Error("getSession remained empty: MSX session was not fully restored after setSession");
         }
 
         console.log("[MSX] Session confirmed — user:", session.user?.id?.slice(0, 8));
 
         if (!cancelled) {
           console.log("[MSX] Boot status → ready");
+          setFailureReason(null);
           setStatus("ready");
         }
       } catch (error: any) {
