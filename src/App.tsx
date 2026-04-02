@@ -68,29 +68,45 @@ const MobileCheckWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  // Persist MSX launch params ASAP before any routing
+  persistMsxLaunchParams();
+
   const [msxReady, setMsxReady] = useState(!isInsideMsx());
+  const [msxBootstrapDone, setMsxBootstrapDone] = useState(false);
+  const [msxRedirectTo, setMsxRedirectTo] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isInsideMsx()) {
-      (async () => {
-        // First verify launch context (entitlements, paywall bypass)
+    if (!isInsideMsx()) return;
+
+    (async () => {
+      try {
+        // Verify launch context (entitlements, paywall bypass)
         const ctx = await verifyMsxLaunch();
         if (ctx) {
           console.log("[MSX] Verified launch — accessMode:", ctx.accessMode);
         }
-        // Then bootstrap a local auth session so user doesn't see login UI
+        // Bootstrap a local auth session
         const bootstrapped = await bootstrapMsxSession();
         console.log("[MSX] Session bootstrap result:", bootstrapped);
+
+        if (bootstrapped) {
+          setMsxRedirectTo("/app");
+        }
+      } catch (e) {
+        console.warn("[MSX] Boot failed, falling back to normal auth:", e);
+      } finally {
+        setMsxBootstrapDone(true);
         setMsxReady(true);
-      })();
-      initMsxListener();
-    }
+      }
+    })();
+    initMsxListener();
   }, []);
 
   if (!msxReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-muted-foreground animate-pulse">Opening in MSX…</p>
       </div>
     );
   }
