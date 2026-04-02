@@ -19,6 +19,7 @@ const MSX_LAUNCH_VERIFY_URL =
   "https://lsoxtrynzaxohvlqxpqe.supabase.co/functions/v1/msx-api/v1/launch/verify";
 
 let msxContext: MsxLaunchContext | null = null;
+let msxSessionBootstrapped = false;
 
 /**
  * Check if we're running inside an MSX shell (iframe or window)
@@ -120,6 +121,70 @@ function notifyShell(message: MsxShellMessage) {
     }
   } catch {
     // silently fail if not in iframe
+  }
+}
+
+/**
+ * Check if MSX session bootstrap has completed
+ */
+export function isMsxSessionBootstrapped(): boolean {
+  return msxSessionBootstrapped;
+}
+
+/**
+ * Bootstrap a local Supabase session from MSX launch token.
+ * Called automatically on app boot when inside MSX.
+ * Returns true if a session was successfully created.
+ */
+export async function bootstrapMsxSession(): Promise<boolean> {
+  const params = new URLSearchParams(window.location.search);
+  const launchToken = params.get("msx_launch_token");
+  const appSlug = params.get("msx_app_slug") || "naru";
+
+  if (!launchToken) {
+    console.log("[MSX] No launch token for session bootstrap");
+    return false;
+  }
+
+  try {
+    // Dynamic import to avoid circular deps
+    const { supabase } = await import("@/integrations/supabase/client");
+
+    // Check if user already has a valid session
+    const { data: { session: existingSession } } = await supabase.auth.getSession();
+    if (existingSession) {
+      console.log("[MSX] Existing session found, skipping bootstrap");
+      msxSessionBootstrapped = true;
+      return true;
+    }
+
+    console.log("[MSX] Bootstrapping session via msx-session-bootstrap...");
+    const { data, error } = await supabase.functions.invoke("msx-session-bootstrap", {
+      body: { launch_token: launchToken, app_slug: appSlug },
+    });
+
+    if (error || !data?.success) {
+      console.warn("[MSX] Session bootstrap failed:", error?.message || data?.error);
+      return false;
+    }
+
+    // Set the session in the Supabase client
+    const { error: setErr } = await supabase.auth.setSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    });
+
+    if (setErr) {
+      console.error("[MSX] Failed to set session:", setErr.message);
+      return false;
+    }
+
+    console.log("[MSX] Session bootstrapped successfully for user:", data.user_id);
+    msxSessionBootstrapped = true;
+    return true;
+  } catch (e) {
+    console.warn("[MSX] Session bootstrap error:", e);
+    return false;
   }
 }
 
