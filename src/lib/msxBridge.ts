@@ -75,9 +75,8 @@ export function getMsxAppSlug(): string {
  * Extract and verify MSX launch token against the real MSX API
  */
 export async function verifyMsxLaunch(): Promise<MsxLaunchContext | null> {
-  const params = new URLSearchParams(window.location.search);
-  const launchToken = params.get("msx_launch_token");
-  const appSlug = params.get("msx_app_slug") || "naru";
+  const launchToken = getMsxLaunchToken();
+  const appSlug = getMsxAppSlug();
 
   if (!launchToken) return null;
 
