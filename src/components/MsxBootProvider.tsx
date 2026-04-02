@@ -77,6 +77,7 @@ export const MsxBootProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [status, setStatus] = useState<MsxBootStatus>(hasMsxCtx ? "booting" : "idle");
+  const [failureReason, setFailureReason] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hasMsxCtx) {
