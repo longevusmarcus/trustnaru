@@ -1,7 +1,7 @@
 project_id = "vpugfhmddyttrokzbsqr"
 
 [functions.batch-parse-cvs]
-verify_jwt = false
+verify_jwt = true
 
 [functions.transcribe-voice]
 verify_jwt = true
